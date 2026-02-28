@@ -40,8 +40,6 @@ async function bootstrap(): Promise<void> {
                         styleSrc: ["'self'", "'unsafe-inline'"],
                         imgSrc: ["'self'", 'data:'],
                     },
-                    // Skip CSP for playground routes - they have their own CSP
-                    skip: req => req.path.startsWith('/mcp/playground'),
                 },
             })
         );

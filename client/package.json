@@ -16,6 +16,7 @@
     "url": "https://github.com/pacifiquem/onlineshop.rw/issues"
   },
   "scripts": {
+    "preinstall": "npx only-allow pnpm",
     "analyze": "cross-env ANALYZE=true next build",
     "build": "next build",
     "build-storybook": "storybook build",
