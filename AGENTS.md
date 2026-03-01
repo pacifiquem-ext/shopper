@@ -28,6 +28,7 @@ This project leverages specialized AI skills to enhance output quality. Dependin
 - Always verify cross-compatibility between the frontend and backend when modifying contracts or API data.
 - Do not over-engineer solutions. Stick to the scope defined in the MVP checklist and execution plan.
 - If you are unsure about an implementation detail or if a standard is unclear, stop and ask the user for clarification before proceeding.
+- Ensure that all user-visible text is done via i18n translation. Making it easy to support multiple language later afterwards for both frontend and backend.
 
 ---
 
