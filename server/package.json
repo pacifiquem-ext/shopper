@@ -125,5 +125,8 @@
             "prettier --write",
             "eslint --fix"
         ]
+    },
+    "prisma": {
+        "seed": "ts-node prisma/seed.ts"
     }
 }

@@ -27,20 +27,32 @@ enum OtpType {
   RESET_PASSWORD
 }
 
+enum StoreStatus {
+  DRAFT
+  SUBMITTED
+  UNDER_REVIEW
+  APPROVED
+  REJECTED
+  SUSPENDED
+  DELETED
+}
+
 model User {
-  id           String       @id @default(uuid())
+  id           String     @id @default(uuid())
   storeId      String?
   fullName     String
-  phoneNumber  String       @unique
+  phoneNumber  String     @unique
   email        String?
   passwordHash String
-  role         UserRole     @default(CUSTOMER)
-  status       UserStatus   @default(PENDING_VERIFICATION)
-  createdAt    DateTime     @default(now())
-  updatedAt    DateTime     @updatedAt
+  role         UserRole   @default(CUSTOMER)
+  status       UserStatus @default(PENDING_VERIFICATION)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
 
   refreshTokens RefreshToken[]
   otpCodes      OtpCode[]
+  stores        Store[]
+  storeDraft    StoreDraft?
 
   @@index([phoneNumber])
   @@map("users")
@@ -55,7 +67,7 @@ model OtpCode {
   expiresAt   DateTime
   createdAt   DateTime @default(now())
 
-  user        User?    @relation(fields: [phoneNumber], references: [phoneNumber], onDelete: Cascade)
+  user User? @relation(fields: [phoneNumber], references: [phoneNumber], onDelete: Cascade)
 
   @@index([phoneNumber, type])
   @@map("otp_codes")
@@ -69,8 +81,131 @@ model RefreshToken {
   expiresAt DateTime
   createdAt DateTime @default(now())
 
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@map("refresh_tokens")
+}
+
+model IndustrySector {
+  id          String   @id @default(uuid())
+  code        String   @unique
+  name        String
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  categories BusinessCategory[]
+  storeKycs  StoreKyc[]
+
+  @@map("industry_sectors")
+}
+
+model BusinessCategory {
+  id               String   @id @default(uuid())
+  industrySectorId String
+  code             String   @unique
+  name             String
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  industrySector IndustrySector @relation(fields: [industrySectorId], references: [id], onDelete: Cascade)
+  storeKycs      StoreKyc[]
+
+  @@index([industrySectorId])
+  @@map("business_categories")
+}
+
+model Store {
+  id        String      @id @default(uuid())
+  userId    String
+  subdomain String      @unique
+  status    StoreStatus @default(SUBMITTED)
+
+  registeredName String
+  displayName    String
+  description    String?
+  currency       String  @default("RWF")
+
+  logoUrl     String?
+  brandColors Json? // {"primary": "#xxxxxx", "secondary": "#xxxxxx"}
+
+  deliveryRegions      Json? // array of regions
+  deliveryPricingRules Json?
+  returnPolicy         String?
+  privacyPolicy        String?
+  termsAndConditions   String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  rejectionReason String?
+
+  user User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  kyc  StoreKyc?
+
+  @@index([userId])
+  @@index([subdomain])
+  @@index([status])
+  @@map("stores")
+}
+
+model StoreKyc {
+  id      String @id @default(uuid())
+  storeId String @unique
+
+  industrySectorId   String
+  businessCategoryId String
+  country            String
+
+  ownerFullName    String
+  ownerDob         DateTime
+  ownerNationality String
+  ownerEmail       String
+  ownerPhoneNumber String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  store            Store            @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  industrySector   IndustrySector   @relation(fields: [industrySectorId], references: [id])
+  businessCategory BusinessCategory @relation(fields: [businessCategoryId], references: [id])
+  businessAddress  Address?         @relation("BusinessAddress")
+  warehouseAddress Address?         @relation("WarehouseAddress")
+
+  @@map("store_kycs")
+}
+
+model Address {
+  id              String  @id @default(uuid())
+  province        String
+  district        String
+  sector          String
+  physicalAddress String
+  googleMapsUrl   String?
+
+  businessKycId  String? @unique
+  warehouseKycId String? @unique
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  businessKyc  StoreKyc? @relation("BusinessAddress", fields: [businessKycId], references: [id], onDelete: Cascade)
+  warehouseKyc StoreKyc? @relation("WarehouseAddress", fields: [warehouseKycId], references: [id], onDelete: Cascade)
+
+  @@map("addresses")
+}
+
+model StoreDraft {
+  id                   String   @id @default(uuid())
+  userId               String   @unique
+  draftData            Json
+  currentStep          Int      @default(1)
+  completionPercentage Int      @default(0)
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("store_drafts")
 }
