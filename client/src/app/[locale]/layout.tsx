@@ -1,7 +1,7 @@
 import { Toaster } from '@/components/ui/toaster'
 
 import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
+import { Geist } from 'next/font/google'
 import type React from 'react'
 import '../../styles/globals.css'
 
@@ -11,7 +11,7 @@ import { hasLocale } from 'next-intl'
 import { notFound } from 'next/navigation'
 import { RootWrapper } from './root-wrapper'
 
-const inter = Inter({ subsets: ['latin'] })
+const geist = Geist({ subsets: ['latin'] })
 
 export default async function RootLayout({
   children,
@@ -27,7 +27,7 @@ export default async function RootLayout({
 
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={inter.className}>
+      <body className={geist.className}>
         <RootWrapper locale={locale}>{children}</RootWrapper>
         <Toaster />
       </body>
