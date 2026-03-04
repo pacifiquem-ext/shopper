@@ -58,3 +58,16 @@ export const resetPasswordSchema = z.object({
 })
 
 export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>
+
+export const verifyPhoneSchema = z.object({
+  phoneNumber: z
+    .string()
+    .min(1, 'Phone number is required')
+    .regex(phoneRegex, 'Invalid phone number format (must be E.164, e.g. +250788123456)'),
+  otpCode: z
+    .string()
+    .length(6, 'OTP must be exactly 6 digits')
+    .regex(/^\d+$/, 'OTP must contain only numbers'),
+})
+
+export type VerifyPhoneSchemaType = z.infer<typeof verifyPhoneSchema>

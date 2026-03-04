@@ -41,6 +41,14 @@
   --color-brand-800: #335fdb;
   --color-brand-900: #1d4ed8;
 
+  --color-error-primary: #db3246;
+  --color-error-foreground: #ffffff;
+  --color-error-secondary: #de4971;
+
+  --color-success-primary: #10b981;
+  --color-success-foreground: #ffffff;
+  --color-success-secondary: #059669;
+
   --color-primary: var(--primary);
 
   --color-primary-foreground: var(--primary-foreground);

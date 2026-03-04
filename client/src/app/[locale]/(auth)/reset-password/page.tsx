@@ -9,8 +9,12 @@ import { ResetPasswordInput, resetPasswordSchema } from '@/validations/auth'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { KeyRound, Lock, Phone } from 'lucide-react'
 import { useForm } from 'react-hook-form'
+import { useAuthStore } from '@/store/auth.store'
+import { useRouter } from '@/i18n/navigation'
 
 export default function ResetPasswordPage() {
+  const router = useRouter()
+  const { resetPassword, isLoading } = useAuthStore()
   const form = useForm<ResetPasswordInput>({
     resolver: zodResolver(resetPasswordSchema),
     defaultValues: {
@@ -20,9 +24,11 @@ export default function ResetPasswordPage() {
     },
   })
 
-  function onSubmit(values: ResetPasswordInput) {
-    // NOTE: This will be integrated with backend later.
-    console.log('Reset Password values:', values)
+  async function onSubmit(values: ResetPasswordInput) {
+    const success = await resetPassword(values)
+    if (success) {
+      router.push('/login')
+    }
   }
 
   return (
@@ -103,9 +109,10 @@ export default function ResetPasswordPage() {
           <div className="flex flex-col items-center space-y-4 pt-6">
             <Button
               type="submit"
-              className="bg-brand-700 hover:bg-brand-800 w-full rounded-full py-6 font-bold shadow-md transition-transform active:scale-95"
+              disabled={isLoading}
+              className="bg-brand-700 hover:bg-brand-800 w-full rounded-full py-6 font-bold shadow-md transition-transform active:scale-95 disabled:opacity-50"
             >
-              RESET PASSWORD
+              {isLoading ? 'RESETTING...' : 'RESET PASSWORD'}
             </Button>
 
             <Link

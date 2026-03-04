@@ -10,9 +10,11 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { Phone } from 'lucide-react'
 import React from 'react'
 import { useForm } from 'react-hook-form'
+import { useAuthStore } from '@/store/auth.store'
 
 export default function ForgotPasswordPage() {
   const [isSubmitted, setIsSubmitted] = React.useState(false)
+  const { forgotPassword, isLoading } = useAuthStore()
 
   const form = useForm<ForgotPasswordInput>({
     resolver: zodResolver(forgotPasswordSchema),
@@ -21,11 +23,11 @@ export default function ForgotPasswordPage() {
     },
   })
 
-  function onSubmit(values: ForgotPasswordInput) {
-    // NOTE: This will be integrated with backend later.
-    console.log('Forgot Password values:', values)
-    // Mocking an API call success
-    setIsSubmitted(true)
+  async function onSubmit(values: ForgotPasswordInput) {
+    const success = await forgotPassword(values)
+    if (success) {
+      setIsSubmitted(true)
+    }
   }
 
   return (
@@ -71,9 +73,10 @@ export default function ForgotPasswordPage() {
             <div className="flex flex-col items-center space-y-4 pt-8">
               <Button
                 type="submit"
-                className="bg-brand-700 hover:bg-brand-800 w-full rounded-full py-6 font-bold shadow-md transition-transform active:scale-95"
+                disabled={isLoading}
+                className="bg-brand-700 hover:bg-brand-800 w-full rounded-full py-6 font-bold shadow-md transition-transform active:scale-95 disabled:opacity-50"
               >
-                SEND RESET LINK
+                {isLoading ? 'SENDING...' : 'SEND RESET LINK'}
               </Button>
 
               <Link

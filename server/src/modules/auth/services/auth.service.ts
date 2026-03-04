@@ -69,7 +69,8 @@ export class AuthService {
             userId: newUser.id,
             phoneNumber: newUser.phoneNumber,
             status: newUser.status,
-            message: 'User registered. Please verify your phone number.',
+            message:
+                'Account created successfully! We just sent a verification code to your phone.',
         };
     }
 
@@ -101,6 +102,8 @@ export class AuthService {
             userId: user.id,
             phoneNumber: user.phoneNumber,
             status: UserStatus.ACTIVE,
+            message:
+                'Phone number successfully verified! You can now access your account.',
         };
     }
 
@@ -185,7 +188,7 @@ export class AuthService {
         // Always return success to prevent user enumeration
         return {
             message:
-                'If the phone number is registered, an OTP has been sent for password reset.',
+                'Password reset code has been sent securely to your phone number.',
         };
     }
 
@@ -212,7 +215,8 @@ export class AuthService {
         });
 
         return {
-            message: 'Password has been successfully reset. You can now login.',
+            message:
+                'Your password has been completely reset. You are ready to log in!',
         };
     }
 
@@ -258,6 +262,7 @@ export class AuthService {
                 id: user.id,
                 fullName: user.fullName,
                 phoneNumber: user.phoneNumber,
+                email: user.email,
                 role: user.role,
                 status: user.status,
             },

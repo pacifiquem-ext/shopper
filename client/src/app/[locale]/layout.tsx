@@ -1,4 +1,5 @@
 import { Toaster } from '@/components/ui/toaster'
+import { Toaster as SonnerToaster } from '@/components/ui/sonner'
 
 import type { Metadata } from 'next'
 import { Geist } from 'next/font/google'
@@ -30,6 +31,7 @@ export default async function RootLayout({
       <body className={geist.className}>
         <RootWrapper locale={locale}>{children}</RootWrapper>
         <Toaster />
+        <SonnerToaster position="top-right" duration={3000} closeButton />
       </body>
     </html>
   )

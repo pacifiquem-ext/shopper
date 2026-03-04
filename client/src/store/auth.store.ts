@@ -1,0 +1,125 @@
+import { create } from 'zustand'
+import { persist, createJSONStorage } from 'zustand/middleware'
+import { authService } from '@/services/auth.service'
+import type {
+  LoginInput,
+  SignupInput,
+  ForgotPasswordInput,
+  ResetPasswordInput,
+} from '@/validations/auth'
+import type { VerifyPhoneInput } from '@/services/auth.service'
+
+interface User {
+  id: string
+  fullName: string
+  phoneNumber: string
+  email?: string
+  role: string
+  status: string
+}
+
+interface AuthState {
+  user: User | null
+  accessToken: string | null
+  refreshToken: string | null
+  isLoading: boolean
+
+  // Actions
+  logout: () => void
+
+  // Async Actions
+  login: (data: LoginInput) => Promise<boolean>
+  signup: (data: SignupInput) => Promise<boolean>
+  verifyPhone: (data: VerifyPhoneInput) => Promise<boolean>
+  forgotPassword: (data: ForgotPasswordInput) => Promise<boolean>
+  resetPassword: (data: ResetPasswordInput) => Promise<boolean>
+}
+
+export const useAuthStore = create<AuthState>()(
+  persist(
+    (set) => ({
+      user: null,
+      accessToken: null,
+      refreshToken: null,
+      isLoading: false,
+
+      logout: () => set({ user: null, accessToken: null, refreshToken: null, isLoading: false }),
+
+      login: async (data: LoginInput) => {
+        set({ isLoading: true })
+        try {
+          const response = await authService.login(data)
+          if (response?.data?.accessToken) {
+            set({
+              user: response.data.user || null,
+              accessToken: response.data.accessToken,
+              refreshToken: response.data.refreshToken,
+            })
+          }
+          return true
+        } catch (error) {
+          return false
+        } finally {
+          set({ isLoading: false })
+        }
+      },
+
+      signup: async (data: SignupInput) => {
+        set({ isLoading: true })
+        try {
+          await authService.signup(data)
+          return true
+        } catch (error) {
+          return false
+        } finally {
+          set({ isLoading: false })
+        }
+      },
+
+      verifyPhone: async (data: VerifyPhoneInput) => {
+        set({ isLoading: true })
+        try {
+          await authService.verifyPhone(data)
+          return true
+        } catch (error) {
+          return false
+        } finally {
+          set({ isLoading: false })
+        }
+      },
+
+      forgotPassword: async (data: ForgotPasswordInput) => {
+        set({ isLoading: true })
+        try {
+          await authService.forgotPassword(data)
+          return true
+        } catch (error) {
+          return false
+        } finally {
+          set({ isLoading: false })
+        }
+      },
+
+      resetPassword: async (data: ResetPasswordInput) => {
+        set({ isLoading: true })
+        try {
+          await authService.resetPassword(data)
+          return true
+        } catch (error) {
+          return false
+        } finally {
+          set({ isLoading: false })
+        }
+      },
+    }),
+    {
+      name: 'auth-storage',
+      storage: createJSONStorage(() => localStorage),
+      partialize: (state) => ({
+        accessToken: state.accessToken,
+        refreshToken: state.refreshToken,
+        user: state.user,
+      }),
+    }
+  )
+)

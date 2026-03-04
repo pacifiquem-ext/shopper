@@ -20,6 +20,7 @@ export class AuthTokenResponseDto {
             id: 'uuid',
             fullName: 'John Doe',
             phoneNumber: '+250788123456',
+            email: 'john@example.com',
             role: UserRole.CUSTOMER,
             status: UserStatus.ACTIVE,
         },
@@ -28,6 +29,7 @@ export class AuthTokenResponseDto {
         id: string;
         fullName: string;
         phoneNumber: string;
+        email?: string;
         role: UserRole;
         status: UserStatus;
     };

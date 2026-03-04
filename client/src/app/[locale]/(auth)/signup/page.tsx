@@ -8,8 +8,12 @@ import { SignupInput, signupSchema } from '@/validations/auth'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Lock, Mail, Phone, User as UserIcon } from 'lucide-react'
 import { useForm } from 'react-hook-form'
+import { useAuthStore } from '@/store/auth.store'
+import { useRouter } from '@/i18n/navigation'
 
 export default function SignupPage() {
+  const router = useRouter()
+  const { signup, isLoading } = useAuthStore()
   const form = useForm<SignupInput>({
     resolver: zodResolver(signupSchema),
     defaultValues: {
@@ -20,9 +24,14 @@ export default function SignupPage() {
     },
   })
 
-  function onSubmit(values: SignupInput) {
-    // NOTE: This will be integrated with backend later.
-    console.log('Signup values:', values)
+  async function onSubmit(values: SignupInput) {
+    // We send payload to global store which triggers toast on success
+    const success = await signup(values)
+    if (success) {
+      // Store the phone number locally to automatically detect it in the verify-phone page
+      localStorage.setItem('pendingVerificationPhone', values.phoneNumber)
+      router.push('/verify-phone')
+    }
   }
 
   return (
@@ -118,9 +127,10 @@ export default function SignupPage() {
           <div className="flex items-center justify-end pt-6">
             <Button
               type="submit"
-              className="bg-brand-700 hover:bg-brand-800 rounded-full px-8 py-2 font-bold shadow-md transition-transform active:scale-95"
+              disabled={isLoading}
+              className="bg-brand-700 hover:bg-brand-800 rounded-full px-8 py-2 font-bold shadow-md transition-transform active:scale-95 disabled:opacity-50"
             >
-              SIGN UP
+              {isLoading ? 'SIGNING UP...' : 'SIGN UP'}
             </Button>
           </div>
         </form>

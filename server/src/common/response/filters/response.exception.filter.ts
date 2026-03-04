@@ -88,8 +88,6 @@ export class ResponseExceptionFilter implements ExceptionFilter {
         if (this.isDebug) {
             if (validationMessages) {
                 errorResponse.error = validationMessages;
-            } else if (exception instanceof Error) {
-                errorResponse.error = exception.stack;
             }
         }
 
