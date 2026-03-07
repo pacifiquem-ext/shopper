@@ -9,6 +9,7 @@ import '../../styles/globals.css'
 import { rootMetadata } from '#/config/root-metadata'
 import { routing } from '@/i18n/routing'
 import { hasLocale } from 'next-intl'
+import { getMessages } from 'next-intl/server'
 import { notFound } from 'next/navigation'
 import { RootWrapper } from './root-wrapper'
 
@@ -26,10 +27,14 @@ export default async function RootLayout({
     notFound()
   }
 
+  const messages = await getMessages()
+
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang={locale} suppressHydrationWarning>
       <body className={geist.className}>
-        <RootWrapper locale={locale}>{children}</RootWrapper>
+        <RootWrapper locale={locale} messages={messages}>
+          {children}
+        </RootWrapper>
         <Toaster />
         <SonnerToaster position="top-right" duration={3000} closeButton />
       </body>

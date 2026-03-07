@@ -1,5 +1,131 @@
 {
   "hero": {
     "title": "NextJS Boilerplate template"
+  },
+  "storeOnboarding": {
+    "header": {
+      "subtitle": "Store setup",
+      "help": "Questions?",
+      "helpAria": "Help",
+      "saveExit": "Save & exit",
+      "reset": "Reset"
+    },
+    "stepLabel": "Step {step} of {total}",
+    "progressAria": "Onboarding progress",
+    "actions": {
+      "back": "Back",
+      "next": "Next",
+      "finish": "Finish"
+    },
+    "businessType": {
+      "title": "What kind of business are you setting up?",
+      "subtitle": "Pick the option that best describes your store. You can refine details later.",
+      "retail": {
+        "title": "Retail store",
+        "subtitle": "Sell products like fashion, electronics, cosmetics, and more."
+      },
+      "restaurant": {
+        "title": "Restaurant",
+        "subtitle": "Sell meals, add-ons, and manage opening hours."
+      },
+      "selected": "Selected",
+      "note": "This only affects the setup flow. You can change some settings later."
+    },
+    "storeBasics": {
+      "title": "Tell customers who you are",
+      "subtitle": "Add a registered name and a display name. Then write a short description.",
+      "registeredNameLabel": "Registered business name",
+      "registeredNamePlaceholder": "e.g. OnlineShop Rwanda Ltd",
+      "displayNameLabel": "Store name (public)",
+      "displayNamePlaceholder": "e.g. Kigali Fashion",
+      "descriptionLabel": "Description",
+      "descriptionPlaceholder": "What do you sell? What makes you different?",
+      "descriptionCount": "{count}/500"
+    },
+    "subdomain": {
+      "title": "Choose your store address",
+      "subtitle": "Your subdomain becomes your public link. Keep it short and easy to remember.",
+      "label": "Subdomain",
+      "placeholder": "e.g. mystore",
+      "preview": "Preview: {domain}",
+      "rulesTitle": "Subdomain rules",
+      "rulesBody": "Use lowercase letters, numbers, and hyphens. It must start and end with a letter or number."
+    },
+    "brand": {
+      "title": "Make your brand stand out",
+      "subtitle": "Upload a logo and pick colors. You can adjust later.",
+      "logoAlt": "Store logo",
+      "logoTitle": "Logo",
+      "logoSubtitle": "A clear square image works best.",
+      "addLogo": "Add logo",
+      "removeLogo": "Remove",
+      "primaryColor": "Primary color",
+      "secondaryColor": "Secondary color",
+      "previewTitle": "Preview",
+      "previewStoreName": "Your store",
+      "previewBadge": "Default theme",
+      "previewButton": "View"
+    },
+    "delivery": {
+      "title": "Set delivery zones",
+      "subtitle": "Define where you deliver, the fee, and estimated time.",
+      "intro": "Self-managed delivery: you set zones, fees and ETAs. No live tracking in MVP.",
+      "zone": "Zone {index}",
+      "removeZoneAria": "Remove delivery zone",
+      "zoneName": "Zone name",
+      "zoneNamePlaceholder": "e.g. Kigali - Kicukiro",
+      "fee": "Delivery fee (RWF)",
+      "feePlaceholder": "e.g. 1500",
+      "eta": "ETA (minutes)",
+      "etaPlaceholder": "e.g. 60",
+      "addZone": "Add another zone"
+    },
+    "review": {
+      "title": "Review and submit",
+      "subtitle": "Make sure everything looks right before you submit for review.",
+      "store": "Store",
+      "businessType": "Business type",
+      "businessTypeValue": {
+        "retail": "Retail store",
+        "restaurant": "Restaurant"
+      },
+      "registeredName": "Registered name",
+      "displayName": "Display name",
+      "subdomain": "Subdomain",
+      "delivery": "Delivery",
+      "unnamedZone": "Unnamed zone",
+      "deliveryMeta": "{fee} RWF • {eta} min",
+      "branding": "Branding & Storefront",
+      "contactAndDelivery": "Contact & Delivery",
+      "note": "UI only: this screen doesn’t call the server yet. Draft is saved locally so you can resume later."
+    },
+    "contact": {
+      "title": "Add your store's contact info",
+      "subtitle": "Help customers reach you and find your physical location. These are optional.",
+      "emailLabel": "Contact email",
+      "phoneLabel": "Contact phone number",
+      "addressLabel": "Physical address / Headquarters",
+      "aboutUsLabel": "About us",
+      "aboutUsPlaceholder": "Tell your customers your story, your mission, and what you stand for.",
+      "publicWarning": "Note: This information will be displayed publicly on your store."
+    },
+    "resetDialog": {
+      "title": "Reset draft?",
+      "body": "This will clear your saved onboarding progress on this device.",
+      "cancel": "Cancel",
+      "confirm": "Reset"
+    },
+    "errors": {
+      "ok": "",
+      "pickBusinessType": "Pick a business type to continue.",
+      "missingRegisteredName": "Add your registered business name to continue.",
+      "missingDisplayName": "Add your public store name to continue.",
+      "missingSubdomain": "Choose a subdomain to continue.",
+      "invalidSubdomain": "That subdomain format isn’t valid.",
+      "missingBrandColors": "Pick your brand colors to continue.",
+      "missingDeliveryZoneName": "Add a name for each delivery zone to continue.",
+      "missingDeliveryFee": "Add a delivery fee for each zone to continue.",
+      "missingDeliveryEta": "Add an ETA for each zone to continue."
+    }
   }
 }

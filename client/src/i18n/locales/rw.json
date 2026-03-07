@@ -1,5 +1,131 @@
 {
   "hero": {
     "title": "Icyagufasha gukoresha Next.js"
+  },
+  "storeOnboarding": {
+    "header": {
+      "subtitle": "Gushyiraho ububiko",
+      "help": "Ufite ikibazo?",
+      "helpAria": "Ubufasha",
+      "saveExit": "Bika usohoke",
+      "reset": "Subiza ku ntangiriro"
+    },
+    "stepLabel": "Intambwe {step} kuri {total}",
+    "progressAria": "Iterambere ry'iyandikisha",
+    "actions": {
+      "back": "Subira inyuma",
+      "next": "Komeza",
+      "finish": "Rangiza"
+    },
+    "businessType": {
+      "title": "Ni ubuhe bucuruzi uri gushyiraho?",
+      "subtitle": "Hitamo igisobanura neza ububiko bwawe. Ibisigaye wabihindura nyuma.",
+      "retail": {
+        "title": "Ubucuruzi (Retail)",
+        "subtitle": "Gurisha ibicuruzwa nko kwambara, ibikoresho by'ikoranabuhanga, n'ibindi."
+      },
+      "restaurant": {
+        "title": "Resitora",
+        "subtitle": "Gurisha amafunguro, inyongera, no gucunga amasaha yo gufungura."
+      },
+      "selected": "Wahisemo",
+      "note": "Ibi bigena uburyo bwo gutangira. Hari bimwe ushobora guhindura nyuma."
+    },
+    "storeBasics": {
+      "title": "Bwira abakiriya uwo uri",
+      "subtitle": "Andika izina ryemewe n'irizagaragara. Hanyuma andika ibisobanuro bigufi.",
+      "registeredNameLabel": "Izina ry'ubucuruzi ryemewe",
+      "registeredNamePlaceholder": "Urugero: OnlineShop Rwanda Ltd",
+      "displayNameLabel": "Izina ry'ububiko (riboneka ku rubuga)",
+      "displayNamePlaceholder": "Urugero: Kigali Fashion",
+      "descriptionLabel": "Ibisobanuro",
+      "descriptionPlaceholder": "Ugura/gurisha iki? Ni iki gitandukanye?",
+      "descriptionCount": "{count}/500"
+    },
+    "subdomain": {
+      "title": "Hitamo aderesi y'ububiko",
+      "subtitle": "Subdomain niyo izaba link y'ububiko bwawe. Iyigire ngufi kandi yoroshye kwibuka.",
+      "label": "Subdomain",
+      "placeholder": "Urugero: mystore",
+      "preview": "Igaragaza: {domain}",
+      "rulesTitle": "Amategeko ya subdomain",
+      "rulesBody": "Koresha inyuguti nto, imibare, n'udutambike (-). Itangire kandi irangire ku nyuguti cyangwa umubare."
+    },
+    "brand": {
+      "title": "Tandukanya ikirango cyawe",
+      "subtitle": "Shyiraho logo uhitemo amabara. Wabihindura nyuma.",
+      "logoAlt": "Logo y'ububiko",
+      "logoTitle": "Logo",
+      "logoSubtitle": "Ifoto y'akarambararo (square) ikora neza.",
+      "addLogo": "Ongeraho logo",
+      "removeLogo": "Kuraho",
+      "primaryColor": "Ibara nyamukuru",
+      "secondaryColor": "Ibara rya kabiri",
+      "previewTitle": "Igerageza",
+      "previewStoreName": "Ububiko bwawe",
+      "previewBadge": "Theme isanzwe",
+      "previewButton": "Reba"
+    },
+    "delivery": {
+      "title": "Shyiraho uturere two gutanga",
+      "subtitle": "Sobanura aho utanga, ikiguzi, n'igihe cyo kugerayo.",
+      "intro": "Delivery wiyicungira: ni wowe ushyiraho uturere, ibiciro n'igihe. Nta live tracking muri MVP.",
+      "zone": "Akarere {index}",
+      "removeZoneAria": "Kuraho akarere",
+      "zoneName": "Izina ry'akarere",
+      "zoneNamePlaceholder": "Urugero: Kigali - Kicukiro",
+      "fee": "Ikiguzi (RWF)",
+      "feePlaceholder": "Urugero: 1500",
+      "eta": "Igihe (iminota)",
+      "etaPlaceholder": "Urugero: 60",
+      "addZone": "Ongeraho akarere"
+    },
+    "review": {
+      "title": "Subiramo unyuzemo",
+      "subtitle": "Reba ko byose bikosoye mbere yo kohereza.",
+      "store": "Ububiko",
+      "businessType": "Ubwoko",
+      "businessTypeValue": {
+        "retail": "Ubucuruzi (Retail)",
+        "restaurant": "Resitora"
+      },
+      "registeredName": "Izina ryemewe",
+      "displayName": "Izina rizagaragara",
+      "subdomain": "Subdomain",
+      "delivery": "Delivery",
+      "unnamedZone": "Akarere katanditse",
+      "deliveryMeta": "{fee} RWF • {eta} min",
+      "branding": "Ikirango & Ubusura bw'iduka",
+      "contactAndDelivery": "Amakuru & Zone zo gutanga",
+      "note": "UI gusa: ubu page ntihamagara server. Draft ibikwa kuri device kugira ngo uzakomereze aho ugeze."
+    },
+    "contact": {
+      "title": "Ongeraho amakuru y'ububiko bwawe",
+      "subtitle": "Fasha abakiriya kukugeraho n'aho uherereye. Ibi si itegeko (optional).",
+      "emailLabel": "Email twakwandikiraho",
+      "phoneLabel": "Nimero ya telefoni",
+      "addressLabel": "Aho uherereye / Icyicaro",
+      "aboutUsLabel": "Wifuza ko bakumenya bate?",
+      "aboutUsPlaceholder": "Bwira abakiriya amateka y'ububiko bwawe, icyo muharanira, n'ibindi.",
+      "publicWarning": "Icyitonderwa: Aya makuru azagaragara ku rubuga rwawe bose bayabone."
+    },
+    "resetDialog": {
+      "title": "Gusiba draft?",
+      "body": "Ibi bizahanagura uko wari ugezeho kuri iyi device.",
+      "cancel": "Oya",
+      "confirm": "Siba"
+    },
+    "errors": {
+      "ok": "",
+      "pickBusinessType": "Hitamo ubwoko bw'ubucuruzi kugira ngo ukomeze.",
+      "missingRegisteredName": "Andika izina ryemewe ry'ubucuruzi.",
+      "missingDisplayName": "Andika izina ry'ububiko rizagaragara.",
+      "missingSubdomain": "Hitamo subdomain kugira ngo ukomeze.",
+      "invalidSubdomain": "Subdomain wanditse siyo.",
+      "missingBrandColors": "Hitamo amabara y'ikirango cyawe.",
+      "missingDeliveryZoneName": "Andika amazina y'uturere twa delivery.",
+      "missingDeliveryFee": "Andika ikiguzi cya delivery kuri buri karere.",
+      "missingDeliveryEta": "Andika igihe (ETA) kuri buri karere."
+    }
   }
 }
