@@ -129,9 +129,12 @@ model Store {
 
   logoUrl     String?
   brandColors Json? // {"primary": "#xxxxxx", "secondary": "#xxxxxx"}
+  
+  aboutUs      String?
+  contactEmail   String?
+  contactPhone   String?
+  contactAddress String?
 
-  deliveryRegions      Json? // array of regions
-  deliveryPricingRules Json?
   returnPolicy         String?
   privacyPolicy        String?
   termsAndConditions   String?
@@ -141,13 +144,29 @@ model Store {
 
   rejectionReason String?
 
-  user User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  kyc  StoreKyc?
+  user     User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  kyc      StoreKyc?
+  delivery DeliveryZone[]
 
   @@index([userId])
   @@index([subdomain])
   @@index([status])
   @@map("stores")
+}
+
+model DeliveryZone {
+  id         String   @id @default(uuid())
+  storeId    String
+  name       String
+  feeRwf     Int
+  etaMinutes Int
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  store Store @relation(fields: [storeId], references: [id], onDelete: Cascade)
+
+  @@index([storeId])
+  @@map("delivery_zones")
 }
 
 model StoreKyc {
@@ -159,7 +178,6 @@ model StoreKyc {
   country            String
 
   ownerFullName    String
-  ownerDob         DateTime
   ownerNationality String
   ownerEmail       String
   ownerPhoneNumber String
@@ -171,7 +189,6 @@ model StoreKyc {
   industrySector   IndustrySector   @relation(fields: [industrySectorId], references: [id])
   businessCategory BusinessCategory @relation(fields: [businessCategoryId], references: [id])
   businessAddress  Address?         @relation("BusinessAddress")
-  warehouseAddress Address?         @relation("WarehouseAddress")
 
   @@map("store_kycs")
 }
@@ -185,13 +202,11 @@ model Address {
   googleMapsUrl   String?
 
   businessKycId  String? @unique
-  warehouseKycId String? @unique
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   businessKyc  StoreKyc? @relation("BusinessAddress", fields: [businessKycId], references: [id], onDelete: Cascade)
-  warehouseKyc StoreKyc? @relation("WarehouseAddress", fields: [warehouseKycId], references: [id], onDelete: Cascade)
 
   @@map("addresses")
 }

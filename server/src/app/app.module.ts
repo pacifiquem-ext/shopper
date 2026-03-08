@@ -6,6 +6,7 @@ import { AuthModule } from 'src/modules/auth/auth.module';
 import { ReferencesModule } from 'src/modules/references/references.module';
 import { TenantModule } from 'src/common/tenant/tenant.module';
 import { AdminModule } from 'src/modules/admin/admin.module';
+import { OnboardingModule } from 'src/modules/onboarding/onboarding.module';
 import { WorkerModule } from 'src/workers/worker.module';
 
 import { HealthController } from './controllers/health.controller';
@@ -19,6 +20,7 @@ import { HealthController } from './controllers/health.controller';
         AuthModule,
         ReferencesModule,
         AdminModule,
+        OnboardingModule,
 
         // Background Processing
         WorkerModule,

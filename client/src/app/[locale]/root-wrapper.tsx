@@ -10,17 +10,19 @@ export const RootWrapper = ({
   children,
   locale,
   messages,
+  timeZone,
 }: {
   children: React.ReactNode
   locale: string
   messages: Record<string, unknown>
+  timeZone: string
 }) => {
   // uncomment if you  want to use react-scan, this can be annoying sometimes - so by default it's disabled
   //   useScan({ enabled: process.env.NODE_ENV === 'development' })
   return (
     <>
       <ThemeProvider attribute="class" defaultTheme="light" disableTransitionOnChange>
-        <NextIntlClientProvider locale={locale} messages={messages}>
+        <NextIntlClientProvider locale={locale} messages={messages} timeZone={timeZone}>
           {children}
         </NextIntlClientProvider>
       </ThemeProvider>

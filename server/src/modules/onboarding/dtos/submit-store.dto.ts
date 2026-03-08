@@ -6,9 +6,10 @@ import {
     IsNotEmpty,
     Matches,
     IsEmail,
-    IsDate,
     ValidateNested,
     IsOptional,
+    IsNumber,
+    IsArray,
 } from 'class-validator';
 
 export class AddressDto {
@@ -38,6 +39,21 @@ export class AddressDto {
     googleMapsUrl?: string;
 }
 
+export class DeliveryZoneDto {
+    @ApiProperty({ description: 'Delivery Zone Name' })
+    @IsString()
+    @IsNotEmpty()
+    name: string;
+
+    @ApiProperty({ description: 'Delivery Fee in RWF' })
+    @IsNumber()
+    feeRwf: number;
+
+    @ApiProperty({ description: 'Estimated Delivery Time in minutes' })
+    @IsNumber()
+    etaMinutes: number;
+}
+
 export class SubmitStoreDto {
     // ------------------------------------
     // Store Configuration
@@ -65,6 +81,55 @@ export class SubmitStoreDto {
     @IsOptional()
     description?: string;
 
+    @ApiProperty({ description: 'Brand primary color', required: false })
+    @IsString()
+    @IsOptional()
+    brandPrimaryColor?: string;
+
+    @ApiProperty({ description: 'Brand secondary color', required: false })
+    @IsString()
+    @IsOptional()
+    brandSecondaryColor?: string;
+
+    @ApiProperty({
+        description: 'Company logo URL or Base64 Data',
+        required: false,
+    })
+    @IsString()
+    @IsOptional()
+    logoDataUrl?: string;
+
+    @ApiProperty({ description: 'About us content', required: false })
+    @IsString()
+    @IsOptional()
+    aboutUs?: string;
+
+    @ApiProperty({ description: 'Public Contact Email', required: false })
+    @IsEmail()
+    @IsOptional()
+    contactEmail?: string;
+
+    @ApiProperty({ description: 'Public Contact Phone', required: false })
+    @IsString()
+    @IsOptional()
+    contactPhone?: string;
+
+    @ApiProperty({ description: 'Public Contact Address', required: false })
+    @IsString()
+    @IsOptional()
+    contactAddress?: string;
+
+    @ApiProperty({
+        description: 'Delivery Zones supported by the store',
+        type: [DeliveryZoneDto],
+        required: false,
+    })
+    @IsArray()
+    @ValidateNested({ each: true })
+    @Type(() => DeliveryZoneDto)
+    @IsOptional()
+    deliveryZones?: DeliveryZoneDto[];
+
     // ------------------------------------
     // KYC Legal Identity
     // ------------------------------------
@@ -91,11 +156,6 @@ export class SubmitStoreDto {
     @IsNotEmpty()
     ownerFullName: string;
 
-    @ApiProperty({ description: 'Date of Birth (ISO8601)' })
-    @Type(() => Date)
-    @IsDate()
-    ownerDob: Date;
-
     @ApiProperty({ description: 'Nationality', example: 'Rwandan' })
     @IsString()
     @IsNotEmpty()
@@ -121,10 +181,4 @@ export class SubmitStoreDto {
     @ValidateNested()
     @Type(() => AddressDto)
     businessAddress: AddressDto;
-
-    @ApiProperty({ description: 'Optional warehouse address', required: false })
-    @IsOptional()
-    @ValidateNested()
-    @Type(() => AddressDto)
-    warehouseAddress?: AddressDto;
 }

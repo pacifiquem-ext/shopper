@@ -10,13 +10,18 @@
       "saveExit": "Save & exit",
       "reset": "Reset"
     },
+    "wizardTitle": "Store Setup Wizard",
     "stepLabel": "Step {step} of {total}",
+    "step": "Step",
+    "steps": "Steps",
     "progressAria": "Onboarding progress",
     "actions": {
       "back": "Back",
       "next": "Next",
-      "finish": "Finish"
+      "finish": "Finish",
+      "submitting": "Submitting"
     },
+    "successText": "Store created successfully!",
     "businessType": {
       "title": "What kind of business are you setting up?",
       "subtitle": "Pick the option that best describes your store. You can refine details later.",
@@ -48,8 +53,11 @@
       "label": "Subdomain",
       "placeholder": "e.g. mystore",
       "preview": "Preview: {domain}",
-      "rulesTitle": "Subdomain rules",
-      "rulesBody": "Use lowercase letters, numbers, and hyphens. It must start and end with a letter or number."
+      "rulesTitle": "Link requirements",
+      "rulesBody": "Use lowercase letters, numbers, and hyphens. It must start and end with a letter or number.",
+      "rule1": "Letters, numbers, and hyphens only",
+      "rule2": "Cannot start or end with a hyphen",
+      "rule3": "Must be between 2 and 63 characters"
     },
     "brand": {
       "title": "Make your brand stand out",
@@ -58,6 +66,10 @@
       "logoTitle": "Logo",
       "logoSubtitle": "A clear square image works best.",
       "addLogo": "Add logo",
+      "uploading": "Uploading...",
+      "uploadLogo": "Upload your logo",
+      "dragDrop": "Click to browse or drag and drop",
+      "removeLogoBtn": "Remove logo",
       "removeLogo": "Remove",
       "primaryColor": "Primary color",
       "secondaryColor": "Secondary color",
@@ -71,6 +83,7 @@
       "subtitle": "Define where you deliver, the fee, and estimated time.",
       "intro": "Self-managed delivery: you set zones, fees and ETAs. No live tracking in MVP.",
       "zone": "Zone {index}",
+      "zoneTitle": "Zone {index}",
       "removeZoneAria": "Remove delivery zone",
       "zoneName": "Zone name",
       "zoneNamePlaceholder": "e.g. Kigali - Kicukiro",
@@ -99,6 +112,29 @@
       "contactAndDelivery": "Contact & Delivery",
       "note": "UI only: this screen doesn’t call the server yet. Draft is saved locally so you can resume later."
     },
+    "legal": {
+      "title": "Business Identity & Ownership",
+      "subtitle": "Provide your official registration details and head office address.",
+      "ownerIdentity": "Owner Identity",
+      "fullName": "Full Name",
+      "nationality": "Nationality",
+      "emailAddress": "Email Address",
+      "phoneNumber": "Phone Number",
+      "registrationCountry": "Registration Country"
+    },
+    "businessAddress": {
+      "title": "Business Address",
+      "subtitle": "Provide your official registered physical address.",
+      "registeredAddressTitle": "Registered Business Address",
+      "province": "Province",
+      "district": "District",
+      "sector": "Sector",
+      "physicalDetails": "Physical Address details",
+      "googleMapsUrl": "Google Maps URL"
+    },
+    "common": {
+      "optional": "(Optional)"
+    },
     "contact": {
       "title": "Add your store's contact info",
       "subtitle": "Help customers reach you and find your physical location. These are optional.",
@@ -115,9 +151,39 @@
       "cancel": "Cancel",
       "confirm": "Reset"
     },
+    "resumeModal": {
+      "title": "Welcome Back!",
+      "description": "We found a saved draft of your store registration. Would you like to pick up where you left off?",
+      "resumeButton": "Continue Draft",
+      "discardButton": "Start Fresh"
+    },
+    "industry": {
+      "title": "What specific category is your business?",
+      "subtitle": "Help us categorize your store for customers to find you easily.",
+      "sectorLabel": "Industry Sector",
+      "sectorPlaceholder": "Select your sector",
+      "loading": "Loading sectors...",
+      "categoryLabel": "Business Category",
+      "categoryPlaceholder": "Select your category",
+      "loadingCat": "Loading categories..."
+    },
     "errors": {
       "ok": "",
+      "default": "Something went wrong. Please try again.",
+      "missingOwnerFullName": "Add your full name to continue.",
+      "missingOwnerNationality": "Add your nationality to continue.",
+      "missingCountry": "Add your registration country to continue.",
+      "missingOwnerPhoneNumber": "Add your phone number to continue.",
+      "invalidOwnerPhoneNumber": "Please enter a valid international phone number (e.g. +250 780 000 000).",
+      "invalidOwnerEmail": "Please enter a valid email address.",
+      "missingProvince": "Add your province to continue.",
+      "missingDistrict": "Add your district to continue.",
+      "missingSector": "Add your sector to continue.",
+      "missingPhysicalAddress": "Add your physical address details to continue.",
+      "missingLegalDetails": "Please fill in all required legal identity and address details.",
       "pickBusinessType": "Pick a business type to continue.",
+      "missingIndustry": "Select an industry sector to continue.",
+      "missingCategory": "Select a business category to continue.",
       "missingRegisteredName": "Add your registered business name to continue.",
       "missingDisplayName": "Add your public store name to continue.",
       "missingSubdomain": "Choose a subdomain to continue.",

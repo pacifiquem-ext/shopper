@@ -48,12 +48,16 @@ export const useAuthStore = create<AuthState>()(
       login: async (data: LoginInput) => {
         set({ isLoading: true })
         try {
-          const response = await authService.login(data)
-          if (response?.data?.accessToken) {
+          const response = (await authService.login(data)) as any
+          const token = response?.data?.accessToken || response?.accessToken
+          const refresh = response?.data?.refreshToken || response?.refreshToken
+          const userData = response?.data?.user || response?.user
+
+          if (token) {
             set({
-              user: response.data.user || null,
-              accessToken: response.data.accessToken,
-              refreshToken: response.data.refreshToken,
+              user: userData || null,
+              accessToken: token,
+              refreshToken: refresh,
             })
           }
           return true

@@ -10,13 +10,18 @@
       "saveExit": "Bika usohoke",
       "reset": "Subiza ku ntangiriro"
     },
+    "wizardTitle": "Gushyiraho ububiko bwawe",
     "stepLabel": "Intambwe {step} kuri {total}",
+    "step": "Intambwe",
+    "steps": "Intambwe",
     "progressAria": "Iterambere ry'iyandikisha",
     "actions": {
       "back": "Subira inyuma",
       "next": "Komeza",
-      "finish": "Rangiza"
+      "finish": "Rangiza",
+      "submitting": "Biri koherezwa"
     },
+    "successText": "Ububiko bwawe bwafunguwe neza!",
     "businessType": {
       "title": "Ni ubuhe bucuruzi uri gushyiraho?",
       "subtitle": "Hitamo igisobanura neza ububiko bwawe. Ibisigaye wabihindura nyuma.",
@@ -49,7 +54,10 @@
       "placeholder": "Urugero: mystore",
       "preview": "Igaragaza: {domain}",
       "rulesTitle": "Amategeko ya subdomain",
-      "rulesBody": "Koresha inyuguti nto, imibare, n'udutambike (-). Itangire kandi irangire ku nyuguti cyangwa umubare."
+      "rulesBody": "Koresha inyuguti nto, imibare, n'udutambike (-). Itangire kandi irangire ku nyuguti cyangwa umubare.",
+      "rule1": "Inyuguti, imibare, n'udukurongo gusa",
+      "rule2": "Ntishobora gutangira cyangwa kurangira n'agakurongo",
+      "rule3": "Igomba kuba hagati y'inyuguti 2 na 63"
     },
     "brand": {
       "title": "Tandukanya ikirango cyawe",
@@ -58,6 +66,10 @@
       "logoTitle": "Logo",
       "logoSubtitle": "Ifoto y'akarambararo (square) ikora neza.",
       "addLogo": "Ongeraho logo",
+      "uploading": "Birimo gushyirwamo...",
+      "uploadLogo": "Shyiraho logo yawe",
+      "dragDrop": "Kanda uhitemo cyangwa ukurure ifoto hano",
+      "removeLogoBtn": "Kuraho logo",
       "removeLogo": "Kuraho",
       "primaryColor": "Ibara nyamukuru",
       "secondaryColor": "Ibara rya kabiri",
@@ -71,6 +83,7 @@
       "subtitle": "Sobanura aho utanga, ikiguzi, n'igihe cyo kugerayo.",
       "intro": "Delivery wiyicungira: ni wowe ushyiraho uturere, ibiciro n'igihe. Nta live tracking muri MVP.",
       "zone": "Akarere {index}",
+      "zoneTitle": "Akarere ka {index}",
       "removeZoneAria": "Kuraho akarere",
       "zoneName": "Izina ry'akarere",
       "zoneNamePlaceholder": "Urugero: Kigali - Kicukiro",
@@ -99,6 +112,29 @@
       "contactAndDelivery": "Amakuru & Zone zo gutanga",
       "note": "UI gusa: ubu page ntihamagara server. Draft ibikwa kuri device kugira ngo uzakomereze aho ugeze."
     },
+    "legal": {
+      "title": "Business Identity & Ownership",
+      "subtitle": "Provide your official registration details and head office address.",
+      "ownerIdentity": "Umwirondoro wa Nyiri ububiko",
+      "fullName": "Amazina yose",
+      "nationality": "Ubwenegihugu",
+      "emailAddress": "Imeli (Email)",
+      "phoneNumber": "Numero ya telefoni",
+      "registrationCountry": "Igihugu wandikijwemo"
+    },
+    "businessAddress": {
+      "title": "Business Address",
+      "subtitle": "Provide your official registered physical address.",
+      "registeredAddressTitle": "Aho ubucuruzi bwanditse ko bukorera",
+      "province": "Intara",
+      "district": "Akarere",
+      "sector": "Umurenge",
+      "physicalDetails": "Aho mukorera neza",
+      "googleMapsUrl": "Aderesi ya Google Maps"
+    },
+    "common": {
+      "optional": "(Si itegeko)"
+    },
     "contact": {
       "title": "Ongeraho amakuru y'ububiko bwawe",
       "subtitle": "Fasha abakiriya kukugeraho n'aho uherereye. Ibi si itegeko (optional).",
@@ -115,9 +151,28 @@
       "cancel": "Oya",
       "confirm": "Siba"
     },
+    "resumeModal": {
+      "title": "Murakaza Neza Wagarutse!",
+      "description": "Twabonye inyandiko y'ibyo watangiye kuzuza. Urifuza gukomeza aho wari ugeze?",
+      "resumeButton": "Komeza Aho Nari Nageze",
+      "discardButton": "Tangira Bushya"
+    },
+    "industry": {
+      "title": "Ubucuruzi bwawe bubarizwa mu rihe tsinda?",
+      "subtitle": "Dufashe gushyira ububiko bwawe mu ngeri iboneye kugira ngo abakiriya bakubone byoroshye.",
+      "sectorLabel": "Urwego rw'Inganda (Sector)",
+      "sectorPlaceholder": "Hitamo urwego rwawe",
+      "loading": "Birimo gushaka inzego...",
+      "categoryLabel": "Icyiciro cy'Ubucuruzi",
+      "categoryPlaceholder": "Hitamo icyiciro cyawe",
+      "loadingCat": "Birimo gushaka ibyiciro..."
+    },
     "errors": {
       "ok": "",
+      "default": "Habaye ikibazo. Ongera ugerageze.",
       "pickBusinessType": "Hitamo ubwoko bw'ubucuruzi kugira ngo ukomeze.",
+      "missingIndustry": "Hitamo urwego rw'iby'inganda (sector) kugira ngo ukomeze.",
+      "missingCategory": "Hitamo icyiciro cy'ubucuruzi kugira ngo ukomeze.",
       "missingRegisteredName": "Andika izina ryemewe ry'ubucuruzi.",
       "missingDisplayName": "Andika izina ry'ububiko rizagaragara.",
       "missingSubdomain": "Hitamo subdomain kugira ngo ukomeze.",

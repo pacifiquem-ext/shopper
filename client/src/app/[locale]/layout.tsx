@@ -9,7 +9,7 @@ import '../../styles/globals.css'
 import { rootMetadata } from '#/config/root-metadata'
 import { routing } from '@/i18n/routing'
 import { hasLocale } from 'next-intl'
-import { getMessages } from 'next-intl/server'
+import { getMessages, getTimeZone } from 'next-intl/server'
 import { notFound } from 'next/navigation'
 import { RootWrapper } from './root-wrapper'
 
@@ -28,11 +28,12 @@ export default async function RootLayout({
   }
 
   const messages = await getMessages()
+  const timeZone = await getTimeZone()
 
   return (
     <html lang={locale} suppressHydrationWarning>
       <body className={geist.className}>
-        <RootWrapper locale={locale} messages={messages}>
+        <RootWrapper locale={locale} messages={messages} timeZone={timeZone}>
           {children}
         </RootWrapper>
         <Toaster />

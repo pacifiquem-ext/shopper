@@ -21,6 +21,7 @@ async function bootstrap(): Promise<void> {
         // Create app
         app = await NestFactory.create(AppModule, new ExpressAdapter(server), {
             bufferLogs: true,
+            bodyParser: false,
         });
 
         const config = app.get(ConfigService);
@@ -43,6 +44,8 @@ async function bootstrap(): Promise<void> {
                 },
             })
         );
+        app.use(express.json({ limit: '50mb' }));
+        app.use(express.urlencoded({ limit: '50mb', extended: true }));
         app.use(compression());
         app.useLogger(logger);
         app.enableCors(config.get('app.cors'));

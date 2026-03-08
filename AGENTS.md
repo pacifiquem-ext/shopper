@@ -30,6 +30,11 @@ This project leverages specialized AI skills to enhance output quality. Dependin
 - If you are unsure about an implementation detail or if a standard is unclear, stop and ask the user for clarification before proceeding.
 - Ensure that all user-visible text is done via i18n translation. Making it easy to support multiple language later afterwards for both frontend and backend.
 
+## 4. i18n Translation Rules
+
+- **Required Reading:** When working on any i18n translation, you **MUST ALWAYS** check and follow the rules defined in [i18n-rules.md](./.agents/rules/i18n-rules.md).
+- Do not make assumptions about i18n translation without reference to this document.
+
 ---
 
 _By following these guidelines, you ensure that the OnlineShop.rw platform remains robust, scalable, and true to its architectural vision._

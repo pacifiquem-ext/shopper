@@ -97,11 +97,15 @@ export const createLoggerConfig = (configService: ConfigService): Params => {
                 res: (res: any) => ({
                     statusCode: res.statusCode,
                 }),
-                err: (err: any) => ({
-                    type: err.type || err.name,
-                    message: err.message,
-                    stack: isLocal ? err.stack : undefined, // Stack traces only in local
-                }),
+                err: (err: any) => {
+                    const errorResponse = err.response || err;
+                    return {
+                        type: err.type || err.name,
+                        message: err.message,
+                        details: errorResponse,
+                        stack: isLocal ? err.stack : undefined, // Stack traces only in local
+                    };
+                },
             },
 
             // Auto-assign log level based on HTTP status

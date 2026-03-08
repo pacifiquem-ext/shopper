@@ -21,7 +21,7 @@ import { JwtStrategy } from './strategies/jwt.strategy';
                     expiresIn: configService.get<string>(
                         'AUTH_ACCESS_TOKEN_EXP',
                         '15m'
-                    ),
+                    ) as any,
                 },
             }),
         }),

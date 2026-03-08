@@ -113,73 +113,77 @@ export class OnboardingService {
             );
         }
 
-        return this.prisma.$transaction(async tx => {
-            const store = await tx.store.create({
-                data: {
-                    userId,
-                    subdomain: dto.subdomain,
-                    registeredName: dto.registeredName,
-                    displayName: dto.displayName,
-                    description: dto.description,
-                    status: StoreStatus.SUBMITTED,
-                },
-            });
-
-            const businessAddress = await tx.address.create({
-                data: {
-                    province: dto.businessAddress.province,
-                    district: dto.businessAddress.district,
-                    sector: dto.businessAddress.sector,
-                    physicalAddress: dto.businessAddress.physicalAddress,
-                    googleMapsUrl: dto.businessAddress.googleMapsUrl,
-                },
-            });
-
-            let warehouseAddressId = null;
-            if (dto.warehouseAddress) {
-                const whAddress = await tx.address.create({
+        return this.prisma.$transaction(
+            async tx => {
+                const store = await tx.store.create({
                     data: {
-                        province: dto.warehouseAddress.province,
-                        district: dto.warehouseAddress.district,
-                        sector: dto.warehouseAddress.sector,
-                        physicalAddress: dto.warehouseAddress.physicalAddress,
-                        googleMapsUrl: dto.warehouseAddress.googleMapsUrl,
+                        userId,
+                        subdomain: dto.subdomain,
+                        registeredName: dto.registeredName,
+                        displayName: dto.displayName,
+                        description: dto.description,
+                        status: StoreStatus.SUBMITTED,
+                        brandColors:
+                            dto.brandPrimaryColor && dto.brandSecondaryColor
+                                ? {
+                                      primary: dto.brandPrimaryColor,
+                                      secondary: dto.brandSecondaryColor,
+                                  }
+                                : undefined,
+                        logoUrl: dto.logoDataUrl || undefined,
+                        aboutUs: dto.aboutUs || undefined,
+                        contactEmail: dto.contactEmail || undefined,
+                        contactPhone: dto.contactPhone || undefined,
+                        contactAddress: dto.contactAddress || undefined,
                     },
                 });
-                warehouseAddressId = whAddress.id;
-            }
 
-            const storeKyc = await tx.storeKyc.create({
-                data: {
-                    storeId: store.id,
-                    industrySectorId: dto.industrySectorId,
-                    businessCategoryId: dto.businessCategoryId,
-                    country: dto.country,
-                    ownerFullName: dto.ownerFullName,
-                    ownerDob: dto.ownerDob,
-                    ownerNationality: dto.ownerNationality,
-                    ownerEmail: dto.ownerEmail,
-                    ownerPhoneNumber: dto.ownerPhoneNumber,
-                },
-            });
+                if (dto.deliveryZones && dto.deliveryZones.length > 0) {
+                    await tx.deliveryZone.createMany({
+                        data: dto.deliveryZones.map(zone => ({
+                            storeId: store.id,
+                            name: zone.name,
+                            feeRwf: zone.feeRwf,
+                            etaMinutes: zone.etaMinutes,
+                        })),
+                    });
+                }
 
-            await tx.address.update({
-                where: { id: businessAddress.id },
-                data: { businessKycId: storeKyc.id },
-            });
-
-            if (warehouseAddressId) {
-                await tx.address.update({
-                    where: { id: warehouseAddressId },
-                    data: { warehouseKycId: storeKyc.id },
+                const businessAddress = await tx.address.create({
+                    data: {
+                        province: dto.businessAddress.province,
+                        district: dto.businessAddress.district,
+                        sector: dto.businessAddress.sector,
+                        physicalAddress: dto.businessAddress.physicalAddress,
+                        googleMapsUrl: dto.businessAddress.googleMapsUrl,
+                    },
                 });
-            }
 
-            await tx.storeDraft.deleteMany({
-                where: { userId },
-            });
+                const storeKyc = await tx.storeKyc.create({
+                    data: {
+                        storeId: store.id,
+                        industrySectorId: dto.industrySectorId,
+                        businessCategoryId: dto.businessCategoryId,
+                        country: dto.country,
+                        ownerFullName: dto.ownerFullName,
+                        ownerNationality: dto.ownerNationality,
+                        ownerEmail: dto.ownerEmail,
+                        ownerPhoneNumber: dto.ownerPhoneNumber,
+                    },
+                });
 
-            return store;
-        });
+                await tx.address.update({
+                    where: { id: businessAddress.id },
+                    data: { businessKycId: storeKyc.id },
+                });
+
+                await tx.storeDraft.deleteMany({
+                    where: { userId },
+                });
+
+                return store;
+            },
+            { timeout: 20000, maxWait: 10000 }
+        );
     }
 }
