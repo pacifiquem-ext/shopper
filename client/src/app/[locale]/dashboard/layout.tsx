@@ -1,0 +1,15 @@
+import React from 'react'
+import { DashboardSidebar } from '@/components/dashboard/dashboard-sidebar'
+import { DashboardHeader } from '@/components/dashboard/dashboard-header'
+
+export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="bg-background flex h-screen w-full overflow-hidden font-sans">
+      <DashboardSidebar />
+      <main className="relative flex h-full w-full flex-1 flex-col overflow-y-auto bg-white">
+        <DashboardHeader />
+        <div className="mx-auto h-full w-full max-w-7xl flex-1 p-8 pb-12">{children}</div>
+      </main>
+    </div>
+  )
+}

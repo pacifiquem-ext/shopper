@@ -193,5 +193,30 @@
       "missingDeliveryFee": "Add a delivery fee for each zone to continue.",
       "missingDeliveryEta": "Add an ETA for each zone to continue."
     }
+  },
+  "dashboard": {
+    "nav": {
+      "dashboard": "Dashboard",
+      "inventory": "Inventory",
+      "products": "Products",
+      "orders": "Orders",
+      "deliverySettings": "Delivery Settings",
+      "payments": "Payments",
+      "storeSettings": "Store Settings",
+      "subscription": "Subscription",
+      "logout": "Logout"
+    },
+    "upgradeCard": {
+      "title": "Advanced Analytics",
+      "description": "Upgrade to Pro to unlock insights",
+      "button": "Upgrade"
+    },
+    "metrics": {
+      "totalProducts": "Total products",
+      "totalOrders": "Total orders",
+      "totalStock": "Total stock",
+      "outOfStock": "Out of stock",
+      "totalRevenue": "Total revenue"
+    }
   }
 }

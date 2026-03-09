@@ -182,5 +182,30 @@
       "missingDeliveryFee": "Andika ikiguzi cya delivery kuri buri karere.",
       "missingDeliveryEta": "Andika igihe (ETA) kuri buri karere."
     }
+  },
+  "dashboard": {
+    "nav": {
+      "dashboard": "Incamake",
+      "inventory": "Ububiko (Inventory)",
+      "products": "Ibicuruzwa",
+      "orders": "Amatigiti",
+      "deliverySettings": "Ibyo Gutanga",
+      "payments": "Kwishyura",
+      "storeSettings": "Imiterere y'Iduka",
+      "subscription": "Ifatabuguzi",
+      "logout": "Sohoka"
+    },
+    "upgradeCard": {
+      "title": "Imibare Yimbitse (Advanced Analytics)",
+      "description": "Hindura ujye muri Pro kugira ngo ubone isesengura ryimbitse",
+      "button": "Kuzamura (Upgrade)"
+    },
+    "metrics": {
+      "totalProducts": "Ibicuruzwa byose",
+      "totalOrders": "Amatigiti yose",
+      "totalStock": "Stock yose",
+      "outOfStock": "Ibyashize mo",
+      "totalRevenue": "Amafaranga yose yinjiye"
+    }
   }
 }

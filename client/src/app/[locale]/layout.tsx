@@ -13,7 +13,10 @@ import { getMessages, getTimeZone } from 'next-intl/server'
 import { notFound } from 'next/navigation'
 import { RootWrapper } from './root-wrapper'
 
-const geist = Geist({ subsets: ['latin'] })
+const geistSans = Geist({
+  variable: '--font-geist-sans',
+  subsets: ['latin'],
+})
 
 export default async function RootLayout({
   children,
@@ -32,7 +35,9 @@ export default async function RootLayout({
 
   return (
     <html lang={locale} suppressHydrationWarning>
-      <body className={geist.className}>
+      <body
+        className={`${geistSans.variable} ${geistSans.className} text-foreground bg-background font-sans antialiased`}
+      >
         <RootWrapper locale={locale} messages={messages} timeZone={timeZone}>
           {children}
         </RootWrapper>
