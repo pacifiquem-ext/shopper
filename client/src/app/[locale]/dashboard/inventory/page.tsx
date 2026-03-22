@@ -1,7 +1,7 @@
 'use client'
 
-import { KpiStatCard } from '@/components/dashboard/kpi-stat-card'
-import { StockBadge } from '@/components/dashboard/status-badges'
+import { KpiStatCard } from '@/components/dashboard/shared/kpi-stat-card'
+import { StockBadge } from '@/components/dashboard/shared/status-badges'
 import { Button } from '@/components/ui/button'
 import { DataTable, type DataTableColumn } from '@/components/ui/data-table'
 import {

@@ -12,13 +12,13 @@ import {
   Users,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { DashboardFilters } from '@/components/dashboard/dashboard-filters'
+import { DashboardFilters } from '@/components/dashboard/shared/dashboard-filters'
 import {
   KeyValueRow,
   MetricCell,
   MetricTile,
   SalesPurchaseChart,
-} from '@/components/dashboard/dashboard-metrics'
+} from '@/components/dashboard/shared/dashboard-metrics'
 
 export default async function DashboardPage() {
   const t = await getTranslations('dashboard')

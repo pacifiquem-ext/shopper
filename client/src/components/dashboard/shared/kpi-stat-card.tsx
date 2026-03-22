@@ -1,4 +1,4 @@
-import { Sparkline } from '@/components/dashboard/sparkline'
+import { Sparkline } from '@/components/dashboard/shared/sparkline'
 import { cn } from '@/lib/utils'
 
 type KpiStatCardProps = {

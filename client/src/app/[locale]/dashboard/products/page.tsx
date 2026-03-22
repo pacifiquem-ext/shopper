@@ -1,8 +1,8 @@
 'use client'
 
-import { ProductStatusBadge } from '@/components/dashboard/status-badges'
-import { SalesPerformanceChart } from '@/components/dashboard/sales-performance-chart'
-import { TrendingProductsChart } from '@/components/dashboard/trending-products-chart'
+import { ProductStatusBadge } from '@/components/dashboard/shared/status-badges'
+import { SalesPerformanceChart } from '@/components/dashboard/products/sales-performance-chart'
+import { TrendingProductsChart } from '@/components/dashboard/products/trending-products-chart'
 import { Button } from '@/components/ui/button'
 import { DataTable, type DataTableColumn } from '@/components/ui/data-table'
 import {
@@ -56,6 +56,7 @@ import {
   TrendingUp,
   X,
   ZoomIn,
+  Badge,
 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'

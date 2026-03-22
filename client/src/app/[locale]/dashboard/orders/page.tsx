@@ -1,9 +1,9 @@
 'use client'
 
-import { KpiStatCard } from '@/components/dashboard/kpi-stat-card'
-import { OrderCommunicationModal } from '@/components/dashboard/order-communication-modal'
-import { PaymentVerificationModal } from '@/components/dashboard/payment-verification-modal'
-import { OrderStatusBadge } from '@/components/dashboard/status-badges'
+import { KpiStatCard } from '@/components/dashboard/shared/kpi-stat-card'
+import { OrderCommunicationModal } from '@/components/dashboard/orders/order-communication-modal'
+import { PaymentVerificationModal } from '@/components/dashboard/orders/payment-verification-modal'
+import { OrderStatusBadge } from '@/components/dashboard/shared/status-badges'
 import { Button } from '@/components/ui/button'
 import { Calendar } from '@/components/ui/calendar'
 import { DataTable, type DataTableColumn } from '@/components/ui/data-table'
