@@ -57,6 +57,9 @@ import {
   X,
   ZoomIn,
   Badge,
+  Edit,
+  Trash2,
+  AlertTriangle,
 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
@@ -74,8 +77,12 @@ export default function ProductsPage() {
   const [selectedProductId, setSelectedProductId] = useState<string | null>(null)
   const [createOpen, setCreateOpen] = useState(false)
   const [createStep, setCreateStep] = useState(0)
+  const [isEditMode, setIsEditMode] = useState(false)
+  const [editingProductId, setEditingProductId] = useState<string | null>(null)
   const [zoomOpen, setZoomOpen] = useState(false)
   const [zoomUrl, setZoomUrl] = useState<string | null>(null)
+  const [deleteOpen, setDeleteOpen] = useState(false)
+  const [productToDelete, setProductToDelete] = useState<{ id: string; name: string; stock: number } | null>(null)
 
   const [filters, setFilters] = useState<ProductFilters>({
     vendor: 'any',
@@ -304,6 +311,54 @@ export default function ProductsPage() {
     setViewOpen(true)
   }, [])
 
+  const openEdit = useCallback((id: string) => {
+    const product = detailsById[id]
+    if (!product) return
+
+    setDraftProduct({
+      name: product.name,
+      vendor: product.vendor,
+      category: product.category,
+      status: product.status,
+      description: product.description,
+      tags: product.tags.join(', '),
+      mediaSectionEnabled: product.images.length > 0,
+      images: product.images,
+      newImageUrl: '',
+      variantsSectionEnabled: product.variants.length > 0,
+      colors: Array.from(new Set(product.variants.map(v => v.color).filter(Boolean))).map(c => ({ name: c!.name, hex: c!.hex })),
+      sizes: Array.from(new Set(product.variants.map(v => v.size).filter(Boolean))),
+      models: [],
+      price: product.pricing.priceFrom.replace('$', ''),
+      cost: product.pricing.cost.replace('$', ''),
+      compareAt: product.pricing.compareAt.replace('$', ''),
+      deliverySectionEnabled: product.delivery.enabled,
+      deliveryEnabled: product.delivery.enabled,
+      deliveryLocation: product.delivery.location,
+      deliveryPrice: product.delivery.price.replace('$', ''),
+      internalNote: product.notes.internalNote,
+    })
+
+    setIsEditMode(true)
+    setEditingProductId(id)
+    setCreateOpen(true)
+    setCreateStep(0)
+  }, [detailsById])
+
+  const openDeleteConfirm = useCallback((product: ProductRow) => {
+    setProductToDelete({ id: product.id, name: product.name, stock: product.totalStock })
+    setDeleteOpen(true)
+  }, [])
+
+  const handleDelete = useCallback(() => {
+    if (!productToDelete) return
+    
+    console.log('Deleting product:', productToDelete.id)
+    
+    setDeleteOpen(false)
+    setProductToDelete(null)
+  }, [productToDelete])
+
   const selectedProduct = selectedProductId ? detailsById[selectedProductId] : undefined
 
   const vendors = useMemo(() => {
@@ -485,6 +540,20 @@ export default function ProductsPage() {
                 <Eye className="mr-2 h-4 w-4" />
                 {t('products.table.view')}
               </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => openEdit(r.id)}
+                className="cursor-pointer focus:bg-brand-50 focus:text-brand-900"
+              >
+                <Edit className="mr-2 h-4 w-4" />
+                Edit
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => openDeleteConfirm(r)}
+                className="cursor-pointer text-rose-600 focus:bg-rose-50 focus:text-rose-700"
+              >
+                <Trash2 className="mr-2 h-4 w-4" />
+                Delete
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         ),
@@ -492,7 +561,7 @@ export default function ProductsPage() {
         headerClassName: 'w-[56px]',
       },
     ],
-    [openView, statusLabel, t]
+    [openView, openEdit, openDeleteConfirm, statusLabel, t]
   )
 
   const paginationLabels = useMemo(
@@ -566,6 +635,8 @@ export default function ProductsPage() {
   const closeCreate = () => {
     setCreateOpen(false)
     setCreateStep(0)
+    setIsEditMode(false)
+    setEditingProductId(null)
   }
 
   const nextStep = () => {
@@ -1416,9 +1487,11 @@ export default function ProductsPage() {
             <div className="border-b border-gray-100 bg-gray-50 p-5 lg:border-b-0 lg:border-r">
               <div className="flex items-center justify-between gap-3">
                 <div>
-                  <DialogTitle className="text-lg font-semibold text-gray-900">{t('products.create.title')}</DialogTitle>
+                  <DialogTitle className="text-lg font-semibold text-gray-900">
+                    {isEditMode ? 'Edit Product' : t('products.create.title')}
+                  </DialogTitle>
                   <DialogDescription className="mt-1 text-sm text-gray-600">
-                    {t('products.create.subtitle')}
+                    {isEditMode ? 'Update product information and settings' : t('products.create.subtitle')}
                   </DialogDescription>
                 </div>
               </div>
@@ -2035,15 +2108,32 @@ export default function ProductsPage() {
                       <Button
                         type="button"
                         onClick={() => {
-                          setCreateOpen(false)
-                          setCreateStep(0)
-                          const q = draftProduct.name.trim()
-                          router.push(`/dashboard/inventory?q=${encodeURIComponent(q)}&action=restock`)
+                          if (isEditMode) {
+                            console.log('Updating product:', editingProductId, draftProduct)
+                            setCreateOpen(false)
+                            setCreateStep(0)
+                            setIsEditMode(false)
+                            setEditingProductId(null)
+                          } else {
+                            setCreateOpen(false)
+                            setCreateStep(0)
+                            const q = draftProduct.name.trim()
+                            router.push(`/dashboard/inventory?q=${encodeURIComponent(q)}&action=restock`)
+                          }
                         }}
                         className="h-10 rounded-xl bg-brand-900 text-white hover:bg-brand-800"
                       >
-                        <Sparkles className="mr-2 h-4 w-4" />
-                        {t('products.create.finish')}
+                        {isEditMode ? (
+                          <>
+                            <Check className="mr-2 h-4 w-4" />
+                            Update Product
+                          </>
+                        ) : (
+                          <>
+                            <Sparkles className="mr-2 h-4 w-4" />
+                            {t('products.create.finish')}
+                          </>
+                        )}
                       </Button>
                     )}
                   </div>
@@ -2068,6 +2158,92 @@ export default function ProductsPage() {
             ) : (
               <div className="flex h-[50vh] items-center justify-center text-white">{t('products.table.na')}</div>
             )}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
+        <DialogContent className="max-w-md overflow-hidden rounded-2xl border border-gray-200 bg-white p-0 shadow-xl">
+          <div className="border-b border-gray-100 px-6 py-4">
+            <DialogHeader>
+              <div className="flex items-center gap-3">
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-rose-50">
+                  <AlertTriangle className="h-6 w-6 text-rose-600" />
+                </div>
+                <div>
+                  <DialogTitle className="text-lg font-semibold text-gray-900">Delete Product</DialogTitle>
+                  <DialogDescription className="mt-1 text-sm text-gray-600">
+                    This action cannot be undone
+                  </DialogDescription>
+                </div>
+              </div>
+            </DialogHeader>
+          </div>
+
+          <div className="px-6 py-4">
+            <div className="space-y-4">
+              <div className="rounded-xl border border-rose-200 bg-rose-50 p-4">
+                <p className="text-sm font-medium text-rose-900">
+                  You are about to delete <span className="font-bold">{productToDelete?.name}</span>
+                </p>
+                <p className="mt-2 text-sm text-rose-700">
+                  This will permanently remove:
+                </p>
+                <ul className="mt-2 space-y-1 text-sm text-rose-700">
+                  <li className="flex items-start gap-2">
+                    <span className="mt-0.5 text-rose-500">•</span>
+                    <span>The product and all its variants</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="mt-0.5 text-rose-500">•</span>
+                    <span>{productToDelete?.stock || 0} units from inventory</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="mt-0.5 text-rose-500">•</span>
+                    <span>All product images and media</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="mt-0.5 text-rose-500">•</span>
+                    <span>Sales history and analytics data</span>
+                  </li>
+                </ul>
+              </div>
+
+              <div className="rounded-xl border border-amber-200 bg-amber-50 p-4">
+                <div className="flex gap-3">
+                  <AlertTriangle className="h-5 w-5 shrink-0 text-amber-600" />
+                  <div>
+                    <p className="text-sm font-medium text-amber-900">
+                      Impact on Active Orders
+                    </p>
+                    <p className="mt-1 text-sm text-amber-700">
+                      If this product is part of any pending orders, those orders may be affected. Consider archiving instead of deleting.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="border-t border-gray-100 px-6 py-4">
+            <div className="flex items-center justify-end gap-3">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setDeleteOpen(false)}
+                className="h-10 rounded-xl border-gray-200 bg-white text-gray-700 hover:bg-gray-50"
+              >
+                Cancel
+              </Button>
+              <Button
+                type="button"
+                onClick={handleDelete}
+                className="h-10 rounded-xl bg-rose-600 text-white hover:bg-rose-700"
+              >
+                <Trash2 className="mr-2 h-4 w-4" />
+                Delete Product
+              </Button>
+            </div>
           </div>
         </DialogContent>
       </Dialog>
