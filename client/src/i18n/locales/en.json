@@ -206,6 +206,580 @@
       "subscription": "Subscription",
       "logout": "Logout"
     },
+    "sidebar": {
+      "brand": "OnlineShop.rw",
+      "subtitle": "Inventory",
+      "role": "Store owner",
+      "defaultUserName": "User"
+    },
+    "header": {
+      "appShort": "OS",
+      "section": "Dashboard",
+      "searchPlaceholder": "Search anything",
+      "monthToDate": "Month to date",
+      "yearToDate": "Year to date",
+      "custom": "Custom",
+      "customRange": "Custom range",
+      "apply": "Apply",
+      "export": "Export",
+      "notificationsAria": "Notifications",
+      "notificationsTitle": "Notifications",
+      "notifications": {
+        "sample1": {
+          "title": "New order received",
+          "body": "Order #1024 was placed 5 minutes ago."
+        },
+        "sample2": {
+          "title": "Low stock alert",
+          "body": "2 items are running low. Consider restocking."
+        },
+        "sample3": {
+          "title": "Payout processed",
+          "body": "Your payout was processed successfully."
+        }
+      },
+      "userMenuAria": "User menu",
+      "profile": "Profile",
+      "settings": "Settings",
+      "search": {
+        "title": "Suggestions",
+        "empty": "No results",
+        "suggestions": {
+          "dashboard": "Overview and stats",
+          "inventory": "Stock and inventory summary",
+          "products": "Manage products and pricing",
+          "orders": "Track and fulfill orders",
+          "settings": "Store and account settings"
+        }
+      }
+    },
+    "inventory": {
+      "title": "Stocks",
+      "subtitle": "Monitor stock levels and prevent overselling.",
+      "export": "Export",
+      "moreActions": "More actions",
+      "searchPlaceholder": "Search inventory",
+      "empty": "No products found",
+      "adjustDialog": {
+        "restockTitle": "Restock",
+        "adjustTitle": "Adjust stock",
+        "subtitle": "Update stock for the selected product.",
+        "quantity": "Quantity",
+        "restockPlaceholder": "e.g. 20",
+        "adjustPlaceholder": "e.g. 120",
+        "noteTitle": "Note",
+        "noteBody": "This is a UI-only demo. Later this will create an inventory movement record.",
+        "cancel": "Cancel",
+        "confirmRestock": "Restock",
+        "confirmAdjust": "Save"
+      },
+      "filters": {
+        "title": "Filters",
+        "subtitle": "Narrow down results using multiple conditions.",
+        "any": "Any",
+        "apply": "Apply",
+        "clear": "Clear",
+        "vendor": "Vendor",
+        "category": "Category",
+        "status": "Status",
+        "sku": "SKU",
+        "skuPlaceholder": "e.g. TS-001",
+        "stockRange": "Stock range"
+      },
+      "tabs": {
+        "all": "All",
+        "inStock": "In stock",
+        "lowStock": "Low stock",
+        "outOfStock": "Out of stock"
+      },
+      "status": {
+        "inStock": "In stock",
+        "lowStock": "Low stock",
+        "outOfStock": "Out of stock"
+      },
+      "kpis": {
+        "totalAssetValue": "Total asset value",
+        "thisMonth": "This month",
+        "products": "Products",
+        "productsCount": "{count} products",
+        "filtersAria": "Filters",
+        "inStock": "In stock: {count}",
+        "lowStock": "Low stock: {count}",
+        "outOfStock": "Out of stock: {count}",
+        "lowStockItems": "Low stock items",
+        "outOfStockItems": "Out of stock items",
+        "needsAttention": "Needs attention",
+        "needsRestock": "Needs restock"
+      },
+      "pagination": {
+        "previous": "Previous",
+        "next": "Next",
+        "rowsPerPage": "Rows per page",
+        "showing": "Showing {from}-{to} of {total}"
+      },
+      "table": {
+        "name": "Name",
+        "category": "Category",
+        "sku": "SKU",
+        "vendor": "Vendor",
+        "stock": "Stock",
+        "status": "Status",
+        "action": "Action",
+        "view": "View",
+        "restock": "Restock",
+        "adjustStock": "Adjust stock",
+        "moreAria": "More actions",
+        "filterAria": "Filter products",
+        "na": "N/A"
+      },
+      "viewSheet": {
+        "title": "Product details",
+        "titleWithName": "{name}",
+        "addStock": "Add stock",
+        "downloadPdf": "Download as PDF",
+        "close": "Close",
+        "empty": "Select a product to see details.",
+        "footerHint": "Tip: Use Download as PDF to print or save the product details.",
+        "available": "Available",
+        "subtitle": "SKU: {sku} • Category: {category}",
+        "stockAvailable": "{count} available",
+        "badges": {
+          "stock": "Stock",
+          "status": "Status",
+          "updated": "Updated"
+        },
+        "sections": {
+          "stock": "Stock",
+          "product": "Product",
+          "pricing": "Pricing",
+          "shipping": "Shipping",
+          "staff": "Staff",
+          "notes": "Notes",
+          "timeline": "Timeline"
+        },
+        "fields": {
+          "onHand": "On hand",
+          "reserved": "Reserved",
+          "available": "Available",
+          "reorderPoint": "Reorder point",
+          "sku": "SKU",
+          "category": "Category",
+          "vendor": "Vendor",
+          "price": "Price",
+          "cost": "Cost",
+          "margin": "Margin",
+          "weight": "Weight",
+          "deliveryEligible": "Delivery eligible",
+          "createdBy": "Created by",
+          "updatedBy": "Updated by",
+          "internalNote": "Internal note"
+        },
+        "shipping": {
+          "yes": "Yes",
+          "no": "No"
+        },
+        "notes": {
+          "internalNoteSample": "Keep a buffer stock for fast-moving sizes.",
+          "reorderSoon": "Reorder soon to avoid stockout."
+        },
+        "events": {
+          "created": {
+            "title": "Product created",
+            "description": "Product was added to the catalog."
+          },
+          "restocked": {
+            "title": "Restocked",
+            "description": "Stock was increased after restocking."
+          },
+          "sold": {
+            "title": "Sold",
+            "description": "Stock decreased due to sales."
+          },
+          "adjusted": {
+            "title": "Stock adjusted",
+            "description": "Stock was updated manually."
+          }
+        }
+      }
+    },
+    "products": {
+      "title": "Products",
+      "subtitle": "Create, organize, and publish what you sell.",
+      "export": "Export",
+      "createProduct": "Create product",
+      "searchPlaceholder": "Search products",
+      "empty": "No products found",
+      "tabs": {
+        "all": "All",
+        "active": "Active",
+        "draft": "Draft",
+        "archived": "Archived"
+      },
+      "status": {
+        "active": "Active",
+        "draft": "Draft",
+        "archived": "Archived"
+      },
+      "kpis": {
+        "totalProducts": "Total products",
+        "activeDraftArchived": "Active: {active} • Draft: {draft} • Archived: {archived}",
+        "stockHealth": "Stock health",
+        "inStockCount": "{count} in stock",
+        "inStock": "In stock",
+        "lowStock": "Low stock",
+        "outOfStock": "Out of stock",
+        "lowStockProducts": "Low stock products",
+        "needsAttention": "Needs attention",
+        "draftProducts": "Draft products",
+        "notPublished": "Not published"
+      },
+      "filters": {
+        "title": "Filters",
+        "subtitle": "Refine results with multiple conditions.",
+        "aria": "Filter products",
+        "any": "Any",
+        "apply": "Apply",
+        "clear": "Clear",
+        "vendor": "Vendor",
+        "category": "Category",
+        "status": "Status",
+        "minStock": "Min stock",
+        "maxStock": "Max stock",
+        "stockPlaceholder": "e.g. 10"
+      },
+      "pagination": {
+        "previous": "Previous",
+        "next": "Next",
+        "rowsPerPage": "Rows per page",
+        "showing": "Showing {from}-{to} of {total}"
+      },
+      "table": {
+        "name": "Name",
+        "category": "Category",
+        "vendor": "Vendor",
+        "price": "Price",
+        "stock": "Stock",
+        "status": "Status",
+        "updated": "Updated",
+        "units": "units",
+        "variantsCount": "{count} variants",
+        "action": "Action",
+        "moreAria": "More actions",
+        "view": "View",
+        "na": "N/A"
+      },
+      "create": {
+        "title": "Create product",
+        "subtitle": "Add a new product with media, variants, and pricing.",
+        "cancel": "Cancel",
+        "back": "Back",
+        "next": "Next",
+        "finish": "Finish",
+        "sections": {
+          "applies": "Applies to this product",
+          "mediaHint": "Disable if this product doesn't need images right now.",
+          "variantsHint": "Disable if this product has no variants (one SKU only).",
+          "deliveryHint": "Disable if you don't deliver this product.",
+          "skippedPill": "Skipped",
+          "skippedTitle": "This section is skipped",
+          "skippedBody": "Enable it anytime if you want to add details.",
+          "enable": "Enable section"
+        },
+        "steps": {
+          "basics": "Basics",
+          "basicsDescription": "Name, category, vendor, and description.",
+          "media": "Media",
+          "mediaDescription": "Upload images and preview the gallery.",
+          "variants": "Variants",
+          "variantsDescription": "Colors, sizes, models, and options.",
+          "pricing": "Pricing",
+          "pricingDescription": "Set price and compare-at price.",
+          "delivery": "Delivery",
+          "deliveryDescription": "Delivery location and pricing.",
+          "review": "Review",
+          "reviewDescription": "Confirm details before saving."
+        },
+        "fields": {
+          "name": "Product name",
+          "namePlaceholder": "e.g. Cotton T-shirt",
+          "vendor": "Vendor",
+          "vendorPlaceholder": "e.g. Kigali Fashion",
+          "category": "Category",
+          "categoryPlaceholder": "e.g. Apparel",
+          "status": "Status",
+          "description": "Description",
+          "descriptionPlaceholder": "Write a short description...",
+          "tags": "Tags",
+          "tagsPlaceholder": "e.g. cotton, unisex, everyday",
+          "tagsHint": "Separate tags with commas."
+        },
+        "media": {
+          "addImages": "Images",
+          "addImagesHint": "Add images to represent your product.",
+          "upload": "Upload images",
+          "uploadHint": "Upload files from your computer.",
+          "urlPlaceholder": "Paste an image URL",
+          "add": "Add",
+          "remove": "Remove",
+          "empty": "No images added yet.",
+          "zoom": "Zoom",
+          "defaultAlt": "Product"
+        },
+        "variants": {
+          "colors": "Colors",
+          "colorsHint": "Choose a color and give it a name (e.g., Navy, Beige).",
+          "addColor": "Add color",
+          "removeColorAria": "Remove color",
+          "colorNamePlaceholder": "Color name",
+          "colorPickerAria": "Pick a color",
+          "colorHexAria": "Selected color hex",
+          "pickColor": "Pick",
+          "sizes": "Sizes",
+          "sizesHint": "Click a size to remove it.",
+          "modelsPlaceholder": "Models (comma-separated), e.g. Regular, Oversized"
+        },
+        "pricing": {
+          "price": "Price",
+          "pricePlaceholder": "e.g. $14",
+          "compareAt": "Compare at",
+          "compareAtPlaceholder": "e.g. $20",
+          "cost": "Cost",
+          "costPlaceholder": "e.g. $6",
+          "smartHintTitle": "Tip",
+          "smartHintBody": "Set cost to estimate margins in the product view."
+        },
+        "delivery": {
+          "enabled": "Delivery enabled",
+          "location": "Delivery location",
+          "locationPlaceholder": "e.g. Kigali",
+          "price": "Delivery price",
+          "pricePlaceholder": "e.g. $2",
+          "internalNote": "Internal note",
+          "internalNotePlaceholder": "Add notes for staff only..."
+        },
+        "review": {
+          "title": "Review",
+          "subtitle": "Make sure everything looks correct.",
+          "nextTitle": "Next",
+          "nextBody": "After saving, you can add stock in Inventory and set up variants more deeply."
+        }
+      },
+      "viewSheet": {
+        "title": "Product details",
+        "addStock": "Add stock",
+        "downloadPdf": "Download as PDF",
+        "printTitle": "Product",
+        "empty": "Select a product to see details.",
+        "zoom": "Zoom",
+        "subtitle": "{vendor} • {category}",
+        "yes": "Yes",
+        "no": "No",
+        "variantsCount": "{count} variants",
+        "sections": {
+          "gallery": "Gallery",
+          "pricing": "Pricing",
+          "delivery": "Delivery",
+          "description": "Description",
+          "variants": "Variants",
+          "staff": "Staff"
+        },
+        "fields": {
+          "cost": "Cost",
+          "margin": "Margin",
+          "compareAt": "Compare at",
+          "deliveryEnabled": "Delivery enabled",
+          "deliveryLocation": "Location",
+          "deliveryPrice": "Price",
+          "createdBy": "Created by",
+          "updatedBy": "Updated by"
+        },
+        "table": {
+          "variant": "Variant",
+          "sku": "SKU",
+          "stock": "Stock",
+          "price": "Price"
+        }
+      },
+      "zoom": {
+        "title": "Zoom",
+        "subtitle": "Inspect details in full resolution.",
+        "alt": "Zoomed view"
+      }
+    },
+    "orders": {
+      "dateRange": "Jan 1 - Jan 30, 2024",
+      "export": "Export",
+      "moreActions": "More actions",
+      "createOrder": "Create order",
+      "searchPlaceholder": "Search order, customer or date",
+      "empty": "No orders found",
+      "viewSheet": {
+        "title": "Order details",
+        "titleWithId": "Order {id}",
+        "orderId": "Order {id}",
+        "total": "Total",
+        "downloadPdf": "Download as PDF",
+        "close": "Close",
+        "empty": "Select an order to see details.",
+        "footerHint": "Tip: Use Download as PDF to print or save the order.",
+        "itemsCountLabel": "items",
+        "badges": {
+          "payment": "Payment",
+          "fulfillment": "Fulfillment",
+          "tracking": "Tracking"
+        },
+        "sections": {
+          "customer": "Customer",
+          "orderMeta": "Order meta",
+          "payment": "Payment",
+          "fulfillment": "Delivery",
+          "items": "Items",
+          "addressShipping": "Shipping address",
+          "addressBilling": "Billing address",
+          "totals": "Totals",
+          "staff": "Staff",
+          "notes": "Notes",
+          "timeline": "Timeline"
+        },
+        "fields": {
+          "name": "Name",
+          "phone": "Phone",
+          "email": "Email",
+          "createdBy": "Created by",
+          "packedBy": "Packed by",
+          "deliveredBy": "Delivered by",
+          "store": "Store",
+          "orderDate": "Order date",
+          "status": "Status",
+          "method": "Method",
+          "reference": "Reference",
+          "paidAt": "Paid at",
+          "deliveryMethod": "Delivery method",
+          "courier": "Courier",
+          "driver": "Driver",
+          "assignedAt": "Assigned at",
+          "deliveredAt": "Delivered at",
+          "subtotal": "Subtotal",
+          "deliveryFee": "Delivery fee",
+          "discount": "Discount",
+          "tax": "Tax",
+          "total": "Total",
+          "customerNote": "Customer note",
+          "internalNote": "Internal note"
+        },
+        "table": {
+          "item": "Item",
+          "qty": "Qty",
+          "unit": "Unit",
+          "total": "Total"
+        },
+        "paymentMethod": {
+          "mobileMoney": "Mobile Money",
+          "cashOnDelivery": "Cash on delivery"
+        },
+        "deliveryMethod": {
+          "storeDelivery": "Store delivery"
+        },
+        "notes": {
+          "customerNoteSample": "Please call me when you arrive.",
+          "internalNoteSample": "Confirm stock before dispatch."
+        },
+        "events": {
+          "created": {
+            "title": "Order created",
+            "description": "Order was placed by the customer."
+          },
+          "paymentPending": {
+            "title": "Payment pending",
+            "description": "Awaiting payment confirmation."
+          },
+          "paid": {
+            "title": "Payment received",
+            "description": "Payment was successfully captured."
+          },
+          "packed": {
+            "title": "Order packed",
+            "description": "Items were packed and prepared for delivery."
+          },
+          "delivered": {
+            "title": "Delivered",
+            "description": "Order was delivered to the customer."
+          }
+        }
+      },
+      "pagination": {
+        "previous": "Previous",
+        "next": "Next",
+        "rowsPerPage": "Rows per page",
+        "showing": "Showing {from}-{to} of {total}"
+      },
+      "stats": {
+        "totalOrders": "Total Orders",
+        "orderItemsOverTime": "Order items over time",
+        "returnsOrders": "Returns Orders",
+        "fulfilledOverTime": "Fulfilled orders over time",
+        "lastWeek": "25.2% last week"
+      },
+      "tabs": {
+        "all": "All",
+        "unfulfilled": "Unfulfilled",
+        "unpaid": "Unpaid",
+        "open": "Open",
+        "closed": "Closed",
+        "add": "Add"
+      },
+      "status": {
+        "pending": "Pending",
+        "success": "Success",
+        "fulfilled": "Fulfilled",
+        "unfulfilled": "Unfulfilled"
+      },
+      "table": {
+        "order": "Order",
+        "date": "Date",
+        "customer": "Customer",
+        "payment": "Payment",
+        "total": "Total",
+        "delivery": "Delivery",
+        "items": "Items",
+        "fulfillment": "Fulfillment",
+        "action": "Action",
+        "view": "View",
+        "moreAria": "More actions",
+        "filterAria": "Filter orders",
+        "columnsAria": "Column options",
+        "na": "N/A",
+        "itemsCount": "{count, plural, one {# item} other {# items}}"
+      }
+    },
+    "cards": {
+      "more": "More",
+      "salesOverview": "Sales Overview",
+      "salesSubtitle": "",
+      "purchaseOverview": "Purchase Overview",
+      "purchaseSubtitle": "",
+      "totalSales": "Total Sales",
+      "revenue": "Revenue",
+      "cost": "Cost",
+      "profit": "Profit",
+      "noOfPurchase": "No of Purchase",
+      "cancelOrder": "Cancel Order",
+      "returns": "Returns",
+      "inventorySummary": "Inventory Summary",
+      "quantityInHand": "Quantity in Hand",
+      "willBeReceived": "Will be Received",
+      "productDetails": "Product Details",
+      "lowStockItems": "Low Stock Items",
+      "itemGroup": "Item Group",
+      "noOfItems": "No of Items",
+      "noOfUsers": "No. of Users",
+      "totalCustomers": "Total Customers",
+      "totalSuppliers": "Total Suppliers",
+      "salesPurchaseStats": "Sales And Purchase Statistics",
+      "salesPurchaseStatsSubtitle": "",
+      "sales": "Sales",
+      "purchase": "Purchase"
+    },
     "upgradeCard": {
       "title": "Advanced Analytics",
       "description": "Upgrade to Pro to unlock insights",

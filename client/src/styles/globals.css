@@ -241,4 +241,56 @@
   body {
     @apply bg-background text-foreground;
   }
+
+  /* Custom Scrollbar Styling */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: #6083e3 #f3f4f6;
+  }
+
+  /* Webkit browsers (Chrome, Safari, Edge) */
+  *::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  *::-webkit-scrollbar-track {
+    background: #f3f4f6;
+    border-radius: 4px;
+  }
+
+  *::-webkit-scrollbar-thumb {
+    background: #6083e3;
+    border-radius: 4px;
+    transition: background 0.2s ease;
+  }
+
+  *::-webkit-scrollbar-thumb:hover {
+    background: #4a71df;
+  }
+
+  *::-webkit-scrollbar-thumb:active {
+    background: #335fdb;
+  }
+
+  /* Dark mode scrollbar */
+  .dark *::-webkit-scrollbar-track {
+    background: #1f2937;
+  }
+
+  .dark *::-webkit-scrollbar-thumb {
+    background: #4a71df;
+  }
+
+  .dark *::-webkit-scrollbar-thumb:hover {
+    background: #6083e3;
+  }
+
+  .dark *::-webkit-scrollbar-thumb:active {
+    background: #7794e7;
+  }
+
+  .dark * {
+    scrollbar-color: #4a71df #1f2937;
+  }
 }

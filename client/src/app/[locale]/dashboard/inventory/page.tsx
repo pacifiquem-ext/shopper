@@ -1,17 +1,1239 @@
-import { getTranslations } from 'next-intl/server'
+'use client'
 
-export default async function InventoryPage() {
-  const t = await getTranslations('dashboard')
+import { KpiStatCard } from '@/components/dashboard/kpi-stat-card'
+import { StockBadge } from '@/components/dashboard/status-badges'
+import { Button } from '@/components/ui/button'
+import { DataTable, type DataTableColumn } from '@/components/ui/data-table'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { ScrollArea } from '@/components/ui/scroll-area'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import { Separator } from '@/components/ui/separator'
+import { Slider } from '@/components/ui/slider'
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import type {
+  InventoryRow,
+  InventoryTab,
+  ProductDetails,
+  InventoryFilters,
+  StockStatus,
+} from '@/types'
+import { cn } from '@/lib/utils'
+import { clampPercent } from '@/utils/dashboard'
+import {
+  ChevronDown,
+  Download,
+  Eye,
+  Filter,
+  MoreHorizontal,
+  Package,
+  Plus,
+  Printer,
+  Search,
+  ShieldCheck,
+  Truck,
+  Warehouse,
+} from 'lucide-react'
+import { useSearchParams } from 'next/navigation'
+import { useTranslations } from 'next-intl'
+import { useCallback, useEffect, useMemo, useState } from 'react'
+
+
+export default function InventoryPage() {
+  const t = useTranslations('dashboard')
+  const searchParams = useSearchParams()
+
+  const [tab, setTab] = useState<InventoryTab>('all')
+  const [query, setQuery] = useState('')
+  const [viewOpen, setViewOpen] = useState(false)
+  const [selectedProductId, setSelectedProductId] = useState<string | null>(null)
+  const [adjustOpen, setAdjustOpen] = useState(false)
+  const [adjustMode, setAdjustMode] = useState<'restock' | 'adjust'>('restock')
+  const [adjustQuantity, setAdjustQuantity] = useState('')
+  const [filters, setFilters] = useState<InventoryFilters>({
+    vendor: 'any',
+    category: 'any',
+    status: 'any',
+    sku: '',
+    stockRange: [0, 200],
+  })
+
+  const [filtersDraft, setFiltersDraft] = useState(filters)
+
+  const [rows, setRows] = useState<InventoryRow[]>(() => [
+    {
+      id: 'p-1',
+      name: 'Cotton T-shirt',
+      category: 'Apparel',
+      sku: 'TS-001',
+      vendor: 'Kigali Fashion',
+      stock: 124,
+      status: 'inStock',
+    },
+    {
+      id: 'p-2',
+      name: 'Classic Cap',
+      category: 'Accessories',
+      sku: 'CAP-031',
+      vendor: 'Kigali Fashion',
+      stock: 10,
+      status: 'lowStock',
+    },
+    {
+      id: 'p-3',
+      name: 'Denim Shorts',
+      category: 'Apparel',
+      sku: 'SH-219',
+      vendor: 'Kigali Fashion',
+      stock: 0,
+      status: 'outOfStock',
+    },
+    {
+      id: 'p-4',
+      name: 'Leather Belt',
+      category: 'Accessories',
+      sku: 'BLT-12',
+      vendor: 'Kigali Fashion',
+      stock: 34,
+      status: 'inStock',
+    },
+    {
+      id: 'p-5',
+      name: 'Socks (Pair)',
+      category: 'Apparel',
+      sku: 'SOCK-01',
+      vendor: 'Kigali Fashion',
+      stock: 6,
+      status: 'lowStock',
+    },
+  ])
+
+  const detailsById = useMemo(() => {
+    const data: ProductDetails[] = [
+      {
+        id: 'p-1',
+        name: 'Cotton T-shirt',
+        sku: 'TS-001',
+        category: 'Apparel',
+        vendor: 'Kigali Fashion',
+        status: 'inStock',
+        stock: {
+          onHand: 124,
+          reserved: 6,
+          available: 118,
+          reorderPoint: 20,
+          updatedAt: '22 Mar, 2026 • 19:42',
+        },
+        pricing: {
+          price: '$10.00',
+          cost: '$6.00',
+          margin: '40%',
+        },
+        shipping: {
+          weight: '0.25 kg',
+          deliveryEligible: t('inventory.viewSheet.shipping.yes'),
+        },
+        staff: {
+          createdBy: 'Store Owner',
+          updatedBy: 'Store Owner',
+        },
+        notes: {
+          internalNote: t('inventory.viewSheet.notes.internalNoteSample'),
+        },
+        events: [
+          {
+            id: 'pe-1',
+            type: 'created',
+            at: '10 Mar, 2026 • 09:12',
+            title: t('inventory.viewSheet.events.created.title'),
+            description: t('inventory.viewSheet.events.created.description'),
+          },
+          {
+            id: 'pe-2',
+            type: 'restocked',
+            at: '18 Mar, 2026 • 11:30',
+            title: t('inventory.viewSheet.events.restocked.title'),
+            description: t('inventory.viewSheet.events.restocked.description'),
+          },
+          {
+            id: 'pe-3',
+            type: 'sold',
+            at: '21 Mar, 2026 • 15:10',
+            title: t('inventory.viewSheet.events.sold.title'),
+            description: t('inventory.viewSheet.events.sold.description'),
+          },
+        ],
+      },
+      {
+        id: 'p-2',
+        name: 'Classic Cap',
+        sku: 'CAP-031',
+        category: 'Accessories',
+        vendor: 'Kigali Fashion',
+        status: 'lowStock',
+        stock: {
+          onHand: 10,
+          reserved: 2,
+          available: 8,
+          reorderPoint: 15,
+          updatedAt: '22 Mar, 2026 • 18:21',
+        },
+        pricing: {
+          price: '$8.00',
+          cost: '$4.20',
+          margin: '47%',
+        },
+        shipping: {
+          weight: '0.15 kg',
+          deliveryEligible: t('inventory.viewSheet.shipping.yes'),
+        },
+        staff: {
+          createdBy: 'Store Owner',
+          updatedBy: 'Aline M.',
+        },
+        notes: {
+          internalNote: t('inventory.viewSheet.notes.reorderSoon'),
+        },
+        events: [
+          {
+            id: 'pe-11',
+            type: 'stockAdjusted',
+            at: '22 Mar, 2026 • 18:21',
+            title: t('inventory.viewSheet.events.adjusted.title'),
+            description: t('inventory.viewSheet.events.adjusted.description'),
+          },
+        ],
+      },
+    ]
+
+    const map = new Map<string, ProductDetails>()
+    for (const item of data) map.set(item.id, item)
+    return map
+  }, [t])
+
+  const selectedProduct = useMemo(() => {
+    if (!selectedProductId) return null
+    const base = detailsById.get(selectedProductId) ?? null
+    if (!base) return null
+
+    const row = rows.find((r) => r.id === selectedProductId)
+    if (!row) return base
+
+    const reserved = base.stock.reserved
+    const onHand = row.stock
+    const available = Math.max(0, onHand - reserved)
+    const status: StockStatus =
+      onHand <= 0 ? 'outOfStock' : onHand < base.stock.reorderPoint ? 'lowStock' : 'inStock'
+
+    return {
+      ...base,
+      status,
+      stock: {
+        ...base.stock,
+        onHand,
+        available,
+      },
+    }
+  }, [detailsById, rows, selectedProductId])
+
+  const openView = useCallback((id: string) => {
+    setSelectedProductId(id)
+    setViewOpen(true)
+  }, [])
+
+  const openAdjust = useCallback((id: string, mode: 'restock' | 'adjust') => {
+    setSelectedProductId(id)
+    setAdjustMode(mode)
+    setAdjustQuantity('')
+    setAdjustOpen(true)
+  }, [])
+
+  const applyAdjustment = useCallback(() => {
+    const qty = Number(adjustQuantity)
+    if (!Number.isFinite(qty)) return
+    if (adjustMode === 'restock' && qty <= 0) return
+
+    setRows((prev) => {
+      const next = [...prev]
+      const idx = next.findIndex((r) => r.id === selectedProductId)
+      if (idx === -1) return prev
+
+      const old = next[idx]
+      const nextStock = adjustMode === 'restock' ? old.stock + qty : qty
+
+      const nextStatus: StockStatus =
+        nextStock <= 0 ? 'outOfStock' : nextStock < 15 ? 'lowStock' : 'inStock'
+
+      next[idx] = { ...old, stock: nextStock, status: nextStatus }
+      return next
+    })
+
+    setAdjustOpen(false)
+  }, [adjustMode, adjustQuantity, selectedProductId])
+
+  useEffect(() => {
+    const sku = searchParams.get('sku')
+    const q = searchParams.get('q')
+    const action = searchParams.get('action')
+    if (!sku && !action) return
+
+    const id = sku
+      ? rows.find((r) => r.sku === sku)?.id
+      : q
+        ? rows.find((r) => {
+            const x = q.toLowerCase()
+            return (
+              r.name.toLowerCase().includes(x) ||
+              r.sku.toLowerCase().includes(x) ||
+              r.vendor.toLowerCase().includes(x)
+            )
+          })?.id
+        : undefined
+    if (!id) return
+
+    setSelectedProductId(id)
+
+    if (action === 'view') {
+      setViewOpen(true)
+      return
+    }
+
+    if (action === 'restock' || action === 'adjust') {
+      setAdjustMode(action)
+      setAdjustQuantity('')
+      setAdjustOpen(true)
+    }
+  }, [rows, searchParams])
+
+  const downloadAsPdf = () => {
+    if (!selectedProduct) return
+
+    const content = document.querySelector('[data-product-print]')
+    if (!(content instanceof HTMLElement)) return
+
+    const win = window.open('', '_blank', 'noopener,noreferrer,width=1100,height=800')
+    if (!win) return
+
+    win.document.open()
+    win.document.write(`<!doctype html><html><head><meta charset="utf-8" />`)
+    win.document.write(`<meta name="viewport" content="width=device-width, initial-scale=1" />`)
+    win.document.write(`<title>${selectedProduct.name}</title>`)
+    win.document.write(`<style>
+      :root { color-scheme: light; }
+      body { font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Noto Sans", "Liberation Sans", sans-serif; margin: 24px; color: #111827; }
+      h1,h2,h3 { margin: 0; }
+      table { width: 100%; border-collapse: collapse; }
+      th, td { text-align: left; padding: 10px 8px; border-bottom: 1px solid #e5e7eb; font-size: 13px; }
+      th { font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: #6b7280; }
+      @media print { body { margin: 0; } }
+    </style></head><body>`)
+    win.document.write(content.outerHTML)
+    win.document.write(`</body></html>`)
+    win.document.close()
+    win.focus()
+    win.print()
+  }
+
+  const filteredRows = useMemo(() => {
+    const q = query.trim().toLowerCase()
+    const skuQ = filters.sku.trim().toLowerCase()
+
+    let data = rows
+
+    if (tab === 'inStock') data = data.filter((r) => r.status === 'inStock')
+    if (tab === 'lowStock') data = data.filter((r) => r.status === 'lowStock')
+    if (tab === 'outOfStock') data = data.filter((r) => r.status === 'outOfStock')
+
+    if (q) {
+      data = data.filter(
+        (r) =>
+          r.name.toLowerCase().includes(q) ||
+          r.category.toLowerCase().includes(q) ||
+          r.sku.toLowerCase().includes(q) ||
+          r.vendor.toLowerCase().includes(q)
+      )
+    }
+
+    if (filters.vendor !== 'any') data = data.filter((r) => r.vendor === filters.vendor)
+    if (filters.category !== 'any') data = data.filter((r) => r.category === filters.category)
+    if (filters.status !== 'any') data = data.filter((r) => r.status === filters.status)
+    if (skuQ) data = data.filter((r) => r.sku.toLowerCase().includes(skuQ))
+
+    data = data.filter((r) => r.stock >= filters.stockRange[0] && r.stock <= filters.stockRange[1])
+
+    return data
+  }, [filters.category, filters.sku, filters.status, filters.stockRange, filters.vendor, query, rows, tab])
+
+  const vendors = useMemo(() => {
+    const set = new Set<string>()
+    for (const r of rows) set.add(r.vendor)
+    return Array.from(set).sort((a, b) => a.localeCompare(b))
+  }, [rows])
+
+  const categories = useMemo(() => {
+    const set = new Set<string>()
+    for (const r of rows) set.add(r.category)
+    return Array.from(set).sort((a, b) => a.localeCompare(b))
+  }, [rows])
+
+  const stockMax = useMemo(() => {
+    const max = Math.max(0, ...rows.map((r) => r.stock))
+    return Math.max(50, Math.ceil(max / 10) * 10)
+  }, [rows])
+
+  const applyFilters = () => {
+    setFilters({
+      ...filtersDraft,
+      stockRange: [
+        Math.min(filtersDraft.stockRange[0], filtersDraft.stockRange[1]),
+        Math.max(filtersDraft.stockRange[0], filtersDraft.stockRange[1]),
+      ],
+    })
+  }
+
+  const clearFilters = () => {
+    const next = {
+      vendor: 'any',
+      category: 'any',
+      status: 'any' as const,
+      sku: '',
+      stockRange: [0, stockMax] as [number, number],
+    }
+
+    setFilters(next)
+    setFiltersDraft(next)
+  }
+
+  const stats = useMemo(() => {
+    const total = rows.length
+    const inStock = rows.filter((r) => r.status === 'inStock').length
+    const lowStock = rows.filter((r) => r.status === 'lowStock').length
+    const outOfStock = rows.filter((r) => r.status === 'outOfStock').length
+
+    return { total, inStock, lowStock, outOfStock }
+  }, [rows])
+
+  const stockBar = useMemo(() => {
+    const total = Math.max(1, stats.total)
+    const inPct = clampPercent((stats.inStock / total) * 100)
+    const lowPct = clampPercent((stats.lowStock / total) * 100)
+    const outPct = clampPercent((stats.outOfStock / total) * 100)
+
+    return { inPct, lowPct, outPct }
+  }, [stats.inStock, stats.lowStock, stats.outOfStock, stats.total])
+
+  const columns: DataTableColumn<InventoryRow>[] = useMemo(
+    () => [
+      {
+        id: 'name',
+        header: t('inventory.table.name'),
+        cell: (r) => (
+          <div className="flex min-w-0 items-center gap-3">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-gray-200 bg-gray-50 text-gray-700">
+              <Package className="h-4 w-4" />
+            </div>
+            <div className="min-w-0">
+              <div className="truncate font-medium text-gray-900">{r.name}</div>
+              <div className="mt-0.5 truncate text-xs font-medium text-gray-500">{r.sku}</div>
+            </div>
+          </div>
+        ),
+      },
+      { id: 'category', header: t('inventory.table.category'), cell: (r) => r.category, className: 'text-gray-600' },
+      { id: 'sku', header: t('inventory.table.sku'), cell: (r) => r.sku, className: 'text-gray-600' },
+      { id: 'vendor', header: t('inventory.table.vendor'), cell: (r) => r.vendor, className: 'text-gray-600' },
+      {
+        id: 'stock',
+        header: t('inventory.table.stock'),
+        cell: (r) => <span className="font-medium text-gray-900">{r.stock}</span>,
+        className: 'text-gray-600',
+      },
+      {
+        id: 'status',
+        header: t('inventory.table.status'),
+        cell: (r) => (
+          <StockBadge
+            status={r.status}
+            labels={{
+              inStock: t('inventory.status.inStock'),
+              lowStock: t('inventory.status.lowStock'),
+              outOfStock: t('inventory.status.outOfStock'),
+            }}
+          />
+        ),
+      },
+      {
+        id: 'action',
+        header: t('inventory.table.action'),
+        cell: (r) => (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                type="button"
+                aria-label={t('inventory.table.moreAria')}
+                className="flex h-8 w-8 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-700 shadow-xs transition-colors hover:bg-brand-50 hover:text-brand-900"
+              >
+                <MoreHorizontal className="h-4 w-4" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="border-gray-200 bg-white text-gray-900 shadow-md">
+              <DropdownMenuItem
+                onSelect={() => openView(r.id)}
+                className="cursor-pointer rounded-md focus:bg-brand-50 focus:text-brand-900"
+              >
+                <Eye className="h-4 w-4 text-gray-600" />
+                <span>{t('inventory.table.view')}</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onSelect={() => openAdjust(r.id, 'restock')}
+                className="cursor-pointer rounded-md focus:bg-brand-50 focus:text-brand-900"
+              >
+                <Plus className="h-4 w-4 text-gray-600" />
+                <span>{t('inventory.table.restock')}</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onSelect={() => openAdjust(r.id, 'adjust')}
+                className="cursor-pointer rounded-md focus:bg-brand-50 focus:text-brand-900"
+              >
+                <Package className="h-4 w-4 text-gray-600" />
+                <span>{t('inventory.table.adjustStock')}</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        ),
+        className: 'text-right',
+        headerClassName: 'text-right',
+      },
+    ],
+    [openAdjust, openView, t]
+  )
 
   return (
     <div className="flex w-full max-w-6xl flex-col gap-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight text-gray-900">{t('nav.inventory')}</h1>
-        <p className="mt-2 text-gray-500">Manage your store inventory.</p>
+      <h1 className="sr-only">{t('nav.inventory')}</h1>
+
+      <Sheet open={viewOpen} onOpenChange={setViewOpen}>
+        <SheetContent
+          side="right"
+          className="flex h-full w-full flex-col gap-0 border-gray-200 bg-white p-0 sm:max-w-[1000px]"
+        >
+          <SheetHeader className="border-b border-gray-200 p-5 text-left">
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <SheetTitle className="truncate text-lg font-semibold text-gray-900">
+                  {selectedProduct
+                    ? t('inventory.viewSheet.titleWithName', { name: selectedProduct.name })
+                    : t('inventory.viewSheet.title')}
+                </SheetTitle>
+                <div className="mt-1 flex flex-wrap items-center gap-2 text-sm text-gray-600">
+                  <span>{selectedProduct?.sku ?? t('inventory.table.na')}</span>
+                  <span className="text-gray-300">•</span>
+                  <span className="inline-flex items-center gap-1">
+                    <Warehouse className="h-4 w-4 text-gray-500" />
+                    <span className="truncate">{selectedProduct?.vendor ?? t('inventory.table.na')}</span>
+                  </span>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => selectedProduct && openAdjust(selectedProduct.id, 'restock')}
+                  disabled={!selectedProduct}
+                  className="h-9 rounded-lg border-gray-200 bg-white text-gray-700 hover:bg-brand-50 hover:text-brand-900"
+                >
+                  <Plus className="h-4 w-4" />
+                  {t('inventory.viewSheet.addStock')}
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={downloadAsPdf}
+                  disabled={!selectedProduct}
+                  className="h-9 rounded-lg border-gray-200 bg-white text-gray-700 hover:bg-brand-50 hover:text-brand-900"
+                >
+                  <Printer className="h-4 w-4" />
+                  {t('inventory.viewSheet.downloadPdf')}
+                </Button>
+              </div>
+            </div>
+
+            {selectedProduct && (
+              <div className="mt-4 flex flex-wrap items-center gap-2">
+                <div className="rounded-xl border border-gray-200 bg-gray-50 px-3 py-2">
+                  <div className="text-[11px] font-semibold text-gray-500">{t('inventory.viewSheet.badges.stock')}</div>
+                  <div className="mt-1 text-sm font-semibold text-gray-900">
+                    {t('inventory.viewSheet.stockAvailable', { count: selectedProduct.stock.available })}
+                  </div>
+                </div>
+                <div className="rounded-xl border border-gray-200 bg-gray-50 px-3 py-2">
+                  <div className="text-[11px] font-semibold text-gray-500">{t('inventory.viewSheet.badges.status')}</div>
+                  <div className="mt-1">
+                    <StockBadge
+                      status={selectedProduct.status}
+                      labels={{
+                        inStock: t('inventory.status.inStock'),
+                        lowStock: t('inventory.status.lowStock'),
+                        outOfStock: t('inventory.status.outOfStock'),
+                      }}
+                    />
+                  </div>
+                </div>
+                <div className="rounded-xl border border-gray-200 bg-gray-50 px-3 py-2">
+                  <div className="text-[11px] font-semibold text-gray-500">{t('inventory.viewSheet.badges.updated')}</div>
+                  <div className="mt-1 text-sm font-semibold text-gray-900">{selectedProduct.stock.updatedAt}</div>
+                </div>
+              </div>
+            )}
+          </SheetHeader>
+
+          <ScrollArea className="h-full">
+            <div className="space-y-4 p-5">
+              <div data-product-print className="space-y-4">
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <div className="text-xl font-semibold text-gray-900">
+                      {selectedProduct?.name ?? t('inventory.table.na')}
+                    </div>
+                    <div className="mt-1 text-sm text-gray-600">
+                      {selectedProduct
+                        ? t('inventory.viewSheet.subtitle', {
+                            sku: selectedProduct.sku,
+                            category: selectedProduct.category,
+                          })
+                        : ''}
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-xs font-semibold text-gray-500">{t('inventory.viewSheet.available')}</div>
+                    <div className="mt-1 text-2xl font-semibold text-gray-900">
+                      {selectedProduct?.stock.available ?? 0}
+                    </div>
+                  </div>
+                </div>
+
+                <Separator className="my-2" />
+
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                  <div className="rounded-2xl border border-gray-200 bg-white p-4">
+                    <div className="flex items-center gap-2 text-sm font-semibold text-gray-900">
+                      <Warehouse className="h-4 w-4 text-gray-600" />
+                      {t('inventory.viewSheet.sections.stock')}
+                    </div>
+                    <div className="mt-3 space-y-2 text-sm">
+                      <div className="flex items-center justify-between gap-3">
+                        <span className="text-gray-500">{t('inventory.viewSheet.fields.onHand')}</span>
+                        <span className="font-medium text-gray-900">{selectedProduct?.stock.onHand ?? 0}</span>
+                      </div>
+                      <div className="flex items-center justify-between gap-3">
+                        <span className="text-gray-500">{t('inventory.viewSheet.fields.reserved')}</span>
+                        <span className="font-medium text-gray-900">{selectedProduct?.stock.reserved ?? 0}</span>
+                      </div>
+                      <div className="flex items-center justify-between gap-3">
+                        <span className="text-gray-500">{t('inventory.viewSheet.fields.available')}</span>
+                        <span className="font-medium text-gray-900">{selectedProduct?.stock.available ?? 0}</span>
+                      </div>
+                      <div className="flex items-center justify-between gap-3">
+                        <span className="text-gray-500">{t('inventory.viewSheet.fields.reorderPoint')}</span>
+                        <span className="font-medium text-gray-900">{selectedProduct?.stock.reorderPoint ?? 0}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="rounded-2xl border border-gray-200 bg-white p-4">
+                    <div className="flex items-center gap-2 text-sm font-semibold text-gray-900">
+                      <ShieldCheck className="h-4 w-4 text-gray-600" />
+                      {t('inventory.viewSheet.sections.product')}
+                    </div>
+                    <div className="mt-3 space-y-2 text-sm">
+                      <div className="flex items-center justify-between gap-3">
+                        <span className="text-gray-500">{t('inventory.viewSheet.fields.sku')}</span>
+                        <span className="font-medium text-gray-900">{selectedProduct?.sku ?? t('inventory.table.na')}</span>
+                      </div>
+                      <div className="flex items-center justify-between gap-3">
+                        <span className="text-gray-500">{t('inventory.viewSheet.fields.category')}</span>
+                        <span className="font-medium text-gray-900">{selectedProduct?.category ?? t('inventory.table.na')}</span>
+                      </div>
+                      <div className="flex items-center justify-between gap-3">
+                        <span className="text-gray-500">{t('inventory.viewSheet.fields.vendor')}</span>
+                        <span className="font-medium text-gray-900">{selectedProduct?.vendor ?? t('inventory.table.na')}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                  <div className="rounded-2xl border border-gray-200 bg-white p-4">
+                    <div className="flex items-center gap-2 text-sm font-semibold text-gray-900">
+                      {t('inventory.viewSheet.sections.pricing')}
+                    </div>
+                    <div className="mt-3 space-y-2 text-sm">
+                      <div className="flex items-center justify-between gap-3">
+                        <span className="text-gray-500">{t('inventory.viewSheet.fields.price')}</span>
+                        <span className="font-medium text-gray-900">{selectedProduct?.pricing.price ?? t('inventory.table.na')}</span>
+                      </div>
+                      <div className="flex items-center justify-between gap-3">
+                        <span className="text-gray-500">{t('inventory.viewSheet.fields.cost')}</span>
+                        <span className="font-medium text-gray-900">{selectedProduct?.pricing.cost ?? t('inventory.table.na')}</span>
+                      </div>
+                      <div className="flex items-center justify-between gap-3">
+                        <span className="text-gray-500">{t('inventory.viewSheet.fields.margin')}</span>
+                        <span className="font-medium text-gray-900">{selectedProduct?.pricing.margin ?? t('inventory.table.na')}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="rounded-2xl border border-gray-200 bg-white p-4">
+                    <div className="flex items-center gap-2 text-sm font-semibold text-gray-900">
+                      <Truck className="h-4 w-4 text-gray-600" />
+                      {t('inventory.viewSheet.sections.shipping')}
+                    </div>
+                    <div className="mt-3 space-y-2 text-sm">
+                      <div className="flex items-center justify-between gap-3">
+                        <span className="text-gray-500">{t('inventory.viewSheet.fields.weight')}</span>
+                        <span className="font-medium text-gray-900">{selectedProduct?.shipping.weight ?? t('inventory.table.na')}</span>
+                      </div>
+                      <div className="flex items-center justify-between gap-3">
+                        <span className="text-gray-500">{t('inventory.viewSheet.fields.deliveryEligible')}</span>
+                        <span className="font-medium text-gray-900">{selectedProduct?.shipping.deliveryEligible ?? t('inventory.table.na')}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                  <div className="rounded-2xl border border-gray-200 bg-white p-4">
+                    <div className="text-sm font-semibold text-gray-900">{t('inventory.viewSheet.sections.staff')}</div>
+                    <div className="mt-3 space-y-2 text-sm">
+                      <div className="flex items-center justify-between gap-3">
+                        <span className="text-gray-500">{t('inventory.viewSheet.fields.createdBy')}</span>
+                        <span className="font-medium text-gray-900">{selectedProduct?.staff.createdBy ?? t('inventory.table.na')}</span>
+                      </div>
+                      <div className="flex items-center justify-between gap-3">
+                        <span className="text-gray-500">{t('inventory.viewSheet.fields.updatedBy')}</span>
+                        <span className="font-medium text-gray-900">{selectedProduct?.staff.updatedBy ?? t('inventory.table.na')}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="rounded-2xl border border-gray-200 bg-white p-4">
+                    <div className="text-sm font-semibold text-gray-900">{t('inventory.viewSheet.sections.notes')}</div>
+                    <div className="mt-3 text-sm">
+                      <div className="text-xs font-semibold text-gray-500">{t('inventory.viewSheet.fields.internalNote')}</div>
+                      <div className="mt-1 rounded-xl border border-gray-200 bg-gray-50 p-3 text-gray-800">
+                        {selectedProduct?.notes.internalNote ?? t('inventory.table.na')}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="rounded-2xl border border-gray-200 bg-white p-4">
+                  <div className="flex items-center gap-2 text-sm font-semibold text-gray-900">
+                    <Truck className="h-4 w-4 text-gray-600" />
+                    {t('inventory.viewSheet.sections.timeline')}
+                  </div>
+                  <div className="mt-3 space-y-3">
+                    {(selectedProduct?.events ?? []).map((ev) => (
+                      <div key={ev.id} className="flex gap-3">
+                        <div className="mt-1 flex flex-col items-center">
+                          <div className="h-2.5 w-2.5 rounded-full bg-brand-900" />
+                          <div className="mt-1 h-full w-px bg-gray-200" />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="text-sm font-semibold text-gray-900">{ev.title}</div>
+                            <div className="shrink-0 text-xs font-medium text-gray-500">{ev.at}</div>
+                          </div>
+                          {ev.description && <div className="mt-1 text-sm text-gray-600">{ev.description}</div>}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {!selectedProduct && (
+                <div className="rounded-2xl border border-gray-200 bg-white p-8 text-center text-sm text-gray-500">
+                  {t('inventory.viewSheet.empty')}
+                </div>
+              )}
+            </div>
+          </ScrollArea>
+
+          <div className="border-t border-gray-200 bg-white p-4">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <div className="text-xs font-medium text-gray-500">{t('inventory.viewSheet.footerHint')}</div>
+              <div className="flex items-center gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={downloadAsPdf}
+                  disabled={!selectedProduct}
+                  className="h-9 rounded-lg border-gray-200 bg-white text-gray-700 hover:bg-brand-50 hover:text-brand-900"
+                >
+                  <Download className="h-4 w-4" />
+                  {t('inventory.viewSheet.downloadPdf')}
+                </Button>
+                <Button
+                  type="button"
+                  onClick={() => setViewOpen(false)}
+                  className="h-9 rounded-lg bg-brand-900 text-white hover:bg-brand-800"
+                >
+                  {t('inventory.viewSheet.close')}
+                </Button>
+              </div>
+            </div>
+          </div>
+        </SheetContent>
+      </Sheet>
+
+      <Dialog open={adjustOpen} onOpenChange={setAdjustOpen}>
+        <DialogContent className="w-[calc(100vw-24px)] max-w-lg rounded-2xl border border-gray-200 bg-white p-0 shadow-xl">
+          <div className="border-b border-gray-100 px-6 py-4">
+            <DialogHeader>
+              <DialogTitle className="text-lg font-semibold text-gray-900">
+                {adjustMode === 'restock'
+                  ? t('inventory.adjustDialog.restockTitle')
+                  : t('inventory.adjustDialog.adjustTitle')}
+              </DialogTitle>
+              <DialogDescription className="mt-1 text-sm text-gray-600">
+                {selectedProductId
+                  ? t('inventory.adjustDialog.subtitle')
+                  : ''}
+              </DialogDescription>
+            </DialogHeader>
+          </div>
+
+          <div className="space-y-4 px-6 py-6">
+            <div className="grid gap-2">
+              <Label className="text-sm font-semibold text-gray-700">{t('inventory.adjustDialog.quantity')}</Label>
+              <Input
+                value={adjustQuantity}
+                onChange={(e) => setAdjustQuantity(e.target.value)}
+                inputMode="numeric"
+                placeholder={adjustMode === 'restock' ? t('inventory.adjustDialog.restockPlaceholder') : t('inventory.adjustDialog.adjustPlaceholder')}
+                className="h-10 rounded-xl border-gray-200 bg-white"
+              />
+            </div>
+
+            <div className="rounded-2xl border border-gray-200 bg-gray-50 p-4 text-sm text-gray-700">
+              <div className="text-xs font-semibold text-gray-500">{t('inventory.adjustDialog.noteTitle')}</div>
+              <div className="mt-1 text-sm text-gray-700">{t('inventory.adjustDialog.noteBody')}</div>
+            </div>
+          </div>
+
+          <div className="border-t border-gray-100 px-6 py-4">
+            <div className="flex flex-col-reverse gap-2 sm:flex-row sm:items-center sm:justify-between">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setAdjustOpen(false)}
+                className="h-10 rounded-xl border-gray-200 bg-white text-gray-700 hover:bg-brand-50 hover:text-brand-900"
+              >
+                {t('inventory.adjustDialog.cancel')}
+              </Button>
+              <Button
+                type="button"
+                onClick={applyAdjustment}
+                className="h-10 rounded-xl bg-brand-900 text-white hover:bg-brand-800"
+              >
+                {adjustMode === 'restock'
+                  ? t('inventory.adjustDialog.confirmRestock')
+                  : t('inventory.adjustDialog.confirmAdjust')}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div className="flex flex-col gap-2">
+          <div className="text-xl font-semibold leading-9 text-gray-900">{t('inventory.title')}</div>
+          <div className="text-sm text-gray-600">{t('inventory.subtitle')}</div>
+        </div>
+
+        <div className="flex items-center gap-2 sm:pt-0.5">
+          <Button
+            type="button"
+            variant="outline"
+            className="h-9 rounded-lg border-gray-200 bg-white text-gray-700 hover:bg-brand-50 hover:text-brand-900"
+          >
+            <Download className="h-4 w-4" />
+            {t('inventory.export')}
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            className="h-9 rounded-lg border-gray-200 bg-white text-gray-700 hover:bg-brand-50 hover:text-brand-900"
+          >
+            {t('inventory.moreActions')}
+            <ChevronDown className="h-4 w-4" />
+          </Button>
+        </div>
       </div>
 
-      <div className="flex min-h-[400px] items-center justify-center rounded-xl border border-gray-200 bg-white p-8 text-gray-500 shadow-sm">
-        Inventory list placeholder
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <KpiStatCard title={t('inventory.kpis.totalAssetValue')} value="$10,200,323" trendLabel={t('inventory.kpis.thisMonth')} />
+        <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <div className="text-xs font-semibold text-gray-500">{t('inventory.kpis.products')}</div>
+              <div className="mt-2 text-2xl font-semibold text-gray-900">
+                {t('inventory.kpis.productsCount', { count: stats.total })}
+              </div>
+            </div>
+            <Popover>
+              <PopoverTrigger asChild>
+                <button
+                  type="button"
+                  aria-label={t('inventory.kpis.filtersAria')}
+                  className={cn(
+                    'flex h-9 w-9 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-700 shadow-xs transition-colors',
+                    'hover:bg-brand-50 hover:text-brand-900'
+                  )}
+                >
+                  <Filter className="h-4 w-4" />
+                </button>
+              </PopoverTrigger>
+              <PopoverContent align="end" className="w-[360px] border-gray-200 bg-white p-4 text-gray-900 shadow-md">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <div className="text-sm font-semibold text-gray-900">{t('inventory.filters.title')}</div>
+                    <div className="mt-0.5 text-xs font-medium text-gray-500">{t('inventory.filters.subtitle')}</div>
+                  </div>
+                </div>
+
+                <div className="mt-4 grid grid-cols-1 gap-4">
+                  <div className="grid gap-2">
+                    <Label className="text-xs font-semibold text-gray-600">{t('inventory.filters.vendor')}</Label>
+                    <Select
+                      value={filtersDraft.vendor}
+                      onValueChange={(v) => setFiltersDraft((p) => ({ ...p, vendor: v }))}
+                    >
+                      <SelectTrigger className="h-9 rounded-lg border-gray-200 bg-white text-sm">
+                        <SelectValue placeholder={t('inventory.filters.any')} />
+                      </SelectTrigger>
+                      <SelectContent className="border-gray-200 bg-white text-gray-900">
+                        <SelectItem value="any">{t('inventory.filters.any')}</SelectItem>
+                        {vendors.map((v) => (
+                          <SelectItem key={v} value={v}>
+                            {v}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="grid gap-2">
+                    <Label className="text-xs font-semibold text-gray-600">{t('inventory.filters.category')}</Label>
+                    <Select
+                      value={filtersDraft.category}
+                      onValueChange={(v) => setFiltersDraft((p) => ({ ...p, category: v }))}
+                    >
+                      <SelectTrigger className="h-9 rounded-lg border-gray-200 bg-white text-sm">
+                        <SelectValue placeholder={t('inventory.filters.any')} />
+                      </SelectTrigger>
+                      <SelectContent className="border-gray-200 bg-white text-gray-900">
+                        <SelectItem value="any">{t('inventory.filters.any')}</SelectItem>
+                        {categories.map((c) => (
+                          <SelectItem key={c} value={c}>
+                            {c}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="grid gap-2">
+                    <Label className="text-xs font-semibold text-gray-600">{t('inventory.filters.status')}</Label>
+                    <Select
+                      value={filtersDraft.status}
+                      onValueChange={(v) => setFiltersDraft((p) => ({ ...p, status: v as StockStatus | 'any' }))}
+                    >
+                      <SelectTrigger className="h-9 rounded-lg border-gray-200 bg-white text-sm">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent className="border-gray-200 bg-white text-gray-900">
+                        <SelectItem value="any">{t('inventory.filters.any')}</SelectItem>
+                        <SelectItem value="inStock">{t('inventory.status.inStock')}</SelectItem>
+                        <SelectItem value="lowStock">{t('inventory.status.lowStock')}</SelectItem>
+                        <SelectItem value="outOfStock">{t('inventory.status.outOfStock')}</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="grid gap-2">
+                    <Label className="text-xs font-semibold text-gray-600">{t('inventory.filters.sku')}</Label>
+                    <Input
+                      value={filtersDraft.sku}
+                      onChange={(e) => setFiltersDraft((p) => ({ ...p, sku: e.target.value }))}
+                      placeholder={t('inventory.filters.skuPlaceholder')}
+                      className="h-9 rounded-lg border-gray-200 bg-white"
+                    />
+                  </div>
+
+                  <div className="grid gap-2">
+                    <div className="flex items-center justify-between gap-3">
+                      <Label className="text-xs font-semibold text-gray-600">{t('inventory.filters.stockRange')}</Label>
+                      <div className="text-xs font-semibold text-gray-700">
+                        {filtersDraft.stockRange[0]} - {filtersDraft.stockRange[1]}
+                      </div>
+                    </div>
+                    <Slider
+                      value={filtersDraft.stockRange}
+                      onValueChange={(v) => setFiltersDraft((p) => ({ ...p, stockRange: [v[0] ?? 0, v[1] ?? stockMax] }))}
+                      min={0}
+                      max={stockMax}
+                      step={1}
+                    />
+                  </div>
+                </div>
+
+                <div className="mt-4 flex items-center justify-between gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={clearFilters}
+                    className="h-9 rounded-lg border-gray-200 bg-white text-gray-700 hover:bg-brand-50 hover:text-brand-900"
+                  >
+                    {t('inventory.filters.clear')}
+                  </Button>
+                  <Button
+                    type="button"
+                    onClick={applyFilters}
+                    className="h-9 rounded-lg bg-brand-900 text-white hover:bg-brand-800"
+                  >
+                    {t('inventory.filters.apply')}
+                  </Button>
+                </div>
+              </PopoverContent>
+            </Popover>
+          </div>
+
+          <div className="mt-3">
+            <div className="flex h-2 w-full overflow-hidden rounded-full bg-gray-100">
+              <div className="h-full bg-emerald-500" style={{ width: `${stockBar.inPct}%` }} />
+              <div className="h-full bg-amber-500" style={{ width: `${stockBar.lowPct}%` }} />
+              <div className="h-full bg-rose-500" style={{ width: `${stockBar.outPct}%` }} />
+            </div>
+            <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs font-medium text-gray-600">
+              <div className="inline-flex items-center gap-2 whitespace-nowrap">
+                <span className="h-2 w-2 rounded-full bg-emerald-500" />
+                <span>{t('inventory.kpis.inStock', { count: stats.inStock })}</span>
+              </div>
+              <div className="inline-flex items-center gap-2 whitespace-nowrap">
+                <span className="h-2 w-2 rounded-full bg-amber-500" />
+                <span>{t('inventory.kpis.lowStock', { count: stats.lowStock })}</span>
+              </div>
+              <div className="inline-flex items-center gap-2 whitespace-nowrap">
+                <span className="h-2 w-2 rounded-full bg-rose-500" />
+                <span>{t('inventory.kpis.outOfStock', { count: stats.outOfStock })}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <KpiStatCard title={t('inventory.kpis.lowStockItems')} value={String(stats.lowStock)} trendLabel={t('inventory.kpis.needsAttention')} />
+        <KpiStatCard title={t('inventory.kpis.outOfStockItems')} value={String(stats.outOfStock)} trendLabel={t('inventory.kpis.needsRestock')} />
+      </div>
+
+      <div className="rounded-2xl border border-gray-200 bg-white shadow-sm">
+        <div className="flex flex-col gap-3 border-b border-gray-200 p-4 lg:flex-row lg:items-center lg:justify-between">
+          <Tabs value={tab} onValueChange={(v) => setTab(v as InventoryTab)}>
+            <TabsList className="h-9 rounded-lg bg-gray-50 p-1">
+              <TabsTrigger value="all" className="rounded-md text-sm">
+                {t('inventory.tabs.all')}
+              </TabsTrigger>
+              <TabsTrigger value="inStock" className="rounded-md text-sm">
+                {t('inventory.tabs.inStock')}
+              </TabsTrigger>
+              <TabsTrigger value="lowStock" className="rounded-md text-sm">
+                {t('inventory.tabs.lowStock')}
+              </TabsTrigger>
+              <TabsTrigger value="outOfStock" className="rounded-md text-sm">
+                {t('inventory.tabs.outOfStock')}
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
+
+          <div className="flex items-center gap-2">
+            <div className="relative w-full max-w-[280px]">
+              <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400" />
+              <Input
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder={t('inventory.searchPlaceholder')}
+                className="h-9 rounded-lg border-gray-200 bg-gray-50 pr-3 pl-9"
+              />
+            </div>
+            <Popover>
+              <PopoverTrigger asChild>
+                <button
+                  type="button"
+                  aria-label={t('inventory.table.filterAria')}
+                  className={cn(
+                    'flex h-9 w-9 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-700 shadow-xs transition-colors',
+                    'hover:bg-brand-50 hover:text-brand-900'
+                  )}
+                >
+                  <Filter className="h-4 w-4" />
+                </button>
+              </PopoverTrigger>
+              <PopoverContent align="end" className="w-[360px] border-gray-200 bg-white p-4 text-gray-900 shadow-md">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <div className="text-sm font-semibold text-gray-900">{t('inventory.filters.title')}</div>
+                    <div className="mt-0.5 text-xs font-medium text-gray-500">{t('inventory.filters.subtitle')}</div>
+                  </div>
+                </div>
+
+                <div className="mt-4 grid grid-cols-1 gap-4">
+                  <div className="grid gap-2">
+                    <Label className="text-xs font-semibold text-gray-600">{t('inventory.filters.vendor')}</Label>
+                    <Select
+                      value={filtersDraft.vendor}
+                      onValueChange={(v) => setFiltersDraft((p) => ({ ...p, vendor: v }))}
+                    >
+                      <SelectTrigger className="h-9 rounded-lg border-gray-200 bg-white text-sm">
+                        <SelectValue placeholder={t('inventory.filters.any')} />
+                      </SelectTrigger>
+                      <SelectContent className="border-gray-200 bg-white text-gray-900">
+                        <SelectItem value="any">{t('inventory.filters.any')}</SelectItem>
+                        {vendors.map((v) => (
+                          <SelectItem key={v} value={v}>
+                            {v}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="grid gap-2">
+                    <Label className="text-xs font-semibold text-gray-600">{t('inventory.filters.category')}</Label>
+                    <Select
+                      value={filtersDraft.category}
+                      onValueChange={(v) => setFiltersDraft((p) => ({ ...p, category: v }))}
+                    >
+                      <SelectTrigger className="h-9 rounded-lg border-gray-200 bg-white text-sm">
+                        <SelectValue placeholder={t('inventory.filters.any')} />
+                      </SelectTrigger>
+                      <SelectContent className="border-gray-200 bg-white text-gray-900">
+                        <SelectItem value="any">{t('inventory.filters.any')}</SelectItem>
+                        {categories.map((c) => (
+                          <SelectItem key={c} value={c}>
+                            {c}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="grid gap-2">
+                    <Label className="text-xs font-semibold text-gray-600">{t('inventory.filters.status')}</Label>
+                    <Select
+                      value={filtersDraft.status}
+                      onValueChange={(v) => setFiltersDraft((p) => ({ ...p, status: v as StockStatus | 'any' }))}
+                    >
+                      <SelectTrigger className="h-9 rounded-lg border-gray-200 bg-white text-sm">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent className="border-gray-200 bg-white text-gray-900">
+                        <SelectItem value="any">{t('inventory.filters.any')}</SelectItem>
+                        <SelectItem value="inStock">{t('inventory.status.inStock')}</SelectItem>
+                        <SelectItem value="lowStock">{t('inventory.status.lowStock')}</SelectItem>
+                        <SelectItem value="outOfStock">{t('inventory.status.outOfStock')}</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="grid gap-2">
+                    <Label className="text-xs font-semibold text-gray-600">{t('inventory.filters.sku')}</Label>
+                    <Input
+                      value={filtersDraft.sku}
+                      onChange={(e) => setFiltersDraft((p) => ({ ...p, sku: e.target.value }))}
+                      placeholder={t('inventory.filters.skuPlaceholder')}
+                      className="h-9 rounded-lg border-gray-200 bg-white"
+                    />
+                  </div>
+
+                  <div className="grid gap-2">
+                    <div className="flex items-center justify-between gap-3">
+                      <Label className="text-xs font-semibold text-gray-600">{t('inventory.filters.stockRange')}</Label>
+                      <div className="text-xs font-semibold text-gray-700">
+                        {filtersDraft.stockRange[0]} - {filtersDraft.stockRange[1]}
+                      </div>
+                    </div>
+                    <Slider
+                      value={filtersDraft.stockRange}
+                      onValueChange={(v) => setFiltersDraft((p) => ({ ...p, stockRange: [v[0] ?? 0, v[1] ?? stockMax] }))}
+                      min={0}
+                      max={stockMax}
+                      step={1}
+                    />
+                  </div>
+                </div>
+
+                <div className="mt-4 flex items-center justify-between gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={clearFilters}
+                    className="h-9 rounded-lg border-gray-200 bg-white text-gray-700 hover:bg-brand-50 hover:text-brand-900"
+                  >
+                    {t('inventory.filters.clear')}
+                  </Button>
+                  <Button
+                    type="button"
+                    onClick={applyFilters}
+                    className="h-9 rounded-lg bg-brand-900 text-white hover:bg-brand-800"
+                  >
+                    {t('inventory.filters.apply')}
+                  </Button>
+                </div>
+              </PopoverContent>
+            </Popover>
+          </div>
+        </div>
+
+        <div className="p-2">
+          <DataTable
+            data={filteredRows}
+            columns={columns}
+            getRowId={(r) => r.id}
+            enableSelection
+            enablePagination
+            defaultPageSize={10}
+            paginationLabels={{
+              previous: t('inventory.pagination.previous'),
+              next: t('inventory.pagination.next'),
+              rowsPerPage: t('inventory.pagination.rowsPerPage'),
+              showing: (from, to, total) => t('inventory.pagination.showing', { from, to, total }),
+            }}
+            emptyState={<span>{t('inventory.empty')}</span>}
+            className="rounded-xl"
+          />
+        </div>
       </div>
     </div>
   )

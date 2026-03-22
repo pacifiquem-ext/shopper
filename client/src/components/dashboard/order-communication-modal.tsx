@@ -1,0 +1,161 @@
+import { Button } from '@/components/ui/button'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
+import { ScrollArea } from '@/components/ui/scroll-area'
+import { Textarea } from '@/components/ui/textarea'
+import { cn } from '@/lib/utils'
+import { Send, User, ShieldCheck } from 'lucide-react'
+import { useState } from 'react'
+
+type Message = {
+  id: string
+  sender: 'admin' | 'customer'
+  senderName: string
+  message: string
+  timestamp: string
+}
+
+type OrderCommunicationModalProps = {
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  orderId: string
+  customerName: string
+  messages: Message[]
+  onSendMessage: (message: string) => void
+}
+
+export function OrderCommunicationModal({
+  open,
+  onOpenChange,
+  orderId,
+  customerName,
+  messages,
+  onSendMessage,
+}: OrderCommunicationModalProps) {
+  const [newMessage, setNewMessage] = useState('')
+
+  const handleSend = () => {
+    if (newMessage.trim()) {
+      onSendMessage(newMessage.trim())
+      setNewMessage('')
+    }
+  }
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault()
+      handleSend()
+    }
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-3xl border-gray-200 bg-white">
+        <DialogHeader>
+          <DialogTitle className="text-gray-900">Order Communication</DialogTitle>
+          <DialogDescription className="text-gray-600">
+            Communicate with {customerName} about order {orderId}
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="mt-4 rounded-xl border border-gray-200 bg-white">
+          <ScrollArea className="h-[500px]">
+            <div className="space-y-4 p-5">
+              {messages.length === 0 ? (
+                <div className="flex h-[400px] items-center justify-center">
+                  <div className="text-center">
+                    <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-gray-100">
+                      <Send className="h-7 w-7 text-gray-400" />
+                    </div>
+                    <p className="mt-4 text-sm font-medium text-gray-900">No messages yet</p>
+                    <p className="mt-1 text-xs text-gray-500">
+                      Start the conversation with {customerName}
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                messages.map((msg) => (
+                  <div
+                    key={msg.id}
+                    className={cn(
+                      'flex gap-3',
+                      msg.sender === 'admin' ? 'flex-row-reverse' : 'flex-row'
+                    )}
+                  >
+                    <div
+                      className={cn(
+                        'flex h-9 w-9 shrink-0 items-center justify-center rounded-full',
+                        msg.sender === 'admin'
+                          ? 'bg-brand-100 text-brand-700'
+                          : 'bg-gray-100 text-gray-700'
+                      )}
+                    >
+                      {msg.sender === 'admin' ? (
+                        <ShieldCheck className="h-4 w-4" />
+                      ) : (
+                        <User className="h-4 w-4" />
+                      )}
+                    </div>
+
+                    <div
+                      className={cn(
+                        'flex max-w-[75%] flex-col gap-1.5',
+                        msg.sender === 'admin' ? 'items-end' : 'items-start'
+                      )}
+                    >
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-semibold text-gray-900">
+                          {msg.senderName}
+                        </span>
+                        <span className="text-xs text-gray-500">{msg.timestamp}</span>
+                      </div>
+                      <div
+                        className={cn(
+                          'rounded-2xl px-4 py-3 text-sm leading-relaxed',
+                          msg.sender === 'admin'
+                            ? 'bg-brand-600 text-white'
+                            : 'bg-gray-100 text-gray-900'
+                        )}
+                      >
+                        {msg.message}
+                      </div>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </ScrollArea>
+
+          <div className="border-t border-gray-200 p-4">
+            <div className="flex gap-3">
+              <Textarea
+                value={newMessage}
+                onChange={(e) => setNewMessage(e.target.value)}
+                onKeyDown={handleKeyDown}
+                placeholder="Type your message to the customer..."
+                className="min-h-[100px] resize-none rounded-xl border-gray-200 bg-white text-sm focus-visible:ring-brand-600"
+              />
+              <Button
+                type="button"
+                onClick={handleSend}
+                disabled={!newMessage.trim()}
+                className="h-auto shrink-0 rounded-xl bg-brand-600 px-5 text-white hover:bg-brand-700 disabled:opacity-50"
+              >
+                <Send className="h-4 w-4" />
+                <span className="sr-only">Send message</span>
+              </Button>
+            </div>
+            <p className="mt-2 text-xs text-gray-500">
+              Press Enter to send, Shift+Enter for new line
+            </p>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  )
+}
