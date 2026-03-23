@@ -1,7 +1,7 @@
 import { CardContent } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
-import { pointToXY, pointsToPathWithBounds } from '@/utils/dashboard'
 import type React from 'react'
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts'
 
 type MetricTileProps = {
   icon: React.ReactNode
@@ -61,102 +61,76 @@ export function KeyValueRow({ label, value }: KeyValueRowProps) {
 }
 
 export function SalesPurchaseChart() {
-  const width = 920
-  const height = 230
-  const paddingLeft = 44
-  const paddingRight = 16
-  const paddingTop = 16
-  const paddingBottom = 28
+  const brandBlue = '#6083e3'
+  const emeraldGreen = '#059669'
 
-  const x0 = paddingLeft
-  const x1 = width - paddingRight
-  const y0 = paddingTop
-  const y1 = height - paddingBottom
-
-  const labels = ['15k', '12k', '9k', '6k']
-  const gridCount = labels.length
-
-  const salesPoints = [
-    [0, 0.62],
-    [0.08, 0.55],
-    [0.18, 0.58],
-    [0.28, 0.52],
-    [0.38, 0.64],
-    [0.5, 0.48],
-    [0.62, 0.6],
-    [0.72, 0.56],
-    [0.82, 0.58],
-    [0.92, 0.54],
-    [1, 0.57],
-  ] as const
-
-  const purchasePoints = [
-    [0, 0.44],
-    [0.1, 0.54],
-    [0.2, 0.5],
-    [0.32, 0.5],
-    [0.44, 0.72],
-    [0.56, 0.56],
-    [0.66, 0.52],
-    [0.76, 0.74],
-    [0.86, 0.48],
-    [0.94, 0.42],
-    [1, 0.5],
-  ] as const
-
-  const salesPath = pointsToPathWithBounds(salesPoints, x0, x1, y0, y1)
-  const purchasePath = pointsToPathWithBounds(purchasePoints, x0, x1, y0, y1)
+  const data = [
+    { month: 'Jan', sales: 9300, purchase: 11200 },
+    { month: 'Feb', sales: 9800, purchase: 10800 },
+    { month: 'Mar', sales: 9600, purchase: 10400 },
+    { month: 'Apr', sales: 9200, purchase: 10200 },
+    { month: 'May', sales: 10500, purchase: 8800 },
+    { month: 'Jun', sales: 9000, purchase: 10600 },
+    { month: 'Jul', sales: 10200, purchase: 10000 },
+    { month: 'Aug', sales: 9800, purchase: 11400 },
+    { month: 'Sep', sales: 9900, purchase: 9200 },
+    { month: 'Oct', sales: 9400, purchase: 9600 },
+    { month: 'Nov', sales: 9700, purchase: 11000 },
+    { month: 'Dec', sales: 9600, purchase: 10400 },
+  ]
 
   return (
-    <div className="mt-2 w-full overflow-hidden rounded-2xl bg-white">
-      <svg
-        viewBox={`0 0 ${width} ${height}`}
-        className="h-[260px] w-full"
-        role="img"
-        aria-label="Sales and purchase chart"
-      >
-        <title>Sales and purchase chart</title>
-        <defs>
-          <linearGradient id="purchaseFill" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#fb923c" stopOpacity="0.18" />
-            <stop offset="100%" stopColor="#fb923c" stopOpacity="0" />
-          </linearGradient>
-        </defs>
-
-        {Array.from({ length: gridCount }).map((_, idx) => {
-          const y = y0 + (idx / (gridCount - 1)) * (y1 - y0)
-          const text = labels[idx] ?? ''
-          return (
-            <g key={`grid-${idx}`}>
-              <line x1={x0} x2={x1} y1={y} y2={y} stroke="#e5e7eb" strokeWidth="1" />
-              <text x={12} y={y + 4} fontSize="12" fill="#6b7280">
-                {text}
-              </text>
-            </g>
-          )
-        })}
-
-        <path d={`${purchasePath} L ${x1} ${y1} L ${x0} ${y1} Z`} fill="url(#purchaseFill)" stroke="none" />
-
-        <path d={purchasePath} fill="none" stroke="#fb923c" strokeWidth="3" strokeLinecap="round" />
-        <path d={salesPath} fill="none" stroke="#0ea5e9" strokeWidth="3" strokeLinecap="round" />
-
-        {salesPoints.map((point, idx) => {
-          const { x, y } = pointToXY(point, x0, x1, y0, y1)
-          if (idx % 2 !== 0) {
-            return null
-          }
-          return <circle key={`s-${idx}`} cx={x} cy={y} r="3.2" fill="#0ea5e9" />
-        })}
-
-        {purchasePoints.map((point, idx) => {
-          const { x, y } = pointToXY(point, x0, x1, y0, y1)
-          if (idx % 2 !== 0) {
-            return null
-          }
-          return <circle key={`p-${idx}`} cx={x} cy={y} r="3.2" fill="#fb923c" />
-        })}
-      </svg>
+    <div className="mt-2 w-full">
+      <ResponsiveContainer width="100%" height={260}>
+        <LineChart
+          data={data}
+          margin={{ top: 5, right: 20, left: 0, bottom: 5 }}
+        >
+          <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+          <XAxis
+            dataKey="month"
+            stroke="#6b7280"
+            fontSize={12}
+            tickLine={false}
+            axisLine={false}
+          />
+          <YAxis
+            stroke="#6b7280"
+            fontSize={12}
+            tickLine={false}
+            axisLine={false}
+            tickFormatter={(value) => `${(value / 1000).toFixed(0)}k`}
+          />
+          <Tooltip
+            contentStyle={{
+              backgroundColor: 'white',
+              border: '1px solid #e5e7eb',
+              borderRadius: '8px',
+              padding: '8px 12px',
+            }}
+            labelStyle={{ color: '#111827', fontWeight: 600, marginBottom: '4px' }}
+            itemStyle={{ fontSize: '12px' }}
+          />
+          <Line
+            type="monotone"
+            dataKey="sales"
+            stroke={brandBlue}
+            strokeWidth={3}
+            dot={{ fill: brandBlue, r: 4 }}
+            activeDot={{ r: 6 }}
+            name="Sales"
+          />
+          <Line
+            type="monotone"
+            dataKey="purchase"
+            stroke={emeraldGreen}
+            strokeWidth={3}
+            dot={{ fill: emeraldGreen, r: 4 }}
+            activeDot={{ r: 6 }}
+            name="Purchase"
+          />
+        </LineChart>
+      </ResponsiveContainer>
     </div>
   )
 }

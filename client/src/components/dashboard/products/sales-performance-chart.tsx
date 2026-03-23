@@ -1,6 +1,6 @@
 import { cn } from '@/lib/utils'
-import { pointToXY, pointsToPathWithBounds } from '@/utils/dashboard'
 import { ArrowUpRight, ArrowDownRight } from 'lucide-react'
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 
 type SalesDataPoint = {
   label: string
@@ -20,26 +20,20 @@ export function SalesPerformanceChart({
   title,
   subtitle,
   data,
-  salesPoints,
-  revenuePoints,
 }: SalesPerformanceChartProps) {
-  const width = 920
-  const height = 200
-  const paddingLeft = 44
-  const paddingRight = 16
-  const paddingTop = 16
-  const paddingBottom = 28
+  const brandBlue = '#6083e3'
+  const emeraldGreen = '#059669'
 
-  const x0 = paddingLeft
-  const x1 = width - paddingRight
-  const y0 = paddingTop
-  const y1 = height - paddingBottom
-
-  const labels = ['$40k', '$30k', '$20k', '$10k']
-  const gridCount = labels.length
-
-  const salesPath = pointsToPathWithBounds(salesPoints, x0, x1, y0, y1)
-  const revenuePath = pointsToPathWithBounds(revenuePoints, x0, x1, y0, y1)
+  const chartData = [
+    { month: 'Week 1', revenue: 8500, units: 145 },
+    { month: 'Week 2', revenue: 12300, units: 198 },
+    { month: 'Week 3', revenue: 9800, units: 167 },
+    { month: 'Week 4', revenue: 15200, units: 234 },
+    { month: 'Week 5', revenue: 18900, units: 287 },
+    { month: 'Week 6', revenue: 22400, units: 342 },
+    { month: 'Week 7', revenue: 26700, units: 398 },
+    { month: 'Week 8', revenue: 31200, units: 456 },
+  ]
 
   return (
     <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
@@ -50,11 +44,11 @@ export function SalesPerformanceChart({
         </div>
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-1.5">
-            <div className="h-2 w-2 rounded-full bg-blue-500" />
+            <div className="h-2 w-2 rounded-full" style={{ backgroundColor: brandBlue }} />
             <span className="text-xs font-medium text-gray-600">Revenue</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <div className="h-2 w-2 rounded-full bg-emerald-500" />
+            <div className="h-2 w-2 rounded-full" style={{ backgroundColor: emeraldGreen }} />
             <span className="text-xs font-medium text-gray-600">Units Sold</span>
           </div>
         </div>
@@ -71,7 +65,7 @@ export function SalesPerformanceChart({
                 <div
                   className={cn(
                     'flex items-center gap-0.5 text-xs font-semibold',
-                    isPositive ? 'text-emerald-600' : 'text-rose-600'
+                    isPositive ? 'text-[--color-emerald-600]' : 'text-gray-500'
                   )}
                 >
                   {isPositive ? (
@@ -87,56 +81,54 @@ export function SalesPerformanceChart({
         })}
       </div>
 
-      <div className="mt-4 overflow-hidden rounded-xl bg-gray-50/50">
-        <svg
-          viewBox={`0 0 ${width} ${height}`}
-          className="h-[200px] w-full"
-          role="img"
-          aria-label="Sales performance chart"
-        >
-          <title>Sales performance chart</title>
-          <defs>
-            <linearGradient id="salesFill" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#10b981" stopOpacity="0.15" />
-              <stop offset="100%" stopColor="#10b981" stopOpacity="0" />
-            </linearGradient>
-            <linearGradient id="revenueFill" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.15" />
-              <stop offset="100%" stopColor="#3b82f6" stopOpacity="0" />
-            </linearGradient>
-          </defs>
-
-          {Array.from({ length: gridCount }).map((_, idx) => {
-            const y = y0 + (idx / (gridCount - 1)) * (y1 - y0)
-            const text = labels[idx] ?? ''
-            return (
-              <g key={`grid-${idx}`}>
-                <line x1={x0} x2={x1} y1={y} y2={y} stroke="#e5e7eb" strokeWidth="1" />
-                <text x={12} y={y + 4} fontSize="11" fill="#6b7280" fontWeight="500">
-                  {text}
-                </text>
-              </g>
-            )
-          })}
-
-          <path d={`${revenuePath} L ${x1} ${y1} L ${x0} ${y1} Z`} fill="url(#revenueFill)" stroke="none" />
-          <path d={`${salesPath} L ${x1} ${y1} L ${x0} ${y1} Z`} fill="url(#salesFill)" stroke="none" />
-
-          <path d={revenuePath} fill="none" stroke="#3b82f6" strokeWidth="2.5" strokeLinecap="round" />
-          <path d={salesPath} fill="none" stroke="#10b981" strokeWidth="2.5" strokeLinecap="round" />
-
-          {salesPoints.map((point, idx) => {
-            const { x, y } = pointToXY(point, x0, x1, y0, y1)
-            if (idx % 2 !== 0) return null
-            return <circle key={`s-${idx}`} cx={x} cy={y} r="3" fill="#10b981" />
-          })}
-
-          {revenuePoints.map((point, idx) => {
-            const { x, y } = pointToXY(point, x0, x1, y0, y1)
-            if (idx % 2 !== 0) return null
-            return <circle key={`r-${idx}`} cx={x} cy={y} r="3" fill="#3b82f6" />
-          })}
-        </svg>
+      <div className="mt-4">
+        <ResponsiveContainer width="100%" height={200}>
+          <LineChart data={chartData} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+            <XAxis
+              dataKey="month"
+              stroke="#6b7280"
+              fontSize={11}
+              tickLine={false}
+              axisLine={false}
+            />
+            <YAxis
+              stroke="#6b7280"
+              fontSize={11}
+              tickLine={false}
+              axisLine={false}
+              tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`}
+            />
+            <Tooltip
+              contentStyle={{
+                backgroundColor: 'white',
+                border: '1px solid #e5e7eb',
+                borderRadius: '8px',
+                padding: '8px 12px',
+              }}
+              labelStyle={{ color: '#111827', fontWeight: 600, marginBottom: '4px' }}
+              itemStyle={{ fontSize: '12px' }}
+            />
+            <Line
+              type="monotone"
+              dataKey="revenue"
+              stroke={brandBlue}
+              strokeWidth={2.5}
+              dot={{ fill: brandBlue, r: 3 }}
+              activeDot={{ r: 5 }}
+              name="Revenue"
+            />
+            <Line
+              type="monotone"
+              dataKey="units"
+              stroke={emeraldGreen}
+              strokeWidth={2.5}
+              dot={{ fill: emeraldGreen, r: 3 }}
+              activeDot={{ r: 5 }}
+              name="Units"
+            />
+          </LineChart>
+        </ResponsiveContainer>
       </div>
     </div>
   )

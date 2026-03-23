@@ -61,13 +61,14 @@ import {
   Trash2,
   AlertTriangle,
 } from 'lucide-react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
-import { useCallback, useId, useMemo, useState } from 'react'
+import { useCallback, useEffect, useId, useMemo, useState } from 'react'
 
 export default function ProductsPage() {
   const t = useTranslations('dashboard')
   const router = useRouter()
+  const searchParams = useSearchParams()
 
   const mediaUploadInputId = useId()
 
@@ -122,7 +123,7 @@ export default function ProductsPage() {
     status: 'draft',
     description: '',
     tags: '',
-    mediaSectionEnabled: true,
+    mediaSectionEnabled: false,
     images: [],
     newImageUrl: '',
     variantsSectionEnabled: true,
@@ -138,6 +139,13 @@ export default function ProductsPage() {
     deliveryPrice: '',
     internalNote: '',
   })
+
+  useEffect(() => {
+    const action = searchParams.get('action')
+    if (action === 'create') {
+      setCreateOpen(true)
+    }
+  }, [searchParams])
 
   const rows: ProductRow[] = useMemo(
     () => [

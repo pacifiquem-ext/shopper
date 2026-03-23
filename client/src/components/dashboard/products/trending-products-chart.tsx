@@ -1,6 +1,6 @@
 import { cn } from '@/lib/utils'
-import { pointToXY, pointsToPathWithBounds } from '@/utils/dashboard'
 import { TrendingUp, TrendingDown } from 'lucide-react'
+import { LineChart, Line, ResponsiveContainer } from 'recharts'
 
 type TrendingProduct = {
   id: string
@@ -31,8 +31,8 @@ export function TrendingProductsChart({ products, title }: TrendingProductsChart
       <div className="mt-4 space-y-3">
         {products.map((product, idx) => {
           const isPositive = product.trend >= 0
-          const trendColor = isPositive ? 'text-emerald-600' : 'text-rose-600'
-          const bgColor = isPositive ? 'bg-emerald-50' : 'bg-rose-50'
+          const trendColor = isPositive ? 'text-[--color-emerald-600]' : 'text-gray-500'
+          const bgColor = isPositive ? 'bg-emerald-50' : 'bg-gray-50'
 
           return (
             <div
@@ -74,45 +74,27 @@ type MiniSparklineProps = {
 }
 
 function MiniSparkline({ points }: MiniSparklineProps) {
-  const width = 80
-  const height = 32
-  const padding = 2
-
-  const x0 = padding
-  const x1 = width - padding
-  const y0 = padding
-  const y1 = height - padding
-
-  const path = pointsToPathWithBounds(points, x0, x1, y0, y1)
+  const emeraldGreen = '#059669'
+  
+  const data = points.map((point, idx) => ({
+    index: idx,
+    value: point[1] * 100,
+  }))
 
   return (
-    <svg
-      viewBox={`0 0 ${width} ${height}`}
-      className="h-8 w-20"
-      role="img"
-      aria-label="Sales trend"
-    >
-      <defs>
-        <linearGradient id="miniSparklineGradient" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#10b981" stopOpacity="0.2" />
-          <stop offset="100%" stopColor="#10b981" stopOpacity="0" />
-        </linearGradient>
-      </defs>
-
-      <path
-        d={`${path} L ${x1} ${y1} L ${x0} ${y1} Z`}
-        fill="url(#miniSparklineGradient)"
-        stroke="none"
-      />
-
-      <path
-        d={path}
-        fill="none"
-        stroke="#10b981"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
+    <div className="h-8 w-20">
+      <ResponsiveContainer width="100%" height="100%">
+        <LineChart data={data} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
+          <Line
+            type="monotone"
+            dataKey="value"
+            stroke={emeraldGreen}
+            strokeWidth={2}
+            dot={false}
+            isAnimationActive={false}
+          />
+        </LineChart>
+      </ResponsiveContainer>
+    </div>
   )
 }
