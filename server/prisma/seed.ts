@@ -202,12 +202,322 @@ const categories = {
     OTHER: [{ code: 'MISCELLANEOUS', name: 'Miscellaneous' }],
 };
 
+async function seedDashboardData() {
+    console.log('Seeding dashboard data...');
+
+    const existingStore = await prisma.store.findFirst({
+        where: { status: 'APPROVED' },
+    });
+
+    if (!existingStore) {
+        console.log('No approved store found. Skipping dashboard seed.');
+        return;
+    }
+
+    console.log(`Using store: ${existingStore.displayName}`);
+
+    const products = [
+        {
+            name: 'Premium Cotton T-Shirt',
+            description: 'High-quality cotton t-shirt with modern fit',
+            vendor: 'Fashion Co.',
+            category: 'Clothing',
+            tags: ['fashion', 'casual', 'cotton'],
+            images: ['/products/tshirt-1.jpg', '/products/tshirt-2.jpg'],
+            primaryImage: '/products/tshirt-1.jpg',
+            variants: [
+                { color: 'Black', hex: '#000000', size: 'S', price: 15000, cost: 8000, stock: 50 },
+                { color: 'Black', hex: '#000000', size: 'M', price: 15000, cost: 8000, stock: 75 },
+                { color: 'Black', hex: '#000000', size: 'L', price: 15000, cost: 8000, stock: 60 },
+                { color: 'White', hex: '#FFFFFF', size: 'S', price: 15000, cost: 8000, stock: 40 },
+                { color: 'White', hex: '#FFFFFF', size: 'M', price: 15000, cost: 8000, stock: 80 },
+                { color: 'White', hex: '#FFFFFF', size: 'L', price: 15000, cost: 8000, stock: 55 },
+            ],
+        },
+        {
+            name: 'Wireless Bluetooth Headphones',
+            description: 'Premium sound quality with noise cancellation',
+            vendor: 'Tech Supplies Ltd',
+            category: 'Electronics',
+            tags: ['audio', 'wireless', 'bluetooth'],
+            images: ['/products/headphones-1.jpg'],
+            primaryImage: '/products/headphones-1.jpg',
+            variants: [
+                { color: 'Black', hex: '#000000', size: null, price: 45000, cost: 25000, stock: 30 },
+                { color: 'Silver', hex: '#C0C0C0', size: null, price: 45000, cost: 25000, stock: 25 },
+            ],
+        },
+        {
+            name: 'Organic Coffee Beans',
+            description: 'Premium arabica coffee beans, freshly roasted',
+            vendor: 'Rwanda Coffee Co.',
+            category: 'Food & Beverage',
+            tags: ['coffee', 'organic', 'premium'],
+            images: ['/products/coffee-1.jpg'],
+            primaryImage: '/products/coffee-1.jpg',
+            variants: [
+                { color: null, hex: null, size: '250g', price: 8000, cost: 4000, stock: 100 },
+                { color: null, hex: null, size: '500g', price: 15000, cost: 7500, stock: 75 },
+                { color: null, hex: null, size: '1kg', price: 28000, cost: 14000, stock: 50 },
+            ],
+        },
+        {
+            name: 'Leather Wallet',
+            description: 'Genuine leather wallet with RFID protection',
+            vendor: 'Leather Goods Inc',
+            category: 'Accessories',
+            tags: ['leather', 'wallet', 'accessories'],
+            images: ['/products/wallet-1.jpg', '/products/wallet-2.jpg'],
+            primaryImage: '/products/wallet-1.jpg',
+            variants: [
+                { color: 'Brown', hex: '#8B4513', size: null, price: 25000, cost: 12000, stock: 5 },
+                { color: 'Black', hex: '#000000', size: null, price: 25000, cost: 12000, stock: 8 },
+            ],
+        },
+        {
+            name: 'Yoga Mat Pro',
+            description: 'Non-slip premium yoga mat with carrying strap',
+            vendor: 'Fitness World',
+            category: 'Sports & Fitness',
+            tags: ['yoga', 'fitness', 'exercise'],
+            images: ['/products/yoga-mat-1.jpg'],
+            primaryImage: '/products/yoga-mat-1.jpg',
+            variants: [
+                { color: 'Purple', hex: '#800080', size: null, price: 18000, cost: 9000, stock: 0 },
+                { color: 'Blue', hex: '#0000FF', size: null, price: 18000, cost: 9000, stock: 20 },
+                { color: 'Pink', hex: '#FFC0CB', size: null, price: 18000, cost: 9000, stock: 15 },
+            ],
+        },
+    ];
+
+    const createdProducts = [];
+    for (const productData of products) {
+        const product = await prisma.product.create({
+            data: {
+                storeId: existingStore.id,
+                name: productData.name,
+                description: productData.description,
+                vendor: productData.vendor,
+                category: productData.category,
+                status: 'ACTIVE',
+                tags: productData.tags,
+                images: productData.images,
+                primaryImage: productData.primaryImage,
+                deliveryEnabled: true,
+                deliveryLocation: 'Kigali',
+                deliveryPrice: 2000,
+                createdBy: existingStore.userId,
+                updatedBy: existingStore.userId,
+            },
+        });
+
+        console.log(`Created product: ${product.name}`);
+
+        for (let i = 0; i < productData.variants.length; i++) {
+            const variantData = productData.variants[i];
+            const sku = `${product.name.substring(0, 3).toUpperCase()}-${i + 1}`;
+            const title = [variantData.color, variantData.size].filter(Boolean).join(' / ');
+
+            const variant = await prisma.productVariant.create({
+                data: {
+                    productId: product.id,
+                    sku,
+                    title: title || 'Default',
+                    colorName: variantData.color,
+                    colorHex: variantData.hex,
+                    size: variantData.size,
+                    price: variantData.price,
+                    compareAt: variantData.price * 1.2,
+                    cost: variantData.cost,
+                },
+            });
+
+            const stockStatus =
+                variantData.stock === 0
+                    ? 'OUT_OF_STOCK'
+                    : variantData.stock < 10
+                      ? 'LOW_STOCK'
+                      : 'IN_STOCK';
+
+            await prisma.inventoryRecord.create({
+                data: {
+                    productVariantId: variant.id,
+                    onHand: variantData.stock,
+                    reserved: 0,
+                    available: variantData.stock,
+                    reorderPoint: 10,
+                    status: stockStatus,
+                    updatedBy: existingStore.userId,
+                },
+            });
+
+            createdProducts.push({ product, variant, stock: variantData.stock });
+        }
+    }
+
+    console.log('Creating sample orders...');
+
+    const orderStatuses = [
+        { payment: 'SUCCESS', fulfillment: 'FULFILLED' },
+        { payment: 'SUCCESS', fulfillment: 'SHIPPED' },
+        { payment: 'SUCCESS', fulfillment: 'PACKED' },
+        { payment: 'PENDING', fulfillment: 'UNFULFILLED' },
+        { payment: 'SUCCESS', fulfillment: 'FULFILLED' },
+        { payment: 'SUCCESS', fulfillment: 'FULFILLED' },
+        { payment: 'PENDING', fulfillment: 'UNFULFILLED' },
+        { payment: 'SUCCESS', fulfillment: 'CANCELLED' },
+        { payment: 'SUCCESS', fulfillment: 'FULFILLED' },
+        { payment: 'SUCCESS', fulfillment: 'PACKED' },
+    ];
+
+    for (let i = 0; i < orderStatuses.length; i++) {
+        const orderNumber = `#${1000 + i}`;
+        const status = orderStatuses[i];
+        const selectedVariants = createdProducts
+            .filter((p) => p.stock > 0)
+            .sort(() => 0.5 - Math.random())
+            .slice(0, Math.floor(Math.random() * 3) + 1);
+
+        const subtotal = selectedVariants.reduce(
+            (sum, item) => sum + Number(item.variant.price) * 2,
+            0,
+        );
+        const deliveryFee = 2000;
+        const total = subtotal + deliveryFee;
+
+        const order = await prisma.order.create({
+            data: {
+                storeId: existingStore.id,
+                orderNumber,
+                customerName: `Customer ${i + 1}`,
+                customerPhone: `078${String(i).padStart(7, '0')}`,
+                customerEmail: `customer${i + 1}@example.com`,
+                shippingAddress: JSON.stringify({
+                    street: `KG ${i + 1} Ave`,
+                    city: 'Kigali',
+                    district: 'Gasabo',
+                }),
+                billingAddress: JSON.stringify({
+                    street: `KG ${i + 1} Ave`,
+                    city: 'Kigali',
+                    district: 'Gasabo',
+                }),
+                subtotal,
+                deliveryFee,
+                discount: 0,
+                tax: 0,
+                total,
+                customerNote: i % 3 === 0 ? 'Please deliver before 5 PM' : null,
+                createdBy: existingStore.userId,
+                placedAt: new Date(Date.now() - i * 24 * 60 * 60 * 1000),
+            },
+        });
+
+        for (const item of selectedVariants) {
+            await prisma.orderLineItem.create({
+                data: {
+                    orderId: order.id,
+                    productVariantId: item.variant.id,
+                    productName: item.product.name,
+                    sku: item.variant.sku,
+                    quantity: 2,
+                    unitPrice: item.variant.price,
+                    total: Number(item.variant.price) * 2,
+                },
+            });
+        }
+
+        await prisma.orderPayment.create({
+            data: {
+                orderId: order.id,
+                status: status.payment as any,
+                method: i % 2 === 0 ? 'MOBILE_MONEY' : 'CASH_ON_DELIVERY',
+                amount: total,
+                reference: status.payment === 'SUCCESS' ? `PAY-${orderNumber}` : null,
+                paidAt: status.payment === 'SUCCESS' ? new Date() : null,
+            },
+        });
+
+        await prisma.orderFulfillment.create({
+            data: {
+                orderId: order.id,
+                status: status.fulfillment as any,
+                deliveryMethod: 'Standard Delivery',
+                deliveryZoneId: null,
+                packedBy: ['PACKED', 'SHIPPED', 'FULFILLED'].includes(status.fulfillment)
+                    ? existingStore.userId
+                    : null,
+                deliveredBy: status.fulfillment === 'FULFILLED' ? 'Driver 1' : null,
+                deliveredAt:
+                    status.fulfillment === 'FULFILLED'
+                        ? new Date(Date.now() - i * 12 * 60 * 60 * 1000)
+                        : null,
+            },
+        });
+
+        await prisma.orderEvent.create({
+            data: {
+                orderId: order.id,
+                type: 'CREATED',
+                title: 'Order Created',
+                description: 'Order was successfully created',
+                performedBy: existingStore.userId,
+            },
+        });
+
+        if (status.payment === 'SUCCESS') {
+            await prisma.orderEvent.create({
+                data: {
+                    orderId: order.id,
+                    type: 'PAID',
+                    title: 'Payment Confirmed',
+                    description: 'Payment has been verified',
+                    performedBy: existingStore.userId,
+                },
+            });
+        }
+
+        console.log(`Created order: ${orderNumber}`);
+    }
+
+    console.log('Creating analytics snapshots...');
+
+    for (let i = 0; i < 7; i++) {
+        const snapshotDate = new Date();
+        snapshotDate.setDate(snapshotDate.getDate() - i);
+
+        await prisma.dailyMetricsSnapshot.create({
+            data: {
+                storeId: existingStore.id,
+                snapshotDate,
+                totalSales: 10 + i * 2,
+                totalRevenue: 500000 + i * 50000,
+                totalCost: 250000 + i * 25000,
+                totalProfit: 250000 + i * 25000,
+                totalOrders: 10 + i * 2,
+                pendingOrders: 2,
+                completedOrders: 7 + i * 2,
+                cancelledOrders: 1,
+                activeProducts: 5,
+                lowStockCount: 1,
+                outOfStockCount: 1,
+                totalCustomers: 50 + i * 5,
+                newCustomers: 3 + i,
+                activeCustomers: 20 + i * 2,
+                totalStockValue: 2000000,
+                totalStockQuantity: 500,
+            },
+        });
+    }
+
+    console.log('Dashboard data seeded successfully!');
+}
+
 async function main() {
     console.log('Start seeding...');
 
     try {
         for (const industry of industries) {
-            // Upsert industry sector
             const sector = await prisma.industrySector.upsert({
                 where: { code: industry.code },
                 update: {
@@ -223,7 +533,6 @@ async function main() {
 
             console.log(`Upserted Industry Sector: ${sector.code}`);
 
-            // Process Categories for this Industry
             const industryCategories =
                 categories[industry.code as keyof typeof categories];
             if (industryCategories) {
@@ -244,6 +553,9 @@ async function main() {
                 }
             }
         }
+
+        await seedDashboardData();
+
         console.log('Seeding finished.');
     } catch (error) {
         console.error('Error seeding data:', error);

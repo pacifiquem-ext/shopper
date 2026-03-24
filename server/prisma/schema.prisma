@@ -37,6 +37,63 @@ enum StoreStatus {
   DELETED
 }
 
+enum ProductStatus {
+  ACTIVE
+  DRAFT
+  ARCHIVED
+}
+
+enum StockStatus {
+  IN_STOCK
+  LOW_STOCK
+  OUT_OF_STOCK
+}
+
+enum InventoryEventType {
+  CREATED
+  RESTOCKED
+  SOLD
+  ADJUSTED
+  RETURNED
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCESS
+  FAILED
+  REFUNDED
+}
+
+enum PaymentMethod {
+  CASH_ON_DELIVERY
+  MOBILE_MONEY
+  BANK_TRANSFER
+  CARD
+}
+
+enum FulfillmentStatus {
+  UNFULFILLED
+  PACKED
+  SHIPPED
+  FULFILLED
+  CANCELLED
+}
+
+enum OrderEventType {
+  CREATED
+  PAID
+  PACKED
+  SHIPPED
+  DELIVERED
+  CANCELLED
+  REFUNDED
+}
+
+enum MessageSender {
+  ADMIN
+  CUSTOMER
+}
+
 model User {
   id           String     @id @default(uuid())
   storeId      String?
@@ -147,6 +204,10 @@ model Store {
   user     User            @relation(fields: [userId], references: [id], onDelete: Cascade)
   kyc      StoreKyc?
   delivery DeliveryZone[]
+  products Product[]
+  orders   Order[]
+  dailyMetricsSnapshots     DailyMetricsSnapshot[]
+  productPerformanceSnapshots ProductPerformanceSnapshot[]
 
   @@index([userId])
   @@index([subdomain])
@@ -163,7 +224,8 @@ model DeliveryZone {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
-  store Store @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  store             Store              @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  orderFulfillments OrderFulfillment[]
 
   @@index([storeId])
   @@map("delivery_zones")
@@ -223,4 +285,298 @@ model StoreDraft {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("store_drafts")
+}
+
+model Product {
+  id          String        @id @default(uuid())
+  storeId     String
+  name        String
+  description String?
+  vendor      String
+  category    String
+  status      ProductStatus @default(DRAFT)
+  tags        String[]
+  images      String[]
+  primaryImage String?
+  
+  deliveryEnabled  Boolean  @default(true)
+  deliveryLocation String?
+  deliveryPrice    Decimal?
+  
+  createdBy String
+  updatedBy String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  store    Store            @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  variants ProductVariant[]
+  
+  @@index([storeId, status])
+  @@index([storeId, category])
+  @@index([storeId, vendor])
+  @@map("products")
+}
+
+model ProductVariant {
+  id        String @id @default(uuid())
+  productId String
+  
+  sku       String @unique
+  title     String
+  
+  colorName String?
+  colorHex  String?
+  size      String?
+  model     String?
+  
+  price     Decimal
+  compareAt Decimal?
+  cost      Decimal?
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  product              Product                      @relation(fields: [productId], references: [id], onDelete: Cascade)
+  inventory            InventoryRecord?
+  orderLineItems       OrderLineItem[]
+  performanceSnapshots ProductPerformanceSnapshot[]
+  
+  @@index([productId])
+  @@index([sku])
+  @@map("product_variants")
+}
+
+model InventoryRecord {
+  id               String @id @default(uuid())
+  productVariantId String @unique
+  
+  onHand       Int         @default(0)
+  reserved     Int         @default(0)
+  available    Int         @default(0)
+  reorderPoint Int         @default(10)
+  status       StockStatus @default(IN_STOCK)
+  
+  lastRestockedAt DateTime?
+  lastSoldAt      DateTime?
+  updatedBy       String?
+  updatedAt       DateTime  @updatedAt
+  
+  productVariant ProductVariant   @relation(fields: [productVariantId], references: [id], onDelete: Cascade)
+  events         InventoryEvent[]
+  
+  @@index([productVariantId])
+  @@index([status])
+  @@map("inventory_records")
+}
+
+model InventoryEvent {
+  id                String             @id @default(uuid())
+  inventoryRecordId String
+  type              InventoryEventType
+  quantity          Int
+  reason            String?
+  performedBy       String
+  createdAt         DateTime           @default(now())
+  
+  inventoryRecord InventoryRecord @relation(fields: [inventoryRecordId], references: [id], onDelete: Cascade)
+  
+  @@index([inventoryRecordId])
+  @@index([createdAt])
+  @@map("inventory_events")
+}
+
+model Order {
+  id          String @id @default(uuid())
+  storeId     String
+  orderNumber String @unique
+  
+  customerName  String
+  customerPhone String
+  customerEmail String
+  
+  shippingAddress String
+  billingAddress  String
+  
+  subtotal    Decimal
+  deliveryFee Decimal @default(0)
+  discount    Decimal @default(0)
+  tax         Decimal @default(0)
+  total       Decimal
+  
+  customerNote String?
+  internalNote String?
+  
+  placedAt  DateTime @default(now())
+  createdBy String
+  updatedAt DateTime @updatedAt
+  
+  store       Store              @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  lineItems   OrderLineItem[]
+  payment     OrderPayment?
+  fulfillment OrderFulfillment?
+  events      OrderEvent[]
+  messages    OrderMessage[]
+  
+  @@index([storeId, placedAt])
+  @@index([storeId, orderNumber])
+  @@index([customerEmail])
+  @@map("orders")
+}
+
+model OrderLineItem {
+  id               String @id @default(uuid())
+  orderId          String
+  productVariantId String
+  
+  productName String
+  sku         String
+  
+  quantity  Int
+  unitPrice Decimal
+  total     Decimal
+  
+  createdAt DateTime @default(now())
+  
+  order          Order          @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productVariant ProductVariant @relation(fields: [productVariantId], references: [id])
+  
+  @@index([orderId])
+  @@index([productVariantId])
+  @@map("order_line_items")
+}
+
+model OrderPayment {
+  id      String @id @default(uuid())
+  orderId String @unique
+  
+  status          PaymentStatus @default(PENDING)
+  method          PaymentMethod
+  reference       String?
+  amount          Decimal
+  paymentProofUrl String?
+  
+  paidAt    DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  
+  @@index([orderId])
+  @@index([status])
+  @@map("order_payments")
+}
+
+model OrderFulfillment {
+  id      String @id @default(uuid())
+  orderId String @unique
+  
+  status         FulfillmentStatus @default(UNFULFILLED)
+  deliveryMethod String
+  deliveryZoneId String?
+  
+  courierName    String?
+  driverName     String?
+  trackingNumber String?
+  
+  packedBy    String?
+  deliveredBy String?
+  
+  assignedAt  DateTime?
+  deliveredAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  
+  order        Order         @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  deliveryZone DeliveryZone? @relation(fields: [deliveryZoneId], references: [id])
+  
+  @@index([orderId])
+  @@index([status])
+  @@map("order_fulfillments")
+}
+
+model OrderEvent {
+  id      String         @id @default(uuid())
+  orderId String
+  type    OrderEventType
+  
+  title       String
+  description String?
+  performedBy String?
+  createdAt   DateTime @default(now())
+  
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  
+  @@index([orderId, createdAt])
+  @@map("order_events")
+}
+
+model OrderMessage {
+  id      String        @id @default(uuid())
+  orderId String
+  sender  MessageSender
+  
+  senderName String
+  message    String
+  isRead     Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  
+  @@index([orderId, createdAt])
+  @@map("order_messages")
+}
+
+model DailyMetricsSnapshot {
+  id           String   @id @default(uuid())
+  storeId      String
+  snapshotDate DateTime @db.Date
+  
+  totalSales   Int
+  totalRevenue Decimal
+  totalCost    Decimal
+  totalProfit  Decimal
+  
+  totalOrders     Int
+  pendingOrders   Int
+  completedOrders Int
+  cancelledOrders Int
+  
+  activeProducts  Int
+  lowStockCount   Int
+  outOfStockCount Int
+  
+  totalCustomers  Int
+  newCustomers    Int
+  activeCustomers Int
+  
+  totalStockValue    Decimal
+  totalStockQuantity Int
+  
+  createdAt DateTime @default(now())
+  
+  store Store @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  
+  @@unique([storeId, snapshotDate])
+  @@index([storeId, snapshotDate])
+  @@map("daily_metrics_snapshots")
+}
+
+model ProductPerformanceSnapshot {
+  id               String   @id @default(uuid())
+  storeId          String
+  productVariantId String
+  snapshotDate     DateTime @db.Date
+  
+  unitsSold    Int
+  revenue      Decimal
+  trendPercent Decimal?
+  
+  createdAt DateTime @default(now())
+  
+  store          Store          @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  productVariant ProductVariant @relation(fields: [productVariantId], references: [id], onDelete: Cascade)
+  
+  @@unique([storeId, productVariantId, snapshotDate])
+  @@index([storeId, snapshotDate])
+  @@map("product_performance_snapshots")
 }

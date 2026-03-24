@@ -8,6 +8,10 @@ import { TenantModule } from 'src/common/tenant/tenant.module';
 import { AdminModule } from 'src/modules/admin/admin.module';
 import { OnboardingModule } from 'src/modules/onboarding/onboarding.module';
 import { WorkerModule } from 'src/workers/worker.module';
+import { ProductsModule } from 'src/modules/products/products.module';
+import { InventoryModule } from 'src/modules/inventory/inventory.module';
+import { OrdersModule } from 'src/modules/orders/orders.module';
+import { AnalyticsModule } from 'src/modules/analytics/analytics.module';
 
 import { HealthController } from './controllers/health.controller';
 @Module({
@@ -21,6 +25,12 @@ import { HealthController } from './controllers/health.controller';
         ReferencesModule,
         AdminModule,
         OnboardingModule,
+
+        // Dashboard Modules
+        ProductsModule,
+        InventoryModule,
+        OrdersModule,
+        AnalyticsModule,
 
         // Background Processing
         WorkerModule,
