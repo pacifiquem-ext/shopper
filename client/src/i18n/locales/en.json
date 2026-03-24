@@ -1,4 +1,12 @@
 {
+  "common": {
+    "table": {
+      "showing": "Showing {from}-{to} of {total}",
+      "rowsPerPage": "Rows per page",
+      "previous": "Previous",
+      "next": "Next"
+    }
+  },
   "hero": {
     "title": "NextJS Boilerplate template"
   },
@@ -487,16 +495,22 @@
         },
         "steps": {
           "basics": "Basics",
+          "basicsDesc": "Name, category, vendor, and description.",
           "basicsDescription": "Name, category, vendor, and description.",
           "media": "Media",
+          "mediaDesc": "Upload images and preview the gallery.",
           "mediaDescription": "Upload images and preview the gallery.",
           "variants": "Variants",
+          "variantsDesc": "Colors, sizes, models, and options.",
           "variantsDescription": "Colors, sizes, models, and options.",
           "pricing": "Pricing",
+          "pricingDesc": "Set price and compare-at price.",
           "pricingDescription": "Set price and compare-at price.",
           "delivery": "Delivery",
+          "deliveryDesc": "Delivery location and pricing.",
           "deliveryDescription": "Delivery location and pricing.",
           "review": "Review",
+          "reviewDesc": "Confirm details before saving.",
           "reviewDescription": "Confirm details before saving."
         },
         "fields": {

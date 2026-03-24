@@ -1,0 +1,850 @@
+'use client'
+
+import { useCallback, useId, useMemo, useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
+import { Button } from '@/components/ui/button'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { ScrollArea } from '@/components/ui/scroll-area'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Separator } from '@/components/ui/separator'
+import { Switch } from '@/components/ui/switch'
+import { Textarea } from '@/components/ui/textarea'
+import { Badge } from '@/components/ui/badge'
+import { cn } from '@/lib/utils'
+import {
+  Check,
+  ChevronLeft,
+  ChevronRight,
+  Plus,
+  Sparkles,
+  X,
+  ZoomIn,
+} from 'lucide-react'
+
+type ProductStatus = 'ACTIVE' | 'DRAFT' | 'ARCHIVED'
+
+interface DraftProduct {
+  name: string
+  vendor: string
+  category: string
+  status: ProductStatus
+  description: string
+  tags: string
+  mediaSectionEnabled: boolean
+  images: string[]
+  newImageUrl: string
+  variantsSectionEnabled: boolean
+  colors: Array<{ name: string; hex: string }>
+  sizes: string[]
+  models: string[]
+  price: string
+  compareAt: string
+  cost: string
+  deliverySectionEnabled: boolean
+  deliveryEnabled: boolean
+  deliveryLocation: string
+  deliveryPrice: string
+  internalNote: string
+}
+
+interface ProductFormModalProps {
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  isEditMode: boolean
+  draftProduct: DraftProduct
+  setDraftProduct: React.Dispatch<React.SetStateAction<DraftProduct>>
+  onSubmit: () => void
+  onZoomImage: (url: string) => void
+  addImages: (urls: string[]) => void
+  removeImage: (url: string) => void
+}
+
+export function ProductFormModal({
+  open,
+  onOpenChange,
+  isEditMode,
+  draftProduct,
+  setDraftProduct,
+  onSubmit,
+  onZoomImage,
+  addImages,
+  removeImage,
+}: ProductFormModalProps) {
+  const t = useTranslations('dashboard')
+  const router = useRouter()
+  const mediaUploadInputId = useId()
+
+  const [createStep, setCreateStep] = useState(0)
+
+  const createSteps = useMemo(
+    () => [
+      {
+        key: 'basics',
+        title: t('products.create.steps.basics'),
+        description: t('products.create.steps.basicsDesc'),
+      },
+      {
+        key: 'media',
+        title: t('products.create.steps.media'),
+        description: t('products.create.steps.mediaDesc'),
+      },
+      {
+        key: 'variants',
+        title: t('products.create.steps.variants'),
+        description: t('products.create.steps.variantsDesc'),
+      },
+      {
+        key: 'pricing',
+        title: t('products.create.steps.pricing'),
+        description: t('products.create.steps.pricingDesc'),
+      },
+      {
+        key: 'delivery',
+        title: t('products.create.steps.delivery'),
+        description: t('products.create.steps.deliveryDesc'),
+      },
+      {
+        key: 'review',
+        title: t('products.create.steps.review'),
+        description: t('products.create.steps.reviewDesc'),
+      },
+    ],
+    [t]
+  )
+
+  const isStepEnabled = useCallback(
+    (index: number) => {
+      const key = createSteps[index]?.key
+      if (!key) return false
+      if (key === 'media') return draftProduct.mediaSectionEnabled
+      if (key === 'variants') return draftProduct.variantsSectionEnabled
+      if (key === 'delivery') return draftProduct.deliverySectionEnabled
+      return true
+    },
+    [createSteps, draftProduct.deliverySectionEnabled, draftProduct.mediaSectionEnabled, draftProduct.variantsSectionEnabled]
+  )
+
+  const canGoNext = useMemo(() => {
+    if (createStep === 0) return draftProduct.name.trim().length > 0
+    if (createStep === 2 && draftProduct.variantsSectionEnabled) {
+      return draftProduct.colors.every((c) => c.name.trim().length > 0)
+    }
+    if (createStep === 3) return draftProduct.price.trim().length > 0
+    return true
+  }, [createStep, draftProduct.colors, draftProduct.name, draftProduct.price, draftProduct.variantsSectionEnabled])
+
+  const closeCreate = () => {
+    onOpenChange(false)
+    setCreateStep(0)
+  }
+
+  const nextStep = () => {
+    if (!canGoNext) return
+
+    setCreateStep((s) => {
+      let idx = Math.min(createSteps.length - 1, s + 1)
+      while (idx < createSteps.length - 1 && !isStepEnabled(idx)) idx += 1
+      return idx
+    })
+  }
+
+  const prevStep = () => {
+    setCreateStep((s) => {
+      let idx = Math.max(0, s - 1)
+      while (idx > 0 && !isStepEnabled(idx)) idx -= 1
+      return idx
+    })
+  }
+
+  const setSectionEnabled = (key: 'media' | 'variants' | 'delivery', enabled: boolean) => {
+    setDraftProduct((p) => {
+      if (key === 'media') return { ...p, mediaSectionEnabled: enabled }
+      if (key === 'variants') return { ...p, variantsSectionEnabled: enabled }
+      return { ...p, deliverySectionEnabled: enabled }
+    })
+
+    if (!enabled) {
+      const stepKey = createSteps[createStep]?.key
+      if (stepKey === key) nextStep()
+    }
+  }
+
+  const statusLabel = (s: ProductStatus) => {
+    if (s === 'ACTIVE') return t('products.status.active')
+    if (s === 'DRAFT') return t('products.status.draft')
+    return t('products.status.archived')
+  }
+
+  const handleFinish = () => {
+    onSubmit()
+    if (!isEditMode) {
+      const q = draftProduct.name.trim()
+      router.push(`/dashboard/inventory?q=${encodeURIComponent(q)}&action=restock`)
+    }
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-h-[85vh] w-[calc(100vw-24px)] max-w-4xl overflow-hidden rounded-2xl border border-brand-200 bg-white p-0 shadow-xl">
+        <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr]">
+          <div className="border-b border-brand-100 bg-brand-50/30 p-5 lg:border-b-0 lg:border-r lg:border-brand-100">
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <DialogTitle className="text-lg font-semibold text-gray-900">
+                  {isEditMode ? 'Edit Product' : t('products.create.title')}
+                </DialogTitle>
+                <DialogDescription className="mt-1 text-sm text-gray-600">
+                  {isEditMode ? 'Update product information and settings' : t('products.create.subtitle')}
+                </DialogDescription>
+              </div>
+            </div>
+
+            <div className="mt-5 space-y-2">
+              {createSteps.map((s, idx) => {
+                const active = idx === createStep
+                const done = idx < createStep
+                const enabled = isStepEnabled(idx)
+                return (
+                  <button
+                    key={s.key}
+                    type="button"
+                    onClick={() => setCreateStep(idx)}
+                    className={cn(
+                      'flex w-full items-start gap-3 rounded-xl border px-3 py-2 text-left transition-colors',
+                      active
+                        ? 'border-brand-200 bg-white text-brand-900'
+                        : 'border-transparent bg-transparent text-gray-700 hover:bg-white',
+                      done ? 'opacity-100' : 'opacity-90'
+                    )}
+                  >
+                    <span
+                      className={cn(
+                        'mt-0.5 flex h-5 w-5 items-center justify-center rounded-full border text-xs font-bold',
+                        active
+                          ? 'border-brand-200 bg-brand-50 text-brand-900'
+                          : done
+                            ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
+                            : 'border-brand-200 bg-white text-gray-700'
+                      )}
+                    >
+                      {done ? <Check className="h-3.5 w-3.5" /> : idx + 1}
+                    </span>
+                    <span className="min-w-0">
+                      <span className="block text-sm font-semibold">
+                        {s.title}{' '}
+                        {!enabled ? (
+                          <span className="ml-2 inline-flex items-center rounded-full border border-brand-200 bg-brand-50 px-2 py-0.5 text-[11px] font-semibold text-gray-700">
+                            {t('products.create.sections.skippedPill')}
+                          </span>
+                        ) : null}
+                      </span>
+                      <span className="mt-0.5 block text-xs font-medium text-gray-500">{s.description}</span>
+                    </span>
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+
+          <div className="flex max-h-[85vh] flex-col">
+            <DialogHeader className="border-b border-brand-100 px-6 py-4">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <DialogTitle className="text-lg font-semibold text-gray-900">{createSteps[createStep]?.title}</DialogTitle>
+                  <DialogDescription className="mt-1 text-sm text-gray-600">
+                    {createSteps[createStep]?.description}
+                  </DialogDescription>
+                </div>
+              </div>
+            </DialogHeader>
+
+            <ScrollArea className="h-full">
+              <div className="space-y-4 px-6 py-6">
+                {createStep === 0 ? (
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                      <div className="space-y-2">
+                        <Label className="text-sm font-semibold text-gray-700">{t('products.create.fields.name')}</Label>
+                        <Input
+                          value={draftProduct.name}
+                          onChange={(e) => setDraftProduct((p) => ({ ...p, name: e.target.value }))}
+                          placeholder={t('products.create.fields.namePlaceholder')}
+                          className="h-10 rounded-xl border-brand-200 bg-white"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-sm font-semibold text-gray-700">{t('products.create.fields.vendor')}</Label>
+                        <Input
+                          value={draftProduct.vendor}
+                          onChange={(e) => setDraftProduct((p) => ({ ...p, vendor: e.target.value }))}
+                          placeholder={t('products.create.fields.vendorPlaceholder')}
+                          className="h-10 rounded-xl border-brand-200 bg-white"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-sm font-semibold text-gray-700">{t('products.create.fields.category')}</Label>
+                        <Input
+                          value={draftProduct.category}
+                          onChange={(e) => setDraftProduct((p) => ({ ...p, category: e.target.value }))}
+                          placeholder={t('products.create.fields.categoryPlaceholder')}
+                          className="h-10 rounded-xl border-brand-200 bg-white"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-sm font-semibold text-gray-700">{t('products.create.fields.status')}</Label>
+                        <Select
+                          value={draftProduct.status}
+                          onValueChange={(value) => setDraftProduct((p) => ({ ...p, status: value as ProductStatus }))}
+                        >
+                          <SelectTrigger className="h-10 rounded-xl border-brand-200 bg-white">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent className="border-brand-200 bg-white text-gray-900">
+                            <SelectItem value="DRAFT">{t('products.status.draft')}</SelectItem>
+                            <SelectItem value="ACTIVE">{t('products.status.active')}</SelectItem>
+                            <SelectItem value="ARCHIVED">{t('products.status.archived')}</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-sm font-semibold text-gray-700">{t('products.create.fields.description')}</Label>
+                      <Textarea
+                        value={draftProduct.description}
+                        onChange={(e) => setDraftProduct((p) => ({ ...p, description: e.target.value }))}
+                        placeholder={t('products.create.fields.descriptionPlaceholder')}
+                        className="min-h-[120px] rounded-xl border-brand-200 bg-white"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-sm font-semibold text-gray-700">{t('products.create.fields.tags')}</Label>
+                      <Input
+                        value={draftProduct.tags}
+                        onChange={(e) => setDraftProduct((p) => ({ ...p, tags: e.target.value }))}
+                        placeholder={t('products.create.fields.tagsPlaceholder')}
+                        className="h-10 rounded-xl border-brand-200 bg-white"
+                      />
+                      <div className="text-xs font-medium text-gray-500">{t('products.create.fields.tagsHint')}</div>
+                    </div>
+                  </div>
+                ) : null}
+
+                {createStep === 1 ? (
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between gap-3 rounded-2xl border border-brand-200 bg-white px-4 py-3 shadow-sm">
+                      <div className="min-w-0">
+                        <div className="text-sm font-semibold text-gray-900">{t('products.create.sections.applies')}</div>
+                        <div className="mt-0.5 text-xs font-medium text-gray-500">{t('products.create.sections.mediaHint')}</div>
+                      </div>
+                      <Switch
+                        checked={draftProduct.mediaSectionEnabled}
+                        onCheckedChange={(v) => setSectionEnabled('media', Boolean(v))}
+                      />
+                    </div>
+
+                    {!draftProduct.mediaSectionEnabled ? (
+                      <div className="rounded-2xl border border-dashed border-brand-200 bg-brand-50/30 p-6">
+                        <div className="text-sm font-semibold text-gray-900">{t('products.create.sections.skippedTitle')}</div>
+                        <div className="mt-1 text-sm text-gray-600">{t('products.create.sections.skippedBody')}</div>
+                        <div className="mt-4">
+                          <Button
+                            type="button"
+                            onClick={() => setSectionEnabled('media', true)}
+                            className="h-10 rounded-xl bg-brand-900 text-white hover:bg-brand-800"
+                          >
+                            {t('products.create.sections.enable')}
+                          </Button>
+                        </div>
+                      </div>
+                    ) : null}
+
+                    {draftProduct.mediaSectionEnabled ? (
+                      <div className="rounded-2xl border border-brand-200 bg-white p-4 shadow-sm">
+                        <div className="flex items-center justify-between gap-3">
+                          <div>
+                            <div className="text-sm font-semibold text-gray-900">{t('products.create.media.addImages')}</div>
+                            <div className="mt-1 text-xs font-medium text-gray-500">{t('products.create.media.addImagesHint')}</div>
+                          </div>
+                        </div>
+
+                        <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                          <div className="text-xs font-medium text-gray-600">{t('products.create.media.uploadHint')}</div>
+                          <div>
+                            <input
+                              id={mediaUploadInputId}
+                              type="file"
+                              accept="image/*"
+                              multiple
+                              className="hidden"
+                              onChange={(e) => {
+                                const files = Array.from(e.target.files ?? [])
+                                const urls: string[] = []
+                                for (const f of files) urls.push(URL.createObjectURL(f))
+                                addImages(urls)
+                                e.target.value = ''
+                              }}
+                            />
+                            <Button
+                              type="button"
+                              variant="outline"
+                              onClick={() => document.getElementById(mediaUploadInputId)?.click()}
+                              className="h-10 rounded-xl border-brand-200 bg-white text-gray-700 hover:bg-brand-50 hover:text-brand-900"
+                            >
+                              <Plus className="mr-2 h-4 w-4" />
+                              {t('products.create.media.upload')}
+                            </Button>
+                          </div>
+                        </div>
+
+                        <div className="mt-4 flex flex-col gap-3 sm:flex-row">
+                          <Input
+                            value={draftProduct.newImageUrl}
+                            onChange={(e) => setDraftProduct((p) => ({ ...p, newImageUrl: e.target.value }))}
+                            placeholder={t('products.create.media.urlPlaceholder')}
+                            className="h-10 flex-1 rounded-xl border-brand-200 bg-white"
+                          />
+                          <Button
+                            type="button"
+                            onClick={() => {
+                              const url = draftProduct.newImageUrl.trim()
+                              if (!url) return
+                              addImages([url])
+                              setDraftProduct((p) => ({ ...p, newImageUrl: '' }))
+                            }}
+                            className="h-10 rounded-xl bg-brand-900 text-white hover:bg-brand-800"
+                          >
+                            <Plus className="mr-2 h-4 w-4" />
+                            {t('products.create.media.add')}
+                          </Button>
+                        </div>
+
+                        {draftProduct.images.length > 0 ? (
+                          <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
+                            {draftProduct.images.map((url) => (
+                              <div key={url} className="group relative overflow-hidden rounded-2xl border border-brand-200 bg-brand-50/30">
+                                <img
+                                  src={url}
+                                  alt={draftProduct.name || t('products.create.media.defaultAlt')}
+                                  className="h-28 w-full object-cover"
+                                  loading="lazy"
+                                />
+                                <div className="absolute inset-0 hidden items-end justify-between bg-gradient-to-t from-black/50 to-transparent p-2 group-hover:flex">
+                                  <button
+                                    type="button"
+                                    onClick={() => onZoomImage(url)}
+                                    className="inline-flex h-8 items-center gap-2 rounded-lg bg-white/90 px-2 text-xs font-semibold text-gray-900"
+                                  >
+                                    <ZoomIn className="h-3.5 w-3.5" />
+                                    {t('products.create.media.zoom')}
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => removeImage(url)}
+                                    className="inline-flex h-8 items-center rounded-lg bg-white/90 px-2 text-xs font-semibold text-gray-900"
+                                  >
+                                    {t('products.create.media.remove')}
+                                  </button>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <div className="mt-4 rounded-2xl border border-dashed border-brand-200 bg-brand-50/30 p-6 text-sm text-gray-600">
+                            {t('products.create.media.empty')}
+                          </div>
+                        )}
+                      </div>
+                    ) : null}
+                  </div>
+                ) : null}
+
+                {createStep === 2 ? (
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between gap-3 rounded-2xl border border-brand-200 bg-white px-4 py-3 shadow-sm">
+                      <div className="min-w-0">
+                        <div className="text-sm font-semibold text-gray-900">{t('products.create.sections.applies')}</div>
+                        <div className="mt-0.5 text-xs font-medium text-gray-500">{t('products.create.sections.variantsHint')}</div>
+                      </div>
+                      <Switch
+                        checked={draftProduct.variantsSectionEnabled}
+                        onCheckedChange={(v) => setSectionEnabled('variants', Boolean(v))}
+                      />
+                    </div>
+
+                    {!draftProduct.variantsSectionEnabled ? (
+                      <div className="rounded-2xl border border-dashed border-brand-200 bg-brand-50/30 p-6">
+                        <div className="text-sm font-semibold text-gray-900">{t('products.create.sections.skippedTitle')}</div>
+                        <div className="mt-1 text-sm text-gray-600">{t('products.create.sections.skippedBody')}</div>
+                        <div className="mt-4">
+                          <Button
+                            type="button"
+                            onClick={() => setSectionEnabled('variants', true)}
+                            className="h-10 rounded-xl bg-brand-900 text-white hover:bg-brand-800"
+                          >
+                            {t('products.create.sections.enable')}
+                          </Button>
+                        </div>
+                      </div>
+                    ) : null}
+
+                    {draftProduct.variantsSectionEnabled ? (
+                      <>
+                        <div className="rounded-2xl border border-brand-200 bg-white p-4 shadow-sm">
+                          <div className="text-sm font-semibold text-gray-900">{t('products.create.variants.colors')}</div>
+                          <div className="mt-1 text-xs font-medium text-gray-500">{t('products.create.variants.colorsHint')}</div>
+                          <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                            {draftProduct.colors.map((c, idx) => (
+                              <div key={`${c.name}-${idx}`} className="flex items-center gap-3 rounded-xl border border-brand-200 bg-white p-3">
+                                <label
+                                  htmlFor={`products-create-color-${idx}`}
+                                  className="inline-flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-xl border border-brand-200 bg-white"
+                                  title={t('products.create.variants.colorPickerAria')}
+                                >
+                                  <span className="h-7 w-7 rounded-lg" style={{ backgroundColor: c.hex }} />
+                                </label>
+                                <input
+                                  id={`products-create-color-${idx}`}
+                                  type="color"
+                                  value={c.hex}
+                                  onChange={(e) =>
+                                    setDraftProduct((p) => {
+                                      const nextHex = e.target.value
+                                      const next = [...p.colors]
+                                      const prevName = next[idx]?.name ?? ''
+                                      next[idx] = {
+                                        ...next[idx],
+                                        hex: nextHex,
+                                        name: prevName.trim().length > 0 ? prevName : '',
+                                      }
+                                      return { ...p, colors: next }
+                                    })
+                                  }
+                                  aria-label={t('products.create.variants.colorPickerAria')}
+                                  className="h-0 w-0 overflow-hidden opacity-0"
+                                />
+                                <Input
+                                  value={c.name}
+                                  onChange={(e) =>
+                                    setDraftProduct((p) => {
+                                      const next = [...p.colors]
+                                      next[idx] = { ...next[idx], name: e.target.value }
+                                      return { ...p, colors: next }
+                                    })
+                                  }
+                                  className="h-9 flex-1 rounded-lg border-brand-200 bg-white"
+                                  placeholder={t('products.create.variants.colorNamePlaceholder')}
+                                />
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={() =>
+                                    setDraftProduct((p) => ({
+                                      ...p,
+                                      colors: p.colors.filter((_, i) => i !== idx),
+                                    }))
+                                  }
+                                  className="h-9 w-9 rounded-lg text-gray-700 hover:bg-brand-50 hover:text-brand-900"
+                                  aria-label={t('products.create.variants.removeColorAria')}
+                                >
+                                  <X className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            ))}
+                          </div>
+                          <div className="mt-4">
+                            <Button
+                              type="button"
+                              variant="outline"
+                              onClick={() =>
+                                setDraftProduct((p) => ({
+                                  ...p,
+                                  colors: [...p.colors, { name: '', hex: '#111827' }],
+                                }))
+                              }
+                              className="h-9 rounded-lg border-brand-200 bg-white text-gray-700 hover:bg-brand-50 hover:text-brand-900"
+                            >
+                              <Plus className="mr-2 h-4 w-4" />
+                              {t('products.create.variants.addColor')}
+                            </Button>
+                          </div>
+                        </div>
+
+                        <div className="rounded-2xl border border-brand-200 bg-white p-4 shadow-sm">
+                          <div className="text-sm font-semibold text-gray-900">{t('products.create.variants.sizes')}</div>
+                          <div className="mt-1 text-xs font-medium text-gray-500">{t('products.create.variants.sizesHint')}</div>
+                          <div className="mt-4 flex flex-wrap gap-2">
+                            {draftProduct.sizes.map((s) => (
+                              <button
+                                key={s}
+                                type="button"
+                                onClick={() =>
+                                  setDraftProduct((p) => ({
+                                    ...p,
+                                    sizes: p.sizes.filter((x) => x !== s),
+                                  }))
+                                }
+                                className="inline-flex items-center gap-2 rounded-full border border-brand-200 bg-brand-50 px-3 py-1 text-sm font-semibold text-gray-800"
+                              >
+                                {s}
+                                <span className="text-gray-500">×</span>
+                              </button>
+                            ))}
+                          </div>
+                          <div className="mt-4 flex flex-col gap-3 sm:flex-row">
+                            <Input
+                              value={draftProduct.models.join(', ')}
+                              onChange={(e) =>
+                                setDraftProduct((p) => ({
+                                  ...p,
+                                  models: e.target.value
+                                    .split(',')
+                                    .map((x) => x.trim())
+                                    .filter(Boolean),
+                                }))
+                              }
+                              placeholder={t('products.create.variants.modelsPlaceholder')}
+                              className="h-10 flex-1 rounded-xl border-brand-200 bg-white"
+                            />
+                          </div>
+                        </div>
+                      </>
+                    ) : null}
+                  </div>
+                ) : null}
+
+                {createStep === 3 ? (
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                      <div className="space-y-2">
+                        <Label className="text-sm font-semibold text-gray-700">{t('products.create.pricing.price')}</Label>
+                        <Input
+                          value={draftProduct.price}
+                          onChange={(e) => setDraftProduct((p) => ({ ...p, price: e.target.value }))}
+                          placeholder={t('products.create.pricing.pricePlaceholder')}
+                          className="h-10 rounded-xl border-brand-200 bg-white"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-sm font-semibold text-gray-700">{t('products.create.pricing.compareAt')}</Label>
+                        <Input
+                          value={draftProduct.compareAt}
+                          onChange={(e) => setDraftProduct((p) => ({ ...p, compareAt: e.target.value }))}
+                          placeholder={t('products.create.pricing.compareAtPlaceholder')}
+                          className="h-10 rounded-xl border-brand-200 bg-white"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-sm font-semibold text-gray-700">{t('products.create.pricing.cost')}</Label>
+                        <Input
+                          value={draftProduct.cost}
+                          onChange={(e) => setDraftProduct((p) => ({ ...p, cost: e.target.value }))}
+                          placeholder={t('products.create.pricing.costPlaceholder')}
+                          className="h-10 rounded-xl border-brand-200 bg-white"
+                        />
+                      </div>
+                      <div className="rounded-2xl border border-brand-200 bg-brand-50/30 p-4 text-sm text-gray-700">
+                        <div className="flex items-center gap-2 font-semibold text-gray-900">
+                          <Sparkles className="h-4 w-4" />
+                          {t('products.create.pricing.smartHintTitle')}
+                        </div>
+                        <div className="mt-2 text-sm text-gray-600">{t('products.create.pricing.smartHintBody')}</div>
+                      </div>
+                    </div>
+                  </div>
+                ) : null}
+
+                {createStep === 4 ? (
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between gap-3 rounded-2xl border border-brand-200 bg-white px-4 py-3 shadow-sm">
+                      <div className="min-w-0">
+                        <div className="text-sm font-semibold text-gray-900">{t('products.create.sections.applies')}</div>
+                        <div className="mt-0.5 text-xs font-medium text-gray-500">{t('products.create.sections.deliveryHint')}</div>
+                      </div>
+                      <Switch
+                        checked={draftProduct.deliverySectionEnabled}
+                        onCheckedChange={(v) => setSectionEnabled('delivery', Boolean(v))}
+                      />
+                    </div>
+
+                    {!draftProduct.deliverySectionEnabled ? (
+                      <div className="rounded-2xl border border-dashed border-brand-200 bg-brand-50/30 p-6">
+                        <div className="text-sm font-semibold text-gray-900">{t('products.create.sections.skippedTitle')}</div>
+                        <div className="mt-1 text-sm text-gray-600">{t('products.create.sections.skippedBody')}</div>
+                        <div className="mt-4">
+                          <Button
+                            type="button"
+                            onClick={() => setSectionEnabled('delivery', true)}
+                            className="h-10 rounded-xl bg-brand-900 text-white hover:bg-brand-800"
+                          >
+                            {t('products.create.sections.enable')}
+                          </Button>
+                        </div>
+                      </div>
+                    ) : null}
+
+                    {draftProduct.deliverySectionEnabled ? (
+                      <>
+                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                          <div className="space-y-2">
+                            <Label className="text-sm font-semibold text-gray-700">{t('products.create.delivery.enabled')}</Label>
+                            <select
+                              value={draftProduct.deliveryEnabled ? 'yes' : 'no'}
+                              onChange={(e) =>
+                                setDraftProduct((p) => ({ ...p, deliveryEnabled: e.target.value === 'yes' }))
+                              }
+                              className="h-10 w-full rounded-xl border border-gray-200 bg-white px-3 text-sm text-gray-900"
+                            >
+                              <option value="yes">{t('products.viewSheet.yes')}</option>
+                              <option value="no">{t('products.viewSheet.no')}</option>
+                            </select>
+                          </div>
+                          <div className="space-y-2">
+                            <Label className="text-sm font-semibold text-gray-700">{t('products.create.delivery.location')}</Label>
+                            <Input
+                              value={draftProduct.deliveryLocation}
+                              onChange={(e) => setDraftProduct((p) => ({ ...p, deliveryLocation: e.target.value }))}
+                              placeholder={t('products.create.delivery.locationPlaceholder')}
+                              className="h-10 rounded-xl border-brand-200 bg-white"
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label className="text-sm font-semibold text-gray-700">{t('products.create.delivery.price')}</Label>
+                            <Input
+                              value={draftProduct.deliveryPrice}
+                              onChange={(e) => setDraftProduct((p) => ({ ...p, deliveryPrice: e.target.value }))}
+                              placeholder={t('products.create.delivery.pricePlaceholder')}
+                              className="h-10 rounded-xl border-brand-200 bg-white"
+                            />
+                          </div>
+                        </div>
+                        <div className="space-y-2">
+                          <Label className="text-sm font-semibold text-gray-700">{t('products.create.delivery.internalNote')}</Label>
+                          <Textarea
+                            value={draftProduct.internalNote}
+                            onChange={(e) => setDraftProduct((p) => ({ ...p, internalNote: e.target.value }))}
+                            placeholder={t('products.create.delivery.internalNotePlaceholder')}
+                            className="min-h-[120px] rounded-xl border-brand-200 bg-white"
+                          />
+                        </div>
+                      </>
+                    ) : null}
+                  </div>
+                ) : null}
+
+                {createStep === 5 ? (
+                  <div className="space-y-4">
+                    <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
+                      <div className="flex items-start justify-between gap-3">
+                        <div>
+                          <div className="text-sm font-semibold text-gray-900">{t('products.create.review.title')}</div>
+                          <div className="mt-1 text-xs font-medium text-gray-500">{t('products.create.review.subtitle')}</div>
+                        </div>
+                        <Badge className="rounded-full border-gray-200 bg-gray-50 text-gray-700 hover:bg-gray-50">
+                          {statusLabel(draftProduct.status)}
+                        </Badge>
+                      </div>
+
+                      <Separator className="my-4" />
+
+                      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                        <div className="space-y-1">
+                          <div className="text-xs font-semibold text-gray-500">{t('products.create.fields.name')}</div>
+                          <div className="text-sm font-semibold text-gray-900">{draftProduct.name || t('products.table.na')}</div>
+                        </div>
+                        <div className="space-y-1">
+                          <div className="text-xs font-semibold text-gray-500">{t('products.create.fields.vendor')}</div>
+                          <div className="text-sm font-semibold text-gray-900">{draftProduct.vendor || t('products.table.na')}</div>
+                        </div>
+                        <div className="space-y-1">
+                          <div className="text-xs font-semibold text-gray-500">{t('products.create.fields.category')}</div>
+                          <div className="text-sm font-semibold text-gray-900">{draftProduct.category || t('products.table.na')}</div>
+                        </div>
+                        <div className="space-y-1">
+                          <div className="text-xs font-semibold text-gray-500">{t('products.create.pricing.price')}</div>
+                          <div className="text-sm font-semibold text-gray-900">{draftProduct.price || t('products.table.na')}</div>
+                        </div>
+                      </div>
+
+                      <div className="mt-4 rounded-2xl border border-gray-200 bg-gray-50 p-4">
+                        <div className="flex items-center gap-2 text-sm font-semibold text-gray-900">
+                          <Sparkles className="h-4 w-4" />
+                          {t('products.create.review.nextTitle')}
+                        </div>
+                        <div className="mt-2 text-sm text-gray-600">{t('products.create.review.nextBody')}</div>
+                      </div>
+                    </div>
+                  </div>
+                ) : null}
+              </div>
+            </ScrollArea>
+
+            <div className="border-t border-gray-100 px-6 py-4">
+              <div className="flex flex-col-reverse gap-2 sm:flex-row sm:items-center sm:justify-between">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={closeCreate}
+                  className="h-10 rounded-xl border-gray-200 bg-white text-gray-700 hover:bg-brand-50 hover:text-brand-900"
+                >
+                  {t('products.create.cancel')}
+                </Button>
+
+                <div className="flex items-center justify-end gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={prevStep}
+                    disabled={createStep === 0}
+                    className="h-10 rounded-xl border-gray-200 bg-white text-gray-700 hover:bg-brand-50 hover:text-brand-900 disabled:opacity-50"
+                  >
+                    <ChevronLeft className="mr-2 h-4 w-4" />
+                    {t('products.create.back')}
+                  </Button>
+                  {createStep < createSteps.length - 1 ? (
+                    <Button
+                      type="button"
+                      onClick={nextStep}
+                      disabled={!canGoNext}
+                      className="h-10 rounded-xl bg-brand-900 text-white hover:bg-brand-800 disabled:opacity-50"
+                    >
+                      {t('products.create.next')}
+                      <ChevronRight className="ml-2 h-4 w-4" />
+                    </Button>
+                  ) : (
+                    <Button
+                      type="button"
+                      onClick={handleFinish}
+                      className="h-10 rounded-xl bg-brand-900 text-white hover:bg-brand-800"
+                    >
+                      {isEditMode ? (
+                        <>
+                          <Check className="mr-2 h-4 w-4" />
+                          Update Product
+                        </>
+                      ) : (
+                        <>
+                          <Sparkles className="mr-2 h-4 w-4" />
+                          {t('products.create.finish')}
+                        </>
+                      )}
+                    </Button>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  )
+}

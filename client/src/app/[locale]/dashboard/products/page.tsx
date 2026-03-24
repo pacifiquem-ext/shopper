@@ -1,29 +1,27 @@
 'use client'
 
 import { ProductStatusBadge } from '@/components/dashboard/shared/status-badges'
+import { StatsCard } from '@/components/dashboard/shared/stats-card'
+import { FilterPopover } from '@/components/dashboard/shared/filter-popover'
+import { ImageZoomDialog } from '@/components/dashboard/shared/image-zoom-dialog'
+import { DeleteConfirmationDialog } from '@/components/dashboard/shared/delete-confirmation-dialog'
 import { SalesPerformanceChart } from '@/components/dashboard/products/sales-performance-chart'
 import { TrendingProductsChart } from '@/components/dashboard/products/trending-products-chart'
+import { ProductFormModal } from '@/components/dashboard/products/product-form-modal'
+import { ProductViewSheet } from '@/components/dashboard/products/product-view-sheet'
 import { Button } from '@/components/ui/button'
 import { DataTable, type DataTableColumn } from '@/components/ui/data-table'
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { ScrollArea } from '@/components/ui/scroll-area'
-import { Separator } from '@/components/ui/separator'
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
+import { Sheet } from '@/components/ui/sheet'
 import { Switch } from '@/components/ui/switch'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Textarea } from '@/components/ui/textarea'
@@ -36,6 +34,7 @@ import type {
 } from '@/types'
 import { cn } from '@/lib/utils'
 import { clampPercent, toBaseSku } from '@/utils/dashboard'
+import { printContent } from '@/utils/print'
 import {
   ArrowUpRight,
   ArrowDownRight,
@@ -54,12 +53,10 @@ import {
   ShoppingCart,
   Sparkles,
   TrendingUp,
+  Trash2,
   X,
-  ZoomIn,
   Badge,
   Edit,
-  Trash2,
-  AlertTriangle,
 } from 'lucide-react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
@@ -77,7 +74,6 @@ export default function ProductsPage() {
   const [viewOpen, setViewOpen] = useState(false)
   const [selectedProductId, setSelectedProductId] = useState<string | null>(null)
   const [createOpen, setCreateOpen] = useState(false)
-  const [createStep, setCreateStep] = useState(0)
   const [isEditMode, setIsEditMode] = useState(false)
   const [editingProductId, setEditingProductId] = useState<string | null>(null)
   const [zoomOpen, setZoomOpen] = useState(false)
@@ -98,7 +94,7 @@ export default function ProductsPage() {
     name: string
     vendor: string
     category: string
-    status: ProductStatus
+    status: 'ACTIVE' | 'DRAFT' | 'ARCHIVED'
     description: string
     tags: string
     mediaSectionEnabled: boolean
@@ -120,7 +116,7 @@ export default function ProductsPage() {
     name: '',
     vendor: '',
     category: '',
-    status: 'draft',
+    status: 'DRAFT',
     description: '',
     tags: '',
     mediaSectionEnabled: false,
@@ -327,7 +323,7 @@ export default function ProductsPage() {
       name: product.name,
       vendor: product.vendor,
       category: product.category,
-      status: product.status,
+      status: product.status.toUpperCase() as 'ACTIVE' | 'DRAFT' | 'ARCHIVED',
       description: product.description,
       tags: product.tags.join(', '),
       mediaSectionEnabled: product.images.length > 0,
@@ -350,7 +346,6 @@ export default function ProductsPage() {
     setIsEditMode(true)
     setEditingProductId(id)
     setCreateOpen(true)
-    setCreateStep(0)
   }, [detailsById])
 
   const openDeleteConfirm = useCallback((product: ProductRow) => {
@@ -387,7 +382,6 @@ export default function ProductsPage() {
 
     if (tab === 'active') data = data.filter((r) => r.status === 'active')
     if (tab === 'draft') data = data.filter((r) => r.status === 'draft')
-    if (tab === 'archived') data = data.filter((r) => r.status === 'archived')
 
     if (q) {
       data = data.filter(
@@ -401,11 +395,11 @@ export default function ProductsPage() {
     if (filters.vendor !== 'any') data = data.filter((r) => r.vendor === filters.vendor)
     if (filters.category !== 'any') data = data.filter((r) => r.category === filters.category)
     if (filters.status !== 'any') data = data.filter((r) => r.status === filters.status)
-    if (filters.minStock != null) data = data.filter((r) => r.totalStock >= filters.minStock)
-    if (filters.maxStock != null) data = data.filter((r) => r.totalStock <= filters.maxStock)
+    if (filters.minStock != null) data = data.filter((r) => r.totalStock >= filters.minStock!)
+    if (filters.maxStock != null) data = data.filter((r) => r.totalStock <= filters.maxStock!)
 
     return data
-  }, [filters.category, filters.maxStock, filters.minStock, filters.status, filters.vendor, query, rows, tab])
+  }, [rows, tab, query, filters])
 
   const stats = useMemo(() => {
     const total = rows.length
@@ -572,137 +566,17 @@ export default function ProductsPage() {
     [openView, openEdit, openDeleteConfirm, statusLabel, t]
   )
 
-  const paginationLabels = useMemo(
-    () => ({
-      previous: t('products.pagination.previous'),
-      next: t('products.pagination.next'),
-      rowsPerPage: t('products.pagination.rowsPerPage'),
-      showing: (from: number, to: number, total: number) =>
-        t('products.pagination.showing', { from, to, total }),
-    }),
-    [t]
-  )
-
-  const createSteps = useMemo(
-    () => [
-      {
-        key: 'basics',
-        title: t('products.create.steps.basics'),
-        description: t('products.create.steps.basicsDescription'),
-      },
-      {
-        key: 'media',
-        title: t('products.create.steps.media'),
-        description: t('products.create.steps.mediaDescription'),
-      },
-      {
-        key: 'variants',
-        title: t('products.create.steps.variants'),
-        description: t('products.create.steps.variantsDescription'),
-      },
-      {
-        key: 'pricing',
-        title: t('products.create.steps.pricing'),
-        description: t('products.create.steps.pricingDescription'),
-      },
-      {
-        key: 'delivery',
-        title: t('products.create.steps.delivery'),
-        description: t('products.create.steps.deliveryDescription'),
-      },
-      {
-        key: 'review',
-        title: t('products.create.steps.review'),
-        description: t('products.create.steps.reviewDescription'),
-      },
-    ],
-    [t]
-  )
-
-  const isStepEnabled = useCallback(
-    (index: number) => {
-      const key = createSteps[index]?.key
-      if (!key) return false
-      if (key === 'media') return draftProduct.mediaSectionEnabled
-      if (key === 'variants') return draftProduct.variantsSectionEnabled
-      if (key === 'delivery') return draftProduct.deliverySectionEnabled
-      return true
-    },
-    [createSteps, draftProduct.deliverySectionEnabled, draftProduct.mediaSectionEnabled, draftProduct.variantsSectionEnabled]
-  )
-
-  const canGoNext = useMemo(() => {
-    if (createStep === 0) return draftProduct.name.trim().length > 0
-    if (createStep === 2 && draftProduct.variantsSectionEnabled) {
-      return draftProduct.colors.every((c) => c.name.trim().length > 0)
-    }
-    if (createStep === 3) return draftProduct.price.trim().length > 0
-    return true
-  }, [createStep, draftProduct.colors, draftProduct.name, draftProduct.price, draftProduct.variantsSectionEnabled])
-
-  const closeCreate = () => {
-    setCreateOpen(false)
-    setCreateStep(0)
-    setIsEditMode(false)
-    setEditingProductId(null)
-  }
-
-  const nextStep = () => {
-    if (!canGoNext) return
-
-    setCreateStep((s) => {
-      let idx = Math.min(createSteps.length - 1, s + 1)
-      while (idx < createSteps.length - 1 && !isStepEnabled(idx)) idx += 1
-      return idx
-    })
-  }
-
-  const prevStep = () => {
-    setCreateStep((s) => {
-      let idx = Math.max(0, s - 1)
-      while (idx > 0 && !isStepEnabled(idx)) idx -= 1
-      return idx
-    })
-  }
-
-  const setSectionEnabled = (key: 'media' | 'variants' | 'delivery', enabled: boolean) => {
-    setDraftProduct((p) => {
-      if (key === 'media') return { ...p, mediaSectionEnabled: enabled }
-      if (key === 'variants') return { ...p, variantsSectionEnabled: enabled }
-      return { ...p, deliverySectionEnabled: enabled }
-    })
-
-    if (!enabled) {
-      const stepKey = createSteps[createStep]?.key
-      if (stepKey === key) nextStep()
-    }
-  }
-
   const openZoom = (url: string) => {
     setZoomUrl(url)
     setZoomOpen(true)
   }
 
   const downloadAsPdf = () => {
-    const win = window.open('', '_blank')
-    if (!win) return
-
-    const content = document.querySelector('[data-product-print]')
-    if (!content) return
-
-    win.document.write(`<html><head><title>${t('products.viewSheet.printTitle')}</title>`)
-    win.document.write(`<style>
-      @media print {
-        body { margin: 0; }
-        [data-hide-print] { display: none !important; }
-      }
-      body { font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji"; }
-    </style></head><body>`) 
-    win.document.write(content.outerHTML)
-    win.document.write('</body></html>')
-    win.document.close()
-    win.focus()
-    win.print()
+    printContent({
+      title: t('products.viewSheet.printTitle'),
+      selector: '[data-product-print]',
+      hideSelector: '[data-hide-print]',
+    })
   }
 
   return (
@@ -735,53 +609,32 @@ export default function ProductsPage() {
         </div>
 
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
-          <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <div className="text-xs font-semibold text-gray-500">Total Revenue</div>
-                <div className="mt-2 text-2xl font-semibold text-gray-900">$48,574</div>
-              </div>
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
-                <Banknote className="h-5 w-5" />
-              </div>
-            </div>
-            <div className="mt-3 flex items-center gap-1 text-xs font-semibold text-emerald-600">
-              <ArrowUpRight className="h-3.5 w-3.5" />
-              <span>12.5% from last month</span>
-            </div>
-          </div>
+          <StatsCard
+            title="Total Revenue"
+            value="$48,574"
+            icon={Banknote}
+            iconBgColor="bg-emerald-50"
+            iconColor="text-emerald-600"
+            trend={{ value: 12.5, label: '12.5% from last month', isPositive: true }}
+          />
 
-          <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <div className="text-xs font-semibold text-gray-500">Units Sold</div>
-                <div className="mt-2 text-2xl font-semibold text-gray-900">1,847</div>
-              </div>
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
-                <ShoppingCart className="h-5 w-5" />
-              </div>
-            </div>
-            <div className="mt-3 flex items-center gap-1 text-xs font-semibold text-emerald-600">
-              <ArrowUpRight className="h-3.5 w-3.5" />
-              <span>8.2% from last month</span>
-            </div>
-          </div>
+          <StatsCard
+            title="Units Sold"
+            value="1,847"
+            icon={ShoppingCart}
+            iconBgColor="bg-blue-50"
+            iconColor="text-blue-600"
+            trend={{ value: 8.2, label: '8.2% from last month', isPositive: true }}
+          />
 
-          <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <div className="text-xs font-semibold text-gray-500">Avg. Order Value</div>
-                <div className="mt-2 text-2xl font-semibold text-gray-900">$26.30</div>
-              </div>
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-purple-50 text-purple-600">
-                <TrendingUp className="h-5 w-5" />
-              </div>
-            </div>
-            <div className="mt-3 flex items-center gap-1 text-xs font-semibold text-rose-600">
-              <ArrowDownRight className="h-3.5 w-3.5" />
-              <span>3.1% from last month</span>
-            </div>
-          </div>
+          <StatsCard
+            title="Avg. Order Value"
+            value="$26.30"
+            icon={TrendingUp}
+            iconBgColor="bg-purple-50"
+            iconColor="text-purple-600"
+            trend={{ value: -3.1, label: '3.1% from last month', isPositive: false }}
+          />
 
           <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
             <div className="flex items-start justify-between gap-4">
@@ -789,131 +642,110 @@ export default function ProductsPage() {
                 <div className="text-xs font-semibold text-gray-500">Active Products</div>
                 <div className="mt-2 text-2xl font-semibold text-gray-900">{stats.active}</div>
               </div>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <button
-                    type="button"
-                    aria-label={t('products.filters.aria')}
-                    className={cn(
-                      'flex h-9 w-9 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-700 shadow-xs transition-colors',
-                      'hover:bg-brand-50 hover:text-brand-900'
-                    )}
-                  >
-                    <Filter className="h-4 w-4" />
-                  </button>
-                </PopoverTrigger>
-                <PopoverContent align="end" className="w-[360px] border-gray-200 bg-white p-4 text-gray-900 shadow-md">
-                  <div>
-                    <div className="text-sm font-semibold text-gray-900">{t('products.filters.title')}</div>
-                    <div className="mt-0.5 text-xs font-medium text-gray-500">{t('products.filters.subtitle')}</div>
-                  </div>
-                  <div className="mt-4 grid grid-cols-1 gap-4">
-                    <div className="grid gap-2">
-                      <Label htmlFor="products-kpi-filter-vendor" className="text-xs font-semibold text-gray-600">{t('products.filters.vendor')}</Label>
-                      <select
-                        id="products-kpi-filter-vendor"
-                        value={filtersDraft.vendor}
-                        onChange={(e) => setFiltersDraft((p) => ({ ...p, vendor: e.target.value }))}
-                        className="h-9 w-full rounded-lg border border-gray-200 bg-white px-3 text-sm text-gray-900"
-                      >
-                        <option value="any">{t('products.filters.any')}</option>
+              <FilterPopover
+                title={t('products.filters.title')}
+                subtitle={t('products.filters.subtitle')}
+                onClear={clearFilters}
+                onApply={applyFilters}
+                clearLabel={t('products.filters.clear')}
+                applyLabel={t('products.filters.apply')}
+                ariaLabel={t('products.filters.aria')}
+              >
+                <div className="grid grid-cols-1 gap-4">
+                  <div className="grid gap-2">
+                    <Label htmlFor="products-kpi-filter-vendor" className="text-xs font-semibold text-gray-600">{t('products.filters.vendor')}</Label>
+                    <Select
+                      value={filtersDraft.vendor}
+                      onValueChange={(value) => setFiltersDraft((p) => ({ ...p, vendor: value }))}
+                    >
+                      <SelectTrigger className="h-9 rounded-lg border-gray-200 bg-white text-sm">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent className="border-gray-200 bg-white text-gray-900">
+                        <SelectItem value="any">{t('products.filters.any')}</SelectItem>
                         {vendors.map((v) => (
-                          <option key={v} value={v}>
+                          <SelectItem key={v} value={v}>
                             {v}
-                          </option>
+                          </SelectItem>
                         ))}
-                      </select>
-                    </div>
+                      </SelectContent>
+                    </Select>
+                  </div>
 
-                    <div className="grid gap-2">
-                      <Label htmlFor="products-kpi-filter-category" className="text-xs font-semibold text-gray-600">{t('products.filters.category')}</Label>
-                      <select
-                        id="products-kpi-filter-category"
-                        value={filtersDraft.category}
-                        onChange={(e) => setFiltersDraft((p) => ({ ...p, category: e.target.value }))}
-                        className="h-9 w-full rounded-lg border border-gray-200 bg-white px-3 text-sm text-gray-900"
-                      >
-                        <option value="any">{t('products.filters.any')}</option>
+                  <div className="grid gap-2">
+                    <Label htmlFor="products-kpi-filter-category" className="text-xs font-semibold text-gray-600">{t('products.filters.category')}</Label>
+                    <Select
+                      value={filtersDraft.category}
+                      onValueChange={(value) => setFiltersDraft((p) => ({ ...p, category: value }))}
+                    >
+                      <SelectTrigger className="h-9 rounded-lg border-gray-200 bg-white text-sm">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent className="border-gray-200 bg-white text-gray-900">
+                        <SelectItem value="any">{t('products.filters.any')}</SelectItem>
                         {categories.map((c) => (
-                          <option key={c} value={c}>
+                          <SelectItem key={c} value={c}>
                             {c}
-                          </option>
+                          </SelectItem>
                         ))}
-                      </select>
-                    </div>
+                      </SelectContent>
+                    </Select>
+                  </div>
 
+                  <div className="grid gap-2">
+                    <Label htmlFor="products-kpi-filter-status" className="text-xs font-semibold text-gray-600">{t('products.filters.status')}</Label>
+                    <Select
+                      value={filtersDraft.status}
+                      onValueChange={(value) => setFiltersDraft((p) => ({ ...p, status: value as ProductStatus | 'any' }))}
+                    >
+                      <SelectTrigger className="h-9 rounded-lg border-gray-200 bg-white text-sm">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent className="border-gray-200 bg-white text-gray-900">
+                        <SelectItem value="any">{t('products.filters.any')}</SelectItem>
+                        <SelectItem value="active">{t('products.status.active')}</SelectItem>
+                        <SelectItem value="draft">{t('products.status.draft')}</SelectItem>
+                        <SelectItem value="archived">{t('products.status.archived')}</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
                     <div className="grid gap-2">
-                      <Label htmlFor="products-kpi-filter-status" className="text-xs font-semibold text-gray-600">{t('products.filters.status')}</Label>
-                      <select
-                        id="products-kpi-filter-status"
-                        value={filtersDraft.status}
+                      <Label htmlFor="products-filter-min-stock" className="text-xs font-semibold text-gray-600">{t('products.filters.minStock')}</Label>
+                      <Input
+                        id="products-filter-min-stock"
+                        value={filtersDraft.minStock == null ? '' : String(filtersDraft.minStock)}
                         onChange={(e) =>
-                          setFiltersDraft((p) => ({ ...p, status: e.target.value as ProductStatus | 'any' }))
+                          setFiltersDraft((p) => ({
+                            ...p,
+                            minStock: e.target.value.trim() ? Number(e.target.value) : null,
+                          }))
                         }
-                        className="h-9 w-full rounded-lg border border-gray-200 bg-white px-3 text-sm text-gray-900"
-                      >
-                        <option value="any">{t('products.filters.any')}</option>
-                        <option value="active">{t('products.status.active')}</option>
-                        <option value="draft">{t('products.status.draft')}</option>
-                        <option value="archived">{t('products.status.archived')}</option>
-                      </select>
+                        inputMode="numeric"
+                        placeholder={t('products.filters.stockPlaceholder')}
+                        className="h-9 rounded-lg border-gray-200 bg-white"
+                      />
                     </div>
-
-                    <div className="grid grid-cols-2 gap-3">
-                      <div className="grid gap-2">
-                        <Label htmlFor="products-filter-min-stock" className="text-xs font-semibold text-gray-600">{t('products.filters.minStock')}</Label>
-                        <Input
-                          id="products-filter-min-stock"
-                          value={filtersDraft.minStock == null ? '' : String(filtersDraft.minStock)}
-                          onChange={(e) =>
-                            setFiltersDraft((p) => ({
-                              ...p,
-                              minStock: e.target.value.trim() ? Number(e.target.value) : null,
-                            }))
-                          }
-                          inputMode="numeric"
-                          placeholder={t('products.filters.stockPlaceholder')}
-                          className="h-9 rounded-lg border-gray-200 bg-white"
-                        />
-                      </div>
-                      <div className="grid gap-2">
-                        <Label htmlFor="products-filter-max-stock" className="text-xs font-semibold text-gray-600">{t('products.filters.maxStock')}</Label>
-                        <Input
-                          id="products-filter-max-stock"
-                          value={filtersDraft.maxStock == null ? '' : String(filtersDraft.maxStock)}
-                          onChange={(e) =>
-                            setFiltersDraft((p) => ({
-                              ...p,
-                              maxStock: e.target.value.trim() ? Number(e.target.value) : null,
-                            }))
-                          }
-                          inputMode="numeric"
-                          placeholder={t('products.filters.stockPlaceholder')}
-                          className="h-9 rounded-lg border-gray-200 bg-white"
-                        />
-                      </div>
+                    <div className="grid gap-2">
+                      <Label htmlFor="products-filter-max-stock" className="text-xs font-semibold text-gray-600">{t('products.filters.maxStock')}</Label>
+                      <Input
+                        id="products-filter-max-stock"
+                        value={filtersDraft.maxStock == null ? '' : String(filtersDraft.maxStock)}
+                        onChange={(e) =>
+                          setFiltersDraft((p) => ({
+                            ...p,
+                            maxStock: e.target.value.trim() ? Number(e.target.value) : null,
+                          }))
+                        }
+                        inputMode="numeric"
+                        placeholder={t('products.filters.stockPlaceholder')}
+                        className="h-9 rounded-lg border-gray-200 bg-white"
+                      />
                     </div>
                   </div>
-
-                  <div className="mt-4 flex items-center justify-between gap-2">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={clearFilters}
-                      className="h-9 rounded-lg border-gray-200 bg-white text-gray-700 hover:bg-brand-50 hover:text-brand-900"
-                    >
-                      {t('products.filters.clear')}
-                    </Button>
-                    <Button
-                      type="button"
-                      onClick={applyFilters}
-                      className="h-9 rounded-lg bg-brand-900 text-white hover:bg-brand-800"
-                    >
-                      {t('products.filters.apply')}
-                    </Button>
-                  </div>
-                </PopoverContent>
-              </Popover>
+                </div>
+              </FilterPopover>
             </div>
 
             <div className="mt-3">
@@ -1221,1040 +1053,110 @@ export default function ProductsPage() {
               getRowId={(r) => r.id}
               enableSelection
               enablePagination
-              paginationLabels={paginationLabels}
               emptyState={<div className="text-sm">{t('products.empty')}</div>}
             />
           </div>
         </div>
       </div>
 
-      <SheetContent
-        side="right"
-        className="flex h-full w-full flex-col gap-0 border-gray-200 bg-white p-0 sm:max-w-[1000px]"
-      >
-        <SheetHeader className="border-b border-gray-100 px-6 py-4">
-          <div className="flex items-start justify-between gap-3">
-            <div className="min-w-0">
-              <SheetTitle className="truncate text-lg font-semibold text-gray-900">
-                {selectedProduct ? selectedProduct.name : t('products.viewSheet.title')}
-              </SheetTitle>
-              <div className="mt-1 flex flex-wrap items-center gap-2 text-sm text-gray-600">
-                <span className="inline-flex items-center gap-2">
-                  <Package className="h-4 w-4 text-gray-500" />
-                  <span className="truncate">{selectedProduct?.category ?? t('products.table.na')}</span>
-                </span>
-                <span className="text-gray-300">•</span>
-                <span className="truncate">{selectedProduct?.vendor ?? t('products.table.na')}</span>
-              </div>
-            </div>
+      <ProductViewSheet
+        product={selectedProduct ?? null}
+        onZoomImage={openZoom}
+        onAddStock={(product) => {
+          const baseSku = toBaseSku(product.variants[0]?.sku ?? '')
+          if (!baseSku) return
+          router.push(`/dashboard/inventory?sku=${encodeURIComponent(baseSku)}&action=restock`)
+        }}
+        onDownloadPdf={downloadAsPdf}
+        statusLabel={statusLabel}
+        translations={{
+          title: t('products.viewSheet.title'),
+          subtitle: (params) => t('products.viewSheet.subtitle', params),
+          empty: t('products.viewSheet.empty'),
+          na: t('products.table.na'),
+          yes: t('products.viewSheet.yes'),
+          no: t('products.viewSheet.no'),
+          addStock: t('products.viewSheet.addStock'),
+          downloadPdf: t('products.viewSheet.downloadPdf'),
+          zoom: t('products.viewSheet.zoom'),
+          variantsCount: (params) => t('products.viewSheet.variantsCount', params),
+          sections: {
+            gallery: t('products.viewSheet.sections.gallery'),
+            pricing: t('products.viewSheet.sections.pricing'),
+            delivery: t('products.viewSheet.sections.delivery'),
+            description: t('products.viewSheet.sections.description'),
+            variants: t('products.viewSheet.sections.variants'),
+            staff: t('products.viewSheet.sections.staff'),
+          },
+          fields: {
+            cost: t('products.viewSheet.fields.cost'),
+            margin: t('products.viewSheet.fields.margin'),
+            compareAt: t('products.viewSheet.fields.compareAt'),
+            deliveryEnabled: t('products.viewSheet.fields.deliveryEnabled'),
+            deliveryLocation: t('products.viewSheet.fields.deliveryLocation'),
+            deliveryPrice: t('products.viewSheet.fields.deliveryPrice'),
+            createdBy: t('products.viewSheet.fields.createdBy'),
+            updatedBy: t('products.viewSheet.fields.updatedBy'),
+          },
+          table: {
+            variant: t('products.viewSheet.table.variant'),
+            sku: t('products.viewSheet.table.sku'),
+            stock: t('products.viewSheet.table.stock'),
+            price: t('products.viewSheet.table.price'),
+          },
+        }}
+      />
 
-            <div className="flex items-center gap-2" data-hide-print>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => {
-                  if (!selectedProduct) return
-                  const baseSku = toBaseSku(selectedProduct.variants[0]?.sku ?? '')
-                  if (!baseSku) return
-                  router.push(`/dashboard/inventory?sku=${encodeURIComponent(baseSku)}&action=restock`)
-                }}
-                disabled={!selectedProduct}
-                className="h-9 rounded-lg border-gray-200 bg-white text-gray-700 hover:bg-brand-50 hover:text-brand-900"
-              >
-                <Plus className="mr-2 h-4 w-4" />
-                {t('products.viewSheet.addStock')}
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={downloadAsPdf}
-                className="h-9 rounded-lg border-gray-200 bg-white text-gray-700 hover:bg-brand-50 hover:text-brand-900"
-              >
-                <Download className="mr-2 h-4 w-4" />
-                {t('products.viewSheet.downloadPdf')}
-              </Button>
-            </div>
-          </div>
-        </SheetHeader>
+      <ProductFormModal
+        open={createOpen}
+        onOpenChange={setCreateOpen}
+        isEditMode={isEditMode}
+        draftProduct={draftProduct}
+        setDraftProduct={setDraftProduct}
+        onSubmit={() => {
+          if (isEditMode) {
+            console.log('Updating product:', editingProductId, draftProduct)
+            setCreateOpen(false)
+            setIsEditMode(false)
+            setEditingProductId(null)
+          } else {
+            setCreateOpen(false)
+          }
+        }}
+        onZoomImage={openZoom}
+        addImages={addImages}
+        removeImage={removeImage}
+      />
 
-        <ScrollArea className="h-full">
-          <div className="px-6 py-6" data-product-print>
-            {!selectedProduct ? (
-              <div className="rounded-2xl border border-dashed border-gray-200 bg-gray-50 p-6 text-sm text-gray-600">
-                {t('products.viewSheet.empty')}
-              </div>
-            ) : (
-              <div className="space-y-4">
-                <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
-                  <div className="flex flex-col gap-4 lg:flex-row">
-                    <div className="w-full lg:w-[340px]">
-                      <div className="overflow-hidden rounded-2xl border border-gray-200 bg-gray-50">
-                        {selectedProduct.images[0] ? (
-                          <img
-                            src={selectedProduct.images[0]}
-                            alt={selectedProduct.name}
-                            className="h-[220px] w-full object-cover"
-                            loading="lazy"
-                          />
-                        ) : (
-                          <div className="flex h-[220px] w-full items-center justify-center text-gray-500">
-                            <Package className="h-5 w-5" />
-                          </div>
-                        )}
-                      </div>
+      <ImageZoomDialog
+        open={zoomOpen}
+        onOpenChange={setZoomOpen}
+        imageUrl={zoomUrl}
+        title={t('products.zoom.title')}
+        subtitle={t('products.zoom.subtitle')}
+        altText={t('products.zoom.alt')}
+        emptyText={t('products.table.na')}
+      />
 
-                      <div className="mt-3 flex flex-wrap items-center gap-2" data-hide-print>
-                        <Button
-                          type="button"
-                          variant="outline"
-                          onClick={() => selectedProduct.images[0] && openZoom(selectedProduct.images[0])}
-                          disabled={!selectedProduct.images[0]}
-                          className="h-9 rounded-lg border-gray-200 bg-white text-gray-700 hover:bg-brand-50 hover:text-brand-900"
-                        >
-                          <ZoomIn className="mr-2 h-4 w-4" />
-                          {t('products.viewSheet.zoom')}
-                        </Button>
-                      </div>
-
-                      <div className="mt-4">
-                        <div className="text-xs font-semibold text-gray-500">{t('products.viewSheet.sections.gallery')}</div>
-                        <div className="mt-2 grid grid-cols-3 gap-2" data-hide-print>
-                          {selectedProduct.images.slice(0, 6).map((url) => (
-                            <button
-                              key={url}
-                              type="button"
-                              onClick={() => openZoom(url)}
-                              className="overflow-hidden rounded-xl border border-gray-200 bg-gray-50"
-                            >
-                              <img
-                                src={url}
-                                alt={selectedProduct.name}
-                                className="h-16 w-full object-cover"
-                                loading="lazy"
-                              />
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="flex-1">
-                      <div className="flex flex-wrap items-start justify-between gap-3">
-                        <div className="min-w-0">
-                          <div className="text-xl font-semibold text-gray-900">{selectedProduct.name}</div>
-                          <div className="mt-1 text-sm text-gray-600">
-                            {t('products.viewSheet.subtitle', {
-                              vendor: selectedProduct.vendor,
-                              category: selectedProduct.category,
-                            })}
-                          </div>
-                        </div>
-                        <div>
-                          <ProductStatusBadge status={selectedProduct.status} label={statusLabel(selectedProduct.status)} />
-                        </div>
-                      </div>
-
-                      <Separator className="my-4" />
-
-                      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                        <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
-                          <div className="text-xs font-semibold text-gray-500">{t('products.viewSheet.sections.pricing')}</div>
-                          <div className="mt-2 text-lg font-semibold text-gray-900">
-                            {selectedProduct.pricing.priceFrom} - {selectedProduct.pricing.priceTo}
-                          </div>
-                          <div className="mt-3 space-y-2 text-sm">
-                            <div className="flex items-center justify-between gap-3">
-                              <span className="text-gray-500">{t('products.viewSheet.fields.cost')}</span>
-                              <span className="font-medium text-gray-900">
-                                {selectedProduct.pricing.cost || t('products.table.na')}
-                              </span>
-                            </div>
-                            <div className="flex items-center justify-between gap-3">
-                              <span className="text-gray-500">{t('products.viewSheet.fields.margin')}</span>
-                              <span className="font-medium text-gray-900">
-                                {selectedProduct.pricing.margin || t('products.table.na')}
-                              </span>
-                            </div>
-                            <div className="flex items-center justify-between gap-3">
-                              <span className="text-gray-500">{t('products.viewSheet.fields.compareAt')}</span>
-                              <span className="font-medium text-gray-900">
-                                {selectedProduct.pricing.compareAt || t('products.table.na')}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
-                          <div className="text-xs font-semibold text-gray-500">{t('products.viewSheet.sections.delivery')}</div>
-                          <div className="mt-3 space-y-2 text-sm">
-                            <div className="flex items-center justify-between gap-3">
-                              <span className="text-gray-500">{t('products.viewSheet.fields.deliveryEnabled')}</span>
-                              <span className="font-medium text-gray-900">
-                                {selectedProduct.delivery.enabled
-                                  ? t('products.viewSheet.yes')
-                                  : t('products.viewSheet.no')}
-                              </span>
-                            </div>
-                            <div className="flex items-center justify-between gap-3">
-                              <span className="text-gray-500">{t('products.viewSheet.fields.deliveryLocation')}</span>
-                              <span className="font-medium text-gray-900">
-                                {selectedProduct.delivery.location || t('products.table.na')}
-                              </span>
-                            </div>
-                            <div className="flex items-center justify-between gap-3">
-                              <span className="text-gray-500">{t('products.viewSheet.fields.deliveryPrice')}</span>
-                              <span className="font-medium text-gray-900">
-                                {selectedProduct.delivery.price || t('products.table.na')}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
-                  <div className="flex items-center justify-between gap-3">
-                    <div>
-                      <div className="text-xs font-semibold text-gray-500">{t('products.viewSheet.sections.description')}</div>
-                      <div className="mt-2 text-sm text-gray-800">{selectedProduct.description}</div>
-                    </div>
-                  </div>
-                  <div className="mt-4 flex flex-wrap items-center gap-2">
-                    {selectedProduct.tags.map((tag) => (
-                      <Badge
-                        key={tag}
-                        className="rounded-full border-gray-200 bg-gray-50 text-gray-700 hover:bg-gray-50"
-                      >
-                        {tag}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
-                  <div className="flex items-center justify-between gap-3">
-                    <div className="text-xs font-semibold text-gray-500">{t('products.viewSheet.sections.variants')}</div>
-                    <div className="text-xs font-semibold text-gray-700">
-                      {t('products.viewSheet.variantsCount', { count: selectedProduct.variants.length })}
-                    </div>
-                  </div>
-
-                  <div className="mt-4 overflow-hidden rounded-xl border border-gray-200">
-                    <div className="grid grid-cols-12 bg-gray-50 px-3 py-2 text-xs font-semibold text-gray-600">
-                      <div className="col-span-5">{t('products.viewSheet.table.variant')}</div>
-                      <div className="col-span-3">{t('products.viewSheet.table.sku')}</div>
-                      <div className="col-span-2 text-right">{t('products.viewSheet.table.stock')}</div>
-                      <div className="col-span-2 text-right">{t('products.viewSheet.table.price')}</div>
-                    </div>
-                    <div className="divide-y divide-gray-100">
-                      {selectedProduct.variants.map((v) => (
-                        <div key={v.id} className="grid grid-cols-12 px-3 py-3 text-sm">
-                          <div className="col-span-5 flex min-w-0 items-center gap-2">
-                            {v.color ? (
-                              <span
-                                className="h-2.5 w-2.5 shrink-0 rounded-full border border-gray-200"
-                                style={{ backgroundColor: v.color.hex }}
-                                title={v.color.name}
-                              />
-                            ) : null}
-                            <div className="truncate font-medium text-gray-900">{v.title}</div>
-                          </div>
-                          <div className="col-span-3 truncate text-gray-700">{v.sku}</div>
-                          <div className="col-span-2 text-right font-semibold text-gray-900">{v.stock}</div>
-                          <div className="col-span-2 text-right font-semibold text-gray-900">{v.price}</div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
-                  <div className="text-xs font-semibold text-gray-500">{t('products.viewSheet.sections.staff')}</div>
-                  <div className="mt-3 grid grid-cols-1 gap-3 text-sm sm:grid-cols-2">
-                    <div className="flex items-center justify-between gap-3 rounded-xl border border-gray-200 bg-gray-50 px-3 py-2">
-                      <span className="text-gray-500">{t('products.viewSheet.fields.createdBy')}</span>
-                      <span className="font-medium text-gray-900">{selectedProduct.staff.createdBy}</span>
-                    </div>
-                    <div className="flex items-center justify-between gap-3 rounded-xl border border-gray-200 bg-gray-50 px-3 py-2">
-                      <span className="text-gray-500">{t('products.viewSheet.fields.updatedBy')}</span>
-                      <span className="font-medium text-gray-900">{selectedProduct.staff.updatedBy}</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-        </ScrollArea>
-      </SheetContent>
-
-      <Dialog open={createOpen} onOpenChange={setCreateOpen}>
-        <DialogContent className="max-h-[85vh] w-[calc(100vw-24px)] max-w-4xl overflow-hidden rounded-2xl border border-gray-200 bg-white p-0 shadow-xl">
-          <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr]">
-            <div className="border-b border-gray-100 bg-gray-50 p-5 lg:border-b-0 lg:border-r">
-              <div className="flex items-center justify-between gap-3">
-                <div>
-                  <DialogTitle className="text-lg font-semibold text-gray-900">
-                    {isEditMode ? 'Edit Product' : t('products.create.title')}
-                  </DialogTitle>
-                  <DialogDescription className="mt-1 text-sm text-gray-600">
-                    {isEditMode ? 'Update product information and settings' : t('products.create.subtitle')}
-                  </DialogDescription>
-                </div>
-              </div>
-
-              <div className="mt-5 space-y-2">
-                {createSteps.map((s, idx) => {
-                  const active = idx === createStep
-                  const done = idx < createStep
-                  const enabled = isStepEnabled(idx)
-                  return (
-                    <button
-                      key={s.key}
-                      type="button"
-                      onClick={() => setCreateStep(idx)}
-                      className={cn(
-                        'flex w-full items-start gap-3 rounded-xl border px-3 py-2 text-left transition-colors',
-                        active
-                          ? 'border-brand-200 bg-white text-brand-900'
-                          : 'border-transparent bg-transparent text-gray-700 hover:bg-white',
-                        done ? 'opacity-100' : 'opacity-90'
-                      )}
-                    >
-                      <span
-                        className={cn(
-                          'mt-0.5 flex h-5 w-5 items-center justify-center rounded-full border text-xs font-bold',
-                          active
-                            ? 'border-brand-200 bg-brand-50 text-brand-900'
-                            : done
-                              ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
-                              : 'border-gray-200 bg-white text-gray-700'
-                        )}
-                      >
-                        {done ? <Check className="h-3.5 w-3.5" /> : idx + 1}
-                      </span>
-                      <span className="min-w-0">
-                        <span className="block text-sm font-semibold">
-                          {s.title}{' '}
-                          {!enabled ? (
-                            <span className="ml-2 inline-flex items-center rounded-full border border-gray-200 bg-gray-50 px-2 py-0.5 text-[11px] font-semibold text-gray-700">
-                              {t('products.create.sections.skippedPill')}
-                            </span>
-                          ) : null}
-                        </span>
-                        <span className="mt-0.5 block text-xs font-medium text-gray-500">{s.description}</span>
-                      </span>
-                    </button>
-                  )
-                })}
-              </div>
-            </div>
-
-            <div className="flex max-h-[85vh] flex-col">
-              <DialogHeader className="border-b border-gray-100 px-6 py-4">
-                <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <DialogTitle className="text-lg font-semibold text-gray-900">{createSteps[createStep]?.title}</DialogTitle>
-                    <DialogDescription className="mt-1 text-sm text-gray-600">
-                      {createSteps[createStep]?.description}
-                    </DialogDescription>
-                  </div>
-                </div>
-              </DialogHeader>
-
-              <ScrollArea className="h-full">
-                <div className="space-y-4 px-6 py-6">
-                  {createStep === 0 ? (
-                    <div className="space-y-4">
-                      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                        <div className="space-y-2">
-                          <Label className="text-sm font-semibold text-gray-700">{t('products.create.fields.name')}</Label>
-                          <Input
-                            value={draftProduct.name}
-                            onChange={(e) => setDraftProduct((p) => ({ ...p, name: e.target.value }))}
-                            placeholder={t('products.create.fields.namePlaceholder')}
-                            className="h-10 rounded-xl border-gray-200 bg-white"
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label className="text-sm font-semibold text-gray-700">{t('products.create.fields.vendor')}</Label>
-                          <Input
-                            value={draftProduct.vendor}
-                            onChange={(e) => setDraftProduct((p) => ({ ...p, vendor: e.target.value }))}
-                            placeholder={t('products.create.fields.vendorPlaceholder')}
-                            className="h-10 rounded-xl border-gray-200 bg-white"
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label className="text-sm font-semibold text-gray-700">{t('products.create.fields.category')}</Label>
-                          <Input
-                            value={draftProduct.category}
-                            onChange={(e) => setDraftProduct((p) => ({ ...p, category: e.target.value }))}
-                            placeholder={t('products.create.fields.categoryPlaceholder')}
-                            className="h-10 rounded-xl border-gray-200 bg-white"
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label className="text-sm font-semibold text-gray-700">{t('products.create.fields.status')}</Label>
-                          <select
-                            value={draftProduct.status}
-                            onChange={(e) => setDraftProduct((p) => ({ ...p, status: e.target.value as ProductStatus }))}
-                            className="h-10 w-full rounded-xl border border-gray-200 bg-white px-3 text-sm text-gray-900"
-                          >
-                            <option value="draft">{t('products.status.draft')}</option>
-                            <option value="active">{t('products.status.active')}</option>
-                            <option value="archived">{t('products.status.archived')}</option>
-                          </select>
-                        </div>
-                      </div>
-                      <div className="space-y-2">
-                        <Label className="text-sm font-semibold text-gray-700">{t('products.create.fields.description')}</Label>
-                        <Textarea
-                          value={draftProduct.description}
-                          onChange={(e) => setDraftProduct((p) => ({ ...p, description: e.target.value }))}
-                          placeholder={t('products.create.fields.descriptionPlaceholder')}
-                          className="min-h-[120px] rounded-xl border-gray-200 bg-white"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label className="text-sm font-semibold text-gray-700">{t('products.create.fields.tags')}</Label>
-                        <Input
-                          value={draftProduct.tags}
-                          onChange={(e) => setDraftProduct((p) => ({ ...p, tags: e.target.value }))}
-                          placeholder={t('products.create.fields.tagsPlaceholder')}
-                          className="h-10 rounded-xl border-gray-200 bg-white"
-                        />
-                        <div className="text-xs font-medium text-gray-500">{t('products.create.fields.tagsHint')}</div>
-                      </div>
-                    </div>
-                  ) : null}
-
-                  {createStep === 1 ? (
-                    <div className="space-y-4">
-                      <div className="flex items-center justify-between gap-3 rounded-2xl border border-gray-200 bg-white px-4 py-3 shadow-sm">
-                        <div className="min-w-0">
-                          <div className="text-sm font-semibold text-gray-900">{t('products.create.sections.applies')}</div>
-                          <div className="mt-0.5 text-xs font-medium text-gray-500">{t('products.create.sections.mediaHint')}</div>
-                        </div>
-                        <Switch
-                          checked={draftProduct.mediaSectionEnabled}
-                          onCheckedChange={(v) => setSectionEnabled('media', Boolean(v))}
-                        />
-                      </div>
-
-                      {!draftProduct.mediaSectionEnabled ? (
-                        <div className="rounded-2xl border border-dashed border-gray-200 bg-gray-50 p-6">
-                          <div className="text-sm font-semibold text-gray-900">{t('products.create.sections.skippedTitle')}</div>
-                          <div className="mt-1 text-sm text-gray-600">{t('products.create.sections.skippedBody')}</div>
-                          <div className="mt-4">
-                            <Button
-                              type="button"
-                              onClick={() => setSectionEnabled('media', true)}
-                              className="h-10 rounded-xl bg-brand-900 text-white hover:bg-brand-800"
-                            >
-                              {t('products.create.sections.enable')}
-                            </Button>
-                          </div>
-                        </div>
-                      ) : null}
-
-                      {draftProduct.mediaSectionEnabled ? (
-                      <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
-                        <div className="flex items-center justify-between gap-3">
-                          <div>
-                            <div className="text-sm font-semibold text-gray-900">{t('products.create.media.addImages')}</div>
-                            <div className="mt-1 text-xs font-medium text-gray-500">{t('products.create.media.addImagesHint')}</div>
-                          </div>
-                        </div>
-
-                        <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                          <div className="text-xs font-medium text-gray-600">{t('products.create.media.uploadHint')}</div>
-                          <div>
-                            <input
-                              id={mediaUploadInputId}
-                              type="file"
-                              accept="image/*"
-                              multiple
-                              className="hidden"
-                              onChange={(e) => {
-                                const files = Array.from(e.target.files ?? [])
-                                const urls: string[] = []
-                                for (const f of files) urls.push(URL.createObjectURL(f))
-                                addImages(urls)
-                                e.target.value = ''
-                              }}
-                            />
-                            <Button
-                              type="button"
-                              variant="outline"
-                              onClick={() => document.getElementById(mediaUploadInputId)?.click()}
-                              className="h-10 rounded-xl border-gray-200 bg-white text-gray-700 hover:bg-brand-50 hover:text-brand-900"
-                            >
-                              <Plus className="mr-2 h-4 w-4" />
-                              {t('products.create.media.upload')}
-                            </Button>
-                          </div>
-                        </div>
-
-                        <div className="mt-4 flex flex-col gap-3 sm:flex-row">
-                          <Input
-                            value={draftProduct.newImageUrl}
-                            onChange={(e) => setDraftProduct((p) => ({ ...p, newImageUrl: e.target.value }))}
-                            placeholder={t('products.create.media.urlPlaceholder')}
-                            className="h-10 flex-1 rounded-xl border-gray-200 bg-white"
-                          />
-                          <Button
-                            type="button"
-                            onClick={() => {
-                              const url = draftProduct.newImageUrl.trim()
-                              if (!url) return
-                              addImages([url])
-                              setDraftProduct((p) => ({ ...p, newImageUrl: '' }))
-                            }}
-                            className="h-10 rounded-xl bg-brand-900 text-white hover:bg-brand-800"
-                          >
-                            <Plus className="mr-2 h-4 w-4" />
-                            {t('products.create.media.add')}
-                          </Button>
-                        </div>
-
-                        {draftProduct.images.length > 0 ? (
-                          <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
-                            {draftProduct.images.map((url) => (
-                              <div key={url} className="group relative overflow-hidden rounded-2xl border border-gray-200 bg-gray-50">
-                                <img
-                                  src={url}
-                                  alt={draftProduct.name || t('products.create.media.defaultAlt')}
-                                  className="h-28 w-full object-cover"
-                                  loading="lazy"
-                                />
-                                <div className="absolute inset-0 hidden items-end justify-between bg-gradient-to-t from-black/50 to-transparent p-2 group-hover:flex">
-                                  <button
-                                    type="button"
-                                    onClick={() => openZoom(url)}
-                                    className="inline-flex h-8 items-center gap-2 rounded-lg bg-white/90 px-2 text-xs font-semibold text-gray-900"
-                                  >
-                                    <ZoomIn className="h-3.5 w-3.5" />
-                                    {t('products.create.media.zoom')}
-                                  </button>
-                                  <button
-                                    type="button"
-                                    onClick={() => removeImage(url)}
-                                    className="inline-flex h-8 items-center rounded-lg bg-white/90 px-2 text-xs font-semibold text-gray-900"
-                                  >
-                                    {t('products.create.media.remove')}
-                                  </button>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        ) : (
-                          <div className="mt-4 rounded-2xl border border-dashed border-gray-200 bg-gray-50 p-6 text-sm text-gray-600">
-                            {t('products.create.media.empty')}
-                          </div>
-                        )}
-                      </div>
-                      ) : null}
-                    </div>
-                  ) : null}
-
-                  {createStep === 2 ? (
-                    <div className="space-y-4">
-                      <div className="flex items-center justify-between gap-3 rounded-2xl border border-gray-200 bg-white px-4 py-3 shadow-sm">
-                        <div className="min-w-0">
-                          <div className="text-sm font-semibold text-gray-900">{t('products.create.sections.applies')}</div>
-                          <div className="mt-0.5 text-xs font-medium text-gray-500">{t('products.create.sections.variantsHint')}</div>
-                        </div>
-                        <Switch
-                          checked={draftProduct.variantsSectionEnabled}
-                          onCheckedChange={(v) => setSectionEnabled('variants', Boolean(v))}
-                        />
-                      </div>
-
-                      {!draftProduct.variantsSectionEnabled ? (
-                        <div className="rounded-2xl border border-dashed border-gray-200 bg-gray-50 p-6">
-                          <div className="text-sm font-semibold text-gray-900">{t('products.create.sections.skippedTitle')}</div>
-                          <div className="mt-1 text-sm text-gray-600">{t('products.create.sections.skippedBody')}</div>
-                          <div className="mt-4">
-                            <Button
-                              type="button"
-                              onClick={() => setSectionEnabled('variants', true)}
-                              className="h-10 rounded-xl bg-brand-900 text-white hover:bg-brand-800"
-                            >
-                              {t('products.create.sections.enable')}
-                            </Button>
-                          </div>
-                        </div>
-                      ) : null}
-
-                      {draftProduct.variantsSectionEnabled ? (
-                        <>
-                          <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
-                            <div className="text-sm font-semibold text-gray-900">{t('products.create.variants.colors')}</div>
-                            <div className="mt-1 text-xs font-medium text-gray-500">{t('products.create.variants.colorsHint')}</div>
-                            <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
-                              {draftProduct.colors.map((c, idx) => (
-                                <div key={`${c.name}-${idx}`} className="flex items-center gap-3 rounded-xl border border-gray-200 bg-white p-3">
-                                  <label
-                                    htmlFor={`products-create-color-${idx}`}
-                                    className="inline-flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-xl border border-gray-200 bg-white"
-                                    title={t('products.create.variants.colorPickerAria')}
-                                  >
-                                    <span className="h-7 w-7 rounded-lg" style={{ backgroundColor: c.hex }} />
-                                  </label>
-                                  <input
-                                    id={`products-create-color-${idx}`}
-                                    type="color"
-                                    value={c.hex}
-                                    onChange={(e) =>
-                                      setDraftProduct((p) => {
-                                        const nextHex = e.target.value
-                                        const next = [...p.colors]
-                                        const prevName = next[idx]?.name ?? ''
-                                        next[idx] = {
-                                          ...next[idx],
-                                          hex: nextHex,
-                                          name: prevName.trim().length > 0 ? '' : prevName,
-                                        }
-                                        return { ...p, colors: next }
-                                      })
-                                    }
-                                    aria-label={t('products.create.variants.colorPickerAria')}
-                                    className="h-0 w-0 overflow-hidden opacity-0"
-                                  />
-                                  <Input
-                                    value={c.name}
-                                    onChange={(e) =>
-                                      setDraftProduct((p) => {
-                                        const next = [...p.colors]
-                                        next[idx] = { ...next[idx], name: e.target.value }
-                                        return { ...p, colors: next }
-                                      })
-                                    }
-                                    className="h-9 flex-1 rounded-lg border-gray-200 bg-white"
-                                    placeholder={t('products.create.variants.colorNamePlaceholder')}
-                                  />
-                                  <Button
-                                    type="button"
-                                    variant="ghost"
-                                    size="icon"
-                                    onClick={() =>
-                                      setDraftProduct((p) => ({
-                                        ...p,
-                                        colors: p.colors.filter((_, i) => i !== idx),
-                                      }))
-                                    }
-                                    className="h-9 w-9 rounded-lg text-gray-700 hover:bg-brand-50 hover:text-brand-900"
-                                    aria-label={t('products.create.variants.removeColorAria')}
-                                  >
-                                    <X className="h-4 w-4" />
-                                  </Button>
-                                </div>
-                              ))}
-                            </div>
-                            <div className="mt-4">
-                              <Button
-                                type="button"
-                                variant="outline"
-                                onClick={() =>
-                                  setDraftProduct((p) => ({
-                                    ...p,
-                                    colors: [...p.colors, { name: '', hex: '#111827' }],
-                                  }))
-                                }
-                                className="h-9 rounded-lg border-gray-200 bg-white text-gray-700 hover:bg-brand-50 hover:text-brand-900"
-                              >
-                                <Plus className="mr-2 h-4 w-4" />
-                                {t('products.create.variants.addColor')}
-                              </Button>
-                            </div>
-                          </div>
-
-                          <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
-                            <div className="text-sm font-semibold text-gray-900">{t('products.create.variants.sizes')}</div>
-                            <div className="mt-1 text-xs font-medium text-gray-500">{t('products.create.variants.sizesHint')}</div>
-                            <div className="mt-4 flex flex-wrap gap-2">
-                              {draftProduct.sizes.map((s) => (
-                                <button
-                                  key={s}
-                                  type="button"
-                                  onClick={() =>
-                                    setDraftProduct((p) => ({
-                                      ...p,
-                                      sizes: p.sizes.filter((x) => x !== s),
-                                    }))
-                                  }
-                                  className="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-gray-50 px-3 py-1 text-sm font-semibold text-gray-800"
-                                >
-                                  {s}
-                                  <span className="text-gray-500">×</span>
-                                </button>
-                              ))}
-                            </div>
-                            <div className="mt-4 flex flex-col gap-3 sm:flex-row">
-                              <Input
-                                value={draftProduct.models.join(', ')}
-                                onChange={(e) =>
-                                  setDraftProduct((p) => ({
-                                    ...p,
-                                    models: e.target.value
-                                      .split(',')
-                                      .map((x) => x.trim())
-                                      .filter(Boolean),
-                                  }))
-                                }
-                                placeholder={t('products.create.variants.modelsPlaceholder')}
-                                className="h-10 flex-1 rounded-xl border-gray-200 bg-white"
-                              />
-                            </div>
-                          </div>
-                        </>
-                      ) : null}
-                    </div>
-                  ) : null}
-
-                  {createStep === 3 ? (
-                    <div className="space-y-4">
-                      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                        <div className="space-y-2">
-                          <Label className="text-sm font-semibold text-gray-700">{t('products.create.pricing.price')}</Label>
-                          <Input
-                            value={draftProduct.price}
-                            onChange={(e) => setDraftProduct((p) => ({ ...p, price: e.target.value }))}
-                            placeholder={t('products.create.pricing.pricePlaceholder')}
-                            className="h-10 rounded-xl border-gray-200 bg-white"
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label className="text-sm font-semibold text-gray-700">{t('products.create.pricing.compareAt')}</Label>
-                          <Input
-                            value={draftProduct.compareAt}
-                            onChange={(e) => setDraftProduct((p) => ({ ...p, compareAt: e.target.value }))}
-                            placeholder={t('products.create.pricing.compareAtPlaceholder')}
-                            className="h-10 rounded-xl border-gray-200 bg-white"
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label className="text-sm font-semibold text-gray-700">{t('products.create.pricing.cost')}</Label>
-                          <Input
-                            value={draftProduct.cost}
-                            onChange={(e) => setDraftProduct((p) => ({ ...p, cost: e.target.value }))}
-                            placeholder={t('products.create.pricing.costPlaceholder')}
-                            className="h-10 rounded-xl border-gray-200 bg-white"
-                          />
-                        </div>
-                        <div className="rounded-2xl border border-gray-200 bg-gray-50 p-4 text-sm text-gray-700">
-                          <div className="flex items-center gap-2 font-semibold text-gray-900">
-                            <Sparkles className="h-4 w-4" />
-                            {t('products.create.pricing.smartHintTitle')}
-                          </div>
-                          <div className="mt-2 text-sm text-gray-600">{t('products.create.pricing.smartHintBody')}</div>
-                        </div>
-                      </div>
-                    </div>
-                  ) : null}
-
-                  {createStep === 4 ? (
-                    <div className="space-y-4">
-                      <div className="flex items-center justify-between gap-3 rounded-2xl border border-gray-200 bg-white px-4 py-3 shadow-sm">
-                        <div className="min-w-0">
-                          <div className="text-sm font-semibold text-gray-900">{t('products.create.sections.applies')}</div>
-                          <div className="mt-0.5 text-xs font-medium text-gray-500">{t('products.create.sections.deliveryHint')}</div>
-                        </div>
-                        <Switch
-                          checked={draftProduct.deliverySectionEnabled}
-                          onCheckedChange={(v) => setSectionEnabled('delivery', Boolean(v))}
-                        />
-                      </div>
-
-                      {!draftProduct.deliverySectionEnabled ? (
-                        <div className="rounded-2xl border border-dashed border-gray-200 bg-gray-50 p-6">
-                          <div className="text-sm font-semibold text-gray-900">{t('products.create.sections.skippedTitle')}</div>
-                          <div className="mt-1 text-sm text-gray-600">{t('products.create.sections.skippedBody')}</div>
-                          <div className="mt-4">
-                            <Button
-                              type="button"
-                              onClick={() => setSectionEnabled('delivery', true)}
-                              className="h-10 rounded-xl bg-brand-900 text-white hover:bg-brand-800"
-                            >
-                              {t('products.create.sections.enable')}
-                            </Button>
-                          </div>
-                        </div>
-                      ) : null}
-
-                      {draftProduct.deliverySectionEnabled ? (
-                        <>
-                          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                            <div className="space-y-2">
-                              <Label className="text-sm font-semibold text-gray-700">{t('products.create.delivery.enabled')}</Label>
-                              <select
-                                value={draftProduct.deliveryEnabled ? 'yes' : 'no'}
-                                onChange={(e) =>
-                                  setDraftProduct((p) => ({ ...p, deliveryEnabled: e.target.value === 'yes' }))
-                                }
-                                className="h-10 w-full rounded-xl border border-gray-200 bg-white px-3 text-sm text-gray-900"
-                              >
-                                <option value="yes">{t('products.viewSheet.yes')}</option>
-                                <option value="no">{t('products.viewSheet.no')}</option>
-                              </select>
-                            </div>
-                            <div className="space-y-2">
-                              <Label className="text-sm font-semibold text-gray-700">{t('products.create.delivery.location')}</Label>
-                              <Input
-                                value={draftProduct.deliveryLocation}
-                                onChange={(e) => setDraftProduct((p) => ({ ...p, deliveryLocation: e.target.value }))}
-                                placeholder={t('products.create.delivery.locationPlaceholder')}
-                                className="h-10 rounded-xl border-gray-200 bg-white"
-                              />
-                            </div>
-                            <div className="space-y-2">
-                              <Label className="text-sm font-semibold text-gray-700">{t('products.create.delivery.price')}</Label>
-                              <Input
-                                value={draftProduct.deliveryPrice}
-                                onChange={(e) => setDraftProduct((p) => ({ ...p, deliveryPrice: e.target.value }))}
-                                placeholder={t('products.create.delivery.pricePlaceholder')}
-                                className="h-10 rounded-xl border-gray-200 bg-white"
-                              />
-                            </div>
-                          </div>
-                          <div className="space-y-2">
-                            <Label className="text-sm font-semibold text-gray-700">{t('products.create.delivery.internalNote')}</Label>
-                            <Textarea
-                              value={draftProduct.internalNote}
-                              onChange={(e) => setDraftProduct((p) => ({ ...p, internalNote: e.target.value }))}
-                              placeholder={t('products.create.delivery.internalNotePlaceholder')}
-                              className="min-h-[120px] rounded-xl border-gray-200 bg-white"
-                            />
-                          </div>
-                        </>
-                      ) : null}
-                    </div>
-                  ) : null}
-
-                  {createStep === 5 ? (
-                    <div className="space-y-4">
-                      <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
-                        <div className="flex items-start justify-between gap-3">
-                          <div>
-                            <div className="text-sm font-semibold text-gray-900">{t('products.create.review.title')}</div>
-                            <div className="mt-1 text-xs font-medium text-gray-500">{t('products.create.review.subtitle')}</div>
-                          </div>
-                          <Badge className="rounded-full border-gray-200 bg-gray-50 text-gray-700 hover:bg-gray-50">
-                            {statusLabel(draftProduct.status)}
-                          </Badge>
-                        </div>
-
-                        <Separator className="my-4" />
-
-                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                          <div className="space-y-1">
-                            <div className="text-xs font-semibold text-gray-500">{t('products.create.fields.name')}</div>
-                            <div className="text-sm font-semibold text-gray-900">{draftProduct.name || t('products.table.na')}</div>
-                          </div>
-                          <div className="space-y-1">
-                            <div className="text-xs font-semibold text-gray-500">{t('products.create.fields.vendor')}</div>
-                            <div className="text-sm font-semibold text-gray-900">{draftProduct.vendor || t('products.table.na')}</div>
-                          </div>
-                          <div className="space-y-1">
-                            <div className="text-xs font-semibold text-gray-500">{t('products.create.fields.category')}</div>
-                            <div className="text-sm font-semibold text-gray-900">{draftProduct.category || t('products.table.na')}</div>
-                          </div>
-                          <div className="space-y-1">
-                            <div className="text-xs font-semibold text-gray-500">{t('products.create.pricing.price')}</div>
-                            <div className="text-sm font-semibold text-gray-900">{draftProduct.price || t('products.table.na')}</div>
-                          </div>
-                        </div>
-
-                        <div className="mt-4 rounded-2xl border border-gray-200 bg-gray-50 p-4">
-                          <div className="flex items-center gap-2 text-sm font-semibold text-gray-900">
-                            <Sparkles className="h-4 w-4" />
-                            {t('products.create.review.nextTitle')}
-                          </div>
-                          <div className="mt-2 text-sm text-gray-600">{t('products.create.review.nextBody')}</div>
-                        </div>
-                      </div>
-                    </div>
-                  ) : null}
-                </div>
-              </ScrollArea>
-
-              <div className="border-t border-gray-100 px-6 py-4">
-                <div className="flex flex-col-reverse gap-2 sm:flex-row sm:items-center sm:justify-between">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={closeCreate}
-                    className="h-10 rounded-xl border-gray-200 bg-white text-gray-700 hover:bg-brand-50 hover:text-brand-900"
-                  >
-                    {t('products.create.cancel')}
-                  </Button>
-
-                  <div className="flex items-center justify-end gap-2">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={prevStep}
-                      disabled={createStep === 0}
-                      className="h-10 rounded-xl border-gray-200 bg-white text-gray-700 hover:bg-brand-50 hover:text-brand-900 disabled:opacity-50"
-                    >
-                      <ChevronLeft className="mr-2 h-4 w-4" />
-                      {t('products.create.back')}
-                    </Button>
-                    {createStep < createSteps.length - 1 ? (
-                      <Button
-                        type="button"
-                        onClick={nextStep}
-                        disabled={!canGoNext}
-                        className="h-10 rounded-xl bg-brand-900 text-white hover:bg-brand-800 disabled:opacity-50"
-                      >
-                        {t('products.create.next')}
-                        <ChevronRight className="ml-2 h-4 w-4" />
-                      </Button>
-                    ) : (
-                      <Button
-                        type="button"
-                        onClick={() => {
-                          if (isEditMode) {
-                            console.log('Updating product:', editingProductId, draftProduct)
-                            setCreateOpen(false)
-                            setCreateStep(0)
-                            setIsEditMode(false)
-                            setEditingProductId(null)
-                          } else {
-                            setCreateOpen(false)
-                            setCreateStep(0)
-                            const q = draftProduct.name.trim()
-                            router.push(`/dashboard/inventory?q=${encodeURIComponent(q)}&action=restock`)
-                          }
-                        }}
-                        className="h-10 rounded-xl bg-brand-900 text-white hover:bg-brand-800"
-                      >
-                        {isEditMode ? (
-                          <>
-                            <Check className="mr-2 h-4 w-4" />
-                            Update Product
-                          </>
-                        ) : (
-                          <>
-                            <Sparkles className="mr-2 h-4 w-4" />
-                            {t('products.create.finish')}
-                          </>
-                        )}
-                      </Button>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      <Dialog open={zoomOpen} onOpenChange={setZoomOpen}>
-        <DialogContent className="w-[calc(100vw-24px)] max-w-5xl overflow-hidden rounded-2xl border border-gray-200 bg-white p-0 shadow-xl">
-          <div className="border-b border-gray-100 px-6 py-4">
-            <DialogHeader>
-              <DialogTitle className="text-lg font-semibold text-gray-900">{t('products.zoom.title')}</DialogTitle>
-              <DialogDescription className="mt-1 text-sm text-gray-600">{t('products.zoom.subtitle')}</DialogDescription>
-            </DialogHeader>
-          </div>
-          <div className="bg-black">
-            {zoomUrl ? (
-              <img src={zoomUrl} alt={t('products.zoom.alt')} className="max-h-[70vh] w-full object-contain" />
-            ) : (
-              <div className="flex h-[50vh] items-center justify-center text-white">{t('products.table.na')}</div>
-            )}
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
-        <DialogContent className="max-w-md overflow-hidden rounded-2xl border border-gray-200 bg-white p-0 shadow-xl">
-          <div className="border-b border-gray-100 px-6 py-4">
-            <DialogHeader>
-              <div className="flex items-center gap-3">
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-rose-50">
-                  <AlertTriangle className="h-6 w-6 text-rose-600" />
-                </div>
-                <div>
-                  <DialogTitle className="text-lg font-semibold text-gray-900">Delete Product</DialogTitle>
-                  <DialogDescription className="mt-1 text-sm text-gray-600">
-                    This action cannot be undone
-                  </DialogDescription>
-                </div>
-              </div>
-            </DialogHeader>
-          </div>
-
-          <div className="px-6 py-4">
-            <div className="space-y-4">
-              <div className="rounded-xl border border-rose-200 bg-rose-50 p-4">
-                <p className="text-sm font-medium text-rose-900">
-                  You are about to delete <span className="font-bold">{productToDelete?.name}</span>
-                </p>
-                <p className="mt-2 text-sm text-rose-700">
-                  This will permanently remove:
-                </p>
-                <ul className="mt-2 space-y-1 text-sm text-rose-700">
-                  <li className="flex items-start gap-2">
-                    <span className="mt-0.5 text-rose-500">•</span>
-                    <span>The product and all its variants</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="mt-0.5 text-rose-500">•</span>
-                    <span>{productToDelete?.stock || 0} units from inventory</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="mt-0.5 text-rose-500">•</span>
-                    <span>All product images and media</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="mt-0.5 text-rose-500">•</span>
-                    <span>Sales history and analytics data</span>
-                  </li>
-                </ul>
-              </div>
-
-              <div className="rounded-xl border border-amber-200 bg-amber-50 p-4">
-                <div className="flex gap-3">
-                  <AlertTriangle className="h-5 w-5 shrink-0 text-amber-600" />
-                  <div>
-                    <p className="text-sm font-medium text-amber-900">
-                      Impact on Active Orders
-                    </p>
-                    <p className="mt-1 text-sm text-amber-700">
-                      If this product is part of any pending orders, those orders may be affected. Consider archiving instead of deleting.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="border-t border-gray-100 px-6 py-4">
-            <div className="flex items-center justify-end gap-3">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setDeleteOpen(false)}
-                className="h-10 rounded-xl border-gray-200 bg-white text-gray-700 hover:bg-gray-50"
-              >
-                Cancel
-              </Button>
-              <Button
-                type="button"
-                onClick={handleDelete}
-                className="h-10 rounded-xl bg-rose-600 text-white hover:bg-rose-700"
-              >
-                <Trash2 className="mr-2 h-4 w-4" />
-                Delete Product
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
+      <DeleteConfirmationDialog
+        open={deleteOpen}
+        onOpenChange={setDeleteOpen}
+        onConfirm={handleDelete}
+        title="Delete Product"
+        description="This action cannot be undone"
+        itemName={productToDelete?.name || ''}
+        warningMessage="You are about to delete"
+        deleteItems={[
+          { label: 'The product and all its variants' },
+          { label: 'units from inventory', value: productToDelete?.stock || 0 },
+          { label: 'All product images and media' },
+          { label: 'Sales history and analytics data' },
+        ]}
+        impactTitle="Impact on Active Orders"
+        impactMessage="If this product is part of any pending orders, those orders may be affected. Consider archiving instead of deleting."
+        confirmButtonText="Delete Product"
+        cancelButtonText="Cancel"
+      />
     </Sheet>
   )
 }

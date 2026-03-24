@@ -1,4 +1,12 @@
 {
+  "common": {
+    "table": {
+      "showing": "Kwerekana {from}-{to} muri {total}",
+      "rowsPerPage": "Imirongo ku rupapuro",
+      "previous": "Ibanze",
+      "next": "Ikurikira"
+    }
+  },
   "hero": {
     "title": "Icyagufasha gukoresha Next.js"
   },
@@ -476,16 +484,22 @@
         },
         "steps": {
           "basics": "Ibanze",
+          "basicsDesc": "Izina, icyiciro, vendor, n'ibisobanuro.",
           "basicsDescription": "Izina, icyiciro, vendor, n'ibisobanuro.",
           "media": "Amafoto",
-          "mediaDescription": "Ongeraho amafoto, urebe gallery.",
-          "variants": "Variants",
-          "variantsDescription": "Amabara, sizes, models, n'ibindi.",
+          "mediaDesc": "Shyiraho amafoto urebe gallery.",
+          "mediaDescription": "Shyiraho amafoto urebe gallery.",
+          "variants": "Ubwoko",
+          "variantsDesc": "Amabara, ingano, uburyo, n'ibindi.",
+          "variantsDescription": "Amabara, ingano, uburyo, n'ibindi.",
           "pricing": "Ibiciro",
-          "pricingDescription": "Shyiraho igiciro n'igiciro cya kera.",
-          "delivery": "Delivery",
-          "deliveryDescription": "Aho byoherezwa n'igiciro.",
-          "review": "Isuzuma",
+          "pricingDesc": "Shyiraho igiciro n'igiciro cyo kugereranya.",
+          "pricingDescription": "Shyiraho igiciro n'igiciro cyo kugereranya.",
+          "delivery": "Gutanga",
+          "deliveryDesc": "Aho utanga n'ibiciro.",
+          "deliveryDescription": "Aho utanga n'ibiciro.",
+          "review": "Subiramo",
+          "reviewDesc": "Emeza ibisobanuro mbere yo kubika.",
           "reviewDescription": "Emeza ibisobanuro mbere yo kubika."
         },
         "fields": {

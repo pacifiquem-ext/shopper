@@ -11,6 +11,7 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { cn } from '@/lib/utils'
+import { useTranslations } from 'next-intl'
 import * as React from 'react'
 
 type RowId = string | number
@@ -34,12 +35,6 @@ type DataTableProps<T> = {
   enablePagination?: boolean
   defaultPageSize?: number
   pageSizeOptions?: number[]
-  paginationLabels?: {
-    previous: string
-    next: string
-    rowsPerPage: string
-    showing: (from: number, to: number, total: number) => string
-  }
   className?: string
 }
 
@@ -54,9 +49,10 @@ export function DataTable<T>({
   enablePagination = false,
   defaultPageSize = 10,
   pageSizeOptions = [10, 20, 50],
-  paginationLabels,
   className,
 }: DataTableProps<T>) {
+  const t = useTranslations('common')
+  
   const [selected, setSelected] = React.useState<Set<RowId>>(
     () => new Set(defaultSelectedIds ?? [])
   )
@@ -121,9 +117,11 @@ export function DataTable<T>({
   const canPrev = enablePagination && safePage > 1
   const canNext = enablePagination && safePage < totalPages
 
-  const showingText = paginationLabels
-    ? paginationLabels.showing(total === 0 ? 0 : startIndex + 1, endIndex, total)
-    : `${total === 0 ? 0 : startIndex + 1}-${endIndex} / ${total}`
+  const showingText = t('table.showing', {
+    from: total === 0 ? 0 : startIndex + 1,
+    to: endIndex,
+    total,
+  })
 
   return (
     <div className={cn('w-full', className)}>
@@ -199,7 +197,7 @@ export function DataTable<T>({
           <div className="flex flex-wrap items-center justify-end gap-2">
             <div className="flex items-center gap-2">
               <div className="text-xs font-medium text-gray-500">
-                {paginationLabels?.rowsPerPage ?? 'Rows per page'}
+                {t('table.rowsPerPage')}
               </div>
               <Select value={String(pageSize)} onValueChange={(v) => setPageSize(Number(v))}>
                 <SelectTrigger className="h-8 w-[90px] rounded-lg border-gray-200 bg-white text-xs">
@@ -222,7 +220,7 @@ export function DataTable<T>({
                 disabled={!canPrev}
                 className="h-8 rounded-lg border border-gray-200 bg-white px-3 text-xs font-semibold text-gray-700 transition-colors hover:bg-brand-50 hover:text-brand-900 disabled:cursor-not-allowed disabled:opacity-50"
               >
-                {paginationLabels?.previous ?? 'Previous'}
+                {t('table.previous')}
               </button>
 
               <div className="flex items-center gap-1">
@@ -253,7 +251,7 @@ export function DataTable<T>({
                 disabled={!canNext}
                 className="h-8 rounded-lg border border-gray-200 bg-white px-3 text-xs font-semibold text-gray-700 transition-colors hover:bg-brand-50 hover:text-brand-900 disabled:cursor-not-allowed disabled:opacity-50"
               >
-                {paginationLabels?.next ?? 'Next'}
+                {t('table.next')}
               </button>
             </div>
           </div>

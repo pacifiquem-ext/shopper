@@ -2,15 +2,10 @@
 
 import { KpiStatCard } from '@/components/dashboard/shared/kpi-stat-card'
 import { StockBadge } from '@/components/dashboard/shared/status-badges'
+import { InventoryViewSheet } from '@/components/dashboard/inventory/inventory-view-sheet'
+import { InventoryAdjustDialog } from '@/components/dashboard/inventory/inventory-adjust-dialog'
 import { Button } from '@/components/ui/button'
 import { DataTable, type DataTableColumn } from '@/components/ui/data-table'
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -20,7 +15,6 @@ import {
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { ScrollArea } from '@/components/ui/scroll-area'
 import {
   Select,
   SelectContent,
@@ -28,9 +22,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Separator } from '@/components/ui/separator'
 import { Slider } from '@/components/ui/slider'
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import type {
   InventoryRow,
@@ -49,11 +41,7 @@ import {
   MoreHorizontal,
   Package,
   Plus,
-  Printer,
   Search,
-  ShieldCheck,
-  Truck,
-  Warehouse,
 } from 'lucide-react'
 import { useSearchParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
@@ -326,34 +314,6 @@ export default function InventoryPage() {
     }
   }, [rows, searchParams])
 
-  const downloadAsPdf = () => {
-    if (!selectedProduct) return
-
-    const content = document.querySelector('[data-product-print]')
-    if (!(content instanceof HTMLElement)) return
-
-    const win = window.open('', '_blank', 'noopener,noreferrer,width=1100,height=800')
-    if (!win) return
-
-    win.document.open()
-    win.document.write(`<!doctype html><html><head><meta charset="utf-8" />`)
-    win.document.write(`<meta name="viewport" content="width=device-width, initial-scale=1" />`)
-    win.document.write(`<title>${selectedProduct.name}</title>`)
-    win.document.write(`<style>
-      :root { color-scheme: light; }
-      body { font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Noto Sans", "Liberation Sans", sans-serif; margin: 24px; color: #111827; }
-      h1,h2,h3 { margin: 0; }
-      table { width: 100%; border-collapse: collapse; }
-      th, td { text-align: left; padding: 10px 8px; border-bottom: 1px solid #e5e7eb; font-size: 13px; }
-      th { font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: #6b7280; }
-      @media print { body { margin: 0; } }
-    </style></head><body>`)
-    win.document.write(content.outerHTML)
-    win.document.write(`</body></html>`)
-    win.document.close()
-    win.focus()
-    win.print()
-  }
 
   const filteredRows = useMemo(() => {
     const q = query.trim().toLowerCase()
@@ -533,340 +493,22 @@ export default function InventoryPage() {
     <div className="flex w-full max-w-6xl flex-col gap-6">
       <h1 className="sr-only">{t('nav.inventory')}</h1>
 
-      <Sheet open={viewOpen} onOpenChange={setViewOpen}>
-        <SheetContent
-          side="right"
-          className="flex h-full w-full flex-col gap-0 border-gray-200 bg-white p-0 sm:max-w-[1000px]"
-        >
-          <SheetHeader className="border-b border-gray-200 p-5 text-left">
-            <div className="flex items-start justify-between gap-3">
-              <div className="min-w-0">
-                <SheetTitle className="truncate text-lg font-semibold text-gray-900">
-                  {selectedProduct
-                    ? t('inventory.viewSheet.titleWithName', { name: selectedProduct.name })
-                    : t('inventory.viewSheet.title')}
-                </SheetTitle>
-                <div className="mt-1 flex flex-wrap items-center gap-2 text-sm text-gray-600">
-                  <span>{selectedProduct?.sku ?? t('inventory.table.na')}</span>
-                  <span className="text-gray-300">•</span>
-                  <span className="inline-flex items-center gap-1">
-                    <Warehouse className="h-4 w-4 text-gray-500" />
-                    <span className="truncate">{selectedProduct?.vendor ?? t('inventory.table.na')}</span>
-                  </span>
-                </div>
-              </div>
+      <InventoryViewSheet
+        open={viewOpen}
+        onOpenChange={setViewOpen}
+        product={selectedProduct}
+        onOpenAdjust={openAdjust}
+      />
 
-              <div className="flex items-center gap-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => selectedProduct && openAdjust(selectedProduct.id, 'restock')}
-                  disabled={!selectedProduct}
-                  className="h-9 rounded-lg border-gray-200 bg-white text-gray-700 hover:bg-brand-50 hover:text-brand-900"
-                >
-                  <Plus className="h-4 w-4" />
-                  {t('inventory.viewSheet.addStock')}
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={downloadAsPdf}
-                  disabled={!selectedProduct}
-                  className="h-9 rounded-lg border-gray-200 bg-white text-gray-700 hover:bg-brand-50 hover:text-brand-900"
-                >
-                  <Printer className="h-4 w-4" />
-                  {t('inventory.viewSheet.downloadPdf')}
-                </Button>
-              </div>
-            </div>
-
-            {selectedProduct && (
-              <div className="mt-4 flex flex-wrap items-center gap-2">
-                <div className="rounded-xl border border-gray-200 bg-gray-50 px-3 py-2">
-                  <div className="text-[11px] font-semibold text-gray-500">{t('inventory.viewSheet.badges.stock')}</div>
-                  <div className="mt-1 text-sm font-semibold text-gray-900">
-                    {t('inventory.viewSheet.stockAvailable', { count: selectedProduct.stock.available })}
-                  </div>
-                </div>
-                <div className="rounded-xl border border-gray-200 bg-gray-50 px-3 py-2">
-                  <div className="text-[11px] font-semibold text-gray-500">{t('inventory.viewSheet.badges.status')}</div>
-                  <div className="mt-1">
-                    <StockBadge
-                      status={selectedProduct.status}
-                      labels={{
-                        inStock: t('inventory.status.inStock'),
-                        lowStock: t('inventory.status.lowStock'),
-                        outOfStock: t('inventory.status.outOfStock'),
-                      }}
-                    />
-                  </div>
-                </div>
-                <div className="rounded-xl border border-gray-200 bg-gray-50 px-3 py-2">
-                  <div className="text-[11px] font-semibold text-gray-500">{t('inventory.viewSheet.badges.updated')}</div>
-                  <div className="mt-1 text-sm font-semibold text-gray-900">{selectedProduct.stock.updatedAt}</div>
-                </div>
-              </div>
-            )}
-          </SheetHeader>
-
-          <ScrollArea className="h-full">
-            <div className="space-y-4 p-5">
-              <div data-product-print className="space-y-4">
-                <div className="flex items-start justify-between gap-4">
-                  <div>
-                    <div className="text-xl font-semibold text-gray-900">
-                      {selectedProduct?.name ?? t('inventory.table.na')}
-                    </div>
-                    <div className="mt-1 text-sm text-gray-600">
-                      {selectedProduct
-                        ? t('inventory.viewSheet.subtitle', {
-                            sku: selectedProduct.sku,
-                            category: selectedProduct.category,
-                          })
-                        : ''}
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <div className="text-xs font-semibold text-gray-500">{t('inventory.viewSheet.available')}</div>
-                    <div className="mt-1 text-2xl font-semibold text-gray-900">
-                      {selectedProduct?.stock.available ?? 0}
-                    </div>
-                  </div>
-                </div>
-
-                <Separator className="my-2" />
-
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                  <div className="rounded-2xl border border-gray-200 bg-white p-4">
-                    <div className="flex items-center gap-2 text-sm font-semibold text-gray-900">
-                      <Warehouse className="h-4 w-4 text-gray-600" />
-                      {t('inventory.viewSheet.sections.stock')}
-                    </div>
-                    <div className="mt-3 space-y-2 text-sm">
-                      <div className="flex items-center justify-between gap-3">
-                        <span className="text-gray-500">{t('inventory.viewSheet.fields.onHand')}</span>
-                        <span className="font-medium text-gray-900">{selectedProduct?.stock.onHand ?? 0}</span>
-                      </div>
-                      <div className="flex items-center justify-between gap-3">
-                        <span className="text-gray-500">{t('inventory.viewSheet.fields.reserved')}</span>
-                        <span className="font-medium text-gray-900">{selectedProduct?.stock.reserved ?? 0}</span>
-                      </div>
-                      <div className="flex items-center justify-between gap-3">
-                        <span className="text-gray-500">{t('inventory.viewSheet.fields.available')}</span>
-                        <span className="font-medium text-gray-900">{selectedProduct?.stock.available ?? 0}</span>
-                      </div>
-                      <div className="flex items-center justify-between gap-3">
-                        <span className="text-gray-500">{t('inventory.viewSheet.fields.reorderPoint')}</span>
-                        <span className="font-medium text-gray-900">{selectedProduct?.stock.reorderPoint ?? 0}</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="rounded-2xl border border-gray-200 bg-white p-4">
-                    <div className="flex items-center gap-2 text-sm font-semibold text-gray-900">
-                      <ShieldCheck className="h-4 w-4 text-gray-600" />
-                      {t('inventory.viewSheet.sections.product')}
-                    </div>
-                    <div className="mt-3 space-y-2 text-sm">
-                      <div className="flex items-center justify-between gap-3">
-                        <span className="text-gray-500">{t('inventory.viewSheet.fields.sku')}</span>
-                        <span className="font-medium text-gray-900">{selectedProduct?.sku ?? t('inventory.table.na')}</span>
-                      </div>
-                      <div className="flex items-center justify-between gap-3">
-                        <span className="text-gray-500">{t('inventory.viewSheet.fields.category')}</span>
-                        <span className="font-medium text-gray-900">{selectedProduct?.category ?? t('inventory.table.na')}</span>
-                      </div>
-                      <div className="flex items-center justify-between gap-3">
-                        <span className="text-gray-500">{t('inventory.viewSheet.fields.vendor')}</span>
-                        <span className="font-medium text-gray-900">{selectedProduct?.vendor ?? t('inventory.table.na')}</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                  <div className="rounded-2xl border border-gray-200 bg-white p-4">
-                    <div className="flex items-center gap-2 text-sm font-semibold text-gray-900">
-                      {t('inventory.viewSheet.sections.pricing')}
-                    </div>
-                    <div className="mt-3 space-y-2 text-sm">
-                      <div className="flex items-center justify-between gap-3">
-                        <span className="text-gray-500">{t('inventory.viewSheet.fields.price')}</span>
-                        <span className="font-medium text-gray-900">{selectedProduct?.pricing.price ?? t('inventory.table.na')}</span>
-                      </div>
-                      <div className="flex items-center justify-between gap-3">
-                        <span className="text-gray-500">{t('inventory.viewSheet.fields.cost')}</span>
-                        <span className="font-medium text-gray-900">{selectedProduct?.pricing.cost ?? t('inventory.table.na')}</span>
-                      </div>
-                      <div className="flex items-center justify-between gap-3">
-                        <span className="text-gray-500">{t('inventory.viewSheet.fields.margin')}</span>
-                        <span className="font-medium text-gray-900">{selectedProduct?.pricing.margin ?? t('inventory.table.na')}</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="rounded-2xl border border-gray-200 bg-white p-4">
-                    <div className="flex items-center gap-2 text-sm font-semibold text-gray-900">
-                      <Truck className="h-4 w-4 text-gray-600" />
-                      {t('inventory.viewSheet.sections.shipping')}
-                    </div>
-                    <div className="mt-3 space-y-2 text-sm">
-                      <div className="flex items-center justify-between gap-3">
-                        <span className="text-gray-500">{t('inventory.viewSheet.fields.weight')}</span>
-                        <span className="font-medium text-gray-900">{selectedProduct?.shipping.weight ?? t('inventory.table.na')}</span>
-                      </div>
-                      <div className="flex items-center justify-between gap-3">
-                        <span className="text-gray-500">{t('inventory.viewSheet.fields.deliveryEligible')}</span>
-                        <span className="font-medium text-gray-900">{selectedProduct?.shipping.deliveryEligible ?? t('inventory.table.na')}</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                  <div className="rounded-2xl border border-gray-200 bg-white p-4">
-                    <div className="text-sm font-semibold text-gray-900">{t('inventory.viewSheet.sections.staff')}</div>
-                    <div className="mt-3 space-y-2 text-sm">
-                      <div className="flex items-center justify-between gap-3">
-                        <span className="text-gray-500">{t('inventory.viewSheet.fields.createdBy')}</span>
-                        <span className="font-medium text-gray-900">{selectedProduct?.staff.createdBy ?? t('inventory.table.na')}</span>
-                      </div>
-                      <div className="flex items-center justify-between gap-3">
-                        <span className="text-gray-500">{t('inventory.viewSheet.fields.updatedBy')}</span>
-                        <span className="font-medium text-gray-900">{selectedProduct?.staff.updatedBy ?? t('inventory.table.na')}</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="rounded-2xl border border-gray-200 bg-white p-4">
-                    <div className="text-sm font-semibold text-gray-900">{t('inventory.viewSheet.sections.notes')}</div>
-                    <div className="mt-3 text-sm">
-                      <div className="text-xs font-semibold text-gray-500">{t('inventory.viewSheet.fields.internalNote')}</div>
-                      <div className="mt-1 rounded-xl border border-gray-200 bg-gray-50 p-3 text-gray-800">
-                        {selectedProduct?.notes.internalNote ?? t('inventory.table.na')}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="rounded-2xl border border-gray-200 bg-white p-4">
-                  <div className="flex items-center gap-2 text-sm font-semibold text-gray-900">
-                    <Truck className="h-4 w-4 text-gray-600" />
-                    {t('inventory.viewSheet.sections.timeline')}
-                  </div>
-                  <div className="mt-3 space-y-3">
-                    {(selectedProduct?.events ?? []).map((ev) => (
-                      <div key={ev.id} className="flex gap-3">
-                        <div className="mt-1 flex flex-col items-center">
-                          <div className="h-2.5 w-2.5 rounded-full bg-brand-900" />
-                          <div className="mt-1 h-full w-px bg-gray-200" />
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <div className="flex items-start justify-between gap-3">
-                            <div className="text-sm font-semibold text-gray-900">{ev.title}</div>
-                            <div className="shrink-0 text-xs font-medium text-gray-500">{ev.at}</div>
-                          </div>
-                          {ev.description && <div className="mt-1 text-sm text-gray-600">{ev.description}</div>}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              {!selectedProduct && (
-                <div className="rounded-2xl border border-gray-200 bg-white p-8 text-center text-sm text-gray-500">
-                  {t('inventory.viewSheet.empty')}
-                </div>
-              )}
-            </div>
-          </ScrollArea>
-
-          <div className="border-t border-gray-200 bg-white p-4">
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <div className="text-xs font-medium text-gray-500">{t('inventory.viewSheet.footerHint')}</div>
-              <div className="flex items-center gap-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={downloadAsPdf}
-                  disabled={!selectedProduct}
-                  className="h-9 rounded-lg border-gray-200 bg-white text-gray-700 hover:bg-brand-50 hover:text-brand-900"
-                >
-                  <Download className="h-4 w-4" />
-                  {t('inventory.viewSheet.downloadPdf')}
-                </Button>
-                <Button
-                  type="button"
-                  onClick={() => setViewOpen(false)}
-                  className="h-9 rounded-lg bg-brand-900 text-white hover:bg-brand-800"
-                >
-                  {t('inventory.viewSheet.close')}
-                </Button>
-              </div>
-            </div>
-          </div>
-        </SheetContent>
-      </Sheet>
-
-      <Dialog open={adjustOpen} onOpenChange={setAdjustOpen}>
-        <DialogContent className="w-[calc(100vw-24px)] max-w-lg rounded-2xl border border-gray-200 bg-white p-0 shadow-xl">
-          <div className="border-b border-gray-100 px-6 py-4">
-            <DialogHeader>
-              <DialogTitle className="text-lg font-semibold text-gray-900">
-                {adjustMode === 'restock'
-                  ? t('inventory.adjustDialog.restockTitle')
-                  : t('inventory.adjustDialog.adjustTitle')}
-              </DialogTitle>
-              <DialogDescription className="mt-1 text-sm text-gray-600">
-                {selectedProductId
-                  ? t('inventory.adjustDialog.subtitle')
-                  : ''}
-              </DialogDescription>
-            </DialogHeader>
-          </div>
-
-          <div className="space-y-4 px-6 py-6">
-            <div className="grid gap-2">
-              <Label className="text-sm font-semibold text-gray-700">{t('inventory.adjustDialog.quantity')}</Label>
-              <Input
-                value={adjustQuantity}
-                onChange={(e) => setAdjustQuantity(e.target.value)}
-                inputMode="numeric"
-                placeholder={adjustMode === 'restock' ? t('inventory.adjustDialog.restockPlaceholder') : t('inventory.adjustDialog.adjustPlaceholder')}
-                className="h-10 rounded-xl border-gray-200 bg-white"
-              />
-            </div>
-
-            <div className="rounded-2xl border border-gray-200 bg-gray-50 p-4 text-sm text-gray-700">
-              <div className="text-xs font-semibold text-gray-500">{t('inventory.adjustDialog.noteTitle')}</div>
-              <div className="mt-1 text-sm text-gray-700">{t('inventory.adjustDialog.noteBody')}</div>
-            </div>
-          </div>
-
-          <div className="border-t border-gray-100 px-6 py-4">
-            <div className="flex flex-col-reverse gap-2 sm:flex-row sm:items-center sm:justify-between">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setAdjustOpen(false)}
-                className="h-10 rounded-xl border-gray-200 bg-white text-gray-700 hover:bg-brand-50 hover:text-brand-900"
-              >
-                {t('inventory.adjustDialog.cancel')}
-              </Button>
-              <Button
-                type="button"
-                onClick={applyAdjustment}
-                className="h-10 rounded-xl bg-brand-900 text-white hover:bg-brand-800"
-              >
-                {adjustMode === 'restock'
-                  ? t('inventory.adjustDialog.confirmRestock')
-                  : t('inventory.adjustDialog.confirmAdjust')}
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
+      <InventoryAdjustDialog
+        open={adjustOpen}
+        onOpenChange={setAdjustOpen}
+        mode={adjustMode}
+        quantity={adjustQuantity}
+        onQuantityChange={setAdjustQuantity}
+        onConfirm={applyAdjustment}
+        productId={selectedProductId}
+      />
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="flex flex-col gap-2">
@@ -1224,12 +866,6 @@ export default function InventoryPage() {
             enableSelection
             enablePagination
             defaultPageSize={10}
-            paginationLabels={{
-              previous: t('inventory.pagination.previous'),
-              next: t('inventory.pagination.next'),
-              rowsPerPage: t('inventory.pagination.rowsPerPage'),
-              showing: (from, to, total) => t('inventory.pagination.showing', { from, to, total }),
-            }}
             emptyState={<span>{t('inventory.empty')}</span>}
             className="rounded-xl"
           />

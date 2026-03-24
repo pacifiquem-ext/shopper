@@ -1,0 +1,138 @@
+'use client'
+
+import { Button } from '@/components/ui/button'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
+import { AlertTriangle, Trash2 } from 'lucide-react'
+
+interface DeleteItem {
+  icon?: React.ReactNode
+  label: string
+  value?: string | number
+}
+
+interface DeleteConfirmationDialogProps {
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  onConfirm: () => void
+  title: string
+  description: string
+  itemName: string
+  warningMessage: string
+  impactTitle?: string
+  impactMessage?: string
+  deleteItems?: DeleteItem[]
+  confirmButtonText?: string
+  cancelButtonText?: string
+  isLoading?: boolean
+}
+
+export function DeleteConfirmationDialog({
+  open,
+  onOpenChange,
+  onConfirm,
+  title,
+  description,
+  itemName,
+  warningMessage,
+  impactTitle,
+  impactMessage,
+  deleteItems = [],
+  confirmButtonText = 'Delete',
+  cancelButtonText = 'Cancel',
+  isLoading = false,
+}: DeleteConfirmationDialogProps) {
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-md overflow-hidden rounded-2xl border border-gray-200 bg-white p-0 shadow-xl">
+        <div className="border-b border-gray-100 px-6 py-4">
+          <DialogHeader>
+            <div className="flex items-center gap-3">
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-rose-50">
+                <AlertTriangle className="h-6 w-6 text-rose-600" />
+              </div>
+              <div>
+                <DialogTitle className="text-lg font-semibold text-gray-900">{title}</DialogTitle>
+                <DialogDescription className="mt-1 text-sm text-gray-600">
+                  {description}
+                </DialogDescription>
+              </div>
+            </div>
+          </DialogHeader>
+        </div>
+
+        <div className="px-6 py-4">
+          <div className="space-y-4">
+            <div className="rounded-xl border border-rose-200 bg-rose-50 p-4">
+              <p className="text-sm font-medium text-rose-900">
+                {warningMessage} <span className="font-bold">{itemName}</span>
+              </p>
+              {deleteItems.length > 0 && (
+                <>
+                  <p className="mt-2 text-sm text-rose-700">
+                    This will permanently remove:
+                  </p>
+                  <ul className="mt-2 space-y-1 text-sm text-rose-700">
+                    {deleteItems.map((item, index) => (
+                      <li key={index} className="flex items-start gap-2">
+                        <span className="mt-0.5 text-rose-500">•</span>
+                        <span>
+                          {item.label}
+                          {item.value !== undefined && ` (${item.value})`}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </>
+              )}
+            </div>
+
+            {impactTitle && impactMessage && (
+              <div className="rounded-xl border border-amber-200 bg-amber-50 p-4">
+                <div className="flex gap-3">
+                  <AlertTriangle className="h-5 w-5 shrink-0 text-amber-600" />
+                  <div>
+                    <p className="text-sm font-medium text-amber-900">
+                      {impactTitle}
+                    </p>
+                    <p className="mt-1 text-sm text-amber-700">
+                      {impactMessage}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="border-t border-gray-100 px-6 py-4">
+          <div className="flex items-center justify-end gap-3">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+              disabled={isLoading}
+              className="h-10 rounded-xl border-gray-200 bg-white text-gray-700 hover:bg-gray-50"
+            >
+              {cancelButtonText}
+            </Button>
+            <Button
+              type="button"
+              onClick={onConfirm}
+              disabled={isLoading}
+              className="h-10 rounded-xl bg-rose-600 text-white hover:bg-rose-700"
+            >
+              <Trash2 className="mr-2 h-4 w-4" />
+              {confirmButtonText}
+            </Button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  )
+}
