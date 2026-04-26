@@ -12,8 +12,11 @@ import { ProductsModule } from 'src/modules/products/products.module';
 import { InventoryModule } from 'src/modules/inventory/inventory.module';
 import { OrdersModule } from 'src/modules/orders/orders.module';
 import { AnalyticsModule } from 'src/modules/analytics/analytics.module';
+import { StoreSettingsModule } from 'src/modules/store-settings/store-settings.module';
+import { DeliveryZonesModule } from 'src/modules/delivery-zones/delivery-zones.module';
 
 import { HealthController } from './controllers/health.controller';
+
 @Module({
     imports: [
         // Shared Common Services
@@ -31,6 +34,8 @@ import { HealthController } from './controllers/health.controller';
         InventoryModule,
         OrdersModule,
         AnalyticsModule,
+        StoreSettingsModule,
+        DeliveryZonesModule,
 
         // Background Processing
         WorkerModule,

@@ -105,7 +105,7 @@ export class OrdersService {
     }
 
     async findAll(storeId: string, filters: any) {
-        const { page = 1, limit = 10, paymentStatus, fulfillmentStatus, search } = filters;
+        const { page = 1, limit = 10, paymentStatus, fulfillmentStatus, search, dateFrom, dateTo } = filters;
         const skip = (page - 1) * limit;
 
         const where: any = {};
@@ -116,6 +116,12 @@ export class OrdersService {
 
         if (fulfillmentStatus) {
             where.fulfillment = { status: fulfillmentStatus };
+        }
+
+        if (dateFrom || dateTo) {
+            where.placedAt = {};
+            if (dateFrom) where.placedAt.gte = new Date(dateFrom);
+            if (dateTo) where.placedAt.lte = new Date(dateTo);
         }
 
         if (search) {
@@ -234,7 +240,7 @@ export class OrdersService {
     }
 
     async sendMessage(id: string, storeId: string, userId: string, dto: any) {
-        const order = await this.findById(id, storeId);
+        await this.findById(id, storeId);
 
         await this.ordersRepository.createMessage({
             sender: MessageSender.ADMIN as PrismaMessageSender,
@@ -246,6 +252,11 @@ export class OrdersService {
         });
 
         return this.findById(id, storeId);
+    }
+
+    async getMessages(id: string, storeId: string) {
+        await this.findById(id, storeId);
+        return this.ordersRepository.findMessages(id);
     }
 
     private async generateOrderNumber(storeId: string): Promise<string> {

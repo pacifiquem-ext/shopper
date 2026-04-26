@@ -1,7 +1,8 @@
 import { CardContent } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
 import type React from 'react'
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts'
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
+import type { SalesTrendPoint } from '@/services/analytics.service'
 
 type MetricTileProps = {
   icon: React.ReactNode
@@ -60,30 +61,45 @@ export function KeyValueRow({ label, value }: KeyValueRowProps) {
   )
 }
 
-export function SalesPurchaseChart() {
+type SalesPurchaseChartProps = {
+  data?: SalesTrendPoint[]
+  isLoading?: boolean
+}
+
+function formatMonth(dateStr: string) {
+  const d = new Date(dateStr)
+  return d.toLocaleString('default', { month: 'short' })
+}
+
+export function SalesPurchaseChart({ data = [], isLoading = false }: SalesPurchaseChartProps) {
   const brandBlue = '#6083e3'
   const emeraldGreen = '#059669'
 
-  const data = [
-    { month: 'Jan', sales: 9300, purchase: 11200 },
-    { month: 'Feb', sales: 9800, purchase: 10800 },
-    { month: 'Mar', sales: 9600, purchase: 10400 },
-    { month: 'Apr', sales: 9200, purchase: 10200 },
-    { month: 'May', sales: 10500, purchase: 8800 },
-    { month: 'Jun', sales: 9000, purchase: 10600 },
-    { month: 'Jul', sales: 10200, purchase: 10000 },
-    { month: 'Aug', sales: 9800, purchase: 11400 },
-    { month: 'Sep', sales: 9900, purchase: 9200 },
-    { month: 'Oct', sales: 9400, purchase: 9600 },
-    { month: 'Nov', sales: 9700, purchase: 11000 },
-    { month: 'Dec', sales: 9600, purchase: 10400 },
-  ]
+  if (isLoading) {
+    return (
+      <div className="mt-2 h-[260px] w-full animate-pulse rounded-xl bg-gray-100" />
+    )
+  }
+
+  if (data.length === 0) {
+    return (
+      <div className="mt-2 flex h-[260px] w-full items-center justify-center rounded-xl bg-gray-50 text-sm text-gray-400">
+        No sales trend data available yet.
+      </div>
+    )
+  }
+
+  const chartData = data.map((point) => ({
+    month: formatMonth(String(point.date)),
+    sales: point.revenue,
+    purchase: point.cost,
+  }))
 
   return (
     <div className="mt-2 w-full">
       <ResponsiveContainer width="100%" height={260}>
         <LineChart
-          data={data}
+          data={chartData}
           margin={{ top: 5, right: 20, left: 0, bottom: 5 }}
         >
           <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
@@ -118,7 +134,7 @@ export function SalesPurchaseChart() {
             strokeWidth={3}
             dot={{ fill: brandBlue, r: 4 }}
             activeDot={{ r: 6 }}
-            name="Sales"
+            name="Revenue"
           />
           <Line
             type="monotone"
@@ -127,7 +143,7 @@ export function SalesPurchaseChart() {
             strokeWidth={3}
             dot={{ fill: emeraldGreen, r: 4 }}
             activeDot={{ r: 6 }}
-            name="Purchase"
+            name="Cost"
           />
         </LineChart>
       </ResponsiveContainer>

@@ -108,4 +108,11 @@ export class OrdersRepository {
     async createMessage(data: Prisma.OrderMessageCreateInput) {
         return this.prisma.orderMessage.create({ data });
     }
+
+    async findMessages(orderId: string) {
+        return this.prisma.orderMessage.findMany({
+            where: { orderId },
+            orderBy: { createdAt: 'asc' },
+        });
+    }
 }

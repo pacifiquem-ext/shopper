@@ -78,6 +78,7 @@ export class AnalyticsService {
         return snapshots.map((s) => ({
             date: s.snapshotDate,
             revenue: Number(s.totalRevenue),
+            cost: Number(s.totalCost),
             orders: s.totalOrders,
             profit: Number(s.totalProfit),
         }));
