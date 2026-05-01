@@ -61,6 +61,150 @@ import {
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { useCallback, useEffect, useId, useMemo, useState } from 'react'
+import { productsService, type ProductApi, type CreateProductPayload } from '@/services/products.service'
+import { analyticsService } from '@/services/analytics.service'
+
+function mapProductStatus(s: string): ProductStatus {
+  if (s === 'DRAFT') return 'draft'
+  if (s === 'ARCHIVED') return 'archived'
+  return 'active'
+}
+
+function apiToProductRow(p: ProductApi): ProductRow {
+  const prices = p.variants.map((v) => v.price).filter((x) => x > 0)
+  const minPrice = prices.length ? Math.min(...prices) : 0
+  const maxPrice = prices.length ? Math.max(...prices) : 0
+  const totalStock = p.variants.reduce((sum, v) => sum + (v.inventory?.onHand ?? 0), 0)
+  const priceRange =
+    prices.length === 0
+      ? '—'
+      : minPrice === maxPrice
+        ? minPrice.toLocaleString()
+        : `${minPrice.toLocaleString()} – ${maxPrice.toLocaleString()}`
+  return {
+    id: p.id,
+    name: p.name,
+    vendor: p.vendor,
+    category: p.category,
+    status: mapProductStatus(p.status),
+    priceRange,
+    totalStock,
+    updatedAt: new Date(p.updatedAt).toLocaleDateString('en-GB', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+    }),
+    primaryImageUrl: p.primaryImage,
+    variantsCount: p.variants.length,
+  }
+}
+
+function apiToProductDetails(p: ProductApi): ProductDetailsExtended {
+  const prices = p.variants.map((v) => v.price).filter((x) => x > 0)
+  const minPrice = prices.length ? Math.min(...prices) : 0
+  const maxPrice = prices.length ? Math.max(...prices) : 0
+  const costs = p.variants.map((v) => v.cost).filter((c): c is number => c != null && c > 0)
+  const avgCost = costs.length ? costs.reduce((a, b) => a + b, 0) / costs.length : 0
+  const compareAt = p.variants[0]?.compareAt
+  return {
+    id: p.id,
+    name: p.name,
+    vendor: p.vendor,
+    category: p.category,
+    status: mapProductStatus(p.status),
+    description: p.description ?? '',
+    tags: p.tags ?? [],
+    images: p.images ?? [],
+    variants: p.variants.map((v) => ({
+      id: v.id,
+      title: v.title,
+      sku: v.sku,
+      color: v.colorName ? { name: v.colorName, hex: v.colorHex ?? '#000000' } : undefined,
+      size: v.size,
+      stock: v.inventory?.onHand ?? 0,
+      price: v.price.toLocaleString(),
+    })),
+    pricing: {
+      priceFrom: minPrice.toLocaleString(),
+      priceTo: maxPrice.toLocaleString(),
+      cost: avgCost ? Math.round(avgCost).toLocaleString() : '',
+      margin:
+        avgCost > 0 && minPrice > 0
+          ? `${Math.round(((minPrice - avgCost) / minPrice) * 100)}%`
+          : '',
+      compareAt: compareAt ? compareAt.toLocaleString() : '',
+    },
+    delivery: {
+      enabled: p.deliveryEnabled,
+      location: p.deliveryLocation,
+      price: p.deliveryPrice ? p.deliveryPrice.toLocaleString() : '',
+    },
+    staff: { createdBy: 'Store Owner', updatedBy: 'Store Owner' },
+    notes: { internalNote: '' },
+    updatedAt: new Date(p.updatedAt).toLocaleDateString('en-GB', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+    }),
+  }
+}
+
+function buildCreatePayload(draft: {
+  name: string
+  vendor: string
+  category: string
+  status: string
+  description: string
+  tags: string
+  images: string[]
+  colors: Array<{ name: string; hex: string }>
+  sizes: string[]
+  models: string[]
+  price: string
+  compareAt: string
+  cost: string
+  deliveryEnabled: boolean
+  deliveryLocation: string
+  deliveryPrice: string
+}): CreateProductPayload {
+  const colors = draft.colors.length > 0 ? draft.colors : [null]
+  const sizes = draft.sizes.length > 0 ? draft.sizes : [null]
+  const models = draft.models.length > 0 ? draft.models : [null]
+  const variants: CreateProductPayload['variants'] = []
+  for (const color of colors) {
+    for (const size of sizes) {
+      for (const model of models) {
+        variants.push({
+          colorName: color?.name,
+          colorHex: color?.hex,
+          size: size ?? undefined,
+          model: model ?? undefined,
+          price: Number(draft.price) || 0,
+          compareAt: draft.compareAt ? Number(draft.compareAt) : undefined,
+          cost: draft.cost ? Number(draft.cost) : undefined,
+          stock: 0,
+        })
+      }
+    }
+  }
+  return {
+    name: draft.name,
+    description: draft.description || undefined,
+    vendor: draft.vendor,
+    category: draft.category,
+    status: draft.status,
+    tags: draft.tags
+      .split(',')
+      .map((t) => t.trim())
+      .filter(Boolean),
+    images: draft.images.length > 0 ? draft.images : undefined,
+    primaryImage: draft.images[0],
+    deliveryEnabled: draft.deliveryEnabled,
+    deliveryLocation: draft.deliveryLocation || undefined,
+    deliveryPrice: draft.deliveryPrice ? Number(draft.deliveryPrice) : undefined,
+    variants,
+  }
+}
 
 export default function ProductsPage() {
   const t = useTranslations('dashboard')
@@ -143,161 +287,50 @@ export default function ProductsPage() {
     }
   }, [searchParams])
 
-  const rows: ProductRow[] = useMemo(
-    () => [
-      {
-        id: 'prod-1',
-        name: 'Cotton T-shirt',
-        vendor: 'Kigali Fashion',
-        category: 'Apparel',
-        status: 'active',
-        priceRange: '$12 - $18',
-        totalStock: 124,
-        updatedAt: '2026-03-18',
-        primaryImageUrl: 'https://images.unsplash.com/photo-1520975958225-1f1f962a8f1f?auto=format&fit=crop&w=400&q=60',
-        variantsCount: 6,
-      },
-      {
-        id: 'prod-2',
-        name: 'Classic Cap',
-        vendor: 'Kigali Fashion',
-        category: 'Accessories',
-        status: 'active',
-        priceRange: '$8',
-        totalStock: 10,
-        updatedAt: '2026-03-16',
-        primaryImageUrl: 'https://images.unsplash.com/photo-1523381294911-8d3cead13475?auto=format&fit=crop&w=400&q=60',
-        variantsCount: 2,
-      },
-      {
-        id: 'prod-3',
-        name: 'Denim Shorts',
-        vendor: 'Kigali Fashion',
-        category: 'Apparel',
-        status: 'draft',
-        priceRange: '$24',
-        totalStock: 0,
-        updatedAt: '2026-03-10',
-        primaryImageUrl: 'https://images.unsplash.com/photo-1520975958225-5d4f3f6f2a4b?auto=format&fit=crop&w=400&q=60',
-        variantsCount: 4,
-      },
-      {
-        id: 'prod-4',
-        name: 'Leather Belt',
-        vendor: 'Kigali Fashion',
-        category: 'Accessories',
-        status: 'active',
-        priceRange: '$14 - $19',
-        totalStock: 34,
-        updatedAt: '2026-03-05',
-        primaryImageUrl: 'https://images.unsplash.com/photo-1520975958225-b44e07039e9d?auto=format&fit=crop&w=400&q=60',
-        variantsCount: 3,
-      },
-      {
-        id: 'prod-5',
-        name: 'Socks (Pair)',
-        vendor: 'Kigali Fashion',
-        category: 'Apparel',
-        status: 'archived',
-        priceRange: '$3',
-        totalStock: 6,
-        updatedAt: '2026-02-28',
-        primaryImageUrl: 'https://images.unsplash.com/photo-1580901369227-308f6f40bdeb?auto=format&fit=crop&w=400&q=60',
-        variantsCount: 1,
-      },
-    ],
-    []
-  )
+  const [rows, setRows] = useState<ProductRow[]>([])
+  const [isLoading, setIsLoading] = useState(false)
+  const [trendingProducts, setTrendingProducts] = useState<
+    Array<{ id: string; name: string; sales: number; trend: number; sparklinePoints: [number, number][] }>
+  >([])
 
-  const detailsById: Record<string, ProductDetailsExtended> = useMemo(
-    () => ({
-      'prod-1': {
-        id: 'prod-1',
-        name: 'Cotton T-shirt',
-        vendor: 'Kigali Fashion',
-        category: 'Apparel',
-        status: 'active',
-        description:
-          'Soft, breathable cotton t-shirt with modern fit. Designed for everyday comfort and easy styling.',
-        tags: ['cotton', 'unisex', 'everyday'],
-        images: [
-          'https://images.unsplash.com/photo-1520975958225-1f1f962a8f1f?auto=format&fit=crop&w=1200&q=70',
-          'https://images.unsplash.com/photo-1520975958225-9d6d17365f1b?auto=format&fit=crop&w=1200&q=70',
-          'https://images.unsplash.com/photo-1520975958225-6d52c5ab07df?auto=format&fit=crop&w=1200&q=70',
-        ],
-        variants: [
-          {
-            id: 'v-1',
-            title: 'Black / M',
-            sku: 'TS-001-BLK-M',
-            color: { name: 'Black', hex: '#111827' },
-            size: 'M',
-            stock: 42,
-            price: '$14',
-          },
-          {
-            id: 'v-2',
-            title: 'Black / L',
-            sku: 'TS-001-BLK-L',
-            color: { name: 'Black', hex: '#111827' },
-            size: 'L',
-            stock: 29,
-            price: '$14',
-          },
-          {
-            id: 'v-3',
-            title: 'White / M',
-            sku: 'TS-001-WHT-M',
-            color: { name: 'White', hex: '#FFFFFF' },
-            size: 'M',
-            stock: 53,
-            price: '$14',
-          },
-        ],
-        pricing: { priceFrom: '$12', priceTo: '$18', cost: '$6', margin: '50%', compareAt: '$20' },
-        delivery: { enabled: true, location: 'Kigali', price: '$2' },
-        staff: { createdBy: 'Admin', updatedBy: 'Manager' },
-        notes: { internalNote: 'Keep top sizes ready for quick delivery.' },
-        updatedAt: '2026-03-18',
-      },
-      'prod-2': {
-        id: 'prod-2',
-        name: 'Classic Cap',
-        vendor: 'Kigali Fashion',
-        category: 'Accessories',
-        status: 'active',
-        description: 'Everyday cap with adjustable strap and structured fit.',
-        tags: ['cap', 'accessories'],
-        images: [
-          'https://images.unsplash.com/photo-1523381294911-8d3cead13475?auto=format&fit=crop&w=1200&q=70',
-        ],
-        variants: [
-          {
-            id: 'v-4',
-            title: 'Black',
-            sku: 'CAP-031-BLK',
-            color: { name: 'Black', hex: '#111827' },
-            stock: 6,
-            price: '$8',
-          },
-          {
-            id: 'v-5',
-            title: 'Navy',
-            sku: 'CAP-031-NVY',
-            color: { name: 'Navy', hex: '#0F172A' },
-            stock: 4,
-            price: '$8',
-          },
-        ],
-        pricing: { priceFrom: '$8', priceTo: '$8', cost: '$3', margin: '62%', compareAt: '' },
-        delivery: { enabled: true, location: 'Kigali', price: '$1' },
-        staff: { createdBy: 'Admin', updatedBy: 'Admin' },
-        notes: { internalNote: '' },
-        updatedAt: '2026-03-16',
-      },
-    }),
-    []
-  )
+  const [detailsById, setDetailsById] = useState<Record<string, ProductDetailsExtended>>({})
+
+  useEffect(() => {
+    setIsLoading(true)
+    productsService
+      .getAll({ limit: 100 })
+      .then((res) => {
+        const list = (res?.data as any)?.data ?? res?.data
+        if (list?.data) setRows((list.data as ProductApi[]).map(apiToProductRow))
+      })
+      .finally(() => setIsLoading(false))
+  }, [])
+
+  useEffect(() => {
+    analyticsService.getTopProducts(5).then((res) => {
+      const data: any[] = (res?.data as any)?.data ?? res?.data ?? []
+      if (Array.isArray(data)) {
+        setTrendingProducts(
+          data.map((p) => ({
+            id: p.productId as string,
+            name: p.productName as string,
+            sales: (p.unitsSold as number) ?? 0,
+            trend: 0,
+            sparklinePoints: [] as [number, number][],
+          })),
+        )
+      }
+    })
+  }, [])
+
+  useEffect(() => {
+    if (!selectedProductId || detailsById[selectedProductId]) return
+    productsService.getById(selectedProductId).then((res) => {
+      const p: ProductApi | null = (res?.data as any)?.data ?? res?.data ?? null
+      if (p) setDetailsById((prev) => ({ ...prev, [selectedProductId]: apiToProductDetails(p) }))
+    })
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedProductId])
 
   const addImages = useCallback((urls: string[]) => {
     const cleaned = urls.map((u) => u.trim()).filter(Boolean)
@@ -315,49 +348,63 @@ export default function ProductsPage() {
     setViewOpen(true)
   }, [])
 
-  const openEdit = useCallback((id: string) => {
-    const product = detailsById[id]
-    if (!product) return
+  const openEdit = useCallback(async (id: string) => {
+    let p: ProductApi | null = null
+    try {
+      const res = await productsService.getById(id)
+      p = (res?.data as any)?.data ?? res?.data ?? null
+    } catch { return }
+    if (!p) return
 
+    setDetailsById((prev) => ({ ...prev, [id]: apiToProductDetails(p!) }))
+
+    const firstVariant = p.variants[0]
     setDraftProduct({
-      name: product.name,
-      vendor: product.vendor,
-      category: product.category,
-      status: product.status.toUpperCase() as 'ACTIVE' | 'DRAFT' | 'ARCHIVED',
-      description: product.description,
-      tags: product.tags.join(', '),
-      mediaSectionEnabled: product.images.length > 0,
-      images: product.images,
+      name: p.name,
+      vendor: p.vendor,
+      category: p.category,
+      status: p.status as 'ACTIVE' | 'DRAFT' | 'ARCHIVED',
+      description: p.description ?? '',
+      tags: (p.tags ?? []).join(', '),
+      mediaSectionEnabled: (p.images?.length ?? 0) > 0,
+      images: p.images ?? [],
       newImageUrl: '',
-      variantsSectionEnabled: product.variants.length > 0,
-      colors: Array.from(new Set(product.variants.map(v => v.color).filter(Boolean))).map(c => ({ name: c!.name, hex: c!.hex })),
-      sizes: Array.from(new Set(product.variants.map(v => v.size).filter(Boolean))),
+      variantsSectionEnabled: p.variants.length > 0,
+      colors: Array.from(
+        new Map(
+          p.variants
+            .filter((v) => v.colorName)
+            .map((v) => [v.colorName, { name: v.colorName!, hex: v.colorHex ?? '#000000' }]),
+        ).values(),
+      ),
+      sizes: Array.from(new Set(p.variants.filter((v) => v.size).map((v) => v.size!))),
       models: [],
-      price: product.pricing.priceFrom.replace('$', ''),
-      cost: product.pricing.cost.replace('$', ''),
-      compareAt: product.pricing.compareAt.replace('$', ''),
-      deliverySectionEnabled: product.delivery.enabled,
-      deliveryEnabled: product.delivery.enabled,
-      deliveryLocation: product.delivery.location,
-      deliveryPrice: product.delivery.price.replace('$', ''),
-      internalNote: product.notes.internalNote,
+      price: String(firstVariant?.price ?? ''),
+      compareAt: String(firstVariant?.compareAt ?? ''),
+      cost: String(firstVariant?.cost ?? ''),
+      deliverySectionEnabled: p.deliveryEnabled,
+      deliveryEnabled: p.deliveryEnabled,
+      deliveryLocation: p.deliveryLocation ?? '',
+      deliveryPrice: String(p.deliveryPrice ?? ''),
+      internalNote: '',
     })
 
     setIsEditMode(true)
     setEditingProductId(id)
     setCreateOpen(true)
-  }, [detailsById])
+  }, [])
 
   const openDeleteConfirm = useCallback((product: ProductRow) => {
     setProductToDelete({ id: product.id, name: product.name, stock: product.totalStock })
     setDeleteOpen(true)
   }, [])
 
-  const handleDelete = useCallback(() => {
+  const handleDelete = useCallback(async () => {
     if (!productToDelete) return
-    
-    console.log('Deleting product:', productToDelete.id)
-    
+    try {
+      await productsService.delete(productToDelete.id)
+      setRows((prev) => prev.filter((r) => r.id !== productToDelete.id))
+    } catch {}
     setDeleteOpen(false)
     setProductToDelete(null)
   }, [productToDelete])
@@ -814,78 +861,7 @@ export default function ProductsPage() {
 
           <TrendingProductsChart
             title="Trending Products"
-            products={[
-              {
-                id: 'prod-1',
-                name: 'Cotton T-shirt',
-                sales: 342,
-                trend: 24.5,
-                sparklinePoints: [
-                  [0, 0.3],
-                  [0.2, 0.45],
-                  [0.4, 0.52],
-                  [0.6, 0.65],
-                  [0.8, 0.72],
-                  [1, 0.85],
-                ],
-              },
-              {
-                id: 'prod-4',
-                name: 'Leather Belt',
-                sales: 287,
-                trend: 18.2,
-                sparklinePoints: [
-                  [0, 0.4],
-                  [0.2, 0.5],
-                  [0.4, 0.55],
-                  [0.6, 0.62],
-                  [0.8, 0.68],
-                  [1, 0.75],
-                ],
-              },
-              {
-                id: 'prod-2',
-                name: 'Classic Cap',
-                sales: 234,
-                trend: 12.8,
-                sparklinePoints: [
-                  [0, 0.5],
-                  [0.2, 0.52],
-                  [0.4, 0.58],
-                  [0.6, 0.62],
-                  [0.8, 0.65],
-                  [1, 0.68],
-                ],
-              },
-              {
-                id: 'prod-3',
-                name: 'Denim Shorts',
-                sales: 198,
-                trend: -5.3,
-                sparklinePoints: [
-                  [0, 0.7],
-                  [0.2, 0.65],
-                  [0.4, 0.62],
-                  [0.6, 0.58],
-                  [0.8, 0.55],
-                  [1, 0.52],
-                ],
-              },
-              {
-                id: 'prod-5',
-                name: 'Socks (Pair)',
-                sales: 156,
-                trend: 8.4,
-                sparklinePoints: [
-                  [0, 0.45],
-                  [0.2, 0.48],
-                  [0.4, 0.52],
-                  [0.6, 0.55],
-                  [0.8, 0.58],
-                  [1, 0.62],
-                ],
-              },
-            ]}
+            products={trendingProducts}
           />
         </div>
 
@@ -1113,13 +1089,48 @@ export default function ProductsPage() {
         isEditMode={isEditMode}
         draftProduct={draftProduct}
         setDraftProduct={setDraftProduct}
-        onSubmit={() => {
-          if (isEditMode) {
-            console.log('Updating product:', editingProductId, draftProduct)
+        onSubmit={async () => {
+          if (isEditMode && editingProductId) {
+            try {
+              const res = await productsService.update(editingProductId, {
+                name: draftProduct.name,
+                description: draftProduct.description || undefined,
+                vendor: draftProduct.vendor,
+                category: draftProduct.category,
+                status: draftProduct.status,
+                tags: draftProduct.tags
+                  .split(',')
+                  .map((t) => t.trim())
+                  .filter(Boolean),
+                images: draftProduct.images.length > 0 ? draftProduct.images : undefined,
+                primaryImage: draftProduct.images[0] || undefined,
+                deliveryEnabled: draftProduct.deliveryEnabled,
+                deliveryLocation: draftProduct.deliveryLocation || undefined,
+                deliveryPrice: draftProduct.deliveryPrice
+                  ? Number(draftProduct.deliveryPrice)
+                  : undefined,
+              })
+              const updated: ProductApi | null = (res?.data as any)?.data ?? res?.data ?? null
+              if (updated) {
+                setRows((prev) =>
+                  prev.map((r) => (r.id === editingProductId ? apiToProductRow(updated) : r)),
+                )
+                setDetailsById((prev) => ({
+                  ...prev,
+                  [editingProductId]: apiToProductDetails(updated),
+                }))
+              }
+            } catch {}
             setCreateOpen(false)
             setIsEditMode(false)
             setEditingProductId(null)
           } else {
+            try {
+              const payload = buildCreatePayload(draftProduct)
+              const res = await productsService.create(payload)
+              const created: ProductApi | null = (res?.data as any)?.data ?? res?.data ?? null
+              if (created) setRows((prev) => [apiToProductRow(created), ...prev])
+            } catch {}
             setCreateOpen(false)
           }
         }}

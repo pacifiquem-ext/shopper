@@ -41,8 +41,130 @@ import {
   User,
 } from 'lucide-react'
 import { useTranslations } from 'next-intl'
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import type { DateRange } from 'react-day-picker'
+import { ordersService, type OrderApi, type OrderMessageApi } from '@/services/orders.service'
+
+function mapPaymentStatus(s: string): PaymentStatus {
+  return s === 'SUCCESS' ? 'success' : 'pending'
+}
+
+function mapFulfillmentStatus(s: string): FulfillmentStatus {
+  return s === 'FULFILLED' ? 'fulfilled' : 'unfulfilled'
+}
+
+function fmtDate(iso: string) {
+  return new Date(iso).toLocaleDateString('en-GB', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+  })
+}
+
+function parseAddress(raw: string | undefined): string {
+  if (!raw) return '—'
+  try {
+    const obj = JSON.parse(raw)
+    return [obj.province, obj.district, obj.sector, obj.physicalAddress]
+      .filter(Boolean)
+      .join(', ')
+  } catch {
+    return raw
+  }
+}
+
+function apiToOrderRow(o: OrderApi, t: (k: string, p?: any) => string): OrderRow {
+  return {
+    id: o.orderNumber,
+    date: fmtDate(o.placedAt),
+    customer: o.customerName,
+    payment: mapPaymentStatus(o.payment?.status ?? 'PENDING'),
+    total: o.total.toLocaleString(),
+    delivery: t('orders.table.na'),
+    items: t('orders.table.itemsCount', { count: o.lineItems.length }),
+    fulfillment: mapFulfillmentStatus(o.fulfillment?.status ?? 'UNFULFILLED'),
+  }
+}
+
+function apiToOrderDetails(o: OrderApi, t: (k: string, p?: any) => string): OrderDetails {
+  const na = t('orders.table.na')
+  return {
+    id: o.orderNumber,
+    placedAt: fmtDate(o.placedAt),
+    customer: {
+      name: o.customerName,
+      phone: o.customerPhone,
+      email: o.customerEmail ?? na,
+    },
+    payment: {
+      status: mapPaymentStatus(o.payment?.status ?? 'PENDING'),
+      method: o.payment?.method ?? na,
+      reference: o.payment?.reference ?? na,
+      paidAt: o.payment?.paidAt ? fmtDate(o.payment.paidAt) : na,
+    },
+    fulfillment: {
+      status: mapFulfillmentStatus(o.fulfillment?.status ?? 'UNFULFILLED'),
+      deliveryMethod: o.fulfillment?.deliveryMethod ?? na,
+      courierName: o.fulfillment?.courierName ?? na,
+      driverName: o.fulfillment?.driverName ?? na,
+      assignedAt: o.fulfillment?.assignedAt ? fmtDate(o.fulfillment.assignedAt) : na,
+      deliveredAt: o.fulfillment?.deliveredAt ? fmtDate(o.fulfillment.deliveredAt) : na,
+      trackingNumber: o.fulfillment?.trackingNumber ?? na,
+    },
+    addresses: {
+      shipping: parseAddress(o.shippingAddress),
+      billing: parseAddress(o.billingAddress ?? o.shippingAddress),
+    },
+    staff: {
+      createdBy: 'Store Owner',
+      packedBy: o.fulfillment?.packedBy ?? na,
+      deliveredBy: o.fulfillment?.deliveredBy ?? na,
+      store: '—',
+    },
+    totals: {
+      subtotal: o.subtotal.toLocaleString(),
+      deliveryFee: o.deliveryFee.toLocaleString(),
+      discount: o.discount.toLocaleString(),
+      tax: o.tax.toLocaleString(),
+      total: o.total.toLocaleString(),
+    },
+    items: o.lineItems.map((li) => ({
+      id: li.id,
+      name: li.productName,
+      sku: li.sku,
+      quantity: li.quantity,
+      unitPrice: li.unitPrice.toLocaleString(),
+      total: li.total.toLocaleString(),
+    })),
+    notes: {
+      customerNote: o.customerNote ?? na,
+      internalNote: o.internalNote ?? na,
+    },
+    events: (o.events ?? []).map((e) => ({
+      id: e.id,
+      type: e.type.toLowerCase() as any,
+      at: fmtDate(e.createdAt),
+      title: e.title,
+      description: e.description,
+    })),
+  }
+}
+
+function apiToMessages(msgs: OrderMessageApi[]): Array<{
+  id: string
+  sender: 'admin' | 'customer'
+  senderName: string
+  message: string
+  timestamp: string
+}> {
+  return msgs.map((m) => ({
+    id: m.id,
+    sender: m.sender.toLowerCase() === 'admin' ? 'admin' : 'customer',
+    senderName: m.senderName,
+    message: m.message,
+    timestamp: new Date(m.createdAt).toLocaleString(),
+  }))
+}
 
 export default function OrdersPage() {
   const t = useTranslations('dashboard')
@@ -54,331 +176,123 @@ export default function OrdersPage() {
   const [communicationOpen, setCommunicationOpen] = useState(false)
   const [paymentModalOpen, setPaymentModalOpen] = useState(false)
   const [activeModalOrderId, setActiveModalOrderId] = useState<string | null>(null)
-  const [range, setRange] = useState<DateRange | undefined>({
-    from: new Date('2024-01-01'),
-    to: new Date('2024-01-30'),
-  })
-  const [paymentConfirmed, setPaymentConfirmed] = useState<Record<string, boolean>>({
-    '#1002': false,
-    '#1004': true,
-  })
+  const [range, setRange] = useState<DateRange | undefined>(undefined)
+  const [rows, setRows] = useState<OrderRow[]>([])
+  const [orderUuidMap, setOrderUuidMap] = useState<Record<string, string>>({})
+  const [detailsById, setDetailsById] = useState<Map<string, OrderDetails>>(new Map())
   const [orderMessages, setOrderMessages] = useState<Record<string, Array<{
     id: string
     sender: 'admin' | 'customer'
     senderName: string
     message: string
     timestamp: string
-  }>>>({
-    '#1002': [
-      {
-        id: 'm1',
-        sender: 'customer',
-        senderName: 'Wade Warren',
-        message: 'Hi, I just sent the payment proof. Can you confirm it?',
-        timestamp: '2 hours ago',
-      },
-    ],
-    '#1004': [
-      {
-        id: 'm2',
-        sender: 'customer',
-        senderName: 'Esther Howard',
-        message: 'When will my order be delivered?',
-        timestamp: '1 day ago',
-      },
-      {
-        id: 'm3',
-        sender: 'admin',
-        senderName: 'Store Admin',
-        message: 'Your order has been shipped and should arrive within 2-3 business days.',
-        timestamp: '1 day ago',
-      },
-    ],
-  })
+  }>>>({})
 
   const dateRangeLabel = useMemo(
     () => formatDateRange(range?.from, range?.to, t('orders.dateRange')),
     [range?.from, range?.to, t]
   )
 
-  const rows: OrderRow[] = useMemo(
-    () => [
-      {
-        id: '#1002',
-        date: '11 Feb, 2024',
-        customer: 'Wade Warren',
-        payment: 'pending',
-        total: '$20.00',
-        delivery: t('orders.table.na'),
-        items: t('orders.table.itemsCount', { count: 2 }),
-        fulfillment: 'unfulfilled',
-      },
-      {
-        id: '#1004',
-        date: '13 Feb, 2024',
-        customer: 'Esther Howard',
-        payment: 'success',
-        total: '$22.00',
-        delivery: t('orders.table.na'),
-        items: t('orders.table.itemsCount', { count: 3 }),
-        fulfillment: 'fulfilled',
-      },
-      {
-        id: '#1007',
-        date: '15 Feb, 2024',
-        customer: 'Jenny Wilson',
-        payment: 'pending',
-        total: '$25.00',
-        delivery: t('orders.table.na'),
-        items: t('orders.table.itemsCount', { count: 1 }),
-        fulfillment: 'unfulfilled',
-      },
-      {
-        id: '#1009',
-        date: '17 Feb, 2024',
-        customer: 'Guy Hawkins',
-        payment: 'success',
-        total: '$27.00',
-        delivery: t('orders.table.na'),
-        items: t('orders.table.itemsCount', { count: 5 }),
-        fulfillment: 'fulfilled',
-      },
-      {
-        id: '#1011',
-        date: '19 Feb, 2024',
-        customer: 'Jacob Jones',
-        payment: 'pending',
-        total: '$32.00',
-        delivery: t('orders.table.na'),
-        items: t('orders.table.itemsCount', { count: 4 }),
-        fulfillment: 'unfulfilled',
-      },
-    ],
-    [t]
-  )
+  // rows loaded via useEffect below
 
-  const detailsById = useMemo(() => {
-    const data: OrderDetails[] = [
-      {
-        id: '#1002',
-        placedAt: '11 Feb, 2024 • 10:14',
-        customer: { name: 'Wade Warren', phone: '+250 780 000 002', email: 'wade@example.com' },
-        payment: {
-          status: 'pending',
-          method: t('orders.viewSheet.paymentMethod.cashOnDelivery'),
-          reference: t('orders.table.na'),
-          paidAt: t('orders.table.na'),
-        },
-        fulfillment: {
-          status: 'unfulfilled',
-          deliveryMethod: t('orders.viewSheet.deliveryMethod.storeDelivery'),
-          courierName: 'OnlineShop Logistics',
-          driverName: t('orders.table.na'),
-          assignedAt: t('orders.table.na'),
-          deliveredAt: t('orders.table.na'),
-          trackingNumber: 'OS-TRK-1002',
-        },
-        addresses: {
-          shipping: 'Kigali, Kicukiro, Gatenga',
-          billing: 'Kigali, Kicukiro, Gatenga',
-        },
-        staff: {
-          createdBy: 'Store Owner',
-          packedBy: t('orders.table.na'),
-          deliveredBy: t('orders.table.na'),
-          store: 'Kigali Fashion',
-        },
-        totals: {
-          subtotal: '$18.00',
-          deliveryFee: '$2.00',
-          discount: '$0.00',
-          tax: '$0.00',
-          total: '$20.00',
-        },
-        items: [
-          {
-            id: 'li-1',
-            name: 'Cotton T-shirt',
-            sku: 'TS-001',
-            quantity: 1,
-            unitPrice: '$10.00',
-            total: '$10.00',
-          },
-          {
-            id: 'li-2',
-            name: 'Classic Cap',
-            sku: 'CAP-031',
-            quantity: 1,
-            unitPrice: '$8.00',
-            total: '$8.00',
-          },
-        ],
-        notes: {
-          customerNote: t('orders.viewSheet.notes.customerNoteSample'),
-          internalNote: t('orders.viewSheet.notes.internalNoteSample'),
-        },
-        events: [
-          {
-            id: 'ev-1',
-            type: 'created',
-            at: '11 Feb, 2024 • 10:14',
-            title: t('orders.viewSheet.events.created.title'),
-            description: t('orders.viewSheet.events.created.description'),
-          },
-          {
-            id: 'ev-2',
-            type: 'paid',
-            at: '11 Feb, 2024 • 10:15',
-            title: t('orders.viewSheet.events.paymentPending.title'),
-            description: t('orders.viewSheet.events.paymentPending.description'),
-          },
-        ],
-      },
-      {
-        id: '#1004',
-        placedAt: '13 Feb, 2024 • 15:02',
-        customer: { name: 'Esther Howard', phone: '+250 780 000 004', email: 'esther@example.com' },
-        payment: {
-          status: 'success',
-          method: t('orders.viewSheet.paymentMethod.mobileMoney'),
-          reference: 'MOMO-829311',
-          paidAt: '13 Feb, 2024 • 15:03',
-        },
-        fulfillment: {
-          status: 'fulfilled',
-          deliveryMethod: t('orders.viewSheet.deliveryMethod.storeDelivery'),
-          courierName: 'OnlineShop Logistics',
-          driverName: 'Eric N.',
-          assignedAt: '13 Feb, 2024 • 15:20',
-          deliveredAt: '13 Feb, 2024 • 16:05',
-          trackingNumber: 'OS-TRK-1004',
-        },
-        addresses: {
-          shipping: 'Kigali, Gasabo, Kacyiru',
-          billing: 'Kigali, Gasabo, Kacyiru',
-        },
-        staff: {
-          createdBy: 'Store Owner',
-          packedBy: 'Aline M.',
-          deliveredBy: 'Eric N.',
-          store: 'Kigali Fashion',
-        },
-        totals: {
-          subtotal: '$19.00',
-          deliveryFee: '$3.00',
-          discount: '$0.00',
-          tax: '$0.00',
-          total: '$22.00',
-        },
-        items: [
-          {
-            id: 'li-11',
-            name: 'Denim Shorts',
-            sku: 'SH-219',
-            quantity: 1,
-            unitPrice: '$12.00',
-            total: '$12.00',
-          },
-          {
-            id: 'li-12',
-            name: 'Socks (Pair)',
-            sku: 'SOCK-01',
-            quantity: 1,
-            unitPrice: '$2.00',
-            total: '$2.00',
-          },
-          {
-            id: 'li-13',
-            name: 'Belt',
-            sku: 'BLT-12',
-            quantity: 1,
-            unitPrice: '$5.00',
-            total: '$5.00',
-          },
-        ],
-        notes: {
-          customerNote: t('orders.table.na'),
-          internalNote: t('orders.table.na'),
-        },
-        events: [
-          {
-            id: 'ev-11',
-            type: 'created',
-            at: '13 Feb, 2024 • 15:02',
-            title: t('orders.viewSheet.events.created.title'),
-            description: t('orders.viewSheet.events.created.description'),
-          },
-          {
-            id: 'ev-12',
-            type: 'paid',
-            at: '13 Feb, 2024 • 15:03',
-            title: t('orders.viewSheet.events.paid.title'),
-            description: t('orders.viewSheet.events.paid.description'),
-          },
-          {
-            id: 'ev-13',
-            type: 'packed',
-            at: '13 Feb, 2024 • 15:18',
-            title: t('orders.viewSheet.events.packed.title'),
-            description: t('orders.viewSheet.events.packed.description'),
-          },
-          {
-            id: 'ev-14',
-            type: 'delivered',
-            at: '13 Feb, 2024 • 16:05',
-            title: t('orders.viewSheet.events.delivered.title'),
-            description: t('orders.viewSheet.events.delivered.description'),
-          },
-        ],
-      },
-    ]
-
-    const map = new Map<string, OrderDetails>()
-    for (const item of data) map.set(item.id, item)
-    return map
-  }, [t])
+  // detailsById loaded lazily in useEffect below
 
   const selectedOrder = useMemo(() => {
     if (!selectedOrderId) return null
     return detailsById.get(selectedOrderId) ?? null
   }, [detailsById, selectedOrderId])
 
+  // Fetch orders whenever the date range changes
+  useEffect(() => {
+    const filters: Parameters<typeof ordersService.getAll>[0] = { limit: 100 }
+    if (range?.from) filters.dateFrom = range.from.toISOString().split('T')[0]
+    if (range?.to) filters.dateTo = range.to.toISOString().split('T')[0]
+
+    ordersService.getAll(filters).then((res) => {
+      const list = (res?.data as any)?.data ?? res?.data
+      if (list?.data) {
+        const uuidMap: Record<string, string> = {}
+        const mapped = (list.data as OrderApi[]).map((o) => {
+          uuidMap[o.orderNumber] = o.id
+          return apiToOrderRow(o, t)
+        })
+        setRows(mapped)
+        setOrderUuidMap(uuidMap)
+      }
+    })
+  }, [range, t])
+
+  // Lazy-load order detail when selectedOrderId changes
+  useEffect(() => {
+    if (!selectedOrderId || detailsById.has(selectedOrderId)) return
+    const uuid = orderUuidMap[selectedOrderId]
+    if (!uuid) return
+    ordersService.getById(uuid).then((res) => {
+      const o: OrderApi | null = (res?.data as any)?.data ?? res?.data ?? null
+      if (o) setDetailsById((prev) => new Map(prev).set(selectedOrderId, apiToOrderDetails(o, t)))
+    })
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedOrderId, orderUuidMap])
+
   const openView = useCallback((id: string) => {
     setSelectedOrderId(id)
     setViewOpen(true)
   }, [])
 
-  const handleConfirmPayment = useCallback((orderId: string) => {
-    setPaymentConfirmed((prev) => ({ ...prev, [orderId]: true }))
-  }, [])
+  const handleConfirmPayment = useCallback(async (orderId: string) => {
+    const uuid = orderUuidMap[orderId]
+    if (!uuid) return
+    try {
+      await ordersService.updatePayment(uuid, { status: 'SUCCESS' })
+      setRows((prev) => prev.map((r) => r.id === orderId ? { ...r, payment: 'success' as const } : r))
+      const res = await ordersService.getById(uuid)
+      const o: OrderApi | null = (res?.data as any)?.data ?? res?.data ?? null
+      if (o) setDetailsById((prev) => new Map(prev).set(orderId, apiToOrderDetails(o, t)))
+    } catch {}
+  }, [orderUuidMap, t])
 
-  const handleRejectPayment = useCallback((orderId: string) => {
-    setPaymentConfirmed((prev) => ({ ...prev, [orderId]: false }))
-  }, [])
+  const handleRejectPayment = useCallback(async (orderId: string) => {
+    const uuid = orderUuidMap[orderId]
+    if (!uuid) return
+    try {
+      await ordersService.updatePayment(uuid, { status: 'FAILED' })
+      setRows((prev) => prev.map((r) => r.id === orderId ? { ...r, payment: 'pending' as const } : r))
+    } catch {}
+  }, [orderUuidMap])
 
-  const handleSendMessage = useCallback((orderId: string, message: string) => {
-    const newMessage = {
-      id: `m${Date.now()}`,
-      sender: 'admin' as const,
-      senderName: 'Store Admin',
-      message,
-      timestamp: 'Just now',
-    }
-    setOrderMessages((prev) => ({
-      ...prev,
-      [orderId]: [...(prev[orderId] || []), newMessage],
-    }))
-  }, [])
+  const handleSendMessage = useCallback(async (orderId: string, message: string) => {
+    const uuid = orderUuidMap[orderId]
+    if (!uuid) return
+    try {
+      await ordersService.sendMessage(uuid, { message, senderName: 'Store Admin' })
+      const res = await ordersService.getMessages(uuid)
+      const msgs: OrderMessageApi[] = (res?.data as any)?.data ?? res?.data ?? []
+      setOrderMessages((prev) => ({ ...prev, [orderId]: apiToMessages(msgs) }))
+    } catch {}
+  }, [orderUuidMap])
 
-  const openCommunication = useCallback((orderId: string) => {
+  const openCommunication = useCallback(async (orderId: string) => {
     setActiveModalOrderId(orderId)
     setCommunicationOpen(true)
-  }, [])
+    const uuid = orderUuidMap[orderId]
+    if (!uuid) return
+    try {
+      const res = await ordersService.getMessages(uuid)
+      const msgs: OrderMessageApi[] = (res?.data as any)?.data ?? res?.data ?? []
+      setOrderMessages((prev) => ({ ...prev, [orderId]: apiToMessages(msgs) }))
+    } catch {}
+  }, [orderUuidMap])
 
   const openPaymentModal = useCallback((orderId: string) => {
     setActiveModalOrderId(orderId)
     setPaymentModalOpen(true)
   }, [])
+
+  const paymentConfirmed = useMemo<Record<string, boolean>>(() => {
+    const result: Record<string, boolean> = {}
+    for (const r of rows) result[r.id] = r.payment === 'success'
+    return result
+  }, [rows])
 
   const downloadAsPdf = () => {
     if (!selectedOrder) return
@@ -595,12 +509,12 @@ export default function OrdersPage() {
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
         <KpiStatCard
           title={t('orders.stats.totalOrders')}
-          value="21"
+          value={String(rows.length)}
           trendLabel={t('orders.stats.lastWeek')}
         />
         <KpiStatCard
           title={t('orders.stats.orderItemsOverTime')}
-          value="15"
+          value={String(rows.filter((r) => r.payment === 'pending').length)}
           trendLabel={t('orders.stats.lastWeek')}
         />
         <KpiStatCard
@@ -610,7 +524,7 @@ export default function OrdersPage() {
         />
         <KpiStatCard
           title={t('orders.stats.fulfilledOverTime')}
-          value="12"
+          value={String(rows.filter((r) => r.fulfillment === 'fulfilled').length)}
           trendLabel={t('orders.stats.lastWeek')}
         />
       </div>
@@ -696,14 +610,14 @@ export default function OrdersPage() {
         orderId={activeModalOrderId || ''}
         customerName={
           activeModalOrderId
-            ? detailsById.get(activeModalOrderId)?.customer.name || 'Customer'
+            ? detailsById.get(activeModalOrderId)?.customer.name ||
+              rows.find((r) => r.id === activeModalOrderId)?.customer ||
+              'Customer'
             : 'Customer'
         }
         messages={activeModalOrderId ? orderMessages[activeModalOrderId] || [] : []}
         onSendMessage={(msg) => {
-          if (activeModalOrderId) {
-            handleSendMessage(activeModalOrderId, msg)
-          }
+          if (activeModalOrderId) handleSendMessage(activeModalOrderId, msg)
         }}
       />
 
@@ -712,22 +626,16 @@ export default function OrdersPage() {
         onOpenChange={setPaymentModalOpen}
         orderId={activeModalOrderId || ''}
         imageUrl={
-          activeModalOrderId === '#1002'
-            ? 'https://images.unsplash.com/photo-1554224311-beee460ae6ba?auto=format&fit=crop&w=800&q=80'
-            : activeModalOrderId === '#1004'
-              ? 'https://images.unsplash.com/photo-1563013544-824ae1b704d3?auto=format&fit=crop&w=800&q=80'
-              : null
+          activeModalOrderId
+            ? (detailsById.get(activeModalOrderId) as any)?.payment?.paymentProofUrl ?? null
+            : null
         }
         isConfirmed={activeModalOrderId ? paymentConfirmed[activeModalOrderId] ?? false : false}
         onConfirm={() => {
-          if (activeModalOrderId) {
-            handleConfirmPayment(activeModalOrderId)
-          }
+          if (activeModalOrderId) handleConfirmPayment(activeModalOrderId)
         }}
         onReject={() => {
-          if (activeModalOrderId) {
-            handleRejectPayment(activeModalOrderId)
-          }
+          if (activeModalOrderId) handleRejectPayment(activeModalOrderId)
         }}
       />
     </div>

@@ -46,7 +46,75 @@ import {
 import { useSearchParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { inventoryService, type InventoryRecordApi } from '@/services/inventory.service'
+import { analyticsService } from '@/services/analytics.service'
 
+function mapInvStatus(s: string): StockStatus {
+  if (s === 'OUT_OF_STOCK') return 'outOfStock'
+  if (s === 'LOW_STOCK') return 'lowStock'
+  return 'inStock'
+}
+
+function apiToInventoryRow(r: InventoryRecordApi): InventoryRow {
+  return {
+    id: r.productVariantId,
+    name: r.productVariant.product.name,
+    category: r.productVariant.product.category,
+    sku: r.productVariant.sku,
+    vendor: r.productVariant.product.vendor,
+    stock: r.onHand,
+    status: mapInvStatus(r.status),
+  }
+}
+
+function apiToInventoryDetails(r: InventoryRecordApi): ProductDetails {
+  const price = r.productVariant.price
+  const cost = r.productVariant.cost ?? 0
+  const margin = cost > 0 && price > 0 ? `${Math.round(((price - cost) / price) * 100)}%` : '—'
+
+  return {
+    id: r.productVariantId,
+    name: r.productVariant.product.name,
+    sku: r.productVariant.sku,
+    category: r.productVariant.product.category,
+    vendor: r.productVariant.product.vendor,
+    status: mapInvStatus(r.status),
+    stock: {
+      onHand: r.onHand,
+      reserved: r.reserved,
+      available: r.available,
+      reorderPoint: r.reorderPoint,
+      updatedAt: new Date(r.updatedAt).toLocaleString('en-GB', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      }),
+    },
+    pricing: {
+      price: price.toLocaleString(),
+      cost: cost ? cost.toLocaleString() : '—',
+      margin,
+    },
+    shipping: { weight: '—', deliveryEligible: '—' },
+    staff: { createdBy: 'Store Owner', updatedBy: 'Store Owner' },
+    notes: { internalNote: '' },
+    events: (r.events ?? []).map((e) => ({
+      id: e.id,
+      type: e.type.toLowerCase().replace('_', '') as any,
+      at: new Date(e.createdAt).toLocaleString('en-GB', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      }),
+      title: e.type.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase()),
+      description: e.reason ?? '',
+    })),
+  }
+}
 
 export default function InventoryPage() {
   const t = useTranslations('dashboard')
@@ -69,156 +137,10 @@ export default function InventoryPage() {
 
   const [filtersDraft, setFiltersDraft] = useState(filters)
 
-  const [rows, setRows] = useState<InventoryRow[]>(() => [
-    {
-      id: 'p-1',
-      name: 'Cotton T-shirt',
-      category: 'Apparel',
-      sku: 'TS-001',
-      vendor: 'Kigali Fashion',
-      stock: 124,
-      status: 'inStock',
-    },
-    {
-      id: 'p-2',
-      name: 'Classic Cap',
-      category: 'Accessories',
-      sku: 'CAP-031',
-      vendor: 'Kigali Fashion',
-      stock: 10,
-      status: 'lowStock',
-    },
-    {
-      id: 'p-3',
-      name: 'Denim Shorts',
-      category: 'Apparel',
-      sku: 'SH-219',
-      vendor: 'Kigali Fashion',
-      stock: 0,
-      status: 'outOfStock',
-    },
-    {
-      id: 'p-4',
-      name: 'Leather Belt',
-      category: 'Accessories',
-      sku: 'BLT-12',
-      vendor: 'Kigali Fashion',
-      stock: 34,
-      status: 'inStock',
-    },
-    {
-      id: 'p-5',
-      name: 'Socks (Pair)',
-      category: 'Apparel',
-      sku: 'SOCK-01',
-      vendor: 'Kigali Fashion',
-      stock: 6,
-      status: 'lowStock',
-    },
-  ])
+  const [rows, setRows] = useState<InventoryRow[]>([])
+  const [totalAssetValue, setTotalAssetValue] = useState<string>('—')
 
-  const detailsById = useMemo(() => {
-    const data: ProductDetails[] = [
-      {
-        id: 'p-1',
-        name: 'Cotton T-shirt',
-        sku: 'TS-001',
-        category: 'Apparel',
-        vendor: 'Kigali Fashion',
-        status: 'inStock',
-        stock: {
-          onHand: 124,
-          reserved: 6,
-          available: 118,
-          reorderPoint: 20,
-          updatedAt: '22 Mar, 2026 • 19:42',
-        },
-        pricing: {
-          price: '$10.00',
-          cost: '$6.00',
-          margin: '40%',
-        },
-        shipping: {
-          weight: '0.25 kg',
-          deliveryEligible: t('inventory.viewSheet.shipping.yes'),
-        },
-        staff: {
-          createdBy: 'Store Owner',
-          updatedBy: 'Store Owner',
-        },
-        notes: {
-          internalNote: t('inventory.viewSheet.notes.internalNoteSample'),
-        },
-        events: [
-          {
-            id: 'pe-1',
-            type: 'created',
-            at: '10 Mar, 2026 • 09:12',
-            title: t('inventory.viewSheet.events.created.title'),
-            description: t('inventory.viewSheet.events.created.description'),
-          },
-          {
-            id: 'pe-2',
-            type: 'restocked',
-            at: '18 Mar, 2026 • 11:30',
-            title: t('inventory.viewSheet.events.restocked.title'),
-            description: t('inventory.viewSheet.events.restocked.description'),
-          },
-          {
-            id: 'pe-3',
-            type: 'sold',
-            at: '21 Mar, 2026 • 15:10',
-            title: t('inventory.viewSheet.events.sold.title'),
-            description: t('inventory.viewSheet.events.sold.description'),
-          },
-        ],
-      },
-      {
-        id: 'p-2',
-        name: 'Classic Cap',
-        sku: 'CAP-031',
-        category: 'Accessories',
-        vendor: 'Kigali Fashion',
-        status: 'lowStock',
-        stock: {
-          onHand: 10,
-          reserved: 2,
-          available: 8,
-          reorderPoint: 15,
-          updatedAt: '22 Mar, 2026 • 18:21',
-        },
-        pricing: {
-          price: '$8.00',
-          cost: '$4.20',
-          margin: '47%',
-        },
-        shipping: {
-          weight: '0.15 kg',
-          deliveryEligible: t('inventory.viewSheet.shipping.yes'),
-        },
-        staff: {
-          createdBy: 'Store Owner',
-          updatedBy: 'Aline M.',
-        },
-        notes: {
-          internalNote: t('inventory.viewSheet.notes.reorderSoon'),
-        },
-        events: [
-          {
-            id: 'pe-11',
-            type: 'stockAdjusted',
-            at: '22 Mar, 2026 • 18:21',
-            title: t('inventory.viewSheet.events.adjusted.title'),
-            description: t('inventory.viewSheet.events.adjusted.description'),
-          },
-        ],
-      },
-    ]
-
-    const map = new Map<string, ProductDetails>()
-    for (const item of data) map.set(item.id, item)
-    return map
-  }, [t])
+  const [detailsById, setDetailsById] = useState<Map<string, ProductDetails>>(new Map())
 
   const selectedProduct = useMemo(() => {
     if (!selectedProductId) return null
@@ -234,16 +156,38 @@ export default function InventoryPage() {
     const status: StockStatus =
       onHand <= 0 ? 'outOfStock' : onHand < base.stock.reorderPoint ? 'lowStock' : 'inStock'
 
-    return {
-      ...base,
-      status,
-      stock: {
-        ...base.stock,
-        onHand,
-        available,
-      },
-    }
+    return { ...base, status, stock: { ...base.stock, onHand, available } }
   }, [detailsById, rows, selectedProductId])
+
+  // Fetch inventory list + analytics on mount
+  useEffect(() => {
+    inventoryService.getAll({ limit: 200 }).then((res) => {
+      const list = (res?.data as any)?.data ?? res?.data
+      if (list?.data) setRows((list.data as InventoryRecordApi[]).map(apiToInventoryRow))
+    })
+    analyticsService.getInventorySummary().then((res) => {
+      const summary = (res?.data as any)?.data ?? res?.data
+      if (summary?.totalStockValue != null) {
+        setTotalAssetValue(
+          Number(summary.totalStockValue).toLocaleString(undefined, {
+            style: 'currency',
+            currency: 'RWF',
+            maximumFractionDigits: 0,
+          }),
+        )
+      }
+    })
+  }, [])
+
+  // Lazy-load detail when a product is selected
+  useEffect(() => {
+    if (!selectedProductId || detailsById.has(selectedProductId)) return
+    inventoryService.getByVariantId(selectedProductId).then((res) => {
+      const r: InventoryRecordApi | null = (res?.data as any)?.data ?? res?.data ?? null
+      if (r) setDetailsById((prev) => new Map(prev).set(selectedProductId, apiToInventoryDetails(r)))
+    })
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedProductId])
 
   const openView = useCallback((id: string) => {
     setSelectedProductId(id)
@@ -257,28 +201,30 @@ export default function InventoryPage() {
     setAdjustOpen(true)
   }, [])
 
-  const applyAdjustment = useCallback(() => {
+  const applyAdjustment = useCallback(async () => {
     const qty = Number(adjustQuantity)
-    if (!Number.isFinite(qty)) return
+    if (!Number.isFinite(qty) || !selectedProductId) return
     if (adjustMode === 'restock' && qty <= 0) return
 
-    setRows((prev) => {
-      const next = [...prev]
-      const idx = next.findIndex((r) => r.id === selectedProductId)
-      if (idx === -1) return prev
+    const currentStock = rows.find((r) => r.id === selectedProductId)?.stock ?? 0
+    const delta = adjustMode === 'restock' ? qty : qty - currentStock
+    const reason = adjustMode === 'restock' ? 'Manual restock' : 'Manual adjustment'
 
-      const old = next[idx]
-      const nextStock = adjustMode === 'restock' ? old.stock + qty : qty
-
-      const nextStatus: StockStatus =
-        nextStock <= 0 ? 'outOfStock' : nextStock < 15 ? 'lowStock' : 'inStock'
-
-      next[idx] = { ...old, stock: nextStock, status: nextStatus }
-      return next
-    })
+    try {
+      const res = await inventoryService.adjustStock(selectedProductId, delta, reason)
+      const updated: InventoryRecordApi | null = (res?.data as any)?.data ?? res?.data ?? null
+      if (updated) {
+        setRows((prev) =>
+          prev.map((r) => (r.id === selectedProductId ? apiToInventoryRow(updated) : r)),
+        )
+        setDetailsById((prev) =>
+          new Map(prev).set(selectedProductId, apiToInventoryDetails(updated)),
+        )
+      }
+    } catch {}
 
     setAdjustOpen(false)
-  }, [adjustMode, adjustQuantity, selectedProductId])
+  }, [adjustMode, adjustQuantity, selectedProductId, rows])
 
   useEffect(() => {
     const sku = searchParams.get('sku')
@@ -537,7 +483,7 @@ export default function InventoryPage() {
       </div>
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <KpiStatCard title={t('inventory.kpis.totalAssetValue')} value="$10,200,323" trendLabel={t('inventory.kpis.thisMonth')} />
+        <KpiStatCard title={t('inventory.kpis.totalAssetValue')} value={totalAssetValue} trendLabel={t('inventory.kpis.thisMonth')} />
         <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
           <div className="flex items-start justify-between gap-4">
             <div>

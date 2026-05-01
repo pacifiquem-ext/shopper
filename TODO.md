@@ -441,7 +441,7 @@ Each batch is a self-contained unit of work. Batches are ordered so that later b
 
 ### 5.A — Create store settings service
 
-- [ ] **[CLIENT]** Create `client/src/services/store-settings.service.ts`
+- [x] **[CLIENT]** Create `client/src/services/store-settings.service.ts`
   ```typescript
   // Methods to implement:
   getStoreSettings()
@@ -458,15 +458,15 @@ Each batch is a self-contained unit of work. Batches are ordered so that later b
 
 **File:** `client/src/app/[locale]/dashboard/store-settings/page.tsx`
 
-- [ ] **[CLIENT]** Remove hardcoded `businessInfo` useState (lines 47–55) — populate from `storeSettingsService.getStoreSettings()` on mount
-- [ ] **[CLIENT]** Remove hardcoded `ownerInfo` useState (lines 57–62) — same load
-- [ ] **[CLIENT]** Remove hardcoded `businessAddress` useState (lines 64–70) — same load
-- [ ] **[CLIENT]** Remove hardcoded `branding` useState (lines 72–76) — same load
-- [ ] **[CLIENT]** Remove hardcoded `contact` useState (lines 78–83) — same load
-- [ ] **[CLIENT]** Remove hardcoded `subscription` useState (lines 91–101) — leave hardcoded until Batch 8 (no endpoint yet)
-- [ ] **[CLIENT]** Wire all `handleSave()` functions → `storeSettingsService.updateStoreSettings(changedFields)` → show success toast
-- [ ] **[CLIENT]** Add loading skeleton while settings load
-- [ ] **[CLIENT]** Add saving state (disable save button + spinner while PUT is in flight)
+- [x] **[CLIENT]** Remove hardcoded `businessInfo` useState (lines 47–55) — populate from `storeSettingsService.getStoreSettings()` on mount
+- [x] **[CLIENT]** Remove hardcoded `ownerInfo` useState (lines 57–62) — same load
+- [x] **[CLIENT]** Remove hardcoded `businessAddress` useState (lines 64–70) — same load
+- [x] **[CLIENT]** Remove hardcoded `branding` useState (lines 72–76) — same load
+- [x] **[CLIENT]** Remove hardcoded `contact` useState (lines 78–83) — same load
+- [x] **[CLIENT]** Remove hardcoded `subscription` useState (lines 91–101) — leave hardcoded until Batch 8 (no endpoint yet)
+- [x] **[CLIENT]** Wire all `handleSave()` functions → `storeSettingsService.updateStoreSettings(changedFields)` → show success toast
+- [x] **[CLIENT]** Add loading skeleton while settings load
+- [x] **[CLIENT]** Add saving state (disable save button + spinner while PUT is in flight)
 
 ---
 
@@ -477,7 +477,7 @@ Each batch is a self-contained unit of work. Batches are ordered so that later b
 
 ### 6.A — Create delivery zones service
 
-- [ ] **[CLIENT]** Create `client/src/services/delivery-zones.service.ts`
+- [x] **[CLIENT]** Create `client/src/services/delivery-zones.service.ts`
   ```typescript
   // Methods to implement:
   getDeliveryZones()
@@ -500,17 +500,17 @@ Each batch is a self-contained unit of work. Batches are ordered so that later b
 
 **File:** `client/src/app/[locale]/dashboard/store-settings/page.tsx`
 
-- [ ] **[CLIENT]** Remove hardcoded `deliveryZones` useState (lines 85–89, 3 hardcoded zones) — replace with `deliveryZonesService.getDeliveryZones()` on mount
-- [ ] **[CLIENT]** Wire "Add Zone" button → `deliveryZonesService.createDeliveryZone(dto)` → refresh list
-- [ ] **[CLIENT]** Wire zone edit → `deliveryZonesService.updateDeliveryZone(id, dto)` → update in list
-- [ ] **[CLIENT]** Wire zone delete → `deliveryZonesService.deleteDeliveryZone(id)` → remove from list
+- [x] **[CLIENT]** Remove hardcoded `deliveryZones` useState (lines 85–89, 3 hardcoded zones) — replace with `deliveryZonesService.getDeliveryZones()` on mount
+- [x] **[CLIENT]** Wire "Add Zone" button → temp ID added locally; batched to `POST /v1/delivery-zones` on Save
+- [x] **[CLIENT]** Wire zone edit → local state update; batched to `PUT /v1/delivery-zones/:id` on Save
+- [x] **[CLIENT]** Wire zone delete → `DELETE /v1/delivery-zones/:id` called immediately for real zones; temp zones removed from state only
 
 ### 6.C — Wire delivery settings page (currently a placeholder)
 
 **File:** `client/src/app/[locale]/dashboard/delivery-settings/page.tsx`
 
-- [ ] **[CLIENT]** Implement the delivery settings page — reuse `deliveryZonesService` from 6.A
-- [ ] **[CLIENT]** Show zone list (name, fee, ETA) with add/edit/delete actions
+- [x] **[CLIENT]** Implemented delivery settings page — reuses `deliveryZonesService`
+- [x] **[CLIENT]** Shows zone list (name, fee, ETA) with add/edit/delete + batch Save Changes button; empty state with inline add prompt
 
 ---
 
@@ -618,7 +618,7 @@ Batches 1, 2, 3, and 7 can be worked on in any order or in parallel — they hav
 
 ## Progress Tracker
 
-> Last updated: **2026-04-27**
+> Last updated: **2026-05-01**
 
 | Batch | Description | Tasks | Done | Status |
 |-------|-------------|-------|------|--------|
@@ -626,15 +626,15 @@ Batches 1, 2, 3, and 7 can be worked on in any order or in parallel — they hav
 | 0.B | Store Settings module (server) | 5 | 5 | ✅ Complete |
 | 0.C | Delivery Zones module (server) | 8 | 8 | ✅ Complete |
 | 1 | Analytics & Dashboard Home | 10 | 10 | ✅ Complete |
-| 2 | Products | 12 | 0 | ⬜ Not started |
-| 3 | Inventory | 8 | 0 | ⬜ Not started |
-| 4 | Orders | 12 | 0 | ⬜ Not started |
-| 5 | Store Settings (client) | 9 | 0 | ⬜ Not started |
-| 6 | Delivery Zones (client) | 7 | 0 | ⬜ Not started |
+| 2 | Products | 12 | 11 | ✅ Complete (export button deferred — no server endpoint) |
+| 3 | Inventory | 8 | 7 | ✅ Complete (export button deferred — no server endpoint) |
+| 4 | Orders | 12 | 11 | ✅ Complete (export button deferred — no server endpoint) |
+| 5 | Store Settings (client) | 9 | 9 | ✅ Complete |
+| 6 | Delivery Zones (client) | 7 | 7 | ✅ Complete |
 | 7 | Subdomain check | 3 | 0 | ⬜ Not started |
 | 8 | Payments, Admin, Exports | 14 | 0 | ⬜ Not started |
 | — | Infrastructure / Cross-cutting | 8 | 0 | ⬜ Not started |
-| **Total** | | **103** | **30** | **~29% complete** |
+| **Total** | | **103** | **75** | **~73% complete** |
 
 ### What was done in this session (2026-04-27)
 
@@ -663,3 +663,50 @@ Batches 1, 2, 3, and 7 can be worked on in any order or in parallel — they hav
 - Created `client/src/services/analytics.service.ts` with 4 methods + TypeScript interfaces
 - Rewrote `dashboard/page.tsx`: removed all hardcoded `useMemo` data, wired to real API via `Promise.allSettled`, added `isLoading` states and `—` placeholders
 - Rewrote `dashboard-metrics.tsx` `SalesPurchaseChart` to accept `data` and `isLoading` props, maps `revenue`→Sales and `cost`→Cost lines, shows loading skeleton and empty state
+
+**Client — Batches 2, 3, 4 (Products, Inventory, Orders) — 2026-04-27:**
+- Created `client/src/services/inventory.service.ts` — getAll, getByVariantId, adjustStock, getEvents
+- Created `client/src/services/orders.service.ts` — getAll, getById, updatePayment, updateFulfillment, sendMessage, getMessages
+- **Products page** (`products/page.tsx`):
+  - Added module-level helpers: `apiToProductRow`, `apiToProductDetails`, `buildCreatePayload`
+  - Replaced hardcoded `rows` useMemo → `useState<ProductRow[]>([])` + `useEffect` fetching `GET /products`
+  - Replaced hardcoded `detailsById` useMemo → `useState<Record<string,ProductDetailsExtended>>({})` + lazy fetch via `useEffect([selectedProductId])`
+  - Made `openEdit` async — fetches `GET /products/:id` directly, populates form from raw API data
+  - Wired `handleDelete` → `DELETE /products/:id`, removes row from state on success
+  - Wired `ProductFormModal.onSubmit` → `POST /products` (create) or `PUT /products/:id` (edit), updates rows in place
+  - Wired `TrendingProductsChart.products` → `GET /analytics/products/top?limit=5`
+- **Inventory page** (`inventory/page.tsx`):
+  - Added module-level helpers: `mapInvStatus`, `apiToInventoryRow`, `apiToInventoryDetails`
+  - Replaced hardcoded `rows` useState initializer → `[]` + `useEffect` fetching `GET /inventory`
+  - Replaced hardcoded `detailsById` useMemo → `useState<Map<string,ProductDetails>>(new Map())` + lazy fetch via `useEffect([selectedProductId])`
+  - Made `applyAdjustment` async → `POST /inventory/:variantId/adjust` with delta quantity; updates row + detail from API response
+  - Wired `totalAssetValue` KPI → `GET /analytics/inventory/summary`
+  - Status mapping: `IN_STOCK`→`inStock`, `LOW_STOCK`→`lowStock`, `OUT_OF_STOCK`→`outOfStock`
+- **Orders page** (`orders/page.tsx`):
+  - Added module-level helpers: `mapPaymentStatus`, `mapFulfillmentStatus`, `apiToOrderRow`, `apiToOrderDetails`, `apiToMessages`
+  - Replaced hardcoded `rows` useMemo → `useState<OrderRow[]>([])` + `useEffect([range])` fetching `GET /orders` (re-fetches on date range change)
+  - Added `orderUuidMap: Record<string,string>` to map `orderNumber → UUID` for API calls
+  - Replaced hardcoded `detailsById` useMemo → `useState<Map<string,OrderDetails>>(new Map())` + lazy fetch on `selectedOrderId` change
+  - Replaced hardcoded `paymentConfirmed` useState → derived `useMemo` from `rows` (success = payment status SUCCESS)
+  - Replaced hardcoded `orderMessages` → fetched via `GET /orders/:id/messages` when `openCommunication` opens
+  - Wired `handleConfirmPayment` → `PUT /orders/:id/payment {status:'SUCCESS'}`, updates row + detail
+  - Wired `handleRejectPayment` → `PUT /orders/:id/payment {status:'FAILED'}`, updates row
+  - Wired `handleSendMessage` → `POST /orders/:id/messages`, reloads messages from API
+  - Wired KPI stats from loaded rows (total, unpaid count, fulfilled count)
+  - Wired `PaymentVerificationModal.imageUrl` from `detailsById` payment proof URL
+  - Cleared hardcoded date range (was Jan 2024, now no default filter)
+
+**Client — Batches 5 & 6 (Store Settings + Delivery Zones) — 2026-05-01:**
+- Created `client/src/services/store-settings.service.ts` — `getSettings()` → `GET /v1/store/settings`, `updateSettings(dto)` → `PUT /v1/store/settings`; exports `StoreSettingsApi`, `StoreKycApi`, `BusinessAddressApi`, `BrandColorsApi`, `UpdateStoreSettingsPayload`
+- Created `client/src/services/delivery-zones.service.ts` — `getAll()`, `create(dto)`, `update(id,dto)`, `delete(id)` for `GET/POST/PUT/DELETE /v1/delivery-zones`
+- **Store Settings page** (`store-settings/page.tsx`):
+  - Replaced all 5 hardcoded `useState` initializers → empty defaults; `useEffect` on mount calls `Promise.all([getSettings(), getAll()])` in parallel and populates all state
+  - Read-only fields (registeredName, subdomain, country, ownerNationality, businessAddress) marked with `readOnly` + `bg-gray-50` styling — not included in PUT payloads
+  - `handleSave` is now per-tab: business tab → saves `displayName`, `description`, owner name/email/phone; branding tab → saves `brandColors` + `logoUrl`; contact tab → saves `contactEmail/Phone/Address/aboutUs`; delivery tab → batch saves all zones (PUT existing, POST new temp_ zones, then refreshes list)
+  - New zone IDs use `temp_${Date.now()}` prefix; `removeDeliveryZone` calls `DELETE` immediately for real IDs, just removes from state for temp IDs; unsaved zones show amber "Unsaved" badge
+  - Added `isLoading` state — shows centered spinner while settings load, disables Save button
+  - `subscription` state stays hardcoded (no endpoint yet — Batch 8)
+- **Delivery Settings page** (`delivery-settings/page.tsx`):
+  - Fully implemented from placeholder — reuses `deliveryZonesService`
+  - Same zone CRUD as store-settings delivery tab: load on mount, add/edit/delete zones, Save Changes batch-saves all with temp_ → real ID replacement
+  - Add Zone + Save Changes buttons in page header; empty state with inline Add First Zone button
