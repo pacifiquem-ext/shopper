@@ -294,6 +294,20 @@ export default function OrdersPage() {
     return result
   }, [rows])
 
+  const handleExport = useCallback(async () => {
+    try {
+      const blob = await ordersService.exportCsv()
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = 'orders.csv'
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+    } catch {}
+  }, [])
+
   const downloadAsPdf = () => {
     if (!selectedOrder) return
 
@@ -491,6 +505,7 @@ export default function OrdersPage() {
             type="button"
             variant="outline"
             className="h-9 rounded-lg border-gray-200 bg-white text-gray-700 hover:bg-brand-50 hover:text-brand-900"
+            onClick={handleExport}
           >
             <Download className="h-4 w-4" />
             {t('orders.export')}

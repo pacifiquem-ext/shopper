@@ -38,7 +38,7 @@ import { Link } from '@/i18n/navigation'
 import { useState, useEffect, useMemo } from 'react'
 import { cn } from '@/lib/utils'
 import { analyticsService } from '@/services/analytics.service'
-import type { DashboardMetrics, TopProduct, InventorySummary, SalesTrendPoint } from '@/services/analytics.service'
+import type { DashboardMetrics, TopProduct, InventorySummary, SalesTrendPoint, RecentActivityItem } from '@/services/analytics.service'
 
 export default function DashboardPage() {
   const t = useTranslations('dashboard')
@@ -48,6 +48,7 @@ export default function DashboardPage() {
   const [topProducts, setTopProducts] = useState<TopProduct[]>([])
   const [inventorySummary, setInventorySummary] = useState<InventorySummary | null>(null)
   const [salesTrend, setSalesTrend] = useState<SalesTrendPoint[]>([])
+  const [recentActivity, setRecentActivity] = useState<RecentActivityItem[]>([])
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
@@ -56,11 +57,12 @@ export default function DashboardPage() {
     const fetchAll = async () => {
       setIsLoading(true)
       try {
-        const [metricsRes, topRes, inventoryRes, trendRes] = await Promise.allSettled([
+        const [metricsRes, topRes, inventoryRes, trendRes, activityRes] = await Promise.allSettled([
           analyticsService.getDashboardMetrics(selectedPeriod),
           analyticsService.getTopProducts(3),
           analyticsService.getInventorySummary(),
           analyticsService.getSalesTrend(365),
+          analyticsService.getRecentActivity(8),
         ])
 
         if (cancelled) return
@@ -81,6 +83,10 @@ export default function DashboardPage() {
           const data = (trendRes.value as any)?.data ?? trendRes.value
           setSalesTrend(Array.isArray(data) ? data : [])
         }
+        if (activityRes.status === 'fulfilled') {
+          const data = (activityRes.value as any)?.data ?? activityRes.value
+          setRecentActivity(Array.isArray(data) ? data : [])
+        }
       } finally {
         if (!cancelled) setIsLoading(false)
       }
@@ -100,6 +106,20 @@ export default function DashboardPage() {
   const fmt = (n: number | undefined) => (n ?? 0).toLocaleString()
   const dash = (v: string | number | undefined) => isLoading ? '—' : String(v ?? 0)
 
+  const handleGenerateReport = async () => {
+    try {
+      const blob = await analyticsService.getReport(selectedPeriod)
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `report-${selectedPeriod}.csv`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+    } catch {}
+  }
+
   return (
     <div className="flex w-full flex-col gap-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -118,7 +138,7 @@ export default function DashboardPage() {
           <Button
             type="button"
             className="h-10 rounded-xl bg-brand-900 text-white hover:bg-brand-800"
-            disabled
+            onClick={handleGenerateReport}
           >
             <Download className="mr-2 h-4 w-4" />
             Generate Report
@@ -536,6 +556,65 @@ export default function DashboardPage() {
         </CardHeader>
         <CardContent className="pt-4">
           <SalesPurchaseChart data={salesTrend} isLoading={isLoading} />
+        </CardContent>
+      </Card>
+
+      {/* Recent Activity */}
+      <Card className="rounded-2xl border border-gray-200/70 bg-white shadow-sm">
+        <CardHeader className="flex flex-row items-start justify-between space-y-0">
+          <div>
+            <CardTitle className="text-sm font-semibold text-gray-900">Recent Activity</CardTitle>
+            <div className="mt-1 text-xs text-gray-500">Latest order events across your store</div>
+          </div>
+          <Link href="/dashboard/orders">
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="h-8 rounded-lg text-xs text-brand-900 hover:bg-brand-50"
+            >
+              View Orders
+              <ExternalLink className="ml-1 h-3 w-3" />
+            </Button>
+          </Link>
+        </CardHeader>
+        <CardContent>
+          {isLoading ? (
+            <div className="space-y-3">
+              {[1, 2, 3, 4].map((i) => (
+                <div key={i} className="h-12 animate-pulse rounded-xl bg-gray-100" />
+              ))}
+            </div>
+          ) : recentActivity.length === 0 ? (
+            <div className="py-8 text-center text-sm text-gray-400">No recent activity yet.</div>
+          ) : (
+            <div className="space-y-2">
+              {recentActivity.map((item) => (
+                <div
+                  key={item.id}
+                  className="flex items-start gap-3 rounded-xl border border-gray-100 bg-gray-50 px-4 py-3"
+                >
+                  <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-brand-50">
+                    <TrendingUp className="h-3.5 w-3.5 text-brand-900" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-sm font-semibold text-gray-900">{item.title}</span>
+                      <span className="shrink-0 text-xs text-gray-400">
+                        {new Date(item.createdAt).toLocaleDateString('en-RW', {
+                          day: '2-digit',
+                          month: 'short',
+                        })}
+                      </span>
+                    </div>
+                    <div className="text-xs text-gray-500">
+                      {item.orderNumber} · {item.customerName}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>

@@ -36,6 +36,16 @@ export interface InventorySummary {
   totalStockQuantity: number
 }
 
+export interface RecentActivityItem {
+  id: string
+  type: string
+  title: string
+  description: string
+  orderNumber: string
+  customerName: string
+  createdAt: string
+}
+
 export const analyticsService = {
   async getDashboardMetrics(
     period: 'today' | 'week' | 'month' | 'year' = 'month',
@@ -53,5 +63,15 @@ export const analyticsService = {
 
   async getInventorySummary(): Promise<ApiResponse<InventorySummary>> {
     return (await api.get('/analytics/inventory/summary')) as ApiResponse<InventorySummary>
+  },
+
+  async getRecentActivity(limit: number = 10): Promise<ApiResponse<RecentActivityItem[]>> {
+    return (await api.get(`/analytics/recent-activity?limit=${limit}`)) as ApiResponse<
+      RecentActivityItem[]
+    >
+  },
+
+  async getReport(period: string = 'month'): Promise<Blob> {
+    return (await api.get(`/analytics/report?period=${period}`, { responseType: 'blob' })) as unknown as Blob
   },
 }

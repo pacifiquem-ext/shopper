@@ -201,6 +201,20 @@ export default function InventoryPage() {
     setAdjustOpen(true)
   }, [])
 
+  const handleExport = useCallback(async () => {
+    try {
+      const blob = await inventoryService.exportCsv()
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = 'inventory.csv'
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+    } catch {}
+  }, [])
+
   const applyAdjustment = useCallback(async () => {
     const qty = Number(adjustQuantity)
     if (!Number.isFinite(qty) || !selectedProductId) return
@@ -467,6 +481,7 @@ export default function InventoryPage() {
             type="button"
             variant="outline"
             className="h-9 rounded-lg border-gray-200 bg-white text-gray-700 hover:bg-brand-50 hover:text-brand-900"
+            onClick={handleExport}
           >
             <Download className="h-4 w-4" />
             {t('inventory.export')}

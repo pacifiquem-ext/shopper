@@ -117,4 +117,8 @@ export const productsService = {
   async getAnalytics(id: string): Promise<ApiResponse<ProductAnalyticsApi>> {
     return (await api.get(`/products/${id}/analytics`)) as ApiResponse<ProductAnalyticsApi>
   },
+
+  async exportCsv(): Promise<Blob> {
+    return (await api.get('/products/export', { responseType: 'blob' })) as unknown as Blob
+  },
 }

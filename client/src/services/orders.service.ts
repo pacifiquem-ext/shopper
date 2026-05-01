@@ -134,4 +134,8 @@ export const ordersService = {
   async getMessages(id: string): Promise<ApiResponse<OrderMessageApi[]>> {
     return (await api.get(`/orders/${id}/messages`)) as ApiResponse<OrderMessageApi[]>
   },
+
+  async exportCsv(): Promise<Blob> {
+    return (await api.get('/orders/export', { responseType: 'blob' })) as unknown as Blob
+  },
 }

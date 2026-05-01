@@ -114,6 +114,34 @@ export class InventoryService {
         return this.inventoryRepository.getEvents(variantId);
     }
 
+    async exportCsv(storeId: string): Promise<string> {
+        const items = await this.inventoryRepository.findManyByStoreId(storeId, {
+            orderBy: { updatedAt: 'desc' },
+        });
+
+        const headers = ['SKU', 'Product', 'Variant', 'On Hand', 'Reserved', 'Available', 'Status', 'Reorder Point'];
+        const rows = (items as any[]).map((i) => [
+            i.productVariant.sku,
+            i.productVariant.product.name,
+            i.productVariant.title,
+            i.onHand,
+            i.reserved,
+            i.available,
+            i.status,
+            i.reorderPoint ?? '',
+        ]);
+
+        return this.toCsv(headers, rows);
+    }
+
+    private toCsv(headers: string[], rows: any[][]): string {
+        const esc = (v: any) => {
+            const s = String(v ?? '');
+            return s.includes(',') || s.includes('"') || s.includes('\n') ? `"${s.replace(/"/g, '""')}"` : s;
+        };
+        return [headers.join(','), ...rows.map((r) => r.map(esc).join(','))].join('\n');
+    }
+
     private calculateStockStatus(stock: number, reorderPoint: number): string {
         if (stock === 0) return StockStatus.OUT_OF_STOCK;
         if (stock < reorderPoint) return StockStatus.LOW_STOCK;

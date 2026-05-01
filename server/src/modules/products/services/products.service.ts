@@ -211,6 +211,39 @@ export class ProductsService {
         };
     }
 
+    async exportCsv(storeId: string): Promise<string> {
+        const products = await this.productsRepository.findMany(storeId, {
+            orderBy: { createdAt: 'desc' },
+        });
+
+        const headers = ['ID', 'Name', 'Category', 'Vendor', 'Status', 'Min Price', 'Total Stock', 'Created At'];
+        const rows = products.map((p) => {
+            const totalStock = p.variants.reduce((sum, v) => sum + ((v as any).inventory?.onHand ?? 0), 0);
+            const prices = p.variants.map((v) => Number(v.price));
+            const minPrice = prices.length > 0 ? Math.min(...prices) : 0;
+            return [
+                p.id,
+                p.name,
+                p.category || '',
+                p.vendor || '',
+                p.status,
+                minPrice,
+                totalStock,
+                p.createdAt.toISOString().split('T')[0],
+            ];
+        });
+
+        return this.toCsv(headers, rows);
+    }
+
+    private toCsv(headers: string[], rows: any[][]): string {
+        const esc = (v: any) => {
+            const s = String(v ?? '');
+            return s.includes(',') || s.includes('"') || s.includes('\n') ? `"${s.replace(/"/g, '""')}"` : s;
+        };
+        return [headers.join(','), ...rows.map((r) => r.map(esc).join(','))].join('\n');
+    }
+
     private generateSku(productName: string, index: number): string {
         const prefix = productName
             .substring(0, 3)

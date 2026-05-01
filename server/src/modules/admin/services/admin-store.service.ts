@@ -43,7 +43,6 @@ export class AdminStoreService {
                         industrySector: true,
                         businessCategory: true,
                         businessAddress: true,
-                        warehouseAddress: true,
                     },
                 },
             },

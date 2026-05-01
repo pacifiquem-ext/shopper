@@ -259,6 +259,34 @@ export class OrdersService {
         return this.ordersRepository.findMessages(id);
     }
 
+    async exportCsv(storeId: string): Promise<string> {
+        const orders = await this.ordersRepository.findMany(storeId, {
+            orderBy: { placedAt: 'desc' },
+        });
+
+        const headers = ['Order #', 'Customer', 'Email', 'Phone', 'Total', 'Payment Status', 'Fulfillment Status', 'Date'];
+        const rows = (orders as any[]).map((o) => [
+            o.orderNumber,
+            o.customerName,
+            o.customerEmail || '',
+            o.customerPhone || '',
+            Number(o.total),
+            o.payment?.status || '',
+            o.fulfillment?.status || '',
+            o.placedAt.toISOString().split('T')[0],
+        ]);
+
+        return this.toCsv(headers, rows);
+    }
+
+    private toCsv(headers: string[], rows: any[][]): string {
+        const esc = (v: any) => {
+            const s = String(v ?? '');
+            return s.includes(',') || s.includes('"') || s.includes('\n') ? `"${s.replace(/"/g, '""')}"` : s;
+        };
+        return [headers.join(','), ...rows.map((r) => r.map(esc).join(','))].join('\n');
+    }
+
     private async generateOrderNumber(storeId: string): Promise<string> {
         const count = await this.ordersRepository.count(storeId);
         return `#${1000 + count + 1}`;

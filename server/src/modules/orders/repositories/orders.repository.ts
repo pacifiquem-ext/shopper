@@ -115,4 +115,47 @@ export class OrdersRepository {
             orderBy: { createdAt: 'asc' },
         });
     }
+
+    async findPayments(
+        storeId: string,
+        params: {
+            skip?: number;
+            take?: number;
+            status?: string;
+            method?: string;
+            dateFrom?: string;
+            dateTo?: string;
+        },
+    ) {
+        const where: any = { order: { storeId } };
+        if (params.status) where.status = params.status;
+        if (params.method) where.method = params.method;
+        if (params.dateFrom || params.dateTo) {
+            where.createdAt = {};
+            if (params.dateFrom) where.createdAt.gte = new Date(params.dateFrom);
+            if (params.dateTo) where.createdAt.lte = new Date(params.dateTo);
+        }
+
+        const [payments, total] = await Promise.all([
+            this.prisma.orderPayment.findMany({
+                skip: params.skip,
+                take: params.take,
+                where,
+                include: {
+                    order: {
+                        select: {
+                            orderNumber: true,
+                            customerName: true,
+                            customerEmail: true,
+                            customerPhone: true,
+                        },
+                    },
+                },
+                orderBy: { createdAt: 'desc' },
+            }),
+            this.prisma.orderPayment.count({ where }),
+        ]);
+
+        return { payments, total };
+    }
 }

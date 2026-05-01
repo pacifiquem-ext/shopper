@@ -1,10 +1,22 @@
-import { getTranslations } from 'next-intl/server'
+'use client'
+
+import { useEffect, useState } from 'react'
+import { useTranslations } from 'next-intl'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { CheckCircle2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { storeSettingsService } from '@/services/store-settings.service'
 
-export default async function SubscriptionPage() {
-  const t = await getTranslations('dashboard')
+export default function SubscriptionPage() {
+  const t = useTranslations('dashboard')
+  const [storeName, setStoreName] = useState<string | null>(null)
+
+  useEffect(() => {
+    storeSettingsService.getSettings().then((res) => {
+      const data = (res?.data as any)?.data ?? res?.data
+      if (data?.displayName) setStoreName(data.displayName)
+    })
+  }, [])
 
   const proFeatures = [
     'Advanced Analytics',
@@ -21,7 +33,9 @@ export default async function SubscriptionPage() {
     <div className="flex w-full max-w-6xl flex-col gap-6">
       <div>
         <h1 className="text-3xl font-bold tracking-tight text-gray-900">{t('nav.subscription')}</h1>
-        <p className="mt-2 text-gray-500">Manage your current plan.</p>
+        <p className="mt-2 text-gray-500">
+          {storeName ? `Managing plan for ${storeName}.` : 'Manage your current plan.'}
+        </p>
       </div>
 
       <div className="mt-4 grid max-w-5xl gap-8 md:grid-cols-2 lg:grid-cols-3">

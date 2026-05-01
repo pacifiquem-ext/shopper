@@ -7,9 +7,11 @@ import {
     Body,
     Param,
     Query,
+    Res,
     UseGuards,
     HttpStatus,
 } from '@nestjs/common';
+import { Response } from 'express';
 import {
     ApiTags,
     ApiOperation,
@@ -72,6 +74,19 @@ export class ProductsController {
         @Query() filters: ProductFilterDto,
     ) {
         return this.productsService.findAll(storeId, filters);
+    }
+
+    @Get('export')
+    @ApiOperation({ summary: 'Export products as CSV' })
+    @ApiResponse({ status: HttpStatus.OK, description: 'CSV file returned' })
+    async exportCsv(
+        @StoreId() storeId: string,
+        @Res() res: Response,
+    ) {
+        const csv = await this.productsService.exportCsv(storeId);
+        res.setHeader('Content-Type', 'text/csv');
+        res.setHeader('Content-Disposition', 'attachment; filename="products.csv"');
+        res.send(csv);
     }
 
     @Get(':id')

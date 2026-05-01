@@ -6,12 +6,40 @@ import { cn } from '@/lib/utils'
 import { useStoreOnboardingStore } from '@/store/store-onboarding.store'
 import { useWizardField } from './wizard-context'
 import { StepHeader } from './step-header'
+import { storeOnboardingService } from '@/services/store-onboarding.service'
+import { useEffect, useState } from 'react'
+
+type AvailabilityState = 'idle' | 'checking' | 'available' | 'taken' | 'error'
 
 export function StepSubdomain() {
   const t = useTranslations('storeOnboarding')
   const { draft, setSubdomain } = useStoreOnboardingStore()
 
   const subdomainField = useWizardField('subdomain')
+
+  const [availability, setAvailability] = useState<AvailabilityState>('idle')
+
+  useEffect(() => {
+    const subdomain = draft.subdomain || ''
+
+    if (subdomain.length < 2 || !/^[a-z0-9][a-z0-9-]*[a-z0-9]$/.test(subdomain)) {
+      setAvailability('idle')
+      return
+    }
+
+    setAvailability('checking')
+    const timer = setTimeout(async () => {
+      try {
+        const res = await storeOnboardingService.checkSubdomain(subdomain)
+        const data = (res as any)?.data ?? res
+        setAvailability(data?.available ? 'available' : 'taken')
+      } catch {
+        setAvailability('error')
+      }
+    }, 400)
+
+    return () => clearTimeout(timer)
+  }, [draft.subdomain])
 
   return (
     <div className="space-y-8">
@@ -32,7 +60,11 @@ export function StepSubdomain() {
               'flex items-center border-b py-2 transition-colors',
               subdomainField.hasError
                 ? 'border-red-500 focus-within:border-red-500'
-                : 'focus-within:border-brand-600 border-gray-300'
+                : availability === 'taken'
+                  ? 'border-red-400 focus-within:border-red-400'
+                  : availability === 'available'
+                    ? 'border-emerald-500 focus-within:border-emerald-500'
+                    : 'focus-within:border-brand-600 border-gray-300',
             )}
           >
             <input
@@ -49,9 +81,28 @@ export function StepSubdomain() {
             />
             <div className="pb-1 text-lg font-medium text-gray-500">.onlineshop.rw</div>
           </div>
+
+          {/* Validation error (from wizard) */}
           {subdomainField.hasError && (
             <div className="absolute bg-white pt-1 text-xs font-medium text-red-500">
               {subdomainField.errorMessage}
+            </div>
+          )}
+
+          {/* Availability status */}
+          {!subdomainField.hasError && availability !== 'idle' && (
+            <div
+              className={cn('pt-1 text-xs font-medium', {
+                'text-gray-400': availability === 'checking',
+                'text-emerald-600': availability === 'available',
+                'text-red-500': availability === 'taken',
+                'text-amber-500': availability === 'error',
+              })}
+            >
+              {availability === 'checking' && 'Checking availability...'}
+              {availability === 'available' && '✓ Available'}
+              {availability === 'taken' && '✗ Already taken — choose a different name'}
+              {availability === 'error' && 'Could not check availability'}
             </div>
           )}
         </div>

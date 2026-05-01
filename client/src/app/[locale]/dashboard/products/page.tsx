@@ -409,6 +409,20 @@ export default function ProductsPage() {
     setProductToDelete(null)
   }, [productToDelete])
 
+  const handleExport = useCallback(async () => {
+    try {
+      const blob = await productsService.exportCsv()
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = 'products.csv'
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+    } catch {}
+  }, [])
+
   const selectedProduct = selectedProductId ? detailsById[selectedProductId] : undefined
 
   const vendors = useMemo(() => {
@@ -640,6 +654,7 @@ export default function ProductsPage() {
               type="button"
               variant="outline"
               className="h-9 rounded-lg border-gray-200 bg-white text-gray-700 hover:bg-brand-50 hover:text-brand-900"
+              onClick={handleExport}
             >
               <Download className="mr-2 h-4 w-4" />
               {t('products.export')}

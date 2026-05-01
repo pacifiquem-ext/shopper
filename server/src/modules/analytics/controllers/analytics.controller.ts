@@ -1,4 +1,5 @@
-import { Controller, Get, Query, UseGuards, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Query, Res, UseGuards, HttpStatus } from '@nestjs/common';
+import { Response } from 'express';
 import {
     ApiTags,
     ApiOperation,
@@ -67,5 +68,34 @@ export class AnalyticsController {
     })
     async getInventorySummary(@StoreId() storeId: string) {
         return this.analyticsService.getInventorySummary(storeId);
+    }
+
+    @Get('report')
+    @ApiOperation({ summary: 'Download analytics report as CSV' })
+    @ApiQuery({ name: 'period', required: false, enum: ['today', 'week', 'month', 'year'] })
+    @ApiResponse({ status: HttpStatus.OK, description: 'CSV report returned' })
+    async getReport(
+        @StoreId() storeId: string,
+        @Query('period') period: string,
+        @Res() res: Response,
+    ) {
+        const csv = await this.analyticsService.getReport(storeId, period);
+        res.setHeader('Content-Type', 'text/csv');
+        res.setHeader('Content-Disposition', 'attachment; filename="report.csv"');
+        res.send(csv);
+    }
+
+    @Get('recent-activity')
+    @ApiOperation({ summary: 'Get recent store activity events' })
+    @ApiQuery({ name: 'limit', required: false, type: Number })
+    @ApiResponse({
+        status: HttpStatus.OK,
+        description: 'Recent activity retrieved successfully',
+    })
+    async getRecentActivity(
+        @StoreId() storeId: string,
+        @Query('limit') limit?: number,
+    ) {
+        return this.analyticsService.getRecentActivity(storeId, limit ? +limit : 10);
     }
 }

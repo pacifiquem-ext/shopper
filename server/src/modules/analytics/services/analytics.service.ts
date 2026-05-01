@@ -155,6 +155,56 @@ export class AnalyticsService {
         };
     }
 
+    async getRecentActivity(storeId: string, limit: number = 10) {
+        const events = await this.prisma.orderEvent.findMany({
+            where: { order: { storeId } },
+            include: {
+                order: { select: { orderNumber: true, customerName: true } },
+            },
+            orderBy: { createdAt: 'desc' },
+            take: limit,
+        });
+
+        return events.map((e) => ({
+            id: e.id,
+            type: e.type,
+            title: e.title,
+            description: e.description,
+            orderNumber: e.order.orderNumber,
+            customerName: e.order.customerName,
+            createdAt: e.createdAt,
+        }));
+    }
+
+    async getReport(storeId: string, period: string = 'month'): Promise<string> {
+        const [dashboard, topProducts] = await Promise.all([
+            this.getDashboardMetrics(storeId, period),
+            this.getTopProducts(storeId, 10),
+        ]);
+
+        const lines: string[] = [
+            'DASHBOARD REPORT',
+            `Period,${period}`,
+            `Generated,${new Date().toISOString()}`,
+            '',
+            'METRICS',
+            `Total Revenue,${dashboard.totalRevenue}`,
+            `Total Orders,${dashboard.totalOrders}`,
+            `Active Products,${dashboard.activeProducts}`,
+            `Total Customers,${dashboard.totalCustomers}`,
+            `Completed Orders,${dashboard.completedOrders}`,
+            `Pending Orders,${dashboard.pendingOrders}`,
+            `Low Stock Items,${dashboard.lowStockCount}`,
+            `Out of Stock Items,${dashboard.outOfStockCount}`,
+            '',
+            'TOP PRODUCTS',
+            'Product Name,Units Sold,Revenue',
+            ...(topProducts as any[]).map((p) => `${p.productName},${p.unitsSold},${p.revenue}`),
+        ];
+
+        return lines.join('\n');
+    }
+
     private getDateRange(period: string) {
         const now = new Date();
         const start = new Date();

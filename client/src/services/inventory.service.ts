@@ -90,4 +90,8 @@ export const inventoryService = {
   async getEvents(variantId: string): Promise<ApiResponse<InventoryEventApi[]>> {
     return (await api.get(`/inventory/${variantId}/events`)) as ApiResponse<InventoryEventApi[]>
   },
+
+  async exportCsv(): Promise<Blob> {
+    return (await api.get('/inventory/export', { responseType: 'blob' })) as unknown as Blob
+  },
 }
