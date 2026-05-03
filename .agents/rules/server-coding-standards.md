@@ -2,458 +2,448 @@
 trigger: always_on
 ---
 
-Core Principles
+# NestJS Production Architecture Rules
 
-High cohesion inside modules.
+## Core Principles
+- High cohesion inside modules, loose coupling between modules
+- Clear dependency direction (always downward)
+- Strict layer contracts, predictable error/response systems
+- Zero hidden dependencies
 
-Loose coupling between modules.
+## Module Organization
 
-Clear dependency direction.
+### Domain-Based Structure
+Modules represent **business domains**, not technical groupings.
 
-Strict contracts between layers.
+**✅ Valid:** `auth`, `users`, `orders`, `payments`, `inventory`, `products`
+**❌ Invalid:** `helpers`, `utils`, `shared-business`, `misc`
 
-Predictable error and response systems.
+### Standard Module Structure
+```
+module-name/
+├── module-name.module.ts
+├── controllers/          # HTTP layer only
+├── services/             # Business logic only  
+├── dtos/                 # External contracts
+└── [guards|strategies|mappers]  # Optional
+```
+**Location:** `/server/modules/{module-name}/`
 
-No hidden dependencies.
+### Module Self-Test
+Every module must answer:
+1. What domain does it own?
+2. What services does it expose?
+3. What data does it control?
 
-Module Design
+If unclear, redesign the module.
 
-Modules represent business domains, not technical groupings.
+## Layer Responsibilities
 
-Good examples
+### Controllers
+**Purpose:** HTTP communication ONLY
+- Accept requests, validate via DTOs, call services
+- **FORBIDDEN:** Business logic, direct DB/Prisma access, repositories, raw request bodies
 
-auth
-users
-orders
-payments
-inventory
-catalog
-
-Bad examples
-
-helpers
-shared-business
-utils
-misc
-
-Rules
-
-A module owns its domain logic.
-
-Modules must expose functionality only through services.
-
-Modules must not access another module’s repositories or controllers.
-
-Module Internal Structure
-
-Each module must follow a predictable structure.
-
-Example
-
-auth
- ├ auth.module.ts
- ├ controllers
- │   └ auth.controller.ts
- ├ services
- │   └ auth.service.ts
- ├ repositories
- │   └ user.repository.ts
- ├ entities
- │   └ user.entity.ts
- ├ dtos
- │   └ login.dto.ts
- ├ constants
- │   └ auth.constants.ts
- ├ guards
- ├ strategies
- └ mappers
-
-Responsibilities
-
-Controllers
-Handle HTTP communication only.
-
-Services
-Contain business logic and orchestration.
-
-Repositories
-Handle database operations.
-
-Entities
-Represent domain objects.
-
-DTOs
-Define external input/output structure.
-
-Constants
-Contain system configuration and statuses.
-
-Dependency Direction
-
-Dependencies must always flow downward.
-
-Controller
-   ↓
-Service
-   ↓
-Repository
-   ↓
-Database
-
-Forbidden patterns
-
-Controller → Prisma
-Controller → Database
-Service → Request object
-Repository → DTO
-Service Rules
-
-Services contain business logic only.
-
-Rules
-
-Services must not perform direct database access.
-
-Services must call repositories.
-
-Services must not contain HTTP-specific logic.
-
-Bad
-
-async login(dto: LoginDto) {
-  return this.prisma.user.findUnique(...)
+```typescript
+// ✅ CORRECT
+@Post('login')
+async login(@Body() dto: LoginDto) {
+  return this.authService.login(dto);
 }
 
-Good
-
-async login(dto: LoginDto) {
-  const user = await this.userRepository.findByEmail(dto.email)
-  return user
+// ❌ INCORRECT
+@Post('login')
+async login(@Body() body: any) {
+  return this.prisma.user.findUnique(...);
 }
-Repository Rules
+```
 
-Repositories isolate the database layer.
+### Services  
+**Purpose:** Business logic and orchestration
+- Implement domain logic, call repositories, call other module services
+- **FORBIDDEN:** Direct DB access, HTTP objects (Request/Response), Prisma queries
 
-Example
+```typescript
+// ✅ CORRECT
+async login(dto: LoginDto) {
+  const user = await this.userRepository.findByEmail(dto.email);
+  if (!user) throw new UserNotFoundException();
+  return this.generateTokens(user);
+}
 
-auth/repositories/user.repository.ts
+// ❌ INCORRECT  
+async login(dto: LoginDto) {
+  return this.prisma.user.findUnique({ where: { email: dto.email } });
+}
+```
 
-Example implementation
+### Repositories
+**Purpose:** Database operations ONLY
+- Perform CRUD, abstract queries, return entities/primitives
+- **FORBIDDEN:** Business logic, DTOs, transactions (belong in services)
 
+```typescript
+// ✅ CORRECT
 @Injectable()
 export class UserRepository {
-
-  constructor(private prisma: PrismaService) {}
-
-  async findByEmail(email: string) {
-    return this.prisma.user.findUnique({
-      where: { email }
-    })
+  async findByEmail(email: string): Promise<User | null> {
+    return this.prisma.user.findUnique({ where: { email } });
   }
-
 }
 
-Rules
+// ❌ INCORRECT - Business logic
+async createUser(dto: CreateUserDto) {
+  const hashed = await bcrypt.hash(dto.password, 10);
+  return this.prisma.user.create({ data: { ...dto, password: hashed } });
+}
+```
 
-Repositories must only perform persistence operations.
+### DTOs
+**Purpose:** Define external contracts
+- All controller inputs MUST use validated DTOs
+- **FORBIDDEN:** Use in repository layer
 
-Repositories must not contain business logic.
+```typescript
+// ✅ CORRECT
+export class LoginDto {
+  @IsEmail()
+  email: string;
+  
+  @IsString()
+  @MinLength(8)
+  password: string;
+}
+```
 
-Cohesion Rules
+## Dependency Flow
 
-Each file must have a single responsibility.
+**Rule:** Dependencies flow DOWNWARD only
 
-Bad
+```
+Controller → Service → Repository → Database
+```
 
-auth.service.ts
-  login
-  register
-  forgotPassword
-  resetPassword
-  verifyEmail
-  sendEmail
+**FORBIDDEN:**
+- Controller → Prisma/Database/Repository
+- Service → Request/Response/Prisma
+- Repository → DTO/Business logic
 
-Better
+**Verify:** Check imports in each layer
+- Controllers: DTOs, Services, Decorators only
+- Services: Repositories, Other Services, Helpers only  
+- Repositories: Prisma, Entities only
 
-auth/services
-  login.service.ts
-  register.service.ts
-  reset-password.service.ts
+## Cross-Module Communication
 
-Limits
+**Rule:** Modules communicate via exported **services ONLY**
 
-Item	Limit
-File size	300 lines
-Service class	200 lines
-Function	40 lines
-Cross Module Communication
-
-Modules must interact through services only.
-
-Good
-
-OrdersService → UsersService
-
-Bad
-
-OrdersService → UsersRepository
-OrdersService → UsersController
-
-Modules must export services.
-
-Example
-
+```typescript
+// ✅ CORRECT
+// users.module.ts
 @Module({
-  providers: [UsersService],
-  exports: [UsersService]
+  providers: [UsersService, UsersRepository],
+  exports: [UsersService]  // Export service only
 })
-Common Folder Usage
 
-Your project already has
+// orders.service.ts
+constructor(
+  private usersService: UsersService  // Use exported service
+) {}
+```
 
-common
- ├ cache
- ├ config
- ├ database
- ├ logger
- ├ request
- ├ response
- └ tenant
+**FORBIDDEN:**
+- Accessing another module's repository
+- Accessing another module's controller
 
-Rules
+## Common Folder (`/server/common`)
 
-Common must only contain technical infrastructure.
+**Purpose:** Technical infrastructure ONLY
 
-Allowed
+**✅ Allowed:** config, database, logger, cache, helper, exceptions, message, request, response, tenant
+**❌ Forbidden:** Business logic (order-service, user-business, payment-logic)
 
-config
-database
-logger
-cache
-validation
-exceptions
+## Constants (`/server/common/constants`)
 
-Forbidden
+**Location:** `/server/common/constants/{module-name}.ts`
 
-order-service
-user-business
-payment-logic
-Status System
+**Rules:**
+- Module constants in `/server/common/constants/{module}.ts`
+- Shared constants in `/server/common/constants/shared.ts`
+- Import from `/server/common/constants/index.ts`
+- **ZERO hardcoded strings/numbers** anywhere in `/server`
 
-Never use raw strings for statuses.
-
-Bad
-
-return { status: "ok" }
-
-Create centralized constants.
-
-Example
-
-common/constants/status.constants.ts
-export const ResponseStatus = {
-  SUCCESS: "SUCCESS",
-  ERROR: "ERROR",
-  FAIL: "FAIL"
-} as const
-
-Statuses must always come from constants.
-
-API Response Standard
-
-All responses must follow the same shape.
-
-Success
-
-{
-  status: SUCCESS,
-  data: {},
-  error: null
-}
-
-Error
-
-{
-  status: FAIL,
-  data: null,
-  error: {
-    code: "USER_NOT_FOUND",
-    message: "User does not exist"
-  }
-}
-
-Rules
-
-Response structure must never change.
-
-Controllers must not return inconsistent formats.
-
-Error Handling
-
-Errors must be typed and categorized.
-
-Example
-
-common/errors
-
-Example classes
-
-export class DomainError extends Error {}
-
-export class NotFoundError extends DomainError {}
-
-export class ValidationError extends DomainError {}
-
-Rules
-
-Domain logic must not throw generic Error.
-
-Infrastructure errors must be mapped to domain errors.
-
-DTO Discipline
-
-Controllers must never accept raw request bodies.
-
-Bad
-
-@Post()
-create(@Body() body)
-
-Good
-
-@Post()
-create(@Body() dto: CreateUserDto)
-
-DTO rules
-
-All inputs must be validated.
-
-DTOs must represent external contracts only.
-
-Constants Management
-
-Constants must be grouped by domain.
-
-Example
-
-constants
- ├ auth.constants.ts
- ├ roles.constants.ts
- ├ permissions.constants.ts
-
-Example
-
-export const Roles = {
+```typescript
+// ✅ CORRECT
+export const AuthRoles = {
   ADMIN: "ADMIN",
   USER: "USER"
-} as const
+} as const;
 
-Rules
+import { AuthRoles } from '@/common/constants';
+if (user.role === AuthRoles.ADMIN) { ... }
 
-Never use literal strings across the system.
+// ❌ INCORRECT
+if (user.role === "ADMIN") { ... }
+```
 
-Logging Rules
+## Exceptions (`/server/common/exceptions`)
 
-Never use console logs.
+**Location:** `/server/common/exceptions/{module-name}.exception.ts`
 
-Bad
+**Rules:**
+- Each module gets its own exception file
+- Extend `DomainException` base class
+- All exceptions MUST have i18n translation keys
+- Wrap risky operations in try/catch
+- **NEVER** throw generic Error/BadRequestException
 
-console.log("User created")
+```typescript
+// ✅ CORRECT
+export class UserNotFoundException extends DomainException {
+  constructor(identifier: string) {
+    super('auth.user.not_found', { identifier }, 404);
+  }
+}
 
-Good
+// Usage
+if (!user) throw new UserNotFoundException(dto.email);
 
-logger.info("USER_CREATED", {
-  userId,
+// ❌ INCORRECT
+throw new BadRequestException('User not found');
+```
+
+**Response Format:** Must align with `/server/common/response/dtos/response.error.dto.ts`
+
+## Helper Services (`/server/common/helper/services`)
+
+**Available Helpers:**
+1. **Encryption** - `/helper/services/helper.encryption.service.ts`
+   - Use for: Password hashing, comparing, encryption/decryption
+2. **Pagination** - `/helper/services/helper.pagination.service.ts`
+   - Use for: ALL paginated endpoints
+3. **Query Builder** - `/helper/services/helper.query.builder.service.ts`
+   - Use for: WHERE, ORDER BY, SELECT, range filters, pagination
+4. **Query Service** - `/helper/services/helper.query.service.ts`
+   - Use for: Complex query orchestration
+
+**Rule:** ALWAYS check helpers first before implementing similar logic
+
+```typescript
+// ✅ CORRECT
+constructor(private encryptionHelper: HelperEncryptionService) {}
+const hashed = await this.encryptionHelper.hash(dto.password);
+
+// ❌ INCORRECT
+import * as bcrypt from 'bcrypt';
+const hashed = await bcrypt.hash(dto.password, 10);
+```
+
+## Logging (`/server/common/logger`)
+
+**Location:** `/server/common/logger/services/logger.service.ts`
+
+**Rules:**
+- ALL actions MUST be logged
+- **NEVER** use console.log
+- Log structure: Event name (UPPERCASE_SNAKE_CASE) + metadata
+
+```typescript
+// ✅ CORRECT
+this.logger.info('ORDER_CREATED', {
+  orderId: order.id,
+  userId: dto.userId,
+  total: order.total
+});
+
+// ❌ INCORRECT
+console.log('Order created');
+this.logger.info('order created');  // Wrong format
+```
+
+**Levels:** info, warn, error, debug
+
+## Translation (`/server/common/message`)
+
+**Service:** `/server/common/message/services/message.service.ts`
+**Files:** `/server/languages/{locale}/{module}.json`
+
+**Rules:**
+- ALL user-facing text MUST be translatable
+- Translation key format: `module.context.action`
+- **NEVER** hardcode user messages
+
+```typescript
+// ✅ CORRECT
+this.messageService.get('auth.user.not_found', { email: dto.email })
+
+// Language file: /server/languages/en/auth.json
+{
+  "user": {
+    "not_found": "User with email {{email}} not found"
+  }
+}
+
+// ❌ INCORRECT
+throw new NotFoundException('User not found');
+```
+
+## Response Standardization (`/server/common/response`)
+
+**DTOs Location:** `/server/common/response/dtos/`
+- `response.success.dto.ts` - Successful operations
+- `response.error.dto.ts` - Failed operations  
+- `response.paginated.dto.ts` - Paginated lists
+- `response.generic.dto.ts` - Generic wrapper
+
+**Interceptor:** `/server/common/response/interceptors/response.interceptor.ts`
+
+**Rules:**
+- ALL responses MUST follow standard structure
+- Check DTO files for exact structure
+- **NEVER** create custom response formats
+- Response structure NEVER changes
+
+```typescript
+// ✅ CORRECT - Interceptor handles formatting
+@Get(':id')
+async findOne(@Param('id') id: string) {
+  return this.service.findOne(id);
+}
+
+// ❌ INCORRECT
+return {
+  success: true,
+  result: data,
   timestamp: Date.now()
-})
+};
+```
 
-Logs must include
+## Request Handling (`/server/common/request`)
 
-event name
+**Guards:** `/server/common/request/guards/`
+- `jwt.access.guard.ts`, `jwt.refresh.guard.ts`, `roles.guard.ts`, `store.guard.ts`
 
-metadata
+**Decorators:** `/server/common/request/decorators/`
+- `request.public.decorator.ts`, `request.role.decorator.ts`, `request.user.decorator.ts`
 
-Configuration Rules
+**Rule:** Use existing guards/decorators, don't reinvent
 
-Environment variables must be centralized.
+```typescript
+// ✅ CORRECT
+@UseGuards(JwtAccessGuard, RolesGuard)
+@Roles('ADMIN')
+async getDashboard() { ... }
 
-Bad
+// ❌ INCORRECT
+async getDashboard(@Headers('authorization') token: string) {
+  const user = this.jwtService.verify(token);
+  if (user.role !== 'ADMIN') throw new ForbiddenException();
+}
+```
 
-process.env.JWT_SECRET
+## Configuration (`/server/common/config`)
 
-Good
+**Files:** `app.config.ts`, `auth.config.ts`, `doc.config.ts`, `redis.config.ts`
 
-config.auth.jwtSecret
+**Rules:**
+- **ONLY** config files read `process.env`
+- Modules import from config files
+- Validate env vars at startup
 
-Only config files may read environment variables.
+```typescript
+// ✅ CORRECT
+constructor(private authConfig: AuthConfig) {}
+secret: this.authConfig.jwtSecret
 
-Worker Rules
+// ❌ INCORRECT
+secret: process.env.JWT_SECRET
+```
 
-Your workers directory is good.
+## Workers (`/server/workers`)
 
-Workers must only depend on services, never controllers.
+**Structure:** `worker.module.ts`, `processors/`, `schedulers/`
 
-Example
+**Rules:**
+- Workers orchestrate services, NO business logic
+- Depend on services, NEVER controllers
+- Use for: Background jobs, scheduled tasks, async operations
 
-workers/email.worker.ts
+```typescript
+// ✅ CORRECT
+constructor(
+  private emailService: EmailService,
+  private userService: UserService
+) {}
 
-Rules
+// ❌ INCORRECT
+constructor(private userController: UserController) {}
+```
 
-Workers must not contain business logic.
+## Transaction Management
 
-Workers orchestrate services.
+**Rule:** Transactions in services ONLY, repositories perform single operations
 
-Language System Rules
+```typescript
+// ✅ CORRECT
+async createOrder(dto: CreateOrderDto) {
+  return this.prisma.$transaction(async (tx) => {
+    const order = await this.orderRepository.create(dto, tx);
+    await this.inventoryRepository.decrementStock(dto.productId, dto.quantity, tx);
+    return order;
+  });
+}
 
-Language files must contain translation keys only.
+// ❌ INCORRECT - Transaction in repository
+```
 
-Bad
+## File Naming
 
-"User created successfully"
+| Type | Pattern |
+|------|---------|
+| Module | `{name}.module.ts` |
+| Controller | `{name}.controller.ts` |
+| Service | `{name}.service.ts` |
+| Repository | `{name}.repository.ts` |
+| DTO | `{action}-{entity}.dto.ts` |
+| Entity | `{name}.entity.ts` |
+| Constants | `{name}.constants.ts` |
 
-Better
+Use kebab-case for all file names.
 
-"user.created"
+## Clean Code
 
-Rules
+**Single Responsibility:**
+```typescript
+// ❌ INCORRECT
+async createUserAndSendEmail(dto: CreateUserDto) { ... }
 
-Translation text belongs to language files only.
+// ✅ CORRECT
+async createUser(dto: CreateUserDto) { ... }
+async sendWelcomeEmail(userId: string) { ... }
+```
 
-Business logic must not contain human text.
+## Critical Rules
 
-File Naming Conventions
-Type	Naming
-DTO	*.dto.ts
-Service	*.service.ts
-Controller	*.controller.ts
-Repository	*.repository.ts
-Constants	*.constants.ts
-Transaction Rules
+1. **Dependencies:** Controller → Service → Repository → Database
+2. **Constants:** Zero hardcoded values, all in `/common/constants/{module}.ts`
+3. **Helpers:** Use existing services in `/common/helper/services/`
+4. **Logging:** Use logger service, no console.log
+5. **Translation:** Use message service + `/languages/{locale}/{module}.json`
+6. **Responses:** Use DTOs from `/common/response/dtos/`
+7. **Exceptions:** Module-specific in `/common/exceptions/{module}.exception.ts`
+8. **Config:** Only config files read process.env
+9. **Cross-Module:** Via exported services only
+10. **Transactions:** In services, not repositories
 
-Database transactions must exist only in services.
+## Verification
 
-Repositories must perform single operations only.
+1. Structure - Right folder?
+2. Dependencies - Flowing downward?
+3. Constants - Any hardcoded values?
+4. Helpers - Existing helper available?
+5. Logging - Using logger service?
+6. Exceptions - Typed, module-specific?
+7. Translation - Using translation keys?
+8. Response - Following standard DTOs?
 
-Clean Code Rules
-
-Never mix responsibilities.
-
-Bad
-
-createUserAndSendEmail()
-
-Good
-
-createUser()
-sendWelcomeEmail()
-Golden Rule
-
-Every module must answer three questions clearly.
-
-What domain does this module own
-
-What services does this module expose
-
-What data does this module control
-
-If these answers are unclear, the module design is incorrect.
+If ANY fails, code is incomplete. Check `/server/common/` for patterns.

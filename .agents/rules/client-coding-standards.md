@@ -2,225 +2,604 @@
 trigger: always_on
 ---
 
-# Project Context
-Ultracite enforces strict type safety, accessibility standards, and consistent code quality for JavaScript/TypeScript projects using Biome's lightning-fast formatter and linter.
+# Next.js Client Architecture Rules
 
-## Key Principles
-- Zero configuration required
-- Subsecond performance
-- Maximum type safety
-- AI-friendly code generation
+## Core Principles
+- Clear separation between server and client components
+- Strict layer contracts: pages → services → API
+- Zero prop-drilling; Zustand for cross-component state
+- All user-facing text must be translatable
+- No inline logic that belongs in services or stores
 
-## Before Writing Code
-1. Analyze existing patterns in the codebase
-2. Consider edge cases and error scenarios
-3. Follow the rules below strictly
-4. Validate accessibility requirements
+## Directory Structure
 
-## Rules
+```
+src/
+├── app/[locale]/           # App Router — all routes under locale segment
+│   ├── (auth)/             # Route group: login, signup, forgot/reset-password, verify-phone
+│   ├── (onboarding)/       # Route group: store setup flow
+│   └── dashboard/          # Protected merchant dashboard routes
+├── components/
+│   ├── ui/                 # shadcn/ui base components — DO NOT modify
+│   ├── auth/               # Auth-specific components
+│   ├── dashboard/
+│   │   ├── shared/         # Reusable dashboard components (header, sidebar, filters)
+│   │   ├── products/
+│   │   ├── orders/
+│   │   └── inventory/
+│   └── store-onboarding/
+├── services/               # API call layer (Axios)
+├── store/                  # Zustand stores
+├── hooks/                  # Custom React hooks
+├── validations/            # Zod schemas
+├── types/                  # TypeScript type definitions
+├── i18n/locales/           # Translation JSON files (en.json, rw.json)
+├── lib/
+│   ├── axios.ts            # Configured Axios instance
+│   └── utils.ts            # cn() and other utilities
+└── utils/constants.ts      # App-wide constants
+```
 
-### Accessibility (a11y)
-- Don't use `accessKey` attribute on any HTML element.
-- Don't set `aria-hidden="true"` on focusable elements.
-- Don't add ARIA roles, states, and properties to elements that don't support them.
-- Don't use distracting elements like `<marquee>` or `<blink>`.
-- Only use the `scope` prop on `<th>` elements.
-- Don't assign non-interactive ARIA roles to interactive HTML elements.
-- Make sure label elements have text content and are associated with an input.
-- Don't assign interactive ARIA roles to non-interactive HTML elements.
-- Don't assign `tabIndex` to non-interactive HTML elements.
-- Don't use positive integers for `tabIndex` property.
-- Don't include "image", "picture", or "photo" in img alt prop.
-- Don't use explicit role property that's the same as the implicit/default role.
-- Make static elements with click handlers use a valid role attribute.
-- Always include a `title` element for SVG elements.
-- Give all elements requiring alt text meaningful information for screen readers.
-- Make sure anchors have content that's accessible to screen readers.
-- Assign `tabIndex` to non-interactive HTML elements with `aria-activedescendant`.
-- Include all required ARIA attributes for elements with ARIA roles.
-- Make sure ARIA properties are valid for the element's supported roles.
-- Always include a `type` attribute for button elements.
-- Make elements with interactive roles and handlers focusable.
-- Give heading elements content that's accessible to screen readers (not hidden with `aria-hidden`).
-- Always include a `lang` attribute on the html element.
-- Always include a `title` attribute for iframe elements.
-- Accompany `onClick` with at least one of: `onKeyUp`, `onKeyDown`, or `onKeyPress`.
-- Accompany `onMouseOver`/`onMouseOut` with `onFocus`/`onBlur`.
-- Include caption tracks for audio and video elements.
-- Use semantic elements instead of role attributes in JSX.
-- Make sure all anchors are valid and navigable.
-- Ensure all ARIA properties (`aria-*`) are valid.
-- Use valid, non-abstract ARIA roles for elements with ARIA roles.
-- Use valid ARIA state and property values.
-- Use valid values for the `autocomplete` attribute on input elements.
-- Use correct ISO language/country codes for the `lang` attribute.
+## Server vs Client Components
 
-### Code Complexity and Quality
-- Don't use consecutive spaces in regular expression literals.
-- Don't use the `arguments` object.
-- Don't use primitive type aliases or misleading types.
-- Don't use the comma operator.
-- Don't use empty type parameters in type aliases and interfaces.
-- Don't write functions that exceed a given Cognitive Complexity score.
-- Don't nest describe() blocks too deeply in test files.
-- Don't use unnecessary boolean casts.
-- Don't use unnecessary callbacks with flatMap.
-- Use for...of statements instead of Array.forEach.
-- Don't create classes that only have static members (like a static namespace).
-- Don't use this and super in static contexts.
-- Don't use unnecessary catch clauses.
-- Don't use unnecessary constructors.
-- Don't use unnecessary continue statements.
-- Don't export empty modules that don't change anything.
-- Don't use unnecessary escape sequences in regular expression literals.
-- Don't use unnecessary fragments.
-- Don't use unnecessary labels.
-- Don't use unnecessary nested block statements.
-- Don't rename imports, exports, and destructured assignments to the same name.
-- Don't use unnecessary string or template literal concatenation.
-- Don't use String.raw in template literals when there are no escape sequences.
-- Don't use useless case statements in switch statements.
-- Don't use ternary operators when simpler alternatives exist.
-- Don't use useless `this` aliasing.
-- Don't use any or unknown as type constraints.
-- Don't initialize variables to undefined.
-- Don't use the void operators (they're not familiar).
-- Use arrow functions instead of function expressions.
-- Use Date.now() to get milliseconds since the Unix Epoch.
-- Use .flatMap() instead of map().flat() when possible.
-- Use literal property access instead of computed property access.
-- Don't use parseInt() or Number.parseInt() when binary, octal, or hexadecimal literals work.
-- Use concise optional chaining instead of chained logical expressions.
-- Use regular expression literals instead of the RegExp constructor when possible.
-- Don't use number literal object member names that aren't base 10 or use underscore separators.
-- Remove redundant terms from logical expressions.
-- Use while loops instead of for loops when you don't need initializer and update expressions.
-- Don't pass children as props.
-- Don't reassign const variables.
-- Don't use constant expressions in conditions.
-- Don't use `Math.min` and `Math.max` to clamp values when the result is constant.
-- Don't return a value from a constructor.
-- Don't use empty character classes in regular expression literals.
-- Don't use empty destructuring patterns.
-- Don't call global object properties as functions.
-- Don't declare functions and vars that are accessible outside their block.
-- Make sure builtins are correctly instantiated.
-- Don't use super() incorrectly inside classes. Also check that super() is called in classes that extend other constructors.
-- Don't use variables and function parameters before they're declared.
-- Don't use 8 and 9 escape sequences in string literals.
-- Don't use literal numbers that lose precision.
+**Rule:** Default to Server Components. Add `'use client'` only when required.
 
-### React and JSX Best Practices
-- Don't use the return value of React.render.
-- Make sure all dependencies are correctly specified in React hooks.
-- Make sure all React hooks are called from the top level of component functions.
-- Don't forget key props in iterators and collection literals.
-- Don't destructure props inside JSX components in Solid projects.
-- Don't define React components inside other components.
-- Don't use event handlers on non-interactive elements.
-- Don't assign to React component props.
-- Don't use both `children` and `dangerouslySetInnerHTML` props on the same element.
-- Don't use dangerous JSX props.
-- Don't use Array index in keys.
-- Don't insert comments as text nodes.
-- Don't assign JSX properties multiple times.
-- Don't add extra closing tags for components without children.
-- Use `<>...</>` instead of `<Fragment>...</Fragment>`.
-- Watch out for possible "wrong" semicolons inside JSX elements.
+**Requires `'use client'`:**
+- React hooks (`useState`, `useEffect`, `useMemo`, etc.)
+- Event handlers (`onClick`, `onChange`, etc.)
+- Zustand store access
+- `useTranslations` from next-intl
+- Browser-only APIs
 
-### Correctness and Safety
-- Don't assign a value to itself.
-- Don't return a value from a setter.
-- Don't compare expressions that modify string case with non-compliant values.
-- Don't use lexical declarations in switch clauses.
-- Don't use variables that haven't been declared in the document.
-- Don't write unreachable code.
-- Make sure super() is called exactly once on every code path in a class constructor before this is accessed if the class has a superclass.
-- Don't use control flow statements in finally blocks.
-- Don't use optional chaining where undefined values aren't allowed.
-- Don't have unused function parameters.
-- Don't have unused imports.
-- Don't have unused labels.
-- Don't have unused private class members.
-- Don't have unused variables.
-- Make sure void (self-closing) elements don't have children.
-- Don't return a value from a function with the return type 'void'
-- Use isNaN() when checking for NaN.
-- Make sure "for" loop update clauses move the counter in the right direction.
-- Make sure typeof expressions are compared to valid values.
-- Make sure generator functions contain yield.
-- Don't use await inside loops.
-- Don't use bitwise operators.
-- Don't use expressions where the operation doesn't change the value.
-- Make sure Promise-like statements are handled appropriately.
-- Don't use __dirname and __filename in the global scope.
-- Prevent import cycles.
-- Don't use configured elements.
-- Don't hardcode sensitive data like API keys and tokens.
-- Don't let variable declarations shadow variables from outer scopes.
-- Don't use the TypeScript directive @ts-ignore.
-- Prevent duplicate polyfills from Polyfill.io.
-- Don't use useless backreferences in regular expressions that always match empty strings.
-- Don't use unnecessary escapes in string literals.
-- Don't use useless undefined.
-- Make sure getters and setters for the same property are next to each other in class and object definitions.
-- Make sure object literals are declared consistently (defaults to explicit definitions).
-- Use static Response methods instead of new Response() constructor when possible.
-- Make sure switch-case statements are exhaustive.
-- Make sure the `preconnect` attribute is used when using Google Fonts.
-- Use `Array#{indexOf,lastIndexOf}()` instead of `Array#{findIndex,findLastIndex}()` when looking for the index of an item.
-- Make sure iterable callbacks return consistent values.
-- Use `with { type: "json" }` for JSON module imports.
-- Use numeric separators in numeric literals.
-- Use object spread instead of `Object.assign()` when constructing new objects.
-- Always use the radix argument when using `parseInt()`.
-- Make sure JSDoc comment lines start with a single asterisk, except for the first one.
-- Include a description parameter for `Symbol()`.
-- Don't use spread (`...`) syntax on accumulators.
-- Don't use the `delete` operator.
-- Don't access namespace imports dynamically.
-- Don't use namespace imports.
-- Declare regex literals at the top level.
-- Don't use `target="_blank"` without `rel="noopener"`.
+```typescript
+// ✅ CORRECT — interactive component needs 'use client'
+'use client'
 
-### TypeScript Best Practices
-- Don't use TypeScript enums.
-- Don't export imported variables.
-- Don't add type annotations to variables, parameters, and class properties that are initialized with literal expressions.
-- Don't use TypeScript namespaces.
-- Don't use non-null assertions with the `!` postfix operator.
-- Don't use parameter properties in class constructors.
-- Don't use user-defined types.
-- Use `as const` instead of literal types and type annotations.
-- Use either `T[]` or `Array<T>` consistently.
-- Initialize each enum member value explicitly.
-- Use `export type` for types.
-- Use `import type` for types.
-- Make sure all enum members are literal values.
-- Don't use TypeScript const enum.
-- Don't declare empty interfaces.
-- Don't let variables evolve into any type through reassignments.
-- Don't use the any type.
-- Don't misuse the non-null assertion operator (!) in TypeScript files.
-- Don't use implicit any type on variable declarations.
-- Don't merge interfaces and classes unsafely.
-- Don't use overload signatures that aren't next to each other.
-- Use the namespace keyword instead of the module keyword to declare TypeScript namespaces.
+import { useState } from 'react'
+import { useTranslations } from 'next-intl'
 
-### Style and Consistency
-- Don't use global `eval()`.
-- Don't use callbacks in asynchronous tests and hooks.
-- Don't use negation in `if` statements that have `else` clauses.
-- Don't use nested ternary expressions.
-- Don't reassign function parameters.
-- This rule lets you specify global variable names you don't want to use in your application.
-- Don't use specified modules when loaded by import or require.
-- Don't use constants whose value is the upper-case version of their name.
-- Use `String.slice()` instead of `String.substr()` and `String.substring()`.
-- Don't use template literals if you don't need interpolation or special-character handling.
-- Don't use `else` blocks when the `if` block breaks early.
-- Don't use yoda expressions.
-- Don't use Array constructors.
-- Use `at()` instead of integer index access.
-- Follow curly brace conventions.
-- Use `else if` instead of nested `if` statements in `else` cla
+export function ProductFormModal({ open, onOpenChange }: ProductFormModalProps) {
+  const t = useTranslations('dashboard')
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  // ...
+}
+
+// ✅ CORRECT — layout with no interactivity stays as server component
+export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="flex h-screen w-full overflow-hidden bg-[#fbfbfa]">
+      <DashboardSidebar />
+      <main className="flex h-full flex-1 flex-col overflow-y-auto">{children}</main>
+    </div>
+  )
+}
+```
+
+## Routing Conventions
+
+**All routes live under `[locale]`** — never create routes outside this segment.
+
+**Route Groups** (do not appear in URL):
+- `(auth)` — public authentication pages
+- `(onboarding)` — store setup flow
+
+**Navigation:** ALWAYS use the locale-aware helpers, never `next/navigation` directly.
+
+```typescript
+// ✅ CORRECT
+import { useRouter, Link, redirect } from '@/i18n/navigation'
+
+// ❌ INCORRECT — loses locale context
+import { useRouter } from 'next/navigation'
+import Link from 'next/link'
+```
+
+**Route paths** use the `ROUTES` constants from `@/utils/constants`.
+
+```typescript
+// ✅ CORRECT
+import { ROUTES } from '@/utils/constants'
+router.push(ROUTES.DASHBOARD)
+
+// ❌ INCORRECT
+router.push('/dashboard')
+```
+
+## Component Rules
+
+### Naming
+
+| Type | Convention | Example |
+|------|------------|---------|
+| Pages | `default export`, PascalCase fn | `export default function ProductsPage()` |
+| Feature components | kebab-case filename, named export | `product-form-modal.tsx` → `export function ProductFormModal` |
+| UI base (shadcn) | kebab-case filename | `button.tsx`, `dialog.tsx` |
+| Hooks | `use-` prefix, kebab-case | `use-mobile.tsx` |
+| Stores | `{domain}.store.ts` | `auth.store.ts` |
+| Services | `{domain}.service.ts` | `products.service.ts` |
+| Types | kebab-case in `src/types/` | `dashboard.ts` |
+| Validations | `{domain}.ts` in `src/validations/` | `auth.ts` |
+
+### Props Interface
+
+Always define an explicit interface for component props. Never use inline `{ prop: type }`.
+
+```typescript
+// ✅ CORRECT
+interface ProductViewSheetProps {
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  productId: string
+}
+
+export function ProductViewSheet({ open, onOpenChange, productId }: ProductViewSheetProps) { ... }
+
+// ❌ INCORRECT
+export function ProductViewSheet({ open, onOpenChange, productId }: { open: boolean; onOpenChange: (open: boolean) => void; productId: string }) { ... }
+```
+
+### Component Variants (shadcn pattern)
+
+Use `class-variance-authority` (`cva`) for components with visual variants. Never branch with if/ternary chains for Tailwind classes.
+
+```typescript
+// ✅ CORRECT
+const badgeVariants = cva('inline-flex items-center rounded-full', {
+  variants: {
+    variant: {
+      default: 'bg-brand-900 text-white',
+      outline: 'border border-brand-900 text-brand-900',
+    },
+  },
+  defaultVariants: { variant: 'default' },
+})
+
+// ❌ INCORRECT
+const className = isOutline ? 'border border-brand-900 text-brand-900' : 'bg-brand-900 text-white'
+```
+
+## Services Layer
+
+**Purpose:** All HTTP communication. Components NEVER call Axios or `fetch` directly.
+
+**Location:** `src/services/{domain}.service.ts`
+
+**Pattern:**
+
+```typescript
+// ✅ CORRECT
+// src/services/products.service.ts
+import { api } from '@/lib/axios'
+import type { ApiResponse, ProductApi, ProductListApi, ProductFiltersApi } from '@/types/dashboard'
+
+export const productsService = {
+  async getAll(filters: ProductFiltersApi = {}): Promise<ApiResponse<ProductListApi>> {
+    const params = new URLSearchParams()
+    if (filters.page) params.set('page', String(filters.page))
+    if (filters.limit) params.set('limit', String(filters.limit))
+    const qs = params.toString()
+    return (await api.get(`/products${qs ? `?${qs}` : ''}`)) as ApiResponse<ProductListApi>
+  },
+
+  async create(dto: CreateProductPayload): Promise<ApiResponse<ProductApi>> {
+    return (await api.post('/products', dto)) as ApiResponse<ProductApi>
+  },
+
+  async exportCsv(): Promise<Blob> {
+    return (await api.get('/products/export', { responseType: 'blob' })) as unknown as Blob
+  },
+}
+
+// ❌ INCORRECT — API call inside a component
+export default function ProductsPage() {
+  useEffect(() => {
+    axios.get('/products').then(...)
+  }, [])
+}
+```
+
+**API Response Wrapper:** All service methods return `ApiResponse<T>`.
+
+```typescript
+export interface ApiResponse<T = unknown> {
+  statusCode: number
+  message: string
+  timestamp: string
+  data: T
+}
+```
+
+Always extract `.data` when consuming service responses:
+
+```typescript
+// ✅ CORRECT
+const response = await productsService.getAll(filters)
+const products = response.data.items
+```
+
+## State Management (Zustand)
+
+**Location:** `src/store/{domain}.store.ts`
+
+**Rules:**
+- One store per domain
+- Store holds state + async actions together
+- Persist only tokens/user identity, never large lists
+- Loading states are store-owned, not component-local
+
+```typescript
+// ✅ CORRECT
+import { create } from 'zustand'
+import { persist, createJSONStorage } from 'zustand/middleware'
+import { authService } from '@/services/auth.service'
+import type { LoginInput } from '@/validations/auth'
+
+interface AuthState {
+  user: User | null
+  accessToken: string | null
+  refreshToken: string | null
+  isLoading: boolean
+  login: (data: LoginInput) => Promise<boolean>
+  logout: () => void
+}
+
+export const useAuthStore = create<AuthState>()(
+  persist(
+    (set) => ({
+      user: null,
+      accessToken: null,
+      refreshToken: null,
+      isLoading: false,
+
+      logout: () => set({ user: null, accessToken: null, refreshToken: null }),
+
+      login: async (data) => {
+        set({ isLoading: true })
+        try {
+          const response = await authService.login(data)
+          set({ user: response.data.user, accessToken: response.data.accessToken })
+          return true
+        } catch {
+          return false
+        } finally {
+          set({ isLoading: false })
+        }
+      },
+    }),
+    {
+      name: 'auth-storage',
+      storage: createJSONStorage(() => localStorage),
+      partialize: (state) => ({
+        accessToken: state.accessToken,
+        refreshToken: state.refreshToken,
+        user: state.user,
+      }),
+    }
+  )
+)
+
+// ❌ INCORRECT — business logic and API calls inside component
+const [user, setUser] = useState(null)
+const handleLogin = async () => {
+  const res = await axios.post('/auth/login', data)
+  setUser(res.data.user)
+  localStorage.setItem('token', res.data.accessToken)
+}
+```
+
+## Forms
+
+**Framework:** `react-hook-form` + `zod` resolver. No exceptions.
+
+**Schemas** live in `src/validations/{domain}.ts`.
+
+```typescript
+// ✅ CORRECT
+// src/validations/auth.ts
+export const loginSchema = z.object({
+  phoneNumber: z
+    .string()
+    .min(1, 'Phone number is required')
+    .regex(/^\+[1-9]\d{1,14}$/, 'Invalid phone format (E.164)'),
+  password: z.string().min(1, 'Password is required'),
+})
+
+export type LoginInput = z.infer<typeof loginSchema>
+
+// ❌ INCORRECT — inline validation
+const handleSubmit = (data: any) => {
+  if (!data.phoneNumber) alert('Phone required')
+}
+```
+
+**Form component pattern:**
+
+```typescript
+// ✅ CORRECT
+'use client'
+
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { loginSchema, type LoginInput } from '@/validations/auth'
+import { Form, FormField, FormItem, FormControl, FormMessage } from '@/components/ui/form'
+
+const form = useForm<LoginInput>({
+  resolver: zodResolver(loginSchema),
+  defaultValues: { phoneNumber: '', password: '' },
+})
+
+return (
+  <Form {...form}>
+    <form onSubmit={form.handleSubmit(onSubmit)}>
+      <FormField
+        control={form.control}
+        name="phoneNumber"
+        render={({ field }) => (
+          <FormItem>
+            <FormControl>
+              <Input {...field} />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+    </form>
+  </Form>
+)
+```
+
+## Styling
+
+**Rule:** Tailwind utility classes ONLY. No CSS modules, no inline `style` props, no raw CSS files (except `globals.css`).
+
+**Class merging:** ALWAYS use `cn()` from `@/lib/utils` when combining conditional classes.
+
+```typescript
+// ✅ CORRECT
+import { cn } from '@/lib/utils'
+
+<div className={cn('flex items-center rounded-md', isActive && 'bg-brand-900 text-white', className)} />
+
+// ❌ INCORRECT
+<div style={{ display: 'flex', backgroundColor: isActive ? '#1d4ed8' : 'transparent' }} />
+<div className={`flex items-center ${isActive ? 'bg-brand-900' : ''}`} />
+```
+
+**Theme tokens** (from `globals.css`):
+- Primary brand: `bg-brand-900` (`#1d4ed8`)
+- Error: `text-error-primary` (`#db3246`)
+- Use CSS custom property tokens over hardcoded hex values
+
+**Responsive design:** mobile-first with `md:`, `lg:` breakpoint prefixes.
+
+**Dark mode:** Use `dark:` variant classes; managed by `next-themes` via `<ThemeProvider>`.
+
+## i18n — Translations
+
+**Rule:** ALL user-facing strings must use translation keys. Zero hardcoded UI text.
+
+**Translation files:** `src/i18n/locales/en.json` and `rw.json`. Key format: `namespace.context.key`.
+
+```typescript
+// ✅ CORRECT
+'use client'
+import { useTranslations } from 'next-intl'
+
+export function ProductsPage() {
+  const t = useTranslations('dashboard')
+  return <h1>{t('products.title')}</h1>
+}
+
+// Translation file: src/i18n/locales/en.json
+{
+  "dashboard": {
+    "products": {
+      "title": "Products"
+    }
+  }
+}
+
+// ❌ INCORRECT
+return <h1>Products</h1>
+```
+
+**Server components** use `getTranslations` (async) from `next-intl/server`.
+
+**Never use `useTranslations` in a Server Component** — it will error.
+
+```typescript
+// ✅ CORRECT (server component)
+import { getTranslations } from 'next-intl/server'
+
+export default async function Page() {
+  const t = await getTranslations('dashboard')
+  return <h1>{t('title')}</h1>
+}
+```
+
+## TypeScript
+
+**Rules:**
+- `strict: true` — no escape hatches
+- **NEVER** use `any`; use `unknown` with type narrowing if needed
+- Export all public types from `src/types/index.ts`
+- Zod-inferred types (`z.infer<typeof schema>`) are the source of truth for form inputs
+
+```typescript
+// ✅ CORRECT
+function processResponse(data: unknown) {
+  if (typeof data === 'object' && data !== null && 'id' in data) {
+    return (data as ProductApi).id
+  }
+}
+
+// ❌ INCORRECT
+function processResponse(data: any) {
+  return data.id
+}
+```
+
+**Import aliases** — NEVER use relative path traversal.
+
+```typescript
+// ✅ CORRECT
+import { Button } from '@/components/ui/button'
+import { useAuthStore } from '@/store/auth.store'
+import { rootMetadata } from '#/config/root-metadata'
+
+// ❌ INCORRECT
+import { Button } from '../../../components/ui/button'
+```
+
+## Constants
+
+**Location:** `src/utils/constants.ts`
+
+**Rule:** ZERO hardcoded strings for routes, pagination defaults, limits, or error messages anywhere outside this file.
+
+```typescript
+// ✅ CORRECT
+import { ROUTES, PAGINATION } from '@/utils/constants'
+
+router.push(ROUTES.DASHBOARD)
+const limit = PAGINATION.DEFAULT_LIMIT
+
+// ❌ INCORRECT
+router.push('/dashboard')
+const limit = 10
+```
+
+**Structure:**
+
+```typescript
+export const ROUTES = {
+  HOME: '/',
+  DASHBOARD: '/dashboard',
+  LOGIN: '/login',
+} as const
+
+export const PAGINATION = {
+  DEFAULT_PAGE: 1,
+  DEFAULT_LIMIT: 10,
+  MAX_LIMIT: 100,
+} as const
+```
+
+## Data Fetching Pattern
+
+Components fetch data in `useEffect` with a cancellation flag. Use `Promise.allSettled` for parallel calls.
+
+```typescript
+// ✅ CORRECT
+'use client'
+
+import { useState, useEffect } from 'react'
+import { productsService } from '@/services/products.service'
+import type { ProductListApi } from '@/types/dashboard'
+
+export default function ProductsPage() {
+  const [data, setData] = useState<ProductListApi | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    let cancelled = false
+
+    const fetch = async () => {
+      setIsLoading(true)
+      try {
+        const [productsRes, statsRes] = await Promise.allSettled([
+          productsService.getAll(),
+          productsService.getStats(),
+        ])
+
+        if (cancelled) return
+
+        if (productsRes.status === 'fulfilled') {
+          setData(productsRes.value.data)
+        }
+      } finally {
+        if (!cancelled) setIsLoading(false)
+      }
+    }
+
+    fetch()
+    return () => { cancelled = true }
+  }, [])
+}
+
+// ❌ INCORRECT — no cancellation, direct API call
+useEffect(() => {
+  axios.get('/products').then(res => setData(res.data))
+}, [])
+```
+
+## Error Handling
+
+**Automatic:** The Axios interceptor in `src/lib/axios.ts` automatically shows Sonner toasts for API errors. Components do NOT need to catch and toast manually.
+
+**Inline form errors:** Let `<FormMessage />` render `react-hook-form` field errors — never roll custom error display for form fields.
+
+**FORBIDDEN:**
+- `console.log` / `console.error` for user-visible error reporting
+- `alert()` or `window.confirm()`
+- Swallowing errors silently
+
+```typescript
+// ✅ CORRECT — interceptor handles toast, component reacts to failure
+const success = await login(values)
+if (!success) return  // toast already shown by interceptor
+
+// ❌ INCORRECT
+try {
+  await login(values)
+} catch (err) {
+  alert('Login failed')
+  console.error(err)
+}
+```
+
+## File Naming
+
+| Type | Pattern | Example |
+|------|---------|---------|
+| Page | `page.tsx` (default export) | `dashboard/products/page.tsx` |
+| Layout | `layout.tsx` (default export) | `dashboard/layout.tsx` |
+| Feature component | `{noun}-{type}.tsx` | `product-form-modal.tsx` |
+| Hook | `use-{name}.ts(x)` | `use-mobile.tsx` |
+| Service | `{domain}.service.ts` | `products.service.ts` |
+| Store | `{domain}.store.ts` | `auth.store.ts` |
+| Validation | `{domain}.ts` | `auth.ts` |
+| Type file | `{domain}.ts` in `types/` | `types/dashboard.ts` |
+| Constants | `constants.ts` | `utils/constants.ts` |
+
+Use kebab-case for all file names. Component function names are PascalCase.
+
+## Critical Rules
+
+1. **Server/Client boundary** — `'use client'` only where hooks or events are needed
+2. **Routing** — always use `@/i18n/navigation`, never `next/navigation`
+3. **API calls** — services layer only; never Axios/fetch in components
+4. **State** — Zustand for shared state; `useState` only for local UI state
+5. **Forms** — `react-hook-form` + Zod; no manual validation
+6. **Translations** — `useTranslations`/`getTranslations` for all UI text
+7. **Styling** — Tailwind + `cn()`; no inline styles, no CSS modules
+8. **Constants** — `@/utils/constants`; no hardcoded routes, limits, or messages
+9. **TypeScript** — no `any`; use `unknown` + narrowing; no relative imports
+10. **Errors** — let Axios interceptor handle toasts; use `<FormMessage />` for fields
+
+## Verification Checklist
+
+Before committing client code, verify:
+
+1. **Server/Client** — Is `'use client'` present only where needed?
+2. **Routing** — Are all navigations using `@/i18n/navigation`?
+3. **Services** — Are all API calls inside `src/services/`?
+4. **Translations** — Is every user-facing string behind `t('...')`?
+5. **TypeScript** — No `any` types anywhere?
+6. **Imports** — All using `@/` or `#/` aliases, no `../..` traversal?
+7. **Constants** — No hardcoded route strings or magic numbers?
+8. **Forms** — Schema in `src/validations/`, `zodResolver` in `useForm`?
+9. **Styling** — Only Tailwind classes with `cn()` for conditionals?
+10. **Errors** — No `console.log`, no manual toast calls for API errors?
+
+If ANY fails, the code is incomplete. Check `src/lib/`, `src/store/`, `src/services/`, and `src/utils/constants.ts` for existing patterns.

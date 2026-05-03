@@ -11,9 +11,9 @@ The OnlineShop.rw platform STRICTLY enforces internationalization (i18n) across 
 The frontend uses `next-intl` for internationalization.
 
 - **File Locations**:
-  - English: [client/src/i18n/locales/en.json](cci:7://file:///c:/Users/DELL/Documents/projects/self/onlineshop/client/src/i18n/locales/en.json:0:0-0:0)
-  - Kinyarwanda: [client/src/i18n/locales/rw.json](cci:7://file:///c:/Users/DELL/Documents/projects/self/onlineshop/client/src/i18n/locales/rw.json:0:0-0:0)
-- **Rule**: Whenever you add, modify, or remove a translation key in the client, you **MUST** apply the exact same change to both [en.json](cci:7://file:///c:/Users/DELL/Documents/projects/self/onlineshop/client/src/i18n/locales/en.json:0:0-0:0) and [rw.json](cci:7://file:///c:/Users/DELL/Documents/projects/self/onlineshop/client/src/i18n/locales/rw.json:0:0-0:0).
+  - English: [client/src/i18n/locales/en.json](<PROJECT_ROOT>/client/src/i18n/locales/en.json:0:0-0:0)
+  - Kinyarwanda: [client/src/i18n/locales/rw.json](<PROJECT_ROOT>/client/src/i18n/locales/rw.json:0:0-0:0)
+- **Rule**: Whenever you add, modify, or remove a translation key in the client, you **MUST** apply the exact same change to both [en.json](<PROJECT_ROOT>/client/src/i18n/locales/en.json:0:0-0:0) and [rw.json](<PROJECT_ROOT>/client/src/i18n/locales/rw.json:0:0-0:0).
 - **Usage**: Always use the `useTranslations` hook or the appropriate server-side translation getter. Never hardcode user-facing strings in the React components.
 
 ## 2. Server (Backend) Translation Rules
