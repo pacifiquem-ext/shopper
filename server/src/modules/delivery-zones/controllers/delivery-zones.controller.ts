@@ -15,10 +15,11 @@ import { CreateDeliveryZoneDto } from '../dtos/create-delivery-zone.dto';
 import { UpdateDeliveryZoneDto } from '../dtos/update-delivery-zone.dto';
 import { StoreId } from '../../../common/tenant/decorators/store-id.decorator';
 import { JwtAccessGuard } from '../../../common/request/guards/jwt.access.guard';
+import { StoreGuard } from '../../../common/request/guards/store.guard';
 
 @ApiTags('Delivery Zones')
 @Controller({ path: 'delivery-zones', version: '1' })
-@UseGuards(JwtAccessGuard)
+@UseGuards(JwtAccessGuard, StoreGuard)
 @ApiBearerAuth()
 export class DeliveryZonesController {
     constructor(private readonly deliveryZonesService: DeliveryZonesService) {}

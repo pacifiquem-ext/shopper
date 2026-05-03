@@ -209,16 +209,15 @@ export default function OrdersPage() {
     if (range?.to) filters.dateTo = range.to.toISOString().split('T')[0]
 
     ordersService.getAll(filters).then((res) => {
-      const list = (res?.data as any)?.data ?? res?.data
-      if (list?.data) {
-        const uuidMap: Record<string, string> = {}
-        const mapped = (list.data as OrderApi[]).map((o) => {
-          uuidMap[o.orderNumber] = o.id
-          return apiToOrderRow(o, t)
-        })
-        setRows(mapped)
-        setOrderUuidMap(uuidMap)
-      }
+      const list: any = res?.data
+      const orders: OrderApi[] = list?.data ?? []
+      const uuidMap: Record<string, string> = {}
+      const mapped = orders.map((o) => {
+        uuidMap[o.orderNumber] = o.id
+        return apiToOrderRow(o, t)
+      })
+      setRows(mapped)
+      setOrderUuidMap(uuidMap)
     })
   }, [range, t])
 

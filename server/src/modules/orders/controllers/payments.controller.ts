@@ -4,10 +4,11 @@ import { OrdersRepository } from '../repositories/orders.repository';
 import { PaymentFilterDto } from '../dtos/payment-filter.dto';
 import { StoreId } from '../../../common/tenant/decorators/store-id.decorator';
 import { JwtAccessGuard } from '../../../common/request/guards/jwt.access.guard';
+import { StoreGuard } from '../../../common/request/guards/store.guard';
 
 @ApiTags('Payments')
 @Controller({ path: 'payments', version: '1' })
-@UseGuards(JwtAccessGuard)
+@UseGuards(JwtAccessGuard, StoreGuard)
 @ApiBearerAuth()
 export class PaymentsController {
     constructor(private readonly ordersRepository: OrdersRepository) {}

@@ -300,8 +300,9 @@ export default function ProductsPage() {
     productsService
       .getAll({ limit: 100 })
       .then((res) => {
-        const list = (res?.data as any)?.data ?? res?.data
-        if (list?.data) setRows((list.data as ProductApi[]).map(apiToProductRow))
+        const list: any = res?.data
+        const products: ProductApi[] = list?.data ?? []
+        setRows(products.map(apiToProductRow))
       })
       .finally(() => setIsLoading(false))
   }, [])

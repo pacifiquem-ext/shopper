@@ -4,10 +4,11 @@ import { StoreSettingsService } from '../services/store-settings.service';
 import { UpdateStoreSettingsDto } from '../dtos/update-store-settings.dto';
 import { StoreId } from '../../../common/tenant/decorators/store-id.decorator';
 import { JwtAccessGuard } from '../../../common/request/guards/jwt.access.guard';
+import { StoreGuard } from '../../../common/request/guards/store.guard';
 
 @ApiTags('Store Settings')
 @Controller({ path: 'store/settings', version: '1' })
-@UseGuards(JwtAccessGuard)
+@UseGuards(JwtAccessGuard, StoreGuard)
 @ApiBearerAuth()
 export class StoreSettingsController {
     constructor(private readonly storeSettingsService: StoreSettingsService) {}

@@ -162,8 +162,9 @@ export default function InventoryPage() {
   // Fetch inventory list + analytics on mount
   useEffect(() => {
     inventoryService.getAll({ limit: 200 }).then((res) => {
-      const list = (res?.data as any)?.data ?? res?.data
-      if (list?.data) setRows((list.data as InventoryRecordApi[]).map(apiToInventoryRow))
+      const list: any = res?.data
+      const items: InventoryRecordApi[] = list?.data ?? []
+      setRows(items.map(apiToInventoryRow))
     })
     analyticsService.getInventorySummary().then((res) => {
       const summary = (res?.data as any)?.data ?? res?.data

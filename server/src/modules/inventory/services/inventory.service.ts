@@ -9,7 +9,9 @@ export class InventoryService {
     constructor(private readonly inventoryRepository: InventoryRepository) {}
 
     async findAll(storeId: string, filters: any) {
-        const { page = 1, limit = 10, status, category, vendor, search } = filters;
+        const page = +(filters.page ?? 1);
+        const limit = +(filters.limit ?? 10);
+        const { status, category, vendor, search } = filters;
         const skip = (page - 1) * limit;
 
         const where: any = {};

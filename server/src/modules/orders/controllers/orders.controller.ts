@@ -22,6 +22,7 @@ import { OrdersService } from '../services/orders.service';
 import { StoreId } from '../../../common/tenant/decorators/store-id.decorator';
 import { AuthUser } from '../../../common/request/decorators/request.user.decorator';
 import { JwtAccessGuard } from '../../../common/request/guards/jwt.access.guard';
+import { StoreGuard } from '../../../common/request/guards/store.guard';
 import { CreateOrderDto } from '../dtos/create-order.dto';
 import { OrderFilterDto } from '../dtos/order-filter.dto';
 import { UpdatePaymentDto } from '../dtos/update-payment.dto';
@@ -30,7 +31,7 @@ import { SendMessageDto } from '../dtos/send-message.dto';
 
 @ApiTags('Orders')
 @Controller({ path: 'orders', version: '1' })
-@UseGuards(JwtAccessGuard)
+@UseGuards(JwtAccessGuard, StoreGuard)
 @ApiBearerAuth()
 export class OrdersController {
     constructor(private readonly ordersService: OrdersService) {}

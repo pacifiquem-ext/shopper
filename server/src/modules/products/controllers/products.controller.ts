@@ -27,10 +27,11 @@ import { ProductResponseDto, ProductListResponseDto } from '../dtos/product-resp
 import { StoreId } from '../../../common/tenant/decorators/store-id.decorator';
 import { AuthUser } from '../../../common/request/decorators/request.user.decorator';
 import { JwtAccessGuard } from '../../../common/request/guards/jwt.access.guard';
+import { StoreGuard } from '../../../common/request/guards/store.guard';
 
 @ApiTags('Products')
 @Controller({ path: 'products', version: '1' })
-@UseGuards(JwtAccessGuard)
+@UseGuards(JwtAccessGuard, StoreGuard)
 @ApiBearerAuth()
 export class ProductsController {
     constructor(private readonly productsService: ProductsService) {}

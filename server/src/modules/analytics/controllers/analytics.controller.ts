@@ -10,10 +10,11 @@ import {
 import { AnalyticsService } from '../services/analytics.service';
 import { StoreId } from '../../../common/tenant/decorators/store-id.decorator';
 import { JwtAccessGuard } from '../../../common/request/guards/jwt.access.guard';
+import { StoreGuard } from '../../../common/request/guards/store.guard';
 
 @ApiTags('Analytics')
 @Controller({ path: 'analytics', version: '1' })
-@UseGuards(JwtAccessGuard)
+@UseGuards(JwtAccessGuard, StoreGuard)
 @ApiBearerAuth()
 export class AnalyticsController {
     constructor(private readonly analyticsService: AnalyticsService) {}

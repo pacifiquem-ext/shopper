@@ -21,6 +21,7 @@ import { InventoryService } from '../services/inventory.service';
 import { StoreId } from '../../../common/tenant/decorators/store-id.decorator';
 import { AuthUser } from '../../../common/request/decorators/request.user.decorator';
 import { JwtAccessGuard } from '../../../common/request/guards/jwt.access.guard';
+import { StoreGuard } from '../../../common/request/guards/store.guard';
 
 class AdjustStockDto {
     quantity: number;
@@ -29,7 +30,7 @@ class AdjustStockDto {
 
 @ApiTags('Inventory')
 @Controller({ path: 'inventory', version: '1' })
-@UseGuards(JwtAccessGuard)
+@UseGuards(JwtAccessGuard, StoreGuard)
 @ApiBearerAuth()
 export class InventoryController {
     constructor(private readonly inventoryService: InventoryService) {}
