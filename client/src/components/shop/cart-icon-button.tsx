@@ -2,7 +2,7 @@
 
 import { ShoppingBag } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
-import { useTranslations } from 'next-intl'
+
 
 import { Link, usePathname } from '@/i18n/navigation'
 import { CART_EVENT, readCart } from '@/lib/cart-storage'
@@ -12,8 +12,13 @@ function getCartCount(): number {
   return readCart().reduce((sum, item) => sum + item.quantity, 0)
 }
 
-export function CartIconButton() {
-  const t = useTranslations('cart')
+export function CartIconButton({
+  ariaLabel,
+  ariaLabelWithCountTemplate,
+}: {
+  ariaLabel: string
+  ariaLabelWithCountTemplate: string
+}) {
   const pathname = usePathname()
   const [count, setCount] = useState(0)
   const [pulse, setPulse] = useState(false)
@@ -51,7 +56,7 @@ export function CartIconButton() {
 
   if (pathname === '/cart') return null
 
-  const aria = count > 0 ? t('cartIconAriaWithCount', { count }) : t('cartIconAria')
+  const aria = count > 0 ? ariaLabelWithCountTemplate.replace('{count}', String(count)) : ariaLabel
   const display = count > 99 ? '99+' : String(count)
 
   return (

@@ -145,7 +145,10 @@ export default async function ShopPage({
 
   return (
     <div className='min-h-screen bg-[#F5F1EB] text-[#2B2B2B]'>
-      <CartIconButton />
+      <CartIconButton 
+        ariaLabel={await getTranslations('cart').then(t => t('cartIconAria'))} 
+        ariaLabelWithCountTemplate={await getTranslations('cart').then(t => t.raw('cartIconAriaWithCount'))} 
+      />
       <section className='relative isolate overflow-hidden border-b border-[rgba(43,43,43,0.08)] bg-[#F5F1EB]'>
         <div aria-hidden className='pointer-events-none absolute -left-32 top-12 size-[420px] rounded-full bg-[#B76E5D]/10 blur-3xl' />
         <div aria-hidden className='pointer-events-none absolute -right-24 bottom-0 size-[460px] rounded-full bg-[#7D8F69]/12 blur-3xl' />

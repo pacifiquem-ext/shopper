@@ -83,7 +83,10 @@ export default async function ProductDetailsPage({
 
   return (
     <div className='min-h-screen bg-[#F5F1EB] text-[#2B2B2B]'>
-      <CartIconButton />
+      <CartIconButton 
+        ariaLabel={await getTranslations('cart').then(t => t('cartIconAria'))} 
+        ariaLabelWithCountTemplate={await getTranslations('cart').then(t => t.raw('cartIconAriaWithCount'))} 
+      />
 
       <div className='border-b border-[rgba(43,43,43,0.08)] bg-[#F5F1EB]'>
         <div className='mx-auto max-w-6xl px-4 py-6'>
