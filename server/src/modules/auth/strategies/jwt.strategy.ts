@@ -7,15 +7,19 @@ import { DatabaseService } from '../../../common/database/services/database.serv
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy, 'jwt-access') {
     constructor(
-        private readonly configService: ConfigService,
+        configService: ConfigService,
         private readonly prisma: DatabaseService
     ) {
+        const secret = configService.get<string>('AUTH_ACCESS_TOKEN_SECRET');
+        if (!secret?.trim()) {
+            throw new Error(
+                'Set AUTH_ACCESS_TOKEN_SECRET in server/.env (non-empty string). JwtStrategy requires it.'
+            );
+        }
         super({
             jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
             ignoreExpiration: false,
-            secretOrKey: configService.get<string>(
-                'AUTH_ACCESS_TOKEN_SECRET'
-            ) as string,
+            secretOrKey: secret,
         });
     }
 

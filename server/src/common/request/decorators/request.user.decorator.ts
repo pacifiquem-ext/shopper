@@ -3,8 +3,15 @@ import { createParamDecorator, ExecutionContext } from '@nestjs/common';
 import { IRequest } from '../interfaces/request.interface';
 
 export const AuthUser = createParamDecorator(
-    (_data: unknown, ctx: ExecutionContext) => {
+    (data: unknown, ctx: ExecutionContext) => {
         const request = ctx.switchToHttp().getRequest<IRequest>();
-        return request.user;
+        const user = request.user;
+
+        // Allow selecting a field, e.g. @AuthUser('userId')
+        if (typeof data === 'string' && user && typeof user === 'object') {
+            return (user as Record<string, unknown>)[data];
+        }
+
+        return user;
     }
 );

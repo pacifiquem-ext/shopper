@@ -23,9 +23,7 @@ const nextConfig: NextConfig = {
     },
   },
 
-  experimental: {
-    typedRoutes: true,
-  },
+  typedRoutes: true,
 
   eslint: {
     ignoreDuringBuilds: process.env.NODE_ENV === 'production',

@@ -1,12 +1,11 @@
-import { getTranslations } from 'next-intl/server'
+import ShopPage from './shop/page'
 
-export default async function HomePage() {
-  const t = await getTranslations('hero')
-  console.log('page: title', t('title'))
-
-  return (
-    <div>
-      <p className='text-2xl font-bold'>Welcome to Online Shop</p>
-    </div>
-  )
+export default async function HomePage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ locale: string }>
+  searchParams: Promise<{ q?: string; category?: string; sort?: string }>
+}) {
+  return <ShopPage params={params} searchParams={searchParams} />
 }

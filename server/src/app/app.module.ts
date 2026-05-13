@@ -14,8 +14,10 @@ import { OrdersModule } from 'src/modules/orders/orders.module';
 import { AnalyticsModule } from 'src/modules/analytics/analytics.module';
 import { StoreSettingsModule } from 'src/modules/store-settings/store-settings.module';
 import { DeliveryZonesModule } from 'src/modules/delivery-zones/delivery-zones.module';
+import { CatalogModule } from 'src/modules/catalog/catalog.module';
 
 import { HealthController } from './controllers/health.controller';
+import { RootController } from './controllers/root.controller';
 
 @Module({
     imports: [
@@ -36,6 +38,7 @@ import { HealthController } from './controllers/health.controller';
         AnalyticsModule,
         StoreSettingsModule,
         DeliveryZonesModule,
+        CatalogModule,
 
         // Background Processing
         WorkerModule,
@@ -43,6 +46,6 @@ import { HealthController } from './controllers/health.controller';
         // Health Check
         TerminusModule,
     ],
-    controllers: [HealthController],
+    controllers: [RootController, HealthController],
 })
 export class AppModule {}
