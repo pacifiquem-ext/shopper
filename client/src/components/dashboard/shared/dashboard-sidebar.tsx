@@ -3,6 +3,7 @@
 import { Link, usePathname, useRouter } from '@/i18n/navigation'
 import { cn } from '@/lib/utils'
 import { useTranslations } from 'next-intl'
+import { useSearchParams } from 'next/navigation'
 import {
   LayoutDashboard,
   Package,
@@ -25,8 +26,14 @@ import { useState, useEffect } from 'react'
 export function DashboardSidebar() {
   const t = useTranslations('dashboard')
   const pathname = usePathname()
+  const searchParams = useSearchParams()
   const router = useRouter()
   const { logout, user } = useAuthStore()
+
+  const storeSettingsTab =
+    pathname === '/dashboard/store-settings'
+      ? searchParams.get('tab') ?? 'business'
+      : null
   
   const [isStoreSettingsOpen, setIsStoreSettingsOpen] = useState(true)
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
@@ -172,8 +179,7 @@ export function DashboardSidebar() {
               {isStoreSettingsOpen && (
                 <div className="ml-3 mt-1 space-y-1 border-l-2 border-gray-100 pl-3">
                   {storeSettingsSubmenu.map((item) => {
-                    const isActive = pathname === '/dashboard/store-settings' && 
-                      (typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('tab') === item.tab)
+                    const isActive = storeSettingsTab === item.tab
 
                     return (
                       <Link

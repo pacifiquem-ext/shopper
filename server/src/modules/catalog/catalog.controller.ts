@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Query } from '@nestjs/common';
+import { Controller, Get, Header, Param, Query } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 
 import { PublicRoute } from '../../common/request/decorators/request.public.decorator';
@@ -12,6 +12,7 @@ export class CatalogController {
 
     @PublicRoute()
     @Get('groups')
+    @Header('Cache-Control', 'no-store, no-cache, must-revalidate')
     @ApiOperation({
         summary: 'List all active products from approved stores, grouped by category',
     })

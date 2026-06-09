@@ -1,18 +1,27 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { ProductStatus, StoreStatus } from '@prisma/client';
 import type { Prisma } from '@prisma/client';
 
+import { APP_ENVIRONMENT } from '../../app/enums/app.enum';
 import { DatabaseService } from '../../common/database/services/database.service';
 import { withDbRetry } from '../../common/database/utils/with-db-retry';
 
+const catalogStoreSelect = {
+    id: true,
+    displayName: true,
+    logoUrl: true,
+    subdomain: true,
+    brandColors: true,
+    description: true,
+    currency: true,
+    contactEmail: true,
+    contactPhone: true,
+} as const;
+
 const catalogProductInclude = {
     store: {
-        select: {
-            id: true,
-            displayName: true,
-            logoUrl: true,
-            subdomain: true,
-        },
+        select: catalogStoreSelect,
     },
     variants: {
         include: {
@@ -30,6 +39,19 @@ const normalizeStoreIdentifier = (value: string | null | undefined) =>
         ?.trim()
         .toLowerCase()
         .replace(/[^a-z0-9]/g, '') || '';
+
+export type PublicCatalogStoreProfile = {
+    id: string;
+    displayName: string;
+    logoUrl: string | null;
+    subdomain: string;
+    storeTemplate: string;
+    brandColors: { primary?: string; secondary?: string } | null;
+    description: string | null;
+    currency: string;
+    contactEmail: string | null;
+    contactPhone: string | null;
+};
 
 export type PublicCatalogProduct = {
     id: string;
@@ -51,6 +73,12 @@ export type PublicCatalogProduct = {
         displayName: string;
         logoUrl: string | null;
         subdomain: string;
+        storeTemplate: string;
+        brandColors: { primary?: string; secondary?: string } | null;
+        description: string | null;
+        currency: string;
+        contactEmail: string | null;
+        contactPhone: string | null;
     };
     variants: Array<{
         id: string;
@@ -70,7 +98,28 @@ export type PublicCatalogProduct = {
 
 @Injectable()
 export class CatalogService {
-    constructor(private readonly prisma: DatabaseService) {}
+    constructor(
+        private readonly prisma: DatabaseService,
+        private readonly config: ConfigService,
+    ) {}
+
+    private marketplaceStoreStatuses(): StoreStatus[] {
+        const env = this.config.get<string>('app.env');
+        if (env === APP_ENVIRONMENT.LOCAL) {
+            return [StoreStatus.APPROVED, StoreStatus.SUBMITTED];
+        }
+
+        return [StoreStatus.APPROVED];
+    }
+
+    private marketplaceStoreWhere(
+        storeId?: string,
+    ): Prisma.StoreWhereInput {
+        return {
+            status: { in: this.marketplaceStoreStatuses() },
+            ...(storeId ? { id: storeId } : {}),
+        };
+    }
 
     async getCatalogGrouped(search?: string, subdomain?: string) {
         const storeId = await this.resolveApprovedStoreId(subdomain);
@@ -80,10 +129,7 @@ export class CatalogService {
 
         const where: Prisma.ProductWhereInput = {
             status: ProductStatus.ACTIVE,
-            store: {
-                status: StoreStatus.APPROVED,
-                ...(storeId ? { id: storeId } : {}),
-            },
+            store: this.marketplaceStoreWhere(storeId),
         };
 
         const q = search?.trim();
@@ -124,7 +170,92 @@ export class CatalogService {
                 total: productsInGroup.length,
             }));
 
-        return { groups };
+        let store: PublicCatalogStoreProfile | null = null;
+        if (storeId) {
+            const fromProduct = products.find(p => p.store.id === storeId)?.store;
+            if (fromProduct) {
+                store = this.serializeStoreProfile(fromProduct);
+            } else {
+                const storeRow = await withDbRetry(
+                    this.prisma,
+                    () =>
+                        this.prisma.store.findFirst({
+                            where: {
+                                id: storeId,
+                                status: { in: this.marketplaceStoreStatuses() },
+                            },
+                            select: catalogStoreSelect,
+                        }),
+                    { label: 'catalog.getCatalogGrouped.store' }
+                );
+                if (storeRow) {
+                    store = this.serializeStoreProfile(storeRow);
+                }
+            }
+        }
+
+        let stores: Awaited<
+            ReturnType<CatalogService['listMarketplaceStoresWithProducts']>
+        > | undefined;
+        if (!subdomain && !q) {
+            try {
+                stores = await this.listMarketplaceStoresWithProducts();
+            } catch {
+                stores = undefined;
+            }
+        }
+
+        return { groups, store, stores };
+    }
+
+    async listMarketplaceStoresWithProducts(limit = 4) {
+        const grouped = await withDbRetry(
+            this.prisma,
+            () =>
+                this.prisma.product.groupBy({
+                    by: ['storeId'],
+                    where: {
+                        status: ProductStatus.ACTIVE,
+                        store: { status: { in: this.marketplaceStoreStatuses() } },
+                    },
+                    _count: { _all: true },
+                    orderBy: { _count: { storeId: 'desc' } },
+                    take: limit,
+                }),
+            { label: 'catalog.listMarketplaceStoresWithProducts.group' }
+        );
+
+        if (grouped.length === 0) {
+            return [];
+        }
+
+        const storeRows = await withDbRetry(
+            this.prisma,
+            () =>
+                this.prisma.store.findMany({
+                    where: {
+                        id: { in: grouped.map(row => row.storeId) },
+                    },
+                    select: catalogStoreSelect,
+                }),
+            { label: 'catalog.listMarketplaceStoresWithProducts.stores' }
+        );
+
+        const storeById = new Map(storeRows.map(row => [row.id, row]));
+
+        return grouped
+            .map(row => {
+                const storeRow = storeById.get(row.storeId);
+                if (!storeRow) {
+                    return null;
+                }
+
+                return {
+                    store: this.serializeStoreProfile(storeRow),
+                    productCount: row._count._all,
+                };
+            })
+            .filter((entry): entry is NonNullable<typeof entry> => entry != null);
     }
 
     async listProductCategories() {
@@ -135,7 +266,7 @@ export class CatalogService {
                     by: ['category'],
                     where: {
                         status: ProductStatus.ACTIVE,
-                        store: { status: StoreStatus.APPROVED },
+                        store: { status: { in: this.marketplaceStoreStatuses() } },
                     },
                     _count: { _all: true },
                     orderBy: { category: 'asc' },
@@ -162,10 +293,7 @@ export class CatalogService {
                     where: {
                         id,
                         status: ProductStatus.ACTIVE,
-                        store: {
-                            status: StoreStatus.APPROVED,
-                            ...(storeId ? { id: storeId } : {}),
-                        },
+                        store: this.marketplaceStoreWhere(storeId),
                     },
                     include: catalogProductInclude,
                 }),
@@ -185,11 +313,37 @@ export class CatalogService {
             return undefined;
         }
 
+        const trimmed = identifier!.trim();
+
+        const directMatch = await withDbRetry(
+            this.prisma,
+            () =>
+                this.prisma.store.findFirst({
+                    where: {
+                        status: { in: this.marketplaceStoreStatuses() },
+                        OR: [
+                            { subdomain: { equals: trimmed, mode: 'insensitive' } },
+                            {
+                                subdomain: {
+                                    equals: normalizedIdentifier,
+                                    mode: 'insensitive',
+                                },
+                            },
+                        ],
+                    },
+                    select: { id: true },
+                }),
+            { label: 'catalog.resolveApprovedStoreId.direct' }
+        );
+        if (directMatch) {
+            return directMatch.id;
+        }
+
         const stores = await withDbRetry(
             this.prisma,
             () =>
                 this.prisma.store.findMany({
-                    where: { status: StoreStatus.APPROVED },
+                    where: { status: { in: this.marketplaceStoreStatuses() } },
                     select: {
                         id: true,
                         subdomain: true,
@@ -197,7 +351,7 @@ export class CatalogService {
                         registeredName: true,
                     },
                 }),
-            { label: 'catalog.resolveApprovedStoreId' }
+            { label: 'catalog.resolveApprovedStoreId.fallback' }
         );
 
         const store = stores.find(current => {
@@ -213,6 +367,34 @@ export class CatalogService {
         });
 
         return store?.id ?? null;
+    }
+
+    private serializeStoreProfile(
+        store: Prisma.StoreGetPayload<{ select: typeof catalogStoreSelect }>
+    ): PublicCatalogStoreProfile {
+        const brandColors = store.brandColors as
+            | { primary?: string; secondary?: string; template?: string }
+            | null;
+        const rawTemplate = brandColors?.template?.trim().toUpperCase();
+        const storeTemplate =
+            rawTemplate === 'VIBRANT_MARKET'
+                ? 'VIBRANT_MARKET'
+                : rawTemplate === 'ISHUSHO_CRAFTS'
+                  ? 'ISHUSHO_CRAFTS'
+                  : 'DEFAULT';
+
+        return {
+            id: store.id,
+            displayName: store.displayName,
+            logoUrl: store.logoUrl,
+            subdomain: store.subdomain,
+            storeTemplate,
+            brandColors: brandColors ?? null,
+            description: store.description,
+            currency: store.currency,
+            contactEmail: store.contactEmail,
+            contactPhone: store.contactPhone,
+        };
     }
 
     private serializeProduct(p: ProductWithCatalog): PublicCatalogProduct {
@@ -257,7 +439,7 @@ export class CatalogService {
             priceFrom,
             compareAtFrom,
             createdAt: p.createdAt.toISOString(),
-            store: p.store,
+            store: this.serializeStoreProfile(p.store),
             variants,
         };
     }

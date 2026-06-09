@@ -2,27 +2,25 @@
 
 import { ShoppingBag } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
-
+import { useTranslations } from 'next-intl'
 
 import { Link, usePathname } from '@/i18n/navigation'
 import { CART_EVENT, readCart } from '@/lib/cart-storage'
+import { readStoreContextFromStorage } from '@/lib/store-context'
+import { storeCartPath } from '@/lib/store-navigation'
 import { cn } from '@/lib/utils'
 
 function getCartCount(): number {
   return readCart().reduce((sum, item) => sum + item.quantity, 0)
 }
 
-export function CartIconButton({
-  ariaLabel,
-  ariaLabelWithCountTemplate,
-}: {
-  ariaLabel: string
-  ariaLabelWithCountTemplate: string
-}) {
+export function CartIconButton() {
+  const t = useTranslations('cart')
   const pathname = usePathname()
   const [count, setCount] = useState(0)
   const [pulse, setPulse] = useState(false)
   const [mounted, setMounted] = useState(false)
+  const [cartHref, setCartHref] = useState('/cart')
   const lastCountRef = useRef(0)
   const pulseTimerRef = useRef<number | null>(null)
 
@@ -56,12 +54,12 @@ export function CartIconButton({
 
   if (pathname === '/cart') return null
 
-  const aria = count > 0 ? ariaLabelWithCountTemplate.replace('{count}', String(count)) : ariaLabel
+  const aria = count > 0 ? t('cartIconAriaWithCount', { count }) : t('cartIconAria')
   const display = count > 99 ? '99+' : String(count)
 
   return (
     <Link
-      href='/cart'
+      href={cartHref}
       aria-label={aria}
       title={aria}
       prefetch={false}

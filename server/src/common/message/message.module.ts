@@ -1,3 +1,4 @@
+import { existsSync } from 'fs';
 import { join } from 'path';
 
 import { Module } from '@nestjs/common';
@@ -9,12 +10,22 @@ import {
 
 import { MessageService } from './services/message.service';
 
+function resolveLanguagesPath(): string {
+    const candidates = [
+        join(__dirname, '../../languages/'),
+        join(process.cwd(), 'dist/languages'),
+        join(process.cwd(), 'src/languages'),
+    ];
+
+    return candidates.find(path => existsSync(path)) ?? candidates[0];
+}
+
 @Module({
     imports: [
         I18nModule.forRoot({
             fallbackLanguage: 'en',
             loaderOptions: {
-                path: join(__dirname, '../../languages/'),
+                path: resolveLanguagesPath(),
                 watch: true,
             },
             resolvers: [

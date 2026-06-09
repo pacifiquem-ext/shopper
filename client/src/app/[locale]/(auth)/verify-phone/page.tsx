@@ -10,10 +10,14 @@ import { KeyRound, Phone } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 import { useAuthStore } from '@/store/auth.store'
 import { useRouter } from '@/i18n/navigation'
+import { useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
+import { MERCHANT_ONBOARDING_PATH, withReturnUrl } from '@/lib/auth-return-url'
 
 export default function VerifyPhonePage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const returnUrl = searchParams.get('returnUrl')
   const { verifyPhone, isLoading } = useAuthStore()
   const [detectedPhone, setDetectedPhone] = useState('')
 
@@ -38,7 +42,11 @@ export default function VerifyPhonePage() {
     const success = await verifyPhone(values)
     if (success) {
       localStorage.removeItem('pendingVerificationPhone')
-      router.push('/login')
+      router.push(
+        withReturnUrl('/login', returnUrl ?? MERCHANT_ONBOARDING_PATH) as Parameters<
+          typeof router.push
+        >[0],
+      )
     }
   }
 

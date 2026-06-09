@@ -4,18 +4,18 @@ import { cn } from '@/lib/utils'
 
 interface StarRatingProps {
   rating: number
-  reviewsLabel?: string
   ariaLabel: string
   size?: number
   className?: string
+  filledClassName?: string
 }
 
 export function StarRating({
   rating,
-  reviewsLabel,
   ariaLabel,
   size = 14,
   className,
+  filledClassName = 'text-amber-400',
 }: StarRatingProps) {
   const clamped = Math.max(0, Math.min(5, rating))
   const fillPercent = (clamped / 5) * 100
@@ -29,8 +29,6 @@ export function StarRating({
       role='img'
       aria-label={ariaLabel}
     >
-      <span className='text-[#2B2B2B]'>{clamped.toFixed(1)}</span>
-
       <span className='relative inline-flex' aria-hidden>
         <span className='inline-flex text-[#EAE4DC]'>
           {Array.from({ length: 5 }).map((_, index) => (
@@ -43,7 +41,7 @@ export function StarRating({
           ))}
         </span>
         <span
-          className='absolute inset-y-0 left-0 inline-flex overflow-hidden text-[#7D8F69]'
+          className={cn('absolute inset-y-0 left-0 inline-flex overflow-hidden', filledClassName)}
           style={{ width: `${fillPercent}%` }}
         >
           {Array.from({ length: 5 }).map((_, index) => (
@@ -56,13 +54,6 @@ export function StarRating({
           ))}
         </span>
       </span>
-
-      {reviewsLabel ? (
-        <>
-          <span aria-hidden className='size-1 rounded-full bg-[rgba(43,43,43,0.15)]' />
-          <span className='font-normal text-[#6E6A66]'>{reviewsLabel}</span>
-        </>
-      ) : null}
     </div>
   )
 }

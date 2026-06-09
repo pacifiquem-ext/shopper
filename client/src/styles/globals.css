@@ -388,3 +388,117 @@
     scrollbar-color: #4a71df #1f2937;
   }
 }
+
+@keyframes vm-ticker {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.vm-ticker-track {
+  animation: vm-ticker 28s linear infinite;
+}
+
+.vm-storefront .bg-black\/80 {
+  background-color: rgb(15 23 42 / 0.55) !important;
+}
+
+.ic-storefront .bg-black\/80 {
+  background-color: rgb(5 8 16 / 0.78) !important;
+}
+
+.ic-hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.35;
+  background-image:
+    linear-gradient(color-mix(in srgb, var(--ic-ink) 4%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--ic-ink) 4%, transparent) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: radial-gradient(ellipse 80% 70% at 50% 40%, black 20%, transparent 75%);
+}
+
+.ic-cta-primary {
+  background-color: var(--ic-secondary);
+  color: var(--ic-on-secondary);
+  box-shadow: 0 8px 28px color-mix(in srgb, var(--ic-secondary) 32%, transparent);
+}
+
+.ic-cta-primary:hover {
+  filter: brightness(1.05);
+}
+
+@keyframes ic-promo-scroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.ic-promo-track {
+  animation: ic-promo-scroll 32s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ic-promo-track {
+    animation: none;
+    flex-wrap: wrap;
+    width: auto;
+    justify-content: center;
+    gap: 0.75rem 1.5rem;
+    padding-right: 1rem;
+  }
+}
+
+.vm-filter-shell [data-slot=''] {
+  border-radius: 1.5rem;
+}
+
+.vm-filter-shell button[type='submit'] {
+  background-color: var(--vm-primary) !important;
+  color: #fff !important;
+}
+
+.vm-filter-shell button[type='submit']:hover {
+  background-color: var(--vm-primary-dark) !important;
+}
+
+/* Artisan & Craft — shadcn tokens follow --ic-* (set on the same node via inline style). */
+.ic-storefront {
+  color: var(--ic-ink);
+  --background: var(--ic-bg);
+  --foreground: var(--ic-ink);
+  --card: var(--ic-surface);
+  --card-foreground: var(--ic-ink);
+  --popover: var(--ic-surface);
+  --popover-foreground: var(--ic-ink);
+  --muted: var(--ic-primary-light);
+  --muted-foreground: var(--ic-muted);
+  --accent: var(--ic-primary-light);
+  --accent-foreground: var(--ic-ink);
+  --border: color-mix(in srgb, var(--ic-ink) 14%, transparent);
+  --input: var(--ic-surface);
+  --ring: var(--ic-secondary);
+  --primary: var(--ic-secondary);
+  --primary-foreground: var(--ic-on-secondary);
+  --secondary: var(--ic-primary-light);
+  --secondary-foreground: var(--ic-ink);
+}
+
+.ic-storefront input,
+.ic-storefront select,
+.ic-storefront textarea,
+.ic-storefront button {
+  color: inherit;
+}
+
+.ic-storefront input::placeholder {
+  color: var(--ic-muted);
+}

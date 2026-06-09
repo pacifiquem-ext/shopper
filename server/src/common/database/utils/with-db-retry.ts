@@ -29,6 +29,7 @@ const RETRYABLE_MESSAGE_HINTS = [
     'server has gone away',
     'connection closed',
     'timed out fetching a new connection',
+    'engine is not yet connected',
 ];
 
 const log = new Logger('withDbRetry');
@@ -43,7 +44,14 @@ function isRetryable(error: unknown): boolean {
     if (error instanceof Prisma.PrismaClientKnownRequestError) {
         return RETRYABLE_PRISMA_CODES.has(error.code);
     }
-    if (error instanceof Prisma.PrismaClientInitializationError) {
+    if (
+        error instanceof Prisma.PrismaClientInitializationError ||
+        error instanceof Prisma.PrismaClientUnknownRequestError
+    ) {
+        if (error instanceof Error) {
+            const msg = error.message.toLowerCase();
+            return RETRYABLE_MESSAGE_HINTS.some(hint => msg.includes(hint));
+        }
         return true;
     }
     if (error instanceof Error) {
@@ -57,12 +65,26 @@ function sleep(ms: number): Promise<void> {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+async function ensureDbConnected(
+    prisma: DatabaseService,
+    label: string
+): Promise<void> {
+    try {
+        await prisma.$connect();
+        await prisma.$queryRaw`SELECT 1`;
+    } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        throw new Error(`${label}: failed to connect to database (${message})`);
+    }
+}
+
 /**
  * Run a Prisma operation with automatic reconnect-and-retry on transient
  * connection errors (notably P1001 from Neon's serverless auto-suspend).
  *
- * Between attempts we force `$disconnect` + `$connect` so a stale pool is
- * discarded and a fresh one is opened against the now-awake compute.
+ * Between attempts we re-connect and ping the DB. We intentionally avoid
+ * `$disconnect()` on the shared PrismaClient — disconnecting breaks concurrent
+ * requests with "Engine is not yet connected".
  */
 export async function withDbRetry<T>(
     prisma: DatabaseService,
@@ -77,6 +99,7 @@ export async function withDbRetry<T>(
 
     for (let attempt = 1; attempt <= attempts; attempt++) {
         try {
+            await ensureDbConnected(prisma, label);
             return await operation();
         } catch (error) {
             lastError = error;
@@ -87,28 +110,10 @@ export async function withDbRetry<T>(
 
             const delay = baseDelayMs * 2 ** (attempt - 1);
             log.warn(
-                `${label}: transient DB error on attempt ${attempt}/${attempts}, reconnecting and retrying in ${delay}ms`
+                `${label}: transient DB error on attempt ${attempt}/${attempts}, retrying in ${delay}ms`
             );
 
-            try {
-                await prisma.$disconnect();
-            } catch {
-                // ignore — disconnect is best effort
-            }
-
             await sleep(delay);
-
-            try {
-                await prisma.$connect();
-            } catch (reconnectError) {
-                log.warn(
-                    `${label}: reconnect attempt ${attempt} failed, will retry: ${
-                        reconnectError instanceof Error
-                            ? reconnectError.message
-                            : String(reconnectError)
-                    }`
-                );
-            }
         }
     }
 

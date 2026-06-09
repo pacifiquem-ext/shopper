@@ -57,35 +57,32 @@ export default function DashboardPage() {
     const fetchAll = async () => {
       setIsLoading(true)
       try {
-        const [metricsRes, topRes, inventoryRes, trendRes, activityRes] = await Promise.allSettled([
-          analyticsService.getDashboardMetrics(selectedPeriod),
-          analyticsService.getTopProducts(3),
-          analyticsService.getInventorySummary(),
-          analyticsService.getSalesTrend(365),
-          analyticsService.getRecentActivity(8),
-        ])
+        const res = await analyticsService.getDashboardOverview(selectedPeriod, {
+          topLimit: 3,
+          trendDays: 365,
+          activityLimit: 8,
+        })
 
         if (cancelled) return
 
-        if (metricsRes.status === 'fulfilled') {
-          const data = (metricsRes.value as any)?.data ?? metricsRes.value
-          setDashboardMetrics(data)
+        const overview = (res as { data?: typeof res })?.data ?? res
+        if (overview && typeof overview === 'object' && 'metrics' in overview) {
+          setDashboardMetrics(overview.metrics)
+          setTopProducts(Array.isArray(overview.topProducts) ? overview.topProducts : [])
+          setInventorySummary(overview.inventory ?? null)
+          setSalesTrend(Array.isArray(overview.salesTrend) ? overview.salesTrend : [])
+          setRecentActivity(
+            Array.isArray(overview.recentActivity) ? overview.recentActivity : [],
+          )
         }
-        if (topRes.status === 'fulfilled') {
-          const data = (topRes.value as any)?.data ?? topRes.value
-          setTopProducts(Array.isArray(data) ? data : [])
-        }
-        if (inventoryRes.status === 'fulfilled') {
-          const data = (inventoryRes.value as any)?.data ?? inventoryRes.value
-          setInventorySummary(data)
-        }
-        if (trendRes.status === 'fulfilled') {
-          const data = (trendRes.value as any)?.data ?? trendRes.value
-          setSalesTrend(Array.isArray(data) ? data : [])
-        }
-        if (activityRes.status === 'fulfilled') {
-          const data = (activityRes.value as any)?.data ?? activityRes.value
-          setRecentActivity(Array.isArray(data) ? data : [])
+      } catch {
+        // Axios interceptor shows toasts; keep dashboard usable with empty metrics
+        if (!cancelled) {
+          setDashboardMetrics(null)
+          setTopProducts([])
+          setInventorySummary(null)
+          setSalesTrend([])
+          setRecentActivity([])
         }
       } finally {
         if (!cancelled) setIsLoading(false)

@@ -17,7 +17,14 @@ export class StoreSettingsService {
         if (dto.displayName !== undefined) storeFields.displayName = dto.displayName;
         if (dto.description !== undefined) storeFields.description = dto.description;
         if (dto.logoUrl !== undefined) storeFields.logoUrl = dto.logoUrl;
-        if (dto.brandColors !== undefined) storeFields.brandColors = dto.brandColors;
+        if (dto.brandColors !== undefined) {
+            const existing = await this.storeSettingsRepository.findByStoreId(storeId);
+            const current = (existing?.brandColors ?? {}) as Record<string, unknown>;
+            storeFields.brandColors = {
+                ...current,
+                ...dto.brandColors,
+            };
+        }
         if (dto.aboutUs !== undefined) storeFields.aboutUs = dto.aboutUs;
         if (dto.contactEmail !== undefined) storeFields.contactEmail = dto.contactEmail;
         if (dto.contactPhone !== undefined) storeFields.contactPhone = dto.contactPhone;

@@ -10,9 +10,13 @@ import { Lock, Mail, Phone, User as UserIcon } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 import { useAuthStore } from '@/store/auth.store'
 import { useRouter } from '@/i18n/navigation'
+import { useSearchParams } from 'next/navigation'
+import { MERCHANT_ONBOARDING_PATH, withReturnUrl } from '@/lib/auth-return-url'
 
 export default function SignupPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const returnUrl = searchParams.get('returnUrl')
   const { signup, isLoading } = useAuthStore()
   const form = useForm<SignupInput>({
     resolver: zodResolver(signupSchema),
@@ -30,12 +34,16 @@ export default function SignupPage() {
     if (success) {
       // Store the phone number locally to automatically detect it in the verify-phone page
       localStorage.setItem('pendingVerificationPhone', values.phoneNumber)
-      router.push('/verify-phone')
+      router.push(
+        withReturnUrl('/verify-phone', returnUrl ?? MERCHANT_ONBOARDING_PATH) as Parameters<
+          typeof router.push
+        >[0],
+      )
     }
   }
 
   return (
-    <AuthCard activeTab="signup">
+    <AuthCard activeTab="signup" returnUrl={returnUrl}>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="w-full space-y-5">
           {/* Full Name Field */}

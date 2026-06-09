@@ -176,6 +176,37 @@ export class AnalyticsService {
         }));
     }
 
+    async getDashboardOverview(
+        storeId: string,
+        period: string = 'month',
+        options: {
+            topLimit?: number;
+            trendDays?: number;
+            activityLimit?: number;
+        } = {}
+    ) {
+        const topLimit = options.topLimit ?? 3;
+        const trendDays = options.trendDays ?? 365;
+        const activityLimit = options.activityLimit ?? 8;
+
+        const metrics = await this.getDashboardMetrics(storeId, period);
+        const topProducts = await this.getTopProducts(storeId, topLimit);
+        const inventory = await this.getInventorySummary(storeId);
+        const salesTrend = await this.getSalesTrends(storeId, trendDays);
+        const recentActivity = await this.getRecentActivity(
+            storeId,
+            activityLimit
+        );
+
+        return {
+            metrics,
+            topProducts,
+            inventory,
+            salesTrend,
+            recentActivity,
+        };
+    }
+
     async getReport(storeId: string, period: string = 'month'): Promise<string> {
         const [dashboard, topProducts] = await Promise.all([
             this.getDashboardMetrics(storeId, period),

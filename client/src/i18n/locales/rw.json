@@ -14,7 +14,12 @@
   },
   "marketplace": {
     "title": "Ububiko",
+    "brandTitle": "OnlineShop",
+    "brandSuffix": ".rw",
     "subtitle": "Ibicuruzwa byose mu maduka yemejwe, byateguriwe ku mitwe.",
+    "compactStats": "Ibicuruzwa {products} · Ibyiciro {categories}",
+    "compactMetaDescription": "Shakisha, tondeka, maze urebe ibicuruzwa biturutse mu maduka yemejwe.",
+    "compactFullShopLink": "Urubuga rwa shop ruzuye",
     "heroEyebrow": "Isoko rya OnlineShop.rw",
     "heroTitle": "Shakisha ibicuruzwa byiza byo mu Rwanda.",
     "heroSubtitle": "Reba ibicuruzwa nyabyo biturutse mu maduka yemejwe, gereranya ubwoko, reba sitoke, maze wubake igikapu kimwe cyiza.",
@@ -30,10 +35,14 @@
     "sortPriceHigh": "Igiciro: kinini kujya hasi",
     "applyFilters": "Emeza",
     "allCategories": "Ibyiciro byose",
-    "trendingEyebrow": "Ibikunzwe ubu",
-    "trendingTitle": "Ibyinshi bihari",
+    "trendingEyebrow": "Bikunzwe",
+    "trendingTitle": "Bikunzwe",
     "newArrivalEyebrow": "Ibishya",
-    "newArrivalTitle": "Bishya mu maduka",
+    "newArrivalTitle": "Ibishya",
+    "topStoresEyebrow": "Amaduka akomeye",
+    "topStoresTitle": "Amaduka akomeye",
+    "topStoresProductCount": "Ibicuruzwa {count}",
+    "topStoresVisitLabel": "Sura iduka",
     "allProductsTitle": "Ibicuruzwa byose",
     "allProductsSubtitle": "Kataloge iriho ibicuruzwa nyabyo n'ububiko buvuye mu maduka yemejwe.",
     "viewAll": "Reba byose",
@@ -61,8 +70,70 @@
     "storeHeroSubtitle": "Uri kureba iduka rya {store}. Buri gicuruzwa kiri hano gicuruzwa kandi cyoherezwa n'iri duka.",
     "storeEmpty": "{store} ntirarashyiramo ibicuruzwa.",
     "searchLabel": "Shakisha",
-    "searchPlaceholder": "Shakisha izina, iduka, cyangwa icyiciro",
-    "homeLink": "Ahabanza"
+    "searchPlaceholder": "Shakisha ibicuruzwa",
+    "homeLink": "Ahabanza",
+    "becomeSeller": "Kuba umucuruzi",
+    "login": "Injira",
+    "quickView": {
+      "photos": "Amafoto",
+      "details": "Ibisobanuro",
+      "close": "Funga",
+      "openFullPage": "Fungura urupapuro rwuzuye",
+      "photoThumbAria": "Erekana ifoto {index}"
+    }
+  },
+  "storeTemplates": {
+    "pickerTitle": "Inyandikorugero y'iduka",
+    "pickerHint": "Kanda ku nyandikorugero ushaka igihe icyo ari cyo cyose. Impinduka zigaragara ako kanya.",
+    "templateActive": "Ikoreshwa",
+    "templateSaved": "Inyandikorugero y'iduka yavuguruwe",
+    "templateSaving": "Hindura inyandikorugero…",
+    "defaultTemplate": "Isanzwe",
+    "defaultTemplateDesc": "Isoko risanzwe rifite filters n'amakarita y'ibicuruzwa — ribere ku iduka ryose.",
+    "defaultTemplateTag": "Rusange",
+    "vibrantMarketTemplate": "Vibrant Market",
+    "vibrantMarketTemplateDesc": "Imyandikire i coral n'umutwe, ticker, na grid y'ibicuruzwa y'imbaraga.",
+    "vibrantMarketTemplateTag": "Ibyiciro byinshi",
+    "ishushoCraftsTemplate": "Isoko ry'ijoro",
+    "ishushoCraftsTemplateDesc": "Iduka ryijimye n'amacunga ya zahabu yo guhaha — byateguwe kugira ngo ibicuruzwa bisomeke neza.",
+    "ishushoCraftsTemplateTag": "Isoko ry'ijoro",
+    "ishushoCrafts": {
+      "heroStorefrontLabel": "Urubuga rw'iduka",
+      "heroFallback": "Menya ibicuruzwa byiza bya {store}, byoherezwa mu Rwanda hose.",
+      "heroBrowse": "Reba ibicuruzwa",
+      "itemsAvailable": "Ibicuruzwa {count} birahari",
+      "ctaShop": "Gura ubu",
+      "searchAria": "Shakisha ibicuruzwa",
+      "navShopLabel": "Gura",
+      "addToCart": "Ongeramo mu gikapu",
+      "chipFilterAria": "Shungura ukurikije icyiciro",
+      "productsTitle": "Ibicuruzwa",
+      "productsSubtitle": "Shakisha, shungura ukurikije icyiciro, ongeramo mu gafuka mu ntambwe nkeya.",
+      "promo1": "Kohereza ku buntu ku ma commande arenga 50,000 RWF",
+      "promo2": "Kwishyura byizewe · wishyura igihe wakiriye",
+      "tickerAria": "Amakuru y'iduka",
+      "footerTagline": "Gura kuri {store} kuri OnlineShop.rw.",
+      "poweredBy": "Byakozwe na OnlineShop.rw",
+      "marketplaceLabel": "Sura isoko rusange",
+      "contactLabel": "Twandikire"
+    },
+    "vibrantMarket": {
+      "eyebrow": "Vibrant Market",
+      "promo2": "Flash sale — ibiciro byihuse biracyari ku isoko",
+      "promo3": "Ibicuruzwa bishya — byongewe muri iki cyumweru",
+      "searchAria": "Shakisha ibicuruzwa",
+      "defaultTagline": "Iduka ryawe muri Kigali — imyenda, elegitoroniki, ibiribwa n'ibindi, byoherezwa vuba.",
+      "ctaStartShopping": "Tangira guhaha",
+      "ctaTrendingNow": "Bikunzwe cyane",
+      "tickerAria": "Amatangazo y'iduka",
+      "flashSaleBadge": "Flash sale",
+      "addToCart": "Shyira mu gafuka",
+      "productsTitle": "Gura ibicuruzwa byose",
+      "categoriesLabel": "Ibyiciro",
+      "footerTagline": "Ibicuruzwa byiza biva mu iduka ryizewe.",
+      "poweredBy": "Byakozwe na OnlineShop.rw",
+      "marketplaceLabel": "Sura isoko"
+    }
   },
   "product": {
     "title": "Igicuruzwa",
@@ -127,6 +198,7 @@
       "submitting": "Biri koherezwa"
     },
     "successText": "Ububiko bwawe bwafunguwe neza!",
+    "authRequired": "Injira kugira ngo ukomeze gutegura ububiko bwawe.",
     "businessType": {
       "title": "Ni ubuhe bucuruzi uri gushyiraho?",
       "subtitle": "Hitamo igisobanura neza ububiko bwawe. Ibisigaye wabihindura nyuma.",
@@ -892,5 +964,73 @@
       "outOfStock": "Ibyashize mo",
       "totalRevenue": "Amafaranga yose yinjiye"
     }
+  }
+  ,
+  "footer": {
+    "brandName": "OnlineShop.rw",
+    "brandTagline": "Isoko",
+    "about": "Ahantu hamwe ho kurebera ibicuruzwa nyabyo biturutse mu maduka yemejwe, kugereranya variants, no kubaka igikapu wizeye.",
+    "becomeSeller": "Kuba umucuruzi",
+    "quickLinksTitle": "Quick links",
+    "quickLinks": {
+      "shop": "Ububiko",
+      "cart": "Igikapu",
+      "trending": "Ibikunzwe",
+      "newArrivals": "Ibishya"
+    },
+    "companyTitle": "Company",
+    "company": {
+      "about": "Ibyerekeye OnlineShop.rw",
+      "sell": "Gurisha kuri OnlineShop.rw",
+      "help": "Ubufasha",
+      "contact": "Twandikire",
+      "aboutHref": "/",
+      "sellHref": "/store",
+      "helpHref": "/",
+      "contactHref": "mailto:support@onlineshop.rw"
+    },
+    "getInTouchTitle": "Twandikire",
+    "contact": {
+      "emailLabel": "Email",
+      "email": "support@onlineshop.rw",
+      "phoneLabel": "Telefoni",
+      "phone": "+250 780 000 000",
+      "phoneTel": "+250780000000",
+      "locationLabel": "Aho duherereye",
+      "location": "Kigali, Rwanda"
+    },
+    "social": {
+      "instagram": "Instagram",
+      "facebook": "Facebook",
+      "linkedin": "LinkedIn",
+      "instagramHref": "https://instagram.com/",
+      "facebookHref": "https://facebook.com/",
+      "linkedinHref": "https://linkedin.com/"
+    },
+    "legal": {
+      "privacy": "Privacy Policy",
+      "terms": "Terms of Service",
+      "cookies": "Cookie Policy",
+      "privacyHref": "/",
+      "termsHref": "/",
+      "cookiesHref": "/"
+    },
+    "store": {
+      "brandTagline": "Iduka rya nyabyo",
+      "about": "Uri guhaha ibicuruzwa {store} agurisha kuri OnlineShop.rw.",
+      "exploreMarketplace": "Shakisha isoko ryose",
+      "browseAllStores": "Subira ku maduka yose",
+      "platformBlurb": "Iri duka riri kuri OnlineShop.rw. Kugirango ubone ubufasha ku konti, kwishyura, cyangwa teka, vugana n'itsinda rishyigikira isoko.",
+      "quickLinksTitle": "Iri duka",
+      "quickLinks": {
+        "storefront": "Ibicuruzwa byose hano",
+        "cart": "Igikapu",
+        "trending": "Ibikunzwe hano",
+        "newArrivals": "Ibishya hano"
+      },
+      "platformTitle": "Isoko",
+      "copyright": "© {year} {store} · OnlineShop.rw"
+    },
+    "copyright": "© {year} OnlineShop.rw. Uburenganzira bwose burubahirizwa."
   }
 }

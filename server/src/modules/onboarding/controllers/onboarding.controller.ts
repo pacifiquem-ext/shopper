@@ -14,6 +14,7 @@ import {
     ApiResponse,
     ApiTags,
 } from '@nestjs/swagger';
+import { PublicRoute } from '../../../common/request/decorators/request.public.decorator';
 import { OnboardingService } from '../services/onboarding.service';
 import { UpdateDraftDto } from '../dtos/draft.dto';
 import { SubmitStoreDto } from '../dtos/submit-store.dto';
@@ -48,6 +49,7 @@ export class OnboardingController {
         return this.onboardingService.updateDraft(req.user.id, updateDraftDto);
     }
 
+    @PublicRoute()
     @Get('check-subdomain')
     @ApiOperation({
         summary:

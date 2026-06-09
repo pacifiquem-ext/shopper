@@ -19,6 +19,33 @@ import { StoreGuard } from '../../../common/request/guards/store.guard';
 export class AnalyticsController {
     constructor(private readonly analyticsService: AnalyticsService) {}
 
+    @Get('overview')
+    @ApiOperation({
+        summary:
+            'Get all dashboard widget data in one request (reduces DB pool pressure)',
+    })
+    @ApiQuery({ name: 'period', required: false, enum: ['today', 'week', 'month', 'year'] })
+    @ApiQuery({ name: 'topLimit', required: false, type: Number })
+    @ApiQuery({ name: 'trendDays', required: false, type: Number })
+    @ApiQuery({ name: 'activityLimit', required: false, type: Number })
+    @ApiResponse({
+        status: HttpStatus.OK,
+        description: 'Dashboard overview retrieved successfully',
+    })
+    async getDashboardOverview(
+        @StoreId() storeId: string,
+        @Query('period') period?: string,
+        @Query('topLimit') topLimit?: number,
+        @Query('trendDays') trendDays?: number,
+        @Query('activityLimit') activityLimit?: number,
+    ) {
+        return this.analyticsService.getDashboardOverview(storeId, period ?? 'month', {
+            topLimit: topLimit ? +topLimit : undefined,
+            trendDays: trendDays ? +trendDays : undefined,
+            activityLimit: activityLimit ? +activityLimit : undefined,
+        });
+    }
+
     @Get('dashboard')
     @ApiOperation({ summary: 'Get dashboard KPIs and metrics' })
     @ApiQuery({ name: 'period', required: false, enum: ['today', 'week', 'month', 'year'] })

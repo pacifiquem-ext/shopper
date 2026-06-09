@@ -185,7 +185,7 @@ model Store {
   currency       String  @default("RWF")
 
   logoUrl     String?
-  brandColors Json? // {"primary": "#xxxxxx", "secondary": "#xxxxxx"}
+  brandColors Json? // {"primary": "#xxxxxx", "secondary": "#xxxxxx", "template": "VIBRANT_MARKET"|"ISHUSHO_CRAFTS"}
   
   aboutUs      String?
   contactEmail   String?

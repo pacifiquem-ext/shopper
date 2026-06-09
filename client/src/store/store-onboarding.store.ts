@@ -3,6 +3,7 @@
 import { create } from 'zustand'
 import { toast } from 'sonner'
 import { storeOnboardingService, SubmitStoreDto } from '@/services/store-onboarding.service'
+import { useAuthStore } from '@/store/auth.store'
 
 export type StoreOnboardingBusinessType = 'retail' | 'restaurant'
 
@@ -109,8 +110,8 @@ const initialDraft: StoreOnboardingDraft = {
   displayName: '',
   description: '',
   subdomain: '',
-  brandPrimaryColor: '#1d4ed8',
-  brandSecondaryColor: '#e8edfb',
+  brandPrimaryColor: '#B76E5D',
+  brandSecondaryColor: '#EAE4DC',
   contactEmail: '',
   contactPhone: '',
   contactAddress: '',
@@ -128,7 +129,7 @@ const initialDraft: StoreOnboardingDraft = {
 export const useStoreOnboardingStore = create<StoreOnboardingState>()((set, get) => ({
   draft: initialDraft,
 
-  isLoadingDraft: true,
+  isLoadingDraft: false,
   isSavingDraft: false,
   isSubmitting: false,
 
@@ -138,6 +139,12 @@ export const useStoreOnboardingStore = create<StoreOnboardingState>()((set, get)
   setEntireDraft: (newDraft) => set((state) => ({ draft: { ...state.draft, ...newDraft } })),
 
   loadDraft: async () => {
+    const { accessToken } = useAuthStore.getState()
+    if (!accessToken) {
+      set({ isLoadingDraft: false })
+      return
+    }
+
     try {
       set({ isLoadingDraft: true })
       const payload = (await storeOnboardingService.getDraft()) as any
@@ -146,8 +153,10 @@ export const useStoreOnboardingStore = create<StoreOnboardingState>()((set, get)
         set({ savedDraft: data, showResumeModal: true })
       }
     } catch (error) {
-      console.error('Failed to load draft:', error)
-      // We don't want to throw or show a toast on initial load failure to fail gracefully
+      const status = (error as { response?: { status?: number } })?.response?.status
+      if (status === 401) {
+        useAuthStore.getState().logout()
+      }
     } finally {
       set({ isLoadingDraft: false })
     }

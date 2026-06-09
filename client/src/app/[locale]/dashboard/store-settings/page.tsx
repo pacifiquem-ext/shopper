@@ -20,16 +20,26 @@ import {
   User,
   Calendar,
   CheckCircle2,
+  Check,
   Clock,
   Plus,
   Trash2,
   Info,
 } from 'lucide-react'
 import { useTranslations } from 'next-intl'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
+import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 import { useSearchParams } from 'next/navigation'
 import { storeSettingsService } from '@/services/store-settings.service'
+import {
+  parseStoreTemplateId,
+  STORE_TEMPLATE_BRAND_PRESETS,
+  STORE_TEMPLATE_OPTIONS,
+  STORE_TEMPLATE_PICKER_UI,
+  type BrandColorsWithTemplate,
+  type StoreTemplateId,
+} from '@/lib/store-templates'
 import {
   deliveryZonesService,
   type DeliveryZoneApi,
@@ -44,6 +54,7 @@ interface DeliveryZoneLocal {
 
 export default function StoreSettingsPage() {
   const t = useTranslations('dashboard')
+  const tTemplates = useTranslations('storeTemplates')
   const searchParams = useSearchParams()
   const tabParam = searchParams.get('tab') as
     | 'business'
@@ -65,6 +76,7 @@ export default function StoreSettingsPage() {
 
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
+  const [templateSavingId, setTemplateSavingId] = useState<StoreTemplateId | null>(null)
 
   const [businessInfo, setBusinessInfo] = useState({
     registeredName: '',
@@ -95,6 +107,7 @@ export default function StoreSettingsPage() {
     primaryColor: '#1d4ed8',
     secondaryColor: '#e8edfb',
     logoUrl: '/placeholder-logo.png',
+    storeTemplate: 'DEFAULT' as StoreTemplateId,
   })
 
   const [contact, setContact] = useState({
@@ -117,6 +130,66 @@ export default function StoreSettingsPage() {
       { id: '3', date: '2026-01-22', amount: 50000, status: 'paid', method: 'Bank Transfer' },
     ],
   })
+
+  const syncBrandingFromSettings = useCallback((s: Record<string, unknown>) => {
+    const colors = s.brandColors as BrandColorsWithTemplate | null
+    setBranding({
+      primaryColor: colors?.primary ?? '#1d4ed8',
+      secondaryColor: colors?.secondary ?? '#e8edfb',
+      logoUrl: (s.logoUrl as string) ?? '/placeholder-logo.png',
+      storeTemplate: parseStoreTemplateId(colors?.template),
+    })
+  }, [])
+
+  const buildBrandColorsPayload = useCallback(
+    (overrides?: Partial<BrandColorsWithTemplate>) => ({
+      primary: overrides?.primary ?? branding.primaryColor,
+      secondary: overrides?.secondary ?? branding.secondaryColor,
+      template: parseStoreTemplateId(overrides?.template ?? branding.storeTemplate),
+    }),
+    [branding.primaryColor, branding.secondaryColor, branding.storeTemplate],
+  )
+
+  const handleTemplateSelect = async (templateId: StoreTemplateId) => {
+    if (templateSavingId || isLoading) return
+
+    const previous = branding.storeTemplate
+    const preset = STORE_TEMPLATE_BRAND_PRESETS[templateId]
+    setBranding((current) => ({
+      ...current,
+      storeTemplate: templateId,
+      primaryColor: preset.primary,
+      secondaryColor: preset.secondary,
+    }))
+    setTemplateSavingId(templateId)
+
+    try {
+      const res = await storeSettingsService.updateSettings({
+        brandColors: buildBrandColorsPayload({
+          template: templateId,
+          primary: preset.primary,
+          secondary: preset.secondary,
+        }),
+      })
+      const updated = (res as { data?: Record<string, unknown> })?.data ?? res
+      if (updated && typeof updated === 'object') {
+        syncBrandingFromSettings(updated as Record<string, unknown>)
+      }
+      const templateLabelKey =
+        templateId === 'VIBRANT_MARKET'
+          ? 'vibrantMarketTemplate'
+          : templateId === 'ISHUSHO_CRAFTS'
+            ? 'ishushoCraftsTemplate'
+            : 'defaultTemplate'
+      toast.success(tTemplates('templateSaved'), {
+        description: tTemplates(templateLabelKey),
+      })
+    } catch {
+      setBranding((current) => ({ ...current, storeTemplate: previous }))
+    } finally {
+      setTemplateSavingId(null)
+    }
+  }
 
   useEffect(() => {
     async function load() {
@@ -151,12 +224,7 @@ export default function StoreSettingsPage() {
             physicalAddress: s.kyc?.businessAddress?.physicalAddress ?? '',
             googleMapsUrl: s.kyc?.businessAddress?.googleMapsUrl ?? '',
           })
-          const colors = s.brandColors as { primary?: string; secondary?: string } | null
-          setBranding({
-            primaryColor: colors?.primary ?? '#1d4ed8',
-            secondaryColor: colors?.secondary ?? '#e8edfb',
-            logoUrl: s.logoUrl ?? '/placeholder-logo.png',
-          })
+          syncBrandingFromSettings(s as Record<string, unknown>)
           setContact({
             email: s.contactEmail ?? '',
             phone: s.contactPhone ?? '',
@@ -183,7 +251,7 @@ export default function StoreSettingsPage() {
       }
     }
     load()
-  }, [])
+  }, [syncBrandingFromSettings])
 
   const handleSave = async () => {
     setIsSaving(true)
@@ -197,10 +265,15 @@ export default function StoreSettingsPage() {
           ownerPhoneNumber: ownerInfo.phone,
         })
       } else if (activeTab === 'branding') {
-        await storeSettingsService.updateSettings({
+        const res = await storeSettingsService.updateSettings({
           logoUrl: branding.logoUrl !== '/placeholder-logo.png' ? branding.logoUrl : undefined,
-          brandColors: { primary: branding.primaryColor, secondary: branding.secondaryColor },
+          brandColors: buildBrandColorsPayload(),
         })
+        const updated = (res as { data?: Record<string, unknown> })?.data ?? res
+        if (updated && typeof updated === 'object') {
+          syncBrandingFromSettings(updated as Record<string, unknown>)
+        }
+        toast.success(tTemplates('templateSaved'))
       } else if (activeTab === 'contact') {
         await storeSettingsService.updateSettings({
           contactEmail: contact.email,
@@ -601,6 +674,91 @@ export default function StoreSettingsPage() {
                               Recommended: Square image, at least 512x512px, PNG or SVG format
                             </p>
                           </div>
+                        </div>
+                      </div>
+
+                      <Separator />
+
+                      <div className="space-y-3">
+                        <Label className="text-sm font-semibold text-gray-700">
+                          {tTemplates('pickerTitle')}
+                        </Label>
+                        <p className="text-xs text-gray-500">{tTemplates('pickerHint')}</p>
+                        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                          {STORE_TEMPLATE_OPTIONS.map((option) => {
+                            const selected = branding.storeTemplate === option.id
+                            const isSavingTemplate = templateSavingId === option.id
+                            const ui = STORE_TEMPLATE_PICKER_UI[option.id]
+                            return (
+                              <button
+                                key={option.id}
+                                type="button"
+                                disabled={Boolean(templateSavingId) || isLoading}
+                                onClick={() => handleTemplateSelect(option.id)}
+                                aria-pressed={selected}
+                                className={cn(
+                                  'relative cursor-pointer rounded-xl border p-4 text-left transition-colors disabled:cursor-not-allowed disabled:opacity-60',
+                                  !selected && 'border-gray-200 bg-white hover:bg-gray-50',
+                                )}
+                                style={
+                                  selected
+                                    ? {
+                                        borderColor: ui.primary,
+                                        backgroundColor: ui.secondary,
+                                        boxShadow: `0 0 0 2px ${ui.primary}33`,
+                                      }
+                                    : undefined
+                                }
+                              >
+                                {selected ? (
+                                  <span
+                                    className="absolute right-3 top-3 inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white"
+                                    style={{ backgroundColor: ui.primary }}
+                                  >
+                                    <Check className="size-3" aria-hidden />
+                                    {tTemplates('templateActive')}
+                                  </span>
+                                ) : null}
+                                <span
+                                  className="mb-3 inline-block rounded-md px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide"
+                                  style={{
+                                    backgroundColor: `${ui.accent}55`,
+                                    color: ui.primary,
+                                  }}
+                                >
+                                  {tTemplates(option.tagKey)}
+                                </span>
+                                <div className="mb-3 flex gap-1.5" aria-hidden>
+                                  <span
+                                    className="h-6 flex-1 rounded-md border border-black/5"
+                                    style={{ backgroundColor: ui.primary }}
+                                  />
+                                  <span
+                                    className="h-6 flex-1 rounded-md border border-black/5"
+                                    style={{ backgroundColor: ui.secondary }}
+                                  />
+                                  <span
+                                    className="h-6 flex-1 rounded-md border border-black/5"
+                                    style={{ backgroundColor: ui.accent }}
+                                  />
+                                </div>
+                                <p className="text-sm font-semibold text-gray-900">
+                                  {tTemplates(option.labelKey)}
+                                </p>
+                                <p className="mt-1 text-xs leading-relaxed text-gray-500">
+                                  {tTemplates(option.descriptionKey)}
+                                </p>
+                                {isSavingTemplate ? (
+                                  <p
+                                    className="mt-2 text-xs font-medium"
+                                    style={{ color: ui.primary }}
+                                  >
+                                    {tTemplates('templateSaving')}
+                                  </p>
+                                ) : null}
+                              </button>
+                            )
+                          })}
                         </div>
                       </div>
 

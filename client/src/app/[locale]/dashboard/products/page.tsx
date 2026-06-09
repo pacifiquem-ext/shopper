@@ -58,6 +58,7 @@ import {
   Badge,
   Edit,
 } from 'lucide-react'
+import type { Route } from 'next'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { useCallback, useEffect, useId, useMemo, useState } from 'react'
@@ -260,7 +261,7 @@ export default function ProductsPage() {
     name: '',
     vendor: '',
     category: '',
-    status: 'DRAFT',
+    status: 'ACTIVE',
     description: '',
     tags: '',
     mediaSectionEnabled: false,
@@ -1057,7 +1058,9 @@ export default function ProductsPage() {
         onAddStock={(product) => {
           const baseSku = toBaseSku(product.variants[0]?.sku ?? '')
           if (!baseSku) return
-          router.push(`/dashboard/inventory?sku=${encodeURIComponent(baseSku)}&action=restock`)
+          router.push(
+            `/dashboard/inventory?sku=${encodeURIComponent(baseSku)}&action=restock` as Route,
+          )
         }}
         onDownloadPdf={downloadAsPdf}
         statusLabel={statusLabel}

@@ -25,11 +25,22 @@ function resolveCatalogApiRoot(): string {
   return normalizeApiRoot(raw)
 }
 
+import type { BrandColorsWithTemplate, StoreTemplateId } from '@/lib/store-templates'
+
+export type { StoreTemplateId }
+
 export interface CatalogStoreSummary {
   id: string
   displayName: string
   logoUrl: string | null
   subdomain: string
+  /** Computed from brandColors.template when served by the API. */
+  storeTemplate?: StoreTemplateId
+  brandColors: BrandColorsWithTemplate | null
+  description: string | null
+  currency: string
+  contactEmail: string | null
+  contactPhone: string | null
 }
 
 export interface CatalogVariantSummary {
@@ -72,8 +83,15 @@ export interface CatalogGroup {
   total: number
 }
 
+export interface CatalogStoreWithProductCount {
+  store: CatalogStoreSummary
+  productCount: number
+}
+
 export interface CatalogGroupsPayload {
   groups: CatalogGroup[]
+  store?: CatalogStoreSummary | null
+  stores?: CatalogStoreWithProductCount[]
 }
 
 export type CatalogFetchResult = {
@@ -85,6 +103,7 @@ export type CatalogFetchResult = {
 export interface CatalogQueryOptions {
   search?: string
   subdomain?: string | null
+  cache?: RequestCache
 }
 
 /** Server-side fetch for the public catalog (no auth). */
@@ -108,7 +127,8 @@ export async function fetchCatalogGroups(
   let res: Response
   try {
     res = await fetch(url.toString(), {
-      cache: 'no-store',
+      cache: options.cache ?? 'no-store',
+      next: { revalidate: 0 },
       headers: { Accept: 'application/json' },
     })
   } catch (err) {
@@ -129,17 +149,31 @@ export async function fetchCatalogGroups(
 
   const envelope = body as ApiResponse<CatalogGroupsPayload> & {
     groups?: CatalogGroupsPayload['groups']
+    store?: CatalogGroupsPayload['store']
+    stores?: CatalogGroupsPayload['stores']
   }
 
   const data =
     envelope.data ??
-    (Array.isArray(envelope.groups) ? { groups: envelope.groups } : null)
+    (Array.isArray(envelope.groups)
+      ? {
+          groups: envelope.groups,
+          store: envelope.store ?? null,
+          stores: envelope.stores,
+        }
+      : null)
 
   if (!data?.groups) {
     return { data: null, devHint: `${url.toString()} — unexpected JSON shape (missing data.groups)` }
   }
 
-  return { data }
+  return {
+    data: {
+      groups: data.groups,
+      store: data.store ?? null,
+      stores: data.stores,
+    },
+  }
 }
 
 export type CatalogProductFetchResult = {
@@ -160,7 +194,7 @@ export async function fetchCatalogProductById(
   let res: Response
   try {
     res = await fetch(url.toString(), {
-      cache: 'no-store',
+      cache: options.cache ?? 'no-store',
       headers: { Accept: 'application/json' },
     })
   } catch (err) {

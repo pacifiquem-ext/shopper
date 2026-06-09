@@ -1,7 +1,8 @@
 'use client'
 
 import { useMemo, useState, useEffect } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useSearchParams } from 'next/navigation'
+import { useRouter } from '@/i18n/navigation'
 import { useTranslations } from 'next-intl'
 import { Store, ChevronLeft, ChevronRight, Check, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
@@ -14,6 +15,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { useStoreOnboardingStore } from '@/store/store-onboarding.store'
+import { useAuthStore } from '@/store/auth.store'
 
 import {
   WizardContext,
@@ -32,6 +34,7 @@ import { StepBrand } from '@/components/store-onboarding/step-brand'
 import { StepDelivery } from '@/components/store-onboarding/step-delivery'
 import { StepContact } from '@/components/store-onboarding/step-contact'
 import { cn } from '@/utils/helpers'
+import { merchantSignupHref } from '@/lib/auth-return-url'
 
 export default function StoreOnboardingPage() {
   const t = useTranslations('storeOnboarding')
@@ -58,12 +61,38 @@ export default function StoreOnboardingPage() {
   } = useStoreOnboardingStore()
 
   const [showErrors, setShowErrors] = useState(false)
+  const [isAuthReady, setIsAuthReady] = useState(false)
 
-  // Load draft on mount
+  // Require sign-in before store setup; new merchants arrive here after signup → login
   useEffect(() => {
-    loadDraft()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+    const init = () => {
+      if (!useAuthStore.getState().accessToken) {
+        router.replace(merchantSignupHref() as Parameters<typeof router.replace>[0])
+        return
+      }
+      setIsAuthReady(true)
+      loadDraft()
+    }
+
+    if (useAuthStore.persist.hasHydrated()) {
+      init()
+      return
+    }
+
+    return useAuthStore.persist.onFinishHydration(init)
+  }, [loadDraft, router])
+
+  const ensureAuthenticated = () => {
+    if (useAuthStore.getState().accessToken) return true
+    toast.error(t('authRequired'))
+    router.replace(merchantSignupHref() as Parameters<typeof router.replace>[0])
+    return false
+  }
+
+  const handleAuthFailure = () => {
+    useAuthStore.getState().logout()
+    return ensureAuthenticated()
+  }
 
   // Validate the current step
   const validation = useMemo(() => validateStep(stepKey, draft), [stepKey, draft])
@@ -71,9 +100,7 @@ export default function StoreOnboardingPage() {
   const navigateToStep = (index: number) => {
     if (index >= 0 && index < orderedSteps.length) {
       setShowErrors(false)
-      const newUrl = new URL(window.location.href)
-      newUrl.searchParams.set('step', urlSteps[index])
-      router.push((newUrl.pathname + newUrl.search + newUrl.hash) as any)
+      router.push(`/store?step=${urlSteps[index]}` as Parameters<typeof router.push>[0])
     }
   }
 
@@ -101,32 +128,45 @@ export default function StoreOnboardingPage() {
       return
     }
 
+    if (!ensureAuthenticated()) return
+
     try {
       await submitStore()
 
       toast.success(t('successText'))
       resetDraft()
-      router.push('/dashboard' as any)
+      router.push('/dashboard' as Parameters<typeof router.push>[0])
     } catch (error) {
-      // Axios interceptor already handles the error toast
-      console.error(error)
+      const status = (error as { response?: { status?: number } })?.response?.status
+      if (status === 401) {
+        handleAuthFailure()
+        return
+      }
     }
   }
 
   const handleSaveAndExit = async () => {
+    if (!useAuthStore.getState().accessToken) {
+      router.push('/' as Parameters<typeof router.push>[0])
+      return
+    }
+
     try {
       await saveDraft(stepIndex + 1)
-      router.push('/' as any)
+      router.push('/' as Parameters<typeof router.push>[0])
     } catch (error) {
-      // Axios interceptor already handles the error toast
-      console.error(error)
+      const status = (error as { response?: { status?: number } })?.response?.status
+      if (status === 401) {
+        handleAuthFailure()
+        return
+      }
     }
   }
 
   const isFirstStep = stepIndex === 0
   const isLastStep = stepIndex === orderedSteps.length - 1
 
-  if (isLoadingDraft) {
+  if (!isAuthReady || isLoadingDraft) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-white">
         <Loader2 className="h-8 w-8 animate-spin text-gray-400" />

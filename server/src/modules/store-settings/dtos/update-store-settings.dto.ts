@@ -1,5 +1,5 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsOptional, IsString, IsEmail, ValidateNested, IsObject } from 'class-validator';
+import { IsOptional, IsString, IsEmail, ValidateNested, IsIn } from 'class-validator';
 import { Type } from 'class-transformer';
 
 class BrandColorsDto {
@@ -12,6 +12,14 @@ class BrandColorsDto {
     @IsOptional()
     @IsString()
     secondary?: string;
+
+    @ApiPropertyOptional({
+        example: 'ISHUSHO_CRAFTS',
+        enum: ['DEFAULT', 'VIBRANT_MARKET', 'ISHUSHO_CRAFTS'],
+    })
+    @IsOptional()
+    @IsIn(['DEFAULT', 'VIBRANT_MARKET', 'ISHUSHO_CRAFTS'])
+    template?: 'DEFAULT' | 'VIBRANT_MARKET' | 'ISHUSHO_CRAFTS';
 }
 
 export class UpdateStoreSettingsDto {

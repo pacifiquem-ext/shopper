@@ -1,10 +1,10 @@
 import { api } from '@/lib/axios'
 import type { ApiResponse } from '@/services/auth.service'
+import type { BrandColorsWithTemplate, StoreTemplateId } from '@/lib/store-templates'
 
-export interface BrandColorsApi {
-  primary?: string
-  secondary?: string
-}
+export type { StoreTemplateId }
+
+export type BrandColorsApi = BrandColorsWithTemplate
 
 export interface BusinessAddressApi {
   province: string

@@ -62,7 +62,7 @@ export class ProductsService {
 
             const stockStatus = this.calculateStockStatus(variantData.stock, 10);
 
-            await this.prisma.inventoryRecord.create({
+            const inventoryRecord = await this.prisma.inventoryRecord.create({
                 data: {
                     productVariantId: variant.id,
                     onHand: variantData.stock,
@@ -76,7 +76,7 @@ export class ProductsService {
 
             await this.prisma.inventoryEvent.create({
                 data: {
-                    inventoryRecordId: variant.id,
+                    inventoryRecordId: inventoryRecord.id,
                     type: 'CREATED',
                     quantity: variantData.stock,
                     reason: 'Initial stock',

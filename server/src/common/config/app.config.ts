@@ -28,7 +28,11 @@ export default registerAs('app', (): Record<string, any> => {
 
         throttle: {
             ttl: 60,
-            limit: 10,
+            limit:
+                (process.env.APP_ENV ?? APP_ENVIRONMENT.LOCAL) ===
+                APP_ENVIRONMENT.LOCAL
+                    ? 200
+                    : 10,
         },
 
         http: {

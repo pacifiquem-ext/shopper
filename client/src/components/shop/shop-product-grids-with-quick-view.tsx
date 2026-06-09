@@ -1,0 +1,153 @@
+'use client'
+
+import { Sparkles } from 'lucide-react'
+import { useCallback, useMemo, useState } from 'react'
+
+import {
+  catalogProductGridClassForCount,
+  catalogSectionGridClassForCount,
+  hasCatalogSectionItems,
+  hasTopStoresSectionItems,
+} from '@/lib/catalog-grid'
+import type { CatalogProductPublic } from '@/services/catalog.service'
+
+import { ProductCard, type ProductCardLabels } from './product-card'
+import { ProductQuickViewSheet } from './product-quick-view-sheet'
+import { TopStoresSection, type TopStoreEntry } from './top-stores-section'
+
+export type ShopProductCell = { product: CatalogProductPublic; labels: ProductCardLabels }
+
+interface NewArrivalsSection {
+  title: string
+  eyebrow: string
+  items: ShopProductCell[]
+}
+
+interface TopStoresSectionConfig {
+  eyebrow: string
+  title: string
+  visitStoreLabel: string
+  stores: TopStoreEntry[]
+}
+
+interface AllProductsSection {
+  title: string
+  subtitle: string
+  emptyMessage: string
+  items: ShopProductCell[]
+}
+
+interface ShopProductGridsWithQuickViewProps {
+  quickViewEnabled: boolean
+  showFullPageLink?: boolean
+  newArrivals?: NewArrivalsSection
+  allProducts?: AllProductsSection
+  topStores?: TopStoresSectionConfig
+  accentColor?: string
+}
+
+export function ShopProductGridsWithQuickView({
+  quickViewEnabled,
+  showFullPageLink = true,
+  newArrivals,
+  allProducts,
+  topStores,
+  accentColor = '#B76E5D',
+}: ShopProductGridsWithQuickViewProps) {
+  const [open, setOpen] = useState(false)
+  const [active, setActive] = useState<ShopProductCell | null>(null)
+
+  const openQuickView = useCallback(
+    (product: CatalogProductPublic, labels: ProductCardLabels) => {
+      if (!quickViewEnabled) return
+      setActive({ product, labels })
+      setOpen(true)
+    },
+    [quickViewEnabled],
+  )
+
+  const handleOpenChange = useCallback((next: boolean) => {
+    setOpen(next)
+    if (!next) setActive(null)
+  }, [])
+
+  const cardProps = useMemo(
+    () => (quickViewEnabled ? { onOpenQuickView: openQuickView } : {}),
+    [quickViewEnabled, openQuickView],
+  )
+
+  const renderCard = (cell: ShopProductCell) => (
+    <ProductCard
+      product={cell.product}
+      labels={cell.labels}
+      ratingColor={accentColor}
+      {...cardProps}
+    />
+  )
+
+  return (
+    <>
+      {newArrivals && hasCatalogSectionItems(newArrivals.items.length) ? (
+        <section id='new-arrivals' className='py-12'>
+          <div className='mb-5 flex items-end justify-between gap-4'>
+            <div>
+              <span className='mb-2 inline-flex items-center gap-1.5 rounded-full border border-[rgba(43,43,43,0.08)] bg-white/60 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-[#2B2B2B] backdrop-blur-md'>
+                <Sparkles className='size-3.5' style={{ color: accentColor }} aria-hidden />
+                {newArrivals.eyebrow}
+              </span>
+              <h2 className='text-2xl font-bold tracking-tight text-[#2B2B2B]'>{newArrivals.title}</h2>
+            </div>
+          </div>
+          <ul className={catalogSectionGridClassForCount(newArrivals.items.length)}>
+            {newArrivals.items.map(({ product, labels }, index) => (
+              <li key={product.id} className='os-fade-up' style={{ animationDelay: `${index * 45}ms` }}>
+                {renderCard({ product, labels })}
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
+
+      {topStores && hasTopStoresSectionItems(topStores.stores.length) ? (
+        <TopStoresSection
+          eyebrow={topStores.eyebrow}
+          title={topStores.title}
+          visitStoreLabel={topStores.visitStoreLabel}
+          stores={topStores.stores}
+          accentColor={accentColor}
+        />
+      ) : null}
+
+      {allProducts ? (
+        <section id='all-products' className='pb-14'>
+          <div className='mb-5'>
+            <h2 className='text-2xl font-bold tracking-tight text-[#2B2B2B]'>{allProducts.title}</h2>
+            <p className='mt-1 text-sm text-[#6E6A66]'>{allProducts.subtitle}</p>
+          </div>
+          {allProducts.items.length === 0 ? (
+            <p className='text-center text-[#6E6A66]'>{allProducts.emptyMessage}</p>
+          ) : (
+            <ul className={catalogProductGridClassForCount(allProducts.items.length)}>
+              {allProducts.items.map(({ product, labels }, index) => (
+                <li key={product.id}>
+                  <div className='os-fade-up' style={{ animationDelay: `${Math.min(index * 22, 420)}ms` }}>
+                    {renderCard({ product, labels })}
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+      ) : null}
+
+      <ProductQuickViewSheet
+        product={active?.product ?? null}
+        labels={active?.labels ?? null}
+        open={open}
+        onOpenChange={handleOpenChange}
+        accentColor={accentColor}
+        showFullPageLink={showFullPageLink}
+      />
+    </>
+  )
+}

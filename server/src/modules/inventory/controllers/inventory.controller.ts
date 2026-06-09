@@ -22,11 +22,7 @@ import { StoreId } from '../../../common/tenant/decorators/store-id.decorator';
 import { AuthUser } from '../../../common/request/decorators/request.user.decorator';
 import { JwtAccessGuard } from '../../../common/request/guards/jwt.access.guard';
 import { StoreGuard } from '../../../common/request/guards/store.guard';
-
-class AdjustStockDto {
-    quantity: number;
-    reason: string;
-}
+import { AdjustStockDto } from '../dtos/adjust-stock.dto';
 
 @ApiTags('Inventory')
 @Controller({ path: 'inventory', version: '1' })

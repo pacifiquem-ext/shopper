@@ -161,23 +161,40 @@ export default function InventoryPage() {
 
   // Fetch inventory list + analytics on mount
   useEffect(() => {
-    inventoryService.getAll({ limit: 200 }).then((res) => {
-      const list: any = res?.data
-      const items: InventoryRecordApi[] = list?.data ?? []
-      setRows(items.map(apiToInventoryRow))
-    })
-    analyticsService.getInventorySummary().then((res) => {
-      const summary = (res?.data as any)?.data ?? res?.data
-      if (summary?.totalStockValue != null) {
-        setTotalAssetValue(
-          Number(summary.totalStockValue).toLocaleString(undefined, {
-            style: 'currency',
-            currency: 'RWF',
-            maximumFractionDigits: 0,
-          }),
-        )
+    let cancelled = false
+
+    const load = async () => {
+      try {
+        const [inventoryRes, summaryRes] = await Promise.all([
+          inventoryService.getAll({ limit: 200 }),
+          analyticsService.getInventorySummary(),
+        ])
+
+        if (cancelled) return
+
+        const list: any = inventoryRes?.data
+        const items: InventoryRecordApi[] = list?.data ?? []
+        setRows(items.map(apiToInventoryRow))
+
+        const summary = (summaryRes?.data as any)?.data ?? summaryRes?.data
+        if (summary?.totalStockValue != null) {
+          setTotalAssetValue(
+            Number(summary.totalStockValue).toLocaleString(undefined, {
+              style: 'currency',
+              currency: 'RWF',
+              maximumFractionDigits: 0,
+            }),
+          )
+        }
+      } catch {
+        if (!cancelled) setRows([])
       }
-    })
+    }
+
+    void load()
+    return () => {
+      cancelled = true
+    }
   }, [])
 
   // Lazy-load detail when a product is selected

@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useId, useMemo, useState } from 'react'
+import type { Route } from 'next'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { Button } from '@/components/ui/button'
@@ -188,7 +189,7 @@ export function ProductFormModal({
     onSubmit()
     if (!isEditMode) {
       const q = draftProduct.name.trim()
-      router.push(`/dashboard/inventory?q=${encodeURIComponent(q)}&action=restock`)
+      router.push(`/dashboard/inventory?q=${encodeURIComponent(q)}&action=restock` as Route)
     }
   }
 

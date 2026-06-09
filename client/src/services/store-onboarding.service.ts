@@ -57,10 +57,23 @@ export const storeOnboardingService = {
   },
 
   async checkSubdomain(
-    subdomain: string
+    subdomain: string,
   ): Promise<ApiResponse<{ available: boolean; message: string }>> {
-    return (await api.get(
-      `/onboarding/check-subdomain?subdomain=${encodeURIComponent(subdomain)}`
-    )) as ApiResponse<any>
+    const base = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/v1').replace(
+      /\/+$/,
+      '',
+    )
+    const url = `${base}/onboarding/check-subdomain?subdomain=${encodeURIComponent(subdomain)}`
+    const res = await fetch(url, { headers: { Accept: 'application/json' } })
+
+    if (!res.ok) {
+      throw new Error(`Subdomain check failed (${res.status})`)
+    }
+
+    const body = (await res.json()) as ApiResponse<{ available: boolean; message: string }>
+    return (body.data ? body : { ...body, data: body }) as ApiResponse<{
+      available: boolean
+      message: string
+    }>
   },
 }

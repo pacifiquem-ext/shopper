@@ -14,7 +14,12 @@
   },
   "marketplace": {
     "title": "Shop",
+    "brandTitle": "OnlineShop",
+    "brandSuffix": ".rw",
     "subtitle": "Products from every approved store, grouped by category.",
+    "compactStats": "{products} products · {categories} categories",
+    "compactMetaDescription": "Search, filter, and browse products from approved stores.",
+    "compactFullShopLink": "Classic shop page",
     "heroEyebrow": "OnlineShop.rw marketplace",
     "heroTitle": "Discover Rwanda's most desirable local finds.",
     "heroSubtitle": "Browse real products from approved stores, compare variants, check stock, and build a cart from one polished storefront.",
@@ -30,10 +35,14 @@
     "sortPriceHigh": "Price: high to low",
     "applyFilters": "Apply",
     "allCategories": "All categories",
-    "trendingEyebrow": "Trending now",
-    "trendingTitle": "Most available picks",
-    "newArrivalEyebrow": "New arrivals",
-    "newArrivalTitle": "Fresh from stores",
+    "trendingEyebrow": "Trending",
+    "trendingTitle": "Trending",
+    "newArrivalEyebrow": "New arrival",
+    "newArrivalTitle": "New arrival",
+    "topStoresEyebrow": "Top stores",
+    "topStoresTitle": "Top stores",
+    "topStoresProductCount": "{count} products",
+    "topStoresVisitLabel": "Visit store",
     "allProductsTitle": "All products",
     "allProductsSubtitle": "A live catalog powered by approved stores and real inventory.",
     "viewAll": "View all",
@@ -61,8 +70,70 @@
     "storeHeroSubtitle": "You are browsing {store}'s storefront. Every product below is sold and shipped by this store.",
     "storeEmpty": "{store} has not added any products yet.",
     "searchLabel": "Search",
-    "searchPlaceholder": "Search by name, store, or category",
-    "homeLink": "Home"
+    "searchPlaceholder": "Search products",
+    "homeLink": "Home",
+    "becomeSeller": "Become a seller",
+    "login": "Log in",
+    "quickView": {
+      "photos": "Photos",
+      "details": "Details",
+      "close": "Close",
+      "openFullPage": "Open full page",
+      "photoThumbAria": "Show photo {index}"
+    }
+  },
+  "storeTemplates": {
+    "pickerTitle": "Storefront template",
+    "pickerHint": "Choose a layout for your shop. Tap a card to switch — your live storefront updates right away.",
+    "templateActive": "Active",
+    "templateSaved": "Storefront template updated",
+    "templateSaving": "Applying template…",
+    "defaultTemplate": "Standard",
+    "defaultTemplateDesc": "Classic catalog with filters and product cards — works for any store type.",
+    "defaultTemplateTag": "General",
+    "vibrantMarketTemplate": "Vibrant Market",
+    "vibrantMarketTemplateDesc": "Bold coral theme with promo ticker and a high-energy product grid.",
+    "vibrantMarketTemplateTag": "Multi-category",
+    "ishushoCraftsTemplate": "Night Market",
+    "ishushoCraftsTemplateDesc": "Midnight storefront with warm gold checkout accents — built for clear product browsing.",
+    "ishushoCraftsTemplateTag": "Night market",
+    "ishushoCrafts": {
+      "heroStorefrontLabel": "Store storefront",
+      "heroFallback": "Discover quality products from {store}, delivered across Rwanda.",
+      "heroBrowse": "Browse collection",
+      "itemsAvailable": "{count} items available",
+      "ctaShop": "Shop now",
+      "searchAria": "Search products",
+      "navShopLabel": "Shop",
+      "addToCart": "Add to cart",
+      "chipFilterAria": "Filter by category",
+      "productsTitle": "Products",
+      "productsSubtitle": "Search, filter by category, and add to cart in a few taps.",
+      "promo1": "Free delivery on orders over 50,000 RWF",
+      "promo2": "Secure checkout · pay on delivery available",
+      "tickerAria": "Store highlights",
+      "footerTagline": "Shop with {store} on OnlineShop.rw.",
+      "poweredBy": "Powered by OnlineShop.rw",
+      "marketplaceLabel": "Explore marketplace",
+      "contactLabel": "Contact"
+    },
+    "vibrantMarket": {
+      "eyebrow": "Vibrant Market",
+      "promo2": "Flash sale alert — limited-time deals live now",
+      "promo3": "New arrivals — fresh products added this week",
+      "searchAria": "Search products",
+      "defaultTagline": "Your one-stop shop in Kigali — fashion, electronics, food & more, delivered fast.",
+      "ctaStartShopping": "Start shopping",
+      "ctaTrendingNow": "Trending now",
+      "tickerAria": "Store promotions",
+      "flashSaleBadge": "Flash sale",
+      "addToCart": "Add to cart",
+      "productsTitle": "Shop all products",
+      "categoriesLabel": "Categories",
+      "footerTagline": "Quality products from a trusted local store.",
+      "poweredBy": "Powered by OnlineShop.rw",
+      "marketplaceLabel": "Explore marketplace"
+    }
   },
   "product": {
     "title": "Product",
@@ -127,6 +198,7 @@
       "submitting": "Submitting"
     },
     "successText": "Store created successfully!",
+    "authRequired": "Sign in to continue setting up your store.",
     "businessType": {
       "title": "What kind of business are you setting up?",
       "subtitle": "Pick the option that best describes your store. You can refine details later.",
@@ -903,5 +975,73 @@
       "outOfStock": "Out of stock",
       "totalRevenue": "Total revenue"
     }
+  }
+  ,
+  "footer": {
+    "brandName": "OnlineShop.rw",
+    "brandTagline": "Marketplace",
+    "about": "A single storefront to discover real products from approved stores, compare variants, and build a cart with confidence.",
+    "becomeSeller": "Become a seller",
+    "quickLinksTitle": "Quick links",
+    "quickLinks": {
+      "shop": "Shop",
+      "cart": "Cart",
+      "trending": "Trending",
+      "newArrivals": "New arrivals"
+    },
+    "companyTitle": "Company",
+    "company": {
+      "about": "About OnlineShop.rw",
+      "sell": "Sell on OnlineShop.rw",
+      "help": "Help center",
+      "contact": "Contact",
+      "aboutHref": "/",
+      "sellHref": "/store",
+      "helpHref": "/",
+      "contactHref": "mailto:support@onlineshop.rw"
+    },
+    "getInTouchTitle": "Get in touch",
+    "contact": {
+      "emailLabel": "Email",
+      "email": "support@onlineshop.rw",
+      "phoneLabel": "Phone",
+      "phone": "+250 780 000 000",
+      "phoneTel": "+250780000000",
+      "locationLabel": "Location",
+      "location": "Kigali, Rwanda"
+    },
+    "social": {
+      "instagram": "Instagram",
+      "facebook": "Facebook",
+      "linkedin": "LinkedIn",
+      "instagramHref": "https://instagram.com/",
+      "facebookHref": "https://facebook.com/",
+      "linkedinHref": "https://linkedin.com/"
+    },
+    "legal": {
+      "privacy": "Privacy Policy",
+      "terms": "Terms of Service",
+      "cookies": "Cookie Policy",
+      "privacyHref": "/",
+      "termsHref": "/",
+      "cookiesHref": "/"
+    },
+    "store": {
+      "brandTagline": "Storefront",
+      "about": "You are shopping products sold by {store} on OnlineShop.rw.",
+      "exploreMarketplace": "Explore full marketplace",
+      "browseAllStores": "Browse all stores",
+      "platformBlurb": "This shop is hosted on OnlineShop.rw. For account, payment, or order help, contact marketplace support.",
+      "quickLinksTitle": "This store",
+      "quickLinks": {
+        "storefront": "All products here",
+        "cart": "Cart",
+        "trending": "Trending here",
+        "newArrivals": "New arrivals here"
+      },
+      "platformTitle": "Marketplace",
+      "copyright": "© {year} {store} · OnlineShop.rw"
+    },
+    "copyright": "© {year} OnlineShop.rw. All rights reserved."
   }
 }

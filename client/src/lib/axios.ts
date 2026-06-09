@@ -1,6 +1,7 @@
 import React from 'react'
 import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios'
 import { toast } from 'sonner'
+import { MERCHANT_ONBOARDING_PATH } from '@/lib/auth-return-url'
 import { useAuthStore } from '@/store/auth.store'
 
 export const api = axios.create({
@@ -18,6 +19,63 @@ let refreshQueue: Array<(token: string | null) => void> = []
 function drainQueue(token: string | null) {
   refreshQueue.forEach((cb) => cb(token))
   refreshQueue = []
+}
+
+function isStoreOnboardingPage(): boolean {
+  if (typeof window === 'undefined') return false
+  return /\/store(\/|\?|$)/.test(window.location.pathname)
+}
+
+function isSilentOnboardingRequest(url?: string): boolean {
+  if (!url) return false
+  return (
+    url.includes('/onboarding/check-subdomain') || url.includes('/onboarding/draft')
+  )
+}
+
+function isDashboardPage(): boolean {
+  if (typeof window === 'undefined') return false
+  return /\/dashboard(\/|$)/.test(window.location.pathname)
+}
+
+let redirectingToOnboarding = false
+let authHydrationPromise: Promise<void> | null = null
+let lastNetworkErrorToastAt = 0
+
+const PUBLIC_API_PREFIXES = [
+  '/auth/login',
+  '/auth/signup',
+  '/auth/verify',
+  '/auth/refresh',
+  '/auth/forgot-password',
+  '/auth/reset-password',
+  '/catalog/',
+  '/onboarding/check-subdomain',
+]
+
+function isPublicApiRequest(url?: string): boolean {
+  if (!url) return false
+  return PUBLIC_API_PREFIXES.some((prefix) => url.includes(prefix))
+}
+
+function waitForAuthHydration(): Promise<void> {
+  if (typeof window === 'undefined') return Promise.resolve()
+  if (useAuthStore.persist.hasHydrated()) return Promise.resolve()
+
+  if (!authHydrationPromise) {
+    authHydrationPromise = new Promise((resolve) => {
+      useAuthStore.persist.onFinishHydration(() => resolve())
+    })
+  }
+
+  return authHydrationPromise
+}
+
+function redirectToStoreOnboarding(): void {
+  if (typeof window === 'undefined' || isStoreOnboardingPage() || redirectingToOnboarding) return
+  redirectingToOnboarding = true
+  const locale = window.location.pathname.split('/')[1] || 'en'
+  window.location.href = `/${locale}${MERCHANT_ONBOARDING_PATH}`
 }
 
 async function doRefresh(): Promise<string | null> {
@@ -41,7 +99,11 @@ async function doRefresh(): Promise<string | null> {
 }
 
 api.interceptors.request.use(
-  (config: InternalAxiosRequestConfig) => {
+  async (config: InternalAxiosRequestConfig) => {
+    if (typeof window !== 'undefined' && !isPublicApiRequest(config.url)) {
+      await waitForAuthHydration()
+    }
+
     const { accessToken } = useAuthStore.getState()
     if (accessToken && config.headers) {
       config.headers.Authorization = `Bearer ${accessToken}`
@@ -75,7 +137,8 @@ api.interceptors.response.use(
     if (
       error.response?.status === 401 &&
       !originalRequest._retried &&
-      !originalRequest.url?.includes('/auth/refresh')
+      !originalRequest.url?.includes('/auth/refresh') &&
+      !isSilentOnboardingRequest(originalRequest.url)
     ) {
       originalRequest._retried = true
 
@@ -100,8 +163,8 @@ api.interceptors.response.use(
         return api(originalRequest)
       }
 
-      // Refresh failed — redirect to login
-      if (typeof window !== 'undefined') {
+      // Refresh failed — redirect to login (never interrupt the store onboarding wizard)
+      if (typeof window !== 'undefined' && !isStoreOnboardingPage()) {
         const locale = window.location.pathname.split('/')[1] || 'en'
         window.location.href = `/${locale}/login`
       }
@@ -110,6 +173,42 @@ api.interceptors.response.use(
 
     // Suppress error toasts for requests that were retried (avoids double-toast)
     if (originalRequest?._retried && error.response?.status === 401) {
+      return Promise.reject(error)
+    }
+
+    if (
+      error.response?.status === 401 &&
+      isStoreOnboardingPage() &&
+      isSilentOnboardingRequest(originalRequest?.url)
+    ) {
+      return Promise.reject(error)
+    }
+
+    // No response — server unreachable, CORS, or request aborted (e.g. page navigation)
+    if (!error.response) {
+      const isCancelled =
+        error.code === 'ERR_CANCELED' ||
+        error.name === 'CanceledError' ||
+        error.message === 'canceled'
+
+      if (isCancelled) {
+        return Promise.reject(error)
+      }
+
+      const isNetwork =
+        error.code === 'ERR_NETWORK' ||
+        error.message === 'Network Error' ||
+        error.message === 'Failed to fetch'
+
+      const now = Date.now()
+      if (isNetwork && !error.config?._retried && now - lastNetworkErrorToastAt > 5000) {
+        lastNetworkErrorToastAt = now
+        toast.error('Cannot connect to API server', {
+          description:
+            'Ensure the NestJS server is running (pnpm dev in server/) and NEXT_PUBLIC_API_URL is correct.',
+        })
+      }
+
       return Promise.reject(error)
     }
 
@@ -141,6 +240,20 @@ api.interceptors.response.use(
       }
     } else if (error.message) {
       descriptionMessage = error.message
+    }
+
+    const needsStoreOnboarding =
+      status === 403 &&
+      isDashboardPage() &&
+      typeof descriptionMessage === 'string' &&
+      descriptionMessage.toLowerCase().includes('store onboarding')
+
+    if (needsStoreOnboarding) {
+      toast.error('Complete store setup', {
+        description: 'Finish onboarding to use the dashboard.',
+      })
+      redirectToStoreOnboarding()
+      return Promise.reject(error)
     }
 
     if (errorsList.length > 0) {

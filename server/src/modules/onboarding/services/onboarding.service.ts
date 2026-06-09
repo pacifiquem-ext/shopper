@@ -1,12 +1,26 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { DatabaseService } from '../../../common/database/services/database.service';
+import { APP_ENVIRONMENT } from '../../../app/enums/app.enum';
 import { UpdateDraftDto } from '../dtos/draft.dto';
 import { SubmitStoreDto } from '../dtos/submit-store.dto';
-import { StoreStatus } from '@prisma/client';
+import { StoreStatus, UserRole } from '@prisma/client';
 
 @Injectable()
 export class OnboardingService {
-    constructor(private readonly prisma: DatabaseService) {}
+    constructor(
+        private readonly prisma: DatabaseService,
+        private readonly config: ConfigService,
+    ) {}
+
+    private initialStoreStatus(): StoreStatus {
+        const env = this.config.get<string>('app.env');
+        const autoApprove =
+            process.env.STORE_AUTO_APPROVE === 'true' ||
+            env === APP_ENVIRONMENT.LOCAL;
+
+        return autoApprove ? StoreStatus.APPROVED : StoreStatus.SUBMITTED;
+    }
 
     async getDraft(userId: string) {
         let draft = await this.prisma.storeDraft.findUnique({
@@ -122,14 +136,12 @@ export class OnboardingService {
                         registeredName: dto.registeredName,
                         displayName: dto.displayName,
                         description: dto.description,
-                        status: StoreStatus.SUBMITTED,
-                        brandColors:
-                            dto.brandPrimaryColor && dto.brandSecondaryColor
-                                ? {
-                                      primary: dto.brandPrimaryColor,
-                                      secondary: dto.brandSecondaryColor,
-                                  }
-                                : undefined,
+                        status: this.initialStoreStatus(),
+                        brandColors: {
+                            primary: dto.brandPrimaryColor?.trim() || '#B76E5D',
+                            secondary: dto.brandSecondaryColor?.trim() || '#EAE4DC',
+                            template: 'DEFAULT',
+                        },
                         logoUrl: dto.logoDataUrl || undefined,
                         aboutUs: dto.aboutUs || undefined,
                         contactEmail: dto.contactEmail || undefined,
@@ -175,6 +187,14 @@ export class OnboardingService {
                 await tx.address.update({
                     where: { id: businessAddress.id },
                     data: { businessKycId: storeKyc.id },
+                });
+
+                await tx.user.update({
+                    where: { id: userId },
+                    data: {
+                        storeId: store.id,
+                        role: UserRole.STORE_OWNER,
+                    },
                 });
 
                 await tx.storeDraft.deleteMany({

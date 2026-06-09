@@ -1,4 +1,5 @@
 import { Link } from '@/i18n/navigation'
+import { MERCHANT_ONBOARDING_PATH, withReturnUrl } from '@/lib/auth-return-url'
 import { cn } from '@/lib/utils'
 import { User } from 'lucide-react'
 import React from 'react'
@@ -6,9 +7,12 @@ import React from 'react'
 interface AuthCardProps {
   children: React.ReactNode
   activeTab: 'login' | 'signup' | 'forgot-password' | 'reset-password'
+  returnUrl?: string | null
 }
 
-export function AuthCard({ children, activeTab }: AuthCardProps) {
+export function AuthCard({ children, activeTab, returnUrl }: AuthCardProps) {
+  const loginHref = withReturnUrl('/login', returnUrl)
+  const signupHref = withReturnUrl('/signup', returnUrl ?? MERCHANT_ONBOARDING_PATH)
   return (
     <div className="bg-brand-800 relative flex min-h-[550px] w-full max-w-[950px] flex-col overflow-hidden rounded-[2rem] shadow-2xl md:flex-row">
       <div className="bg-brand-500 relative hidden w-[40%] overflow-hidden md:block">
@@ -20,7 +24,7 @@ export function AuthCard({ children, activeTab }: AuthCardProps) {
           {(activeTab === 'login' || activeTab === 'signup') && (
             <>
               <Link
-                href="/login"
+                href={loginHref}
                 className={cn(
                   'group relative flex w-full items-center justify-end rounded-l-full py-4 pr-8 text-sm font-bold tracking-wider transition-all duration-300',
                   activeTab === 'login'
@@ -38,7 +42,7 @@ export function AuthCard({ children, activeTab }: AuthCardProps) {
               </Link>
 
               <Link
-                href="/signup"
+                href={signupHref}
                 className={cn(
                   'group relative flex w-full items-center justify-end rounded-l-full py-4 pr-8 text-sm font-bold tracking-wider transition-all duration-300',
                   activeTab === 'signup'
@@ -94,7 +98,7 @@ export function AuthCard({ children, activeTab }: AuthCardProps) {
           {(activeTab === 'login' || activeTab === 'signup') && (
             <>
               <Link
-                href="/login"
+                href={loginHref}
                 className={cn(
                   'rounded-full px-6 py-2 text-sm font-bold tracking-wider transition-colors',
                   activeTab === 'login'
@@ -105,7 +109,7 @@ export function AuthCard({ children, activeTab }: AuthCardProps) {
                 Log in
               </Link>
               <Link
-                href="/signup"
+                href={signupHref}
                 className={cn(
                   'rounded-full px-6 py-2 text-sm font-bold tracking-wider transition-colors',
                   activeTab === 'signup'

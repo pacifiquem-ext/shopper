@@ -1,14 +1,18 @@
-import { MiddlewareConsumer, Module } from '@nestjs/common';
+import { Global, MiddlewareConsumer, Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 
+import { DatabaseModule } from '../database/database.module';
 import { JwtAccessGuard } from './guards/jwt.access.guard';
 import { RolesGuard } from './guards/roles.guard';
+import { StoreGuard } from './guards/store.guard';
 import { RequestLoggerMiddleware } from './middlewares/request.middleware';
 
+@Global()
 @Module({
     imports: [
+        DatabaseModule,
         ThrottlerModule.forRootAsync({
             imports: [ConfigModule],
             useFactory: (configService: ConfigService) => ({
@@ -22,8 +26,9 @@ import { RequestLoggerMiddleware } from './middlewares/request.middleware';
             inject: [ConfigService],
         }),
     ],
-    exports: [],
+    exports: [StoreGuard],
     providers: [
+        StoreGuard,
         {
             provide: APP_GUARD,
             useClass: ThrottlerGuard,

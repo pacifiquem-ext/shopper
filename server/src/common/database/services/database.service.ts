@@ -1,9 +1,9 @@
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import { HealthIndicatorResult } from '@nestjs/terminus';
 import { PrismaClient } from '@prisma/client';
 
 @Injectable()
-export class DatabaseService extends PrismaClient implements OnModuleInit {
+export class DatabaseService extends PrismaClient implements OnModuleInit, OnModuleDestroy {
     private readonly logger = new Logger(DatabaseService.name);
 
     async onModuleInit() {
@@ -28,6 +28,10 @@ export class DatabaseService extends PrismaClient implements OnModuleInit {
                 await new Promise(resolve => setTimeout(resolve, delay));
             }
         }
+    }
+
+    async onModuleDestroy() {
+        await this.$disconnect();
     }
 
     async isHealthy(): Promise<HealthIndicatorResult> {

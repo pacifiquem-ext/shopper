@@ -46,7 +46,28 @@ export interface RecentActivityItem {
   createdAt: string
 }
 
+export interface DashboardOverview {
+  metrics: DashboardMetrics
+  topProducts: TopProduct[]
+  inventory: InventorySummary
+  salesTrend: SalesTrendPoint[]
+  recentActivity: RecentActivityItem[]
+}
+
 export const analyticsService = {
+  async getDashboardOverview(
+    period: 'today' | 'week' | 'month' | 'year' = 'month',
+    options: { topLimit?: number; trendDays?: number; activityLimit?: number } = {},
+  ): Promise<ApiResponse<DashboardOverview>> {
+    const params = new URLSearchParams({ period })
+    if (options.topLimit != null) params.set('topLimit', String(options.topLimit))
+    if (options.trendDays != null) params.set('trendDays', String(options.trendDays))
+    if (options.activityLimit != null) params.set('activityLimit', String(options.activityLimit))
+    return (await api.get(
+      `/analytics/overview?${params.toString()}`,
+    )) as ApiResponse<DashboardOverview>
+  },
+
   async getDashboardMetrics(
     period: 'today' | 'week' | 'month' | 'year' = 'month',
   ): Promise<ApiResponse<DashboardMetrics>> {
