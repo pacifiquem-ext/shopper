@@ -53,7 +53,9 @@
     "newBadge": "Gishya",
     "offBadge": "-{percent}%",
     "addToCartAria": "Ongeramo mu gikapu",
+    "chooseOptionsAria": "Hitamo ubwoko",
     "addedToCart": "Byongeyemo",
+    "toastAddedToCart": "Byongewe mu gikapu",
     "wishlistAria": "Bika ku byifuzwa",
     "savedToWishlist": "Byabitswe ku byifuzwa",
     "removedFromWishlist": "Byakuwe ku byifuzwa",
@@ -147,12 +149,14 @@
     "deliveryDisabled": "Kohereza ntibihari",
     "deliveryLocation": "Bohereza i {location}",
     "variants": "Ubwoko",
+    "selectVariant": "Hitamo ubwoko",
+    "price": "Igiciro",
     "inStock": "{count} bihari",
     "stockUnknown": "Sitoke ntizwi"
   },
   "cart": {
     "title": "Igikapu cyawe",
-    "subtitle": "Reba ibicuruzwa wahisemo, hindura ingano, maze utegure order mbere yo kwishyura.",
+    "subtitle": "Reba ibicuruzwa wahisemo, hindura ingano, hanyuma utange order ukoresheje nimero ya telefone.",
     "eyebrow": "Igikapu cyo guhaha",
     "cartIconAria": "Fungura igikapu cyawe",
     "cartIconAriaWithCount": "Fungura igikapu cyawe, ibintu {count}",
@@ -171,6 +175,22 @@
     "delivery": "Delivery",
     "calculatedLater": "Bizabarwa nyuma",
     "estimatedTotal": "Igiteranyo giteganyijwe",
+    "placeOrder": "Tanga order",
+    "placeOrderHint": "Andika nimero ya telefone kugira ngo umucuruzi akumenyeshe kugira ngo yemeze delivery.",
+    "placeOrderTitle": "Tanga order yawe",
+    "placeOrderDescription": "Tanga nimero ya telefone umucuruzi azakoresha kugira ngo yemeze order n'ibisobanuro bya delivery.",
+    "placeOrderPhoneLabel": "Nimero yawe ya telefone",
+    "placeOrderPhoneHint": "Koresha uburyo mpuzamahanga bufite kode y'igihugu, urugero +250788123456 (nta intera).",
+    "placeOrderPhonePlaceholder": "+250788123456",
+    "placeOrderCancel": "Hagarika",
+    "placeOrderConfirm": "Emeza order",
+    "placeOrderSubmitting": "Order iri gutangwa…",
+    "placeOrderSuccessOne": "Order {orderNumber} yatanzwe. Umucuruzi azakuvugana vuba.",
+    "placeOrderSuccessMany": "Order {count} zatanzwe. Abacuruzi bazakuvugana vuba.",
+    "placeOrderError": "Ntitwashoboye gutanga order. Ongera ugerageze.",
+    "placeOrderInsufficientStock": "Sitoke ntihagije (ihari: {available}, wasabye: {requested}). Kuraho cyangwa ugabanye ibicuruzwa mu gikapu, cyangwa hitamo irindi gicuruzwa.",
+    "placeOrderPhoneRequired": "Nimero ya telefone irakenewe",
+    "placeOrderPhoneInvalid": "Koresha uburyo mpuzamahanga, urugero +250788123456",
     "checkout": "Komeza kwishyura",
     "checkoutHint": "Checkout no kwishyura bizahuzwa nyuma yo kwemeza cart flow.",
     "checkoutComingSoon": "Checkout izahuzwa mu ntambwe ikurikira.",
@@ -241,13 +261,19 @@
       "subtitle": "Shyiraho logo uhitemo amabara. Wabihindura nyuma.",
       "logoAlt": "Logo y'ububiko",
       "logoTitle": "Logo",
-      "logoSubtitle": "Ifoto y'akarambararo (square) ikora neza.",
+      "logoSubtitle": "Koresha ifoto y'uburebure 4:5 (urugero 800×1000px). JPG cyangwa PNG, nibura 400×500px.",
       "addLogo": "Ongeraho logo",
       "uploading": "Birimo gushyirwamo...",
       "uploadLogo": "Shyiraho logo yawe",
       "dragDrop": "Kanda uhitemo cyangwa ukurure ifoto hano",
       "removeLogoBtn": "Kuraho logo",
       "removeLogo": "Kuraho",
+      "logoHint": "Ifoto y'uburebure 4:5, nibura 400×500px. Duhindura kugira ngo ibe 800×1000 ku makarita y'iduka.",
+      "logoErrors": {
+        "invalidType": "Koresha ifoto ya JPG, PNG, cyangwa WebP.",
+        "tooSmall": "Ifoto ntoya cyane ({width}×{height}px). Nibura ni 400×500px.",
+        "loadFailed": "Ntitwashoboye gusoma iyo foto. Gerageza indi."
+      },
       "primaryColor": "Ibara nyamukuru",
       "secondaryColor": "Ibara rya kabiri",
       "previewTitle": "Igerageza",
@@ -372,11 +398,48 @@
       "subscription": "Ifatabuguzi",
       "logout": "Sohoka"
     },
+    "profile": {
+      "title": "Umwirondoro wawe",
+      "subtitle": "Amakuru y'konti yawe ya OnlineShop.rw.",
+      "fallbackName": "Umukoresha",
+      "notProvided": "Ntabwo yatanzwe",
+      "fields": {
+        "fullName": "Amazina yuzuye",
+        "phone": "Nimero ya telefone",
+        "email": "Email",
+        "accountStatus": "Imiterere ya konti"
+      },
+      "roles": {
+        "storeOwner": "Nyir'iduka",
+        "customer": "Umukiriya",
+        "platformAdmin": "Umuyobozi wa platform"
+      },
+      "status": {
+        "active": "Irakora",
+        "pendingVerification": "Telefone itaragenzurwa",
+        "suspended": "Yahagaritswe",
+        "unknown": "Ntibizwi"
+      }
+    },
     "sidebar": {
       "brand": "OnlineShop.rw",
       "subtitle": "Inventory",
       "role": "Nyir'iduka",
       "defaultUserName": "Ukoresha"
+    },
+    "storeSettings": {
+      "branding": {
+        "storeLogo": "Logo y'iduka",
+        "uploadLogo": "Shyiraho logo nshya",
+        "uploading": "Birimo gushyirwamo...",
+        "logoHint": "Ifoto y'uburebure 4:5, nibura 400×500px. Duhindura kugira ngo ibe 800×1000 ku makarita y'iduka.",
+        "logoAlt": "Igaragaza rya logo",
+        "logoErrors": {
+          "invalidType": "Koresha ifoto ya JPG, PNG, cyangwa WebP.",
+          "tooSmall": "Ifoto ntoya cyane ({width}×{height}px). Nibura ni 400×500px.",
+          "loadFailed": "Ntitwashoboye gusoma iyo foto. Gerageza indi."
+        }
+      }
     },
     "header": {
       "appShort": "OS",
@@ -388,22 +451,13 @@
       "customRange": "Custom range",
       "apply": "Emeza",
       "export": "Export",
+      "exporting": "Birimo kohereza…",
+      "generateReport": "Kohereza raporo",
       "notificationsAria": "Ubutumwa",
       "notificationsTitle": "Ubutumwa",
-      "notifications": {
-        "sample1": {
-          "title": "Hari order nshya",
-          "body": "Order #1024 yashyizweho hashize iminota 5."
-        },
-        "sample2": {
-          "title": "Stock iri hasi",
-          "body": "Ibicuruzwa 2 biri kugabanuka. Tekereza kongera stock."
-        },
-        "sample3": {
-          "title": "Payout yemejwe",
-          "body": "Payout yawe yakozwe neza."
-        }
-      },
+      "notificationsLoading": "Birimo gufungura…",
+      "notificationsEmpty": "Nta butumwa bushya.",
+      "notificationsNewOrderTitle": "Order nshya {orderNumber}",
       "userMenuAria": "User menu",
       "profile": "Profile",
       "settings": "Settings",
@@ -425,6 +479,7 @@
       "export": "Export",
       "moreActions": "Ibindi",
       "searchPlaceholder": "Shakisha mu bubiko",
+      "loading": "Turimo gupakira ububiko…",
       "empty": "Nta bicuruzwa bibonetse",
       "adjustDialog": {
         "restockTitle": "Kongera stock",
@@ -505,6 +560,7 @@
         "downloadPdf": "Kuramo nka PDF",
         "close": "Funga",
         "empty": "Hitamo igicuruzwa kugira ngo ubone ibisobanuro.",
+        "loading": "Turimo gupakira ibisobanuro by'igicuruzwa…",
         "footerHint": "Inama: Kanda Kuramo nka PDF kugira ngo usohore (print) cyangwa ubike ibisobanuro.",
         "available": "Bihari",
         "subtitle": "SKU: {sku} • Icyiciro: {category}",
@@ -571,6 +627,7 @@
     "products": {
       "title": "Ibicuruzwa",
       "subtitle": "Kora, utegure, kandi usohore ibicuruzwa ugurisha.",
+      "listHint": "Kanda izina ry'igicuruzwa urebe uko riboneka ku bubiko bwawe.",
       "export": "Export",
       "createProduct": "Kora igicuruzwa",
       "searchPlaceholder": "Shakisha ibicuruzwa",
@@ -598,6 +655,37 @@
         "needsAttention": "Bikeneye kwitabwaho",
         "draftProducts": "Draft",
         "notPublished": "Ntabwo byasohotse"
+      },
+      "charts": {
+        "kpis": {
+          "totalRevenue": "Amafaranga yose",
+          "unitsSold": "Ibicuruzwa byose",
+          "avgOrderValue": "Agaciro g'ubucuruzi",
+          "activeProducts": "Ibicuruzwa bikora",
+          "revenuePeriod": "Uku kwezi",
+          "ordersPeriod": "Uku kwezi",
+          "aovPeriod": "Kuri buri gicuruzwa"
+        },
+        "salesPerformance": {
+          "title": "Imikorere y'ubucuruzi",
+          "subtitle": "Amafaranga n'ibicuruzwa mu minsi 30 ishize",
+          "thisWeek": "Iki cyumweru",
+          "lastWeek": "Icyumweru gishize",
+          "thisMonth": "Uku kwezi",
+          "lastMonth": "Ukwezi gushize",
+          "weekLabel": "Icyumweru {number}",
+          "revenue": "Amafaranga",
+          "orders": "Ibicuruzwa",
+          "noData": "Nta makuru y'ubucuruzi arahari."
+        },
+        "trending": {
+          "title": "Ibicuruzwa bikunzwe",
+          "salesTrend": "Imiterere y'ubucuruzi",
+          "unitsSold": "Ibicuruzwa {count}",
+          "empty": "Nta gicuruzwa cyacurujwe.",
+          "emptyTitle": "Nta makuru ahari",
+          "emptyDescription": "Ibicuruzwa bikunzwe bizagaragara hano igihe abakiriya batangiye kugura."
+        }
       },
       "filters": {
         "title": "Filters",
@@ -632,6 +720,9 @@
         "action": "Action",
         "moreAria": "Ibikorwa byinshi",
         "view": "Reba",
+        "viewLive": "Reba urupapuro rw'ibicuruzwa",
+        "edit": "Hindura",
+        "delete": "Siba",
         "na": "N/A"
       },
       "create": {
@@ -641,6 +732,7 @@
         "back": "Subira inyuma",
         "next": "Komeza",
         "finish": "Rangiza",
+        "submitting": "Turimo kubika igicuruzwa…",
         "sections": {
           "applies": "Birareba iki gicuruzwa",
           "mediaHint": "Zimya niba iki gicuruzwa kidakeneye amafoto ubu.",
@@ -736,13 +828,27 @@
           "nextBody": "Nyuma yo kubika, ushobora kongera stock muri Inventory."
         }
       },
+      "preview": {
+        "loading": "Turimo gufungura igicuruzwa…",
+        "loadError": "Ntitwashoboye kubona iki gicuruzwa.",
+        "notFound": "Igicuruzwa nticyabonetse.",
+        "backToProducts": "Subira ku bicuruzwa",
+        "subtitle": "{category} · {stock} mu bubiko",
+        "storefrontBanner": "Reba uko abakiriya babibona ku bubiko bwawe.",
+        "draftNotice": "Iki gicuruzwa ntikiratangajwe. Ushobora kugikurikirana hano gusa kugeza ucyashyize Active.",
+        "cartHint": "Ongeramo mu gikapu (reba gusa)"
+      },
       "viewSheet": {
         "title": "Ibisobanuro by'igicuruzwa",
         "addStock": "Kongera stock",
         "downloadPdf": "Kuramo nka PDF",
         "printTitle": "Igicuruzwa",
         "empty": "Hitamo igicuruzwa kugira ngo ubone ibisobanuro.",
+        "loading": "Turimo gupakira ibisobanuro by'igicuruzwa…",
         "zoom": "Zoom",
+        "viewLivePage": "Reba urupapuro rw'ibicuruzwa",
+        "viewLivePageDisabled": "Tangaza igicuruzwa (status Active) kugira ngo riboneke ku bubiko bwawe.",
+        "photoThumbAria": "Erekana ifoto {index}",
         "subtitle": "{vendor} • {category}",
         "yes": "Yego",
         "no": "Oya",
@@ -779,12 +885,23 @@
       }
     },
     "orders": {
-      "dateRange": "Mutarama 1 - Mutarama 30, 2024",
+      "dateRange": "Hitamo itariki",
+      "lastSevenDays": "Iminsi 7 ishize",
       "export": "Export",
       "moreActions": "Ibindi",
       "createOrder": "Kora order",
       "searchPlaceholder": "Shakisha order, umukiriya cyangwa itariki",
       "empty": "Nta orders zabonetse",
+      "communication": {
+        "title": "Itumanaho ry'order",
+        "description": "Vugana na {customerName} ku bijyanye na order {orderId}",
+        "loading": "Birimo gufungura ubutumwa…",
+        "emptyTitle": "Nta butumwa buhari",
+        "emptyDescription": "Tangira ikiganiro na {customerName}",
+        "placeholder": "Andika ubutumwa bwawe ku mukiriya...",
+        "sendAria": "Ohereza ubutumwa",
+        "hint": "Kanda Enter kohereza, Shift+Enter kugira ngo wandike umurongo mushya"
+      },
       "viewSheet": {
         "title": "Ibisobanuro by'order",
         "titleWithId": "Order {id}",
@@ -890,7 +1007,7 @@
         "orderItemsOverTime": "Ibicuruzwa by'order mu gihe",
         "returnsOrders": "Orders zasubijwe",
         "fulfilledOverTime": "Orders zuzuye mu gihe",
-        "lastWeek": "25.2% icyumweru gishize"
+        "trendChange": "{change}% ugereranije n'igihe gishize"
       },
       "tabs": {
         "all": "Zose",

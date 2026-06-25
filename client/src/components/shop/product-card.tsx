@@ -1,4 +1,4 @@
-import { Package, Truck } from 'lucide-react'
+import { Package, ShoppingBag, Truck } from 'lucide-react'
 
 import { Link } from '@/i18n/navigation'
 import { cn } from '@/lib/utils'
@@ -38,6 +38,10 @@ function availableStock(product: CatalogProductPublic): number {
 
 function primaryVariant(product: CatalogProductPublic) {
   return product.variants[0]
+}
+
+function firstInStockVariant(product: CatalogProductPublic) {
+  return product.variants.find((variant) => (variant.inventory?.available ?? 0) > 0)
 }
 
 interface ProductCardProps {
@@ -125,7 +129,7 @@ export function ProductCard({
   const off = discountPercent(product.priceFrom, product.compareAtFrom)
   const showNew = isNewListing(product.createdAt)
   const stock = availableStock(product)
-  const variant = primaryVariant(product)
+  const variant = firstInStockVariant(product) ?? primaryVariant(product)
   const hasPrice = product.priceFrom != null
   const { rating } = pseudoRating(product.id)
 
@@ -133,13 +137,14 @@ export function ProductCard({
   const stockPill = { text: labels.stockTagText, tone: stockTone }
 
   const openSheet = onOpenQuickView ? () => onOpenQuickView(product, labels) : undefined
+  const hasVariantOptions = product.variants.length > 1
   const mediaClass =
-    'relative m-2 block w-full overflow-hidden rounded-[1.25rem] bg-[#EAE4DC] text-left ring-offset-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B76E5D]/50'
+    'relative mx-1.5 block overflow-hidden rounded-xl bg-[#EAE4DC] text-left ring-offset-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B76E5D]/50 sm:mx-2 sm:rounded-[1.25rem]'
 
   return (
     <article
       className={cn(
-        'group/card relative isolate flex h-full flex-col overflow-hidden rounded-[1.6rem] border border-[rgba(43,43,43,0.08)] bg-white/60 shadow-[0_1px_2px_rgba(43,43,43,0.03),0_8px_24px_rgba(43,43,43,0.05)] backdrop-blur-md transition-all duration-500 ease-out hover:-translate-y-1.5 hover:shadow-[0_2px_4px_rgba(43,43,43,0.04),0_24px_48px_rgba(43,43,43,0.10)]',
+        'group/card relative isolate flex h-full flex-col overflow-hidden rounded-2xl border border-[rgba(43,43,43,0.08)] bg-white/60 shadow-[0_1px_2px_rgba(43,43,43,0.03),0_8px_24px_rgba(43,43,43,0.05)] backdrop-blur-md transition-all duration-500 ease-out hover:-translate-y-1.5 hover:shadow-[0_2px_4px_rgba(43,43,43,0.04),0_24px_48px_rgba(43,43,43,0.10)] sm:rounded-[1.6rem]',
         className,
       )}
     >
@@ -167,7 +172,7 @@ export function ProductCard({
         </Link>
       )}
 
-      <div className='absolute right-5 top-5 z-10'>
+      <div className='absolute right-3 top-3 z-10 sm:right-5 sm:top-5'>
         <WishlistButton
           label={labels.wishlistAria}
           toastSavedLabel={labels.wishlistSavedToast}
@@ -182,7 +187,7 @@ export function ProductCard({
         />
       </div>
 
-      <div className='flex flex-1 flex-col gap-3 px-5 pb-5 pt-1'>
+      <div className='flex flex-1 flex-col gap-2 px-3 pb-4 pt-1 sm:gap-3 sm:px-5 sm:pb-5'>
         <div className='flex items-center justify-between gap-2'>
           <StarRating
             rating={rating}
@@ -220,7 +225,7 @@ export function ProductCard({
           )}
         </div>
 
-        <div className='mt-auto flex items-end justify-between gap-3 pt-1'>
+        <div className='mt-auto flex flex-col gap-2 pt-1 min-[400px]:flex-row min-[400px]:items-end min-[400px]:justify-between min-[400px]:gap-3'>
           <div className='min-w-0'>
             {hasPrice && product.priceFrom != null ? (
               <div className='flex items-baseline gap-2'>
@@ -239,8 +244,37 @@ export function ProductCard({
             ) : null}
           </div>
 
-          {variant ? (
+          {variant && hasVariantOptions ? (
+            onOpenQuickView ? (
+              <button
+                type='button'
+                aria-label={labels.addToCartAria}
+                title={labels.addToCartAria}
+                onClick={(event) => {
+                  event.preventDefault()
+                  event.stopPropagation()
+                  openSheet?.()
+                }}
+                className='inline-flex h-10 shrink-0 items-center gap-1.5 self-end rounded-full bg-[#B76E5D] px-3 text-[11px] font-semibold text-white shadow-[0_6px_18px_rgba(43,43,43,0.18)] transition-colors hover:bg-[#A66250] active:scale-[0.96] sm:h-11 sm:px-4 sm:text-xs'
+              >
+                <ShoppingBag className='size-4 shrink-0' aria-hidden strokeWidth={2} />
+                <span>{labels.addToCartAria}</span>
+              </button>
+            ) : (
+              <Link
+                href={`/shop/${product.id}`}
+                prefetch={false}
+                aria-label={labels.addToCartAria}
+                title={labels.addToCartAria}
+                className='inline-flex h-10 shrink-0 items-center gap-1.5 self-end rounded-full bg-[#B76E5D] px-3 text-[11px] font-semibold text-white shadow-[0_6px_18px_rgba(43,43,43,0.18)] transition-colors hover:bg-[#A66250] active:scale-[0.96] sm:h-11 sm:px-4 sm:text-xs'
+              >
+                <ShoppingBag className='size-4 shrink-0' aria-hidden strokeWidth={2} />
+                <span>{labels.addToCartAria}</span>
+              </Link>
+            )
+          ) : variant ? (
             <QuickAddButton
+              className='self-end'
               label={labels.addToCartAria}
               addedLabel={labels.addedLabel}
               toastTitle={labels.toastAdded}

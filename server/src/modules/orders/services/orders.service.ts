@@ -1,7 +1,14 @@
 import { Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { ProductStatus, StoreStatus } from '@prisma/client';
 import { OrdersRepository } from '../repositories/orders.repository';
 import { DatabaseService } from '../../../common/database/services/database.service';
-import { OrderNotFoundException } from '../../../common/exceptions/domain.exception';
+import {
+    InsufficientStockException,
+    OrderNotFoundException,
+    ProductVariantNotFoundException,
+} from '../../../common/exceptions/domain.exception';
+import { APP_ENVIRONMENT } from '../../../app/enums/app.enum';
 import {
     PaymentStatus,
     PaymentMethod,
@@ -17,11 +24,14 @@ import {
     MessageSender as PrismaMessageSender,
 } from '@prisma/client';
 
+import { PlaceGuestOrderDto } from '../dtos/place-guest-order.dto';
+
 @Injectable()
 export class OrdersService {
     constructor(
         private readonly ordersRepository: OrdersRepository,
         private readonly prisma: DatabaseService,
+        private readonly config: ConfigService,
     ) {}
 
     async create(storeId: string, userId: string, dto: any) {
@@ -101,7 +111,195 @@ export class OrdersService {
             },
         });
 
+        await this.ordersRepository.createMessage({
+            sender: MessageSender.CUSTOMER as PrismaMessageSender,
+            senderName: dto.customerName || 'Customer',
+            message: 'New order placed.',
+            order: {
+                connect: { id: order.id },
+            },
+        });
+
         return this.findById(order.id, storeId);
+    }
+
+    async getNotifications(storeId: string, limit = 10) {
+        const notifications = await this.ordersRepository.findUnreadCustomerMessagesForStore(
+            storeId,
+            limit,
+        );
+
+        return notifications.map((n) => ({
+            id: n.id,
+            orderId: n.order.id,
+            orderNumber: n.order.orderNumber,
+            title: 'New order received',
+            body: n.message,
+            createdAt: n.createdAt,
+        }));
+    }
+
+    async markNotificationsRead(storeId: string, ids: string[]) {
+        if (ids.length === 0) return { count: 0 };
+
+        // Ensure tenant safety: only mark messages belonging to this store.
+        const allowed = await this.prisma.orderMessage.findMany({
+            where: {
+                id: { in: ids },
+                order: { storeId },
+            },
+            select: { id: true },
+        });
+
+        const allowedIds = allowed.map((m) => m.id);
+        return this.ordersRepository.markMessagesRead(allowedIds);
+    }
+
+    async createGuestOrder(dto: PlaceGuestOrderDto) {
+        const variantIds = dto.items.map((item) => item.productVariantId);
+        const quantityByVariant = new Map(
+            dto.items.map((item) => [item.productVariantId, item.quantity]),
+        );
+
+        const variants = await this.prisma.productVariant.findMany({
+            where: { id: { in: variantIds } },
+            include: {
+                product: {
+                    include: {
+                        store: {
+                            select: {
+                                id: true,
+                                displayName: true,
+                                status: true,
+                                contactPhone: true,
+                            },
+                        },
+                    },
+                },
+                inventory: true,
+            },
+        });
+
+        if (variants.length !== variantIds.length) {
+            const found = new Set(variants.map((variant) => variant.id));
+            const missing = variantIds.find((id) => !found.has(id));
+            throw new ProductVariantNotFoundException(missing);
+        }
+
+        const allowedStoreStatuses = this.guestCheckoutStoreStatuses();
+        const grouped = new Map<
+            string,
+            {
+                storeName: string;
+                vendorContactPhone: string | null;
+                lines: Array<{
+                    productVariantId: string;
+                    productName: string;
+                    sku: string;
+                    quantity: number;
+                    unitPrice: number;
+                    total: number;
+                }>;
+            }
+        >();
+
+        for (const variant of variants) {
+            const store = variant.product.store;
+            if (!allowedStoreStatuses.includes(store.status)) {
+                throw new ProductVariantNotFoundException(variant.id);
+            }
+            if (variant.product.status !== ProductStatus.ACTIVE) {
+                throw new ProductVariantNotFoundException(variant.id);
+            }
+
+            const quantity = quantityByVariant.get(variant.id) ?? 0;
+            const available = variant.inventory?.available ?? 0;
+            if (available < quantity) {
+                throw new InsufficientStockException(available, quantity);
+            }
+
+            const unitPrice = Number(variant.price);
+            const line = {
+                productVariantId: variant.id,
+                productName: `${variant.product.name} — ${variant.title}`,
+                sku: variant.sku,
+                quantity,
+                unitPrice,
+                total: unitPrice * quantity,
+            };
+
+            const bucket = grouped.get(store.id);
+            if (bucket) {
+                bucket.lines.push(line);
+            } else {
+                grouped.set(store.id, {
+                    storeName: store.displayName,
+                    vendorContactPhone: store.contactPhone,
+                    lines: [line],
+                });
+            }
+        }
+
+        const customerName = dto.customerName?.trim() || 'Customer';
+        const customerPhone = dto.customerPhone.trim();
+        const createdOrders: Array<{
+            id: string;
+            orderNumber: string;
+            storeId: string;
+            storeName: string;
+            total: number;
+        }> = [];
+
+        for (const [storeId, bucket] of grouped.entries()) {
+            const subtotal = bucket.lines.reduce((sum, line) => sum + line.total, 0);
+            const orderPayload = {
+                customerName,
+                customerPhone,
+                customerEmail: '',
+                shippingAddress: {
+                    physicalAddress: 'Phone order — delivery details to confirm with customer',
+                },
+                subtotal,
+                deliveryFee: 0,
+                discount: 0,
+                tax: 0,
+                total: subtotal,
+                customerNote: `Customer phone for vendor follow-up: ${customerPhone}`,
+                paymentMethod: PaymentMethod.CASH_ON_DELIVERY,
+                deliveryMethod: 'Phone order',
+                items: bucket.lines,
+            };
+
+            const order = await this.create(storeId, 'guest', orderPayload);
+
+            await this.ordersRepository.createMessage({
+                sender: MessageSender.CUSTOMER as PrismaMessageSender,
+                senderName: customerName,
+                message: `New order placed. Contact customer at ${customerPhone}.`,
+                order: {
+                    connect: { id: order.id },
+                },
+            });
+
+            createdOrders.push({
+                id: order.id,
+                orderNumber: order.orderNumber,
+                storeId,
+                storeName: bucket.storeName,
+                total: subtotal,
+            });
+        }
+
+        return { orders: createdOrders };
+    }
+
+    private guestCheckoutStoreStatuses(): StoreStatus[] {
+        const env = this.config.get<string>('app.env');
+        if (env === APP_ENVIRONMENT.LOCAL) {
+            return [StoreStatus.APPROVED, StoreStatus.SUBMITTED];
+        }
+
+        return [StoreStatus.APPROVED];
     }
 
     async findAll(storeId: string, filters: any) {
@@ -163,7 +361,7 @@ export class OrdersService {
     }
 
     async updatePayment(id: string, storeId: string, userId: string, dto: any) {
-        const order = await this.findById(id, storeId);
+        await this.findById(id, storeId);
 
         await this.ordersRepository.updatePayment(id, {
             status: dto.status as PrismaPaymentStatus,
@@ -239,7 +437,7 @@ export class OrdersService {
         return this.findById(id, storeId);
     }
 
-    async sendMessage(id: string, storeId: string, userId: string, dto: any) {
+    async sendMessage(id: string, storeId: string, _userId: string, dto: any) {
         await this.findById(id, storeId);
 
         await this.ordersRepository.createMessage({
@@ -288,7 +486,20 @@ export class OrdersService {
     }
 
     private async generateOrderNumber(storeId: string): Promise<string> {
-        const count = await this.ordersRepository.count(storeId);
-        return `#${1000 + count + 1}`;
+        const storeCount = await this.ordersRepository.count(storeId);
+        const candidate = 1000 + storeCount + 1;
+
+        for (let attempt = 0; attempt < 50; attempt++) {
+            const orderNumber = `#${candidate + attempt}`;
+            const existing = await this.prisma.order.findUnique({
+                where: { orderNumber },
+                select: { id: true },
+            });
+            if (!existing) {
+                return orderNumber;
+            }
+        }
+
+        return `#${Date.now()}`;
     }
 }

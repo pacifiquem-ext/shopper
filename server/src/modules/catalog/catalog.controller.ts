@@ -1,14 +1,19 @@
-import { Controller, Get, Header, Param, Query } from '@nestjs/common';
+import { Body, Controller, Get, Header, HttpStatus, Param, Post, Query } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 
 import { PublicRoute } from '../../common/request/decorators/request.public.decorator';
+import { PlaceGuestOrderDto } from '../orders/dtos/place-guest-order.dto';
+import { OrdersService } from '../orders/services/orders.service';
 import { CatalogService } from './catalog.service';
 import { CatalogQueryDto } from './dtos/catalog-query.dto';
 
 @ApiTags('Catalog')
 @Controller({ path: 'catalog', version: '1' })
 export class CatalogController {
-    constructor(private readonly catalogService: CatalogService) {}
+    constructor(
+        private readonly catalogService: CatalogService,
+        private readonly ordersService: OrdersService,
+    ) {}
 
     @PublicRoute()
     @Get('groups')
@@ -41,5 +46,14 @@ export class CatalogController {
         @Query() query: CatalogQueryDto,
     ) {
         return this.catalogService.getProductById(id, query.subdomain);
+    }
+
+    @PublicRoute()
+    @Post('orders')
+    @ApiOperation({ summary: 'Place a guest order from the public cart (phone required)' })
+    @ApiResponse({ status: HttpStatus.CREATED, description: 'Order(s) created for vendor follow-up' })
+    @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Invalid input or insufficient stock' })
+    async placeGuestOrder(@Body() dto: PlaceGuestOrderDto) {
+        return this.ordersService.createGuestOrder(dto);
     }
 }

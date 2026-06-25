@@ -1,8 +1,6 @@
 'use client'
 
 import { useCallback, useId, useMemo, useState } from 'react'
-import type { Route } from 'next'
-import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { Button } from '@/components/ui/button'
 import {
@@ -30,6 +28,7 @@ import {
   X,
   ZoomIn,
 } from 'lucide-react'
+import { TurningZeroLoader } from '@/components/ui/turning-zero-loader'
 
 type ProductStatus = 'ACTIVE' | 'DRAFT' | 'ARCHIVED'
 
@@ -63,10 +62,11 @@ interface ProductFormModalProps {
   isEditMode: boolean
   draftProduct: DraftProduct
   setDraftProduct: React.Dispatch<React.SetStateAction<DraftProduct>>
-  onSubmit: () => void
+  onSubmit: () => void | Promise<void>
   onZoomImage: (url: string) => void
   addImages: (urls: string[]) => void
   removeImage: (url: string) => void
+  isDraftLoading?: boolean
 }
 
 export function ProductFormModal({
@@ -79,12 +79,13 @@ export function ProductFormModal({
   onZoomImage,
   addImages,
   removeImage,
+  isDraftLoading = false,
 }: ProductFormModalProps) {
   const t = useTranslations('dashboard')
-  const router = useRouter()
   const mediaUploadInputId = useId()
 
   const [createStep, setCreateStep] = useState(0)
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const createSteps = useMemo(
     () => [
@@ -144,8 +145,25 @@ export function ProductFormModal({
   }, [createStep, draftProduct.colors, draftProduct.name, draftProduct.price, draftProduct.variantsSectionEnabled])
 
   const closeCreate = () => {
+    if (isSubmitting || isDraftLoading) return
     onOpenChange(false)
     setCreateStep(0)
+  }
+
+  const handleFinish = async () => {
+    if (isSubmitting) return
+    setIsSubmitting(true)
+    try {
+      await onSubmit()
+    } catch {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleOpenChange = (next: boolean) => {
+    if (!next && (isSubmitting || isDraftLoading)) return
+    if (!next) setCreateStep(0)
+    onOpenChange(next)
   }
 
   const nextStep = () => {
@@ -185,18 +203,22 @@ export function ProductFormModal({
     return t('products.status.archived')
   }
 
-  const handleFinish = () => {
-    onSubmit()
-    if (!isEditMode) {
-      const q = draftProduct.name.trim()
-      router.push(`/dashboard/inventory?q=${encodeURIComponent(q)}&action=restock` as Route)
-    }
-  }
-
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="max-h-[85vh] w-[calc(100vw-24px)] max-w-4xl overflow-hidden rounded-2xl border border-brand-200 bg-white p-0 shadow-xl">
-        <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr]">
+        <div className="relative grid grid-cols-1 lg:grid-cols-[280px_1fr]">
+          {isDraftLoading && (
+            <div className="absolute inset-0 z-50 flex flex-col items-center justify-center gap-3 bg-white/85 backdrop-blur-[1px]">
+              <TurningZeroLoader size="md" label={t('products.preview.loading')} />
+              <p className="text-sm font-medium text-gray-600">{t('products.preview.loading')}</p>
+            </div>
+          )}
+          {isSubmitting && (
+            <div className="absolute inset-0 z-50 flex flex-col items-center justify-center gap-3 bg-white/85 backdrop-blur-[1px]">
+              <TurningZeroLoader size="md" label={t('products.create.submitting')} />
+              <p className="text-sm font-medium text-gray-600">{t('products.create.submitting')}</p>
+            </div>
+          )}
           <div className="border-b border-brand-100 bg-brand-50/30 p-5 lg:border-b-0 lg:border-r lg:border-brand-100">
             <div className="flex items-center justify-between gap-3">
               <div>
@@ -284,12 +306,9 @@ export function ProductFormModal({
                       </div>
                       <div className="space-y-2">
                         <Label className="text-sm font-semibold text-gray-700">{t('products.create.fields.vendor')}</Label>
-                        <Input
-                          value={draftProduct.vendor}
-                          onChange={(e) => setDraftProduct((p) => ({ ...p, vendor: e.target.value }))}
-                          placeholder={t('products.create.fields.vendorPlaceholder')}
-                          className="h-10 rounded-xl border-brand-200 bg-white"
-                        />
+                        <div className="flex h-10 items-center rounded-xl border border-brand-200 bg-gray-50 px-3 text-sm font-medium text-gray-900">
+                          {draftProduct.vendor || t('products.table.na')}
+                        </div>
                       </div>
                       <div className="space-y-2">
                         <Label className="text-sm font-semibold text-gray-700">{t('products.create.fields.category')}</Label>
@@ -795,7 +814,8 @@ export function ProductFormModal({
                   type="button"
                   variant="outline"
                   onClick={closeCreate}
-                  className="h-10 rounded-xl border-gray-200 bg-white text-gray-700 hover:bg-brand-50 hover:text-brand-900"
+                  disabled={isSubmitting || isDraftLoading}
+                  className="h-10 rounded-xl border-gray-200 bg-white text-gray-700 hover:bg-brand-50 hover:text-brand-900 disabled:opacity-50"
                 >
                   {t('products.create.cancel')}
                 </Button>
@@ -805,7 +825,7 @@ export function ProductFormModal({
                     type="button"
                     variant="outline"
                     onClick={prevStep}
-                    disabled={createStep === 0}
+                    disabled={createStep === 0 || isSubmitting || isDraftLoading}
                     className="h-10 rounded-xl border-gray-200 bg-white text-gray-700 hover:bg-brand-50 hover:text-brand-900 disabled:opacity-50"
                   >
                     <ChevronLeft className="mr-2 h-4 w-4" />
@@ -815,7 +835,7 @@ export function ProductFormModal({
                     <Button
                       type="button"
                       onClick={nextStep}
-                      disabled={!canGoNext}
+                      disabled={!canGoNext || isSubmitting || isDraftLoading}
                       className="h-10 rounded-xl bg-brand-900 text-white hover:bg-brand-800 disabled:opacity-50"
                     >
                       {t('products.create.next')}
@@ -824,8 +844,9 @@ export function ProductFormModal({
                   ) : (
                     <Button
                       type="button"
-                      onClick={handleFinish}
-                      className="h-10 rounded-xl bg-brand-900 text-white hover:bg-brand-800"
+                      onClick={() => void handleFinish()}
+                      disabled={isSubmitting || isDraftLoading}
+                      className="h-10 rounded-xl bg-brand-900 text-white hover:bg-brand-800 disabled:opacity-50"
                     >
                       {isEditMode ? (
                         <>

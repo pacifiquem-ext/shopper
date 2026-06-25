@@ -27,9 +27,12 @@ import {
   Info,
 } from 'lucide-react'
 import { useTranslations } from 'next-intl'
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { toast } from 'sonner'
+import { MARKETPLACE_BRAND } from '@/lib/marketplace-brand-colors'
+import { processStoreLogoFile } from '@/lib/store-logo-image'
 import { cn } from '@/lib/utils'
+import { TurningZeroLoader } from '@/components/ui/turning-zero-loader'
 import { useSearchParams } from 'next/navigation'
 import { storeSettingsService } from '@/services/store-settings.service'
 import {
@@ -54,6 +57,7 @@ interface DeliveryZoneLocal {
 
 export default function StoreSettingsPage() {
   const t = useTranslations('dashboard')
+  const tBranding = useTranslations('dashboard.storeSettings.branding')
   const tTemplates = useTranslations('storeTemplates')
   const searchParams = useSearchParams()
   const tabParam = searchParams.get('tab') as
@@ -76,7 +80,9 @@ export default function StoreSettingsPage() {
 
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
+  const [isLogoUploading, setIsLogoUploading] = useState(false)
   const [templateSavingId, setTemplateSavingId] = useState<StoreTemplateId | null>(null)
+  const logoInputRef = useRef<HTMLInputElement | null>(null)
 
   const [businessInfo, setBusinessInfo] = useState({
     registeredName: '',
@@ -104,8 +110,8 @@ export default function StoreSettingsPage() {
   })
 
   const [branding, setBranding] = useState({
-    primaryColor: '#1d4ed8',
-    secondaryColor: '#e8edfb',
+    primaryColor: MARKETPLACE_BRAND.primary,
+    secondaryColor: MARKETPLACE_BRAND.canvas,
     logoUrl: '/placeholder-logo.png',
     storeTemplate: 'DEFAULT' as StoreTemplateId,
   })
@@ -134,8 +140,8 @@ export default function StoreSettingsPage() {
   const syncBrandingFromSettings = useCallback((s: Record<string, unknown>) => {
     const colors = s.brandColors as BrandColorsWithTemplate | null
     setBranding({
-      primaryColor: colors?.primary ?? '#1d4ed8',
-      secondaryColor: colors?.secondary ?? '#e8edfb',
+      primaryColor: colors?.primary ?? MARKETPLACE_BRAND.primary,
+      secondaryColor: colors?.secondary ?? MARKETPLACE_BRAND.canvas,
       logoUrl: (s.logoUrl as string) ?? '/placeholder-logo.png',
       storeTemplate: parseStoreTemplateId(colors?.template),
     })
@@ -347,6 +353,34 @@ export default function StoreSettingsPage() {
     setDeliveryZones(deliveryZones.filter((zone) => zone.id !== id))
   }
 
+  const handleLogoUpload = async (file: File | null) => {
+    if (!file) return
+
+    setIsLogoUploading(true)
+    try {
+      const result = await processStoreLogoFile(file)
+      if (!result.ok) {
+        if (result.error === 'invalid_type') {
+          toast.error(tBranding('logoErrors.invalidType'))
+        } else if (result.error === 'too_small') {
+          toast.error(
+            tBranding('logoErrors.tooSmall', {
+              width: result.width ?? 0,
+              height: result.height ?? 0,
+            }),
+          )
+        } else {
+          toast.error(tBranding('logoErrors.loadFailed'))
+        }
+        return
+      }
+      setBranding((prev) => ({ ...prev, logoUrl: result.dataUrl }))
+    } finally {
+      setIsLogoUploading(false)
+      if (logoInputRef.current) logoInputRef.current.value = ''
+    }
+  }
+
   const tabs = [
     { key: 'business' as const, label: 'Business Info', icon: Building2 },
     { key: 'branding' as const, label: 'Branding', icon: Palette },
@@ -356,19 +390,19 @@ export default function StoreSettingsPage() {
   ]
 
   return (
-    <div className="flex w-full max-w-7xl flex-col gap-6">
+    <div className="flex w-full max-w-7xl flex-col gap-4 sm:gap-6">
       <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-start">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight text-gray-900">
+        <div className="min-w-0">
+          <h1 className="text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl">
             {t('nav.storeSettings')}
           </h1>
-          <p className="mt-2 text-gray-500">Manage your store configuration and settings</p>
+          <p className="mt-2 text-sm text-gray-500 sm:text-base">Manage your store configuration and settings</p>
         </div>
         <Button
           type="button"
           onClick={handleSave}
           disabled={isSaving || isLoading || activeTab === 'subscription'}
-          className="h-10 rounded-lg bg-brand-900 px-6 text-white hover:bg-brand-800 disabled:opacity-50"
+          className="h-10 w-full rounded-lg bg-brand-900 px-6 text-white hover:bg-brand-800 disabled:opacity-50 sm:w-auto"
         >
           <Save className="mr-2 h-4 w-4" />
           {isSaving ? 'Saving...' : 'Save Changes'}
@@ -377,7 +411,7 @@ export default function StoreSettingsPage() {
 
       <div className="flex flex-col gap-6 lg:flex-row">
         <div className="w-full lg:w-64">
-          <nav className="space-y-1 rounded-2xl border border-gray-200 bg-white p-2 shadow-sm">
+          <nav className="flex gap-2 overflow-x-auto rounded-2xl border border-gray-200 bg-white p-2 shadow-sm [-ms-overflow-style:none] [scrollbar-width:none] lg:block lg:space-y-1 lg:overflow-visible [&::-webkit-scrollbar]:hidden">
             {tabs.map((tab) => {
               const Icon = tab.icon
               const isActive = activeTab === tab.key
@@ -387,7 +421,7 @@ export default function StoreSettingsPage() {
                   type="button"
                   onClick={() => setActiveTab(tab.key)}
                   className={cn(
-                    'flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-medium transition-colors',
+                    'flex shrink-0 items-center gap-2 rounded-xl px-3 py-2.5 text-left text-sm font-medium transition-colors sm:gap-3 sm:px-4 sm:py-3 lg:w-full',
                     isActive
                       ? 'bg-brand-50 text-brand-900'
                       : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900',
@@ -405,7 +439,7 @@ export default function StoreSettingsPage() {
           <div className="rounded-2xl border border-gray-200 bg-white shadow-sm">
             {isLoading ? (
               <div className="flex min-h-[400px] items-center justify-center">
-                <div className="h-8 w-8 animate-spin rounded-full border-4 border-brand-900 border-t-transparent" />
+                <TurningZeroLoader size="md" />
               </div>
             ) : (
               <>
@@ -640,7 +674,7 @@ export default function StoreSettingsPage() {
                 )}
 
                 {activeTab === 'branding' && (
-                  <div className="p-6">
+                  <div className="p-4 sm:p-6">
                     <div className="mb-6">
                       <h2 className="text-lg font-semibold text-gray-900">
                         Branding & Visual Identity
@@ -652,27 +686,36 @@ export default function StoreSettingsPage() {
 
                     <div className="space-y-6">
                       <div className="space-y-2">
-                        <Label className="text-sm font-semibold text-gray-700">Store Logo</Label>
-                        <div className="flex items-start gap-6">
-                          <div className="h-32 w-32 overflow-hidden rounded-xl border-2 border-gray-200 bg-gray-50">
+                        <Label className="text-sm font-semibold text-gray-700">
+                          {tBranding('storeLogo')}
+                        </Label>
+                        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:gap-6">
+                          <div className="mx-auto aspect-[4/5] h-36 w-[7.2rem] shrink-0 overflow-hidden rounded-xl border-2 border-gray-200 bg-gray-50 sm:mx-0 sm:h-40 sm:w-32">
                             <img
                               src={branding.logoUrl}
-                              alt="Store logo"
-                              className="h-full w-full object-contain p-4"
+                              alt={tBranding('logoAlt')}
+                              className="h-full w-full object-cover"
                             />
                           </div>
-                          <div className="flex-1">
+                          <div className="flex-1 text-center sm:text-left">
+                            <input
+                              ref={logoInputRef}
+                              type="file"
+                              accept="image/jpeg,image/png,image/webp"
+                              className="hidden"
+                              onChange={(e) => handleLogoUpload(e.target.files?.[0] ?? null)}
+                            />
                             <Button
                               type="button"
                               variant="outline"
+                              disabled={isLogoUploading || isLoading}
+                              onClick={() => logoInputRef.current?.click()}
                               className="h-10 rounded-lg border-gray-200 bg-white text-gray-700 hover:bg-gray-50"
                             >
                               <Upload className="mr-2 h-4 w-4" />
-                              Upload New Logo
+                              {isLogoUploading ? tBranding('uploading') : tBranding('uploadLogo')}
                             </Button>
-                            <p className="mt-2 text-xs text-gray-500">
-                              Recommended: Square image, at least 512x512px, PNG or SVG format
-                            </p>
+                            <p className="mt-2 text-xs text-gray-500">{tBranding('logoHint')}</p>
                           </div>
                         </div>
                       </div>

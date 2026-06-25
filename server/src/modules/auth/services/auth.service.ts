@@ -3,6 +3,7 @@ import {
     ConflictException,
     ForbiddenException,
     Injectable,
+    Logger,
     UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
@@ -21,6 +22,8 @@ import { ResetPasswordDto } from '../dtos/auth.reset-password.dto';
 
 @Injectable()
 export class AuthService {
+    private readonly logger = new Logger(AuthService.name);
+
     constructor(
         private readonly prisma: DatabaseService,
         private readonly otpService: OtpService,
@@ -48,11 +51,12 @@ export class AuthService {
         const saltRounds = parseInt(String(saltRoundsStr), 10);
         const passwordHash = await bcrypt.hash(signupDto.password, saltRounds);
 
+        const email = signupDto.email?.trim();
         const newUser = await this.prisma.user.create({
             data: {
                 fullName: signupDto.fullName,
                 phoneNumber: signupDto.phoneNumber,
-                email: signupDto.email,
+                email: email || null,
                 passwordHash,
                 role: signupDto.role || UserRole.CUSTOMER,
                 status: UserStatus.PENDING_VERIFICATION,
@@ -60,10 +64,11 @@ export class AuthService {
         });
 
         // create & send OTP
-        await this.otpService.createOtp(
+        const otpCode = await this.otpService.createOtp(
             newUser.phoneNumber,
             OtpType.VERIFY_PHONE
         );
+        this.logDevOtp(newUser.phoneNumber, OtpType.VERIFY_PHONE, otpCode);
 
         return {
             userId: newUser.id,
@@ -179,10 +184,11 @@ export class AuthService {
         });
 
         if (user) {
-            await this.otpService.createOtp(
+            const otpCode = await this.otpService.createOtp(
                 user.phoneNumber,
                 OtpType.RESET_PASSWORD
             );
+            this.logDevOtp(user.phoneNumber, OtpType.RESET_PASSWORD, otpCode);
         }
 
         // Always return success to prevent user enumeration
@@ -267,5 +273,15 @@ export class AuthService {
                 status: user.status,
             },
         };
+    }
+
+    private logDevOtp(phoneNumber: string, type: OtpType, code: string): void {
+        if (this.configService.get<string>('NODE_ENV') === 'production') {
+            return;
+        }
+
+        this.logger.log(
+            `[DEV] OTP ${type} for ${phoneNumber}: ${code} (SMS not configured — use this code locally)`
+        );
     }
 }

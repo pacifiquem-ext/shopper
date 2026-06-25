@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Search, CreditCard, CheckCircle2, XCircle, Clock, RefreshCw } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { TurningZeroLoader } from '@/components/ui/turning-zero-loader'
 import { paymentsService, type PaymentApi } from '@/services/payments.service'
 
 const STATUS_CONFIG: Record<string, { label: string; className: string; icon: React.ElementType }> =
@@ -157,7 +158,7 @@ export default function PaymentsPage() {
       <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
         {isLoading ? (
           <div className="flex min-h-[300px] items-center justify-center">
-            <div className="h-8 w-8 animate-spin rounded-full border-4 border-brand-900 border-t-transparent" />
+            <TurningZeroLoader size="md" />
           </div>
         ) : filtered.length === 0 ? (
           <div className="flex min-h-[300px] flex-col items-center justify-center gap-3 text-gray-400">

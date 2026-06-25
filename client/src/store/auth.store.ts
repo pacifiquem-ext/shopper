@@ -59,8 +59,9 @@ export const useAuthStore = create<AuthState>()(
               accessToken: token,
               refreshToken: refresh,
             })
+            return true
           }
-          return true
+          return false
         } catch (error) {
           return false
         } finally {
@@ -71,7 +72,11 @@ export const useAuthStore = create<AuthState>()(
       signup: async (data: SignupInput) => {
         set({ isLoading: true })
         try {
-          await authService.signup(data)
+          const email = data.email?.trim()
+          await authService.signup({
+            ...data,
+            ...(email ? { email } : {}),
+          })
           return true
         } catch (error) {
           return false

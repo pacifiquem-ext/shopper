@@ -1,8 +1,10 @@
 'use client'
 
-import { Button } from '@/components/ui/button'
+import { ExportButton } from '@/components/dashboard/shared/export-button'
 import { Calendar } from '@/components/ui/calendar'
+import { Button } from '@/components/ui/button'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { analyticsService } from '@/services/analytics.service'
 import { cn } from '@/lib/utils'
 import { ChevronDown } from 'lucide-react'
 import { useTranslations } from 'next-intl'
@@ -11,7 +13,11 @@ import type { DateRange } from 'react-day-picker'
 
 type RangePreset = 'mtd' | 'ytd' | 'custom'
 
-export function DashboardFilters() {
+type DashboardFiltersProps = {
+  period?: 'today' | 'week' | 'month' | 'year'
+}
+
+export function DashboardFilters({ period = 'month' }: DashboardFiltersProps) {
   const t = useTranslations('dashboard')
   const [preset, setPreset] = useState<RangePreset>('mtd')
   const [customRange, setCustomRange] = useState<DateRange | undefined>()
@@ -25,6 +31,12 @@ export function DashboardFilters() {
     }
     return t('header.custom')
   }, [preset, t])
+
+  const exportPeriod = useMemo(() => {
+    if (preset === 'ytd') return 'year' as const
+    if (preset === 'mtd') return 'month' as const
+    return period
+  }, [preset, period])
 
   return (
     <div className="flex items-center gap-2">
@@ -94,12 +106,14 @@ export function DashboardFilters() {
         </PopoverContent>
       </Popover>
 
-      <button
-        type="button"
-        className="h-9 rounded-lg bg-brand-900 px-4 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-brand-800"
-      >
-        {t('header.export')}
-      </button>
+      <ExportButton
+        fetchBlob={() => analyticsService.getReport(exportPeriod)}
+        filename={`report-${exportPeriod}.csv`}
+        label={t('header.export')}
+        className="h-9 rounded-lg bg-brand-900 px-4 text-sm font-semibold text-white shadow-sm hover:bg-brand-800"
+        variant="default"
+        size="sm"
+      />
     </div>
   )
 }

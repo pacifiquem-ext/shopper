@@ -94,15 +94,12 @@ export function ShopCatalogFilters({
   return (
     <section
       className={cn(
-        'rounded-[2rem] border border-[rgba(43,43,43,0.08)] bg-white/60 p-4 shadow-[0_1px_2px_rgba(43,43,43,0.03)] backdrop-blur-md',
+        'rounded-2xl border border-[rgba(43,43,43,0.08)] bg-white/60 p-3 shadow-[0_1px_2px_rgba(43,43,43,0.03)] backdrop-blur-md sm:rounded-[2rem] sm:p-4',
         isPending && 'opacity-80',
       )}
       aria-busy={isPending}
     >
-      <form
-        onSubmit={handleSubmit}
-        className='grid gap-3 lg:grid-cols-[1fr_auto_auto] lg:items-end'
-      >
+      <form onSubmit={handleSubmit} className='grid gap-3 lg:grid-cols-[1fr_auto_auto] lg:items-end'>
         <div className='space-y-2'>
           <Label
             htmlFor='catalog-q'
@@ -125,33 +122,35 @@ export function ShopCatalogFilters({
             onChange={(event) => {
               if (event.target.value === '') clearSearchAndGoHome()
             }}
-            className='h-12 rounded-2xl border-[rgba(43,43,43,0.08)] bg-[#EAE4DC]/60 text-[#2B2B2B] placeholder:text-[#6E6A66]'
+            className='h-11 rounded-2xl border-[rgba(43,43,43,0.08)] bg-[#EAE4DC]/60 text-[#2B2B2B] placeholder:text-[#6E6A66] sm:h-12'
           />
         </div>
-        <div className='space-y-2'>
-          <select
-            id='catalog-sort'
-            name='sort'
-            aria-label={labels.sortLabel}
-            defaultValue={filters.sort ?? 'newest'}
-            className='h-12 w-full rounded-2xl border border-[rgba(43,43,43,0.08)] bg-[#EAE4DC]/60 px-4 text-sm text-[#2B2B2B]'
+        <div className='grid grid-cols-1 gap-3 min-[480px]:grid-cols-[1fr_auto] lg:contents'>
+          <div className='space-y-2 lg:contents'>
+            <select
+              id='catalog-sort'
+              name='sort'
+              aria-label={labels.sortLabel}
+              defaultValue={filters.sort ?? 'newest'}
+              className='h-11 w-full min-w-0 rounded-2xl border border-[rgba(43,43,43,0.08)] bg-[#EAE4DC]/60 px-4 text-sm text-[#2B2B2B] sm:h-12'
+            >
+              <option value='newest'>{labels.sortNewest}</option>
+              <option value='trending'>{labels.sortTrending}</option>
+              <option value='price-asc'>{labels.sortPriceLow}</option>
+              <option value='price-desc'>{labels.sortPriceHigh}</option>
+            </select>
+          </div>
+          <Button
+            type='submit'
+            disabled={isPending}
+            className='h-11 w-full rounded-2xl bg-[#B76E5D] px-7 text-white shadow-[0_8px_22px_rgba(183,110,93,0.25)] hover:bg-[#A66250] disabled:opacity-70 min-[480px]:w-auto sm:h-12 lg:w-auto'
           >
-            <option value='newest'>{labels.sortNewest}</option>
-            <option value='trending'>{labels.sortTrending}</option>
-            <option value='price-asc'>{labels.sortPriceLow}</option>
-            <option value='price-desc'>{labels.sortPriceHigh}</option>
-          </select>
+            {labels.applyFilters}
+          </Button>
         </div>
-        <Button
-          type='submit'
-          disabled={isPending}
-          className='h-12 rounded-2xl bg-[#B76E5D] px-7 text-white shadow-[0_8px_22px_rgba(183,110,93,0.25)] hover:bg-[#A66250] disabled:opacity-70'
-        >
-          {labels.applyFilters}
-        </Button>
       </form>
 
-      <div className='mt-5 flex gap-2 overflow-x-auto pb-1'>
+      <div className='mt-4 flex gap-2 overflow-x-auto pb-1 sm:mt-5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden'>
         <Button
           type='button'
           variant={!activeCategory ? 'default' : 'outline'}

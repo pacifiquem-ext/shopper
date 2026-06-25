@@ -181,6 +181,73 @@ export type CatalogProductFetchResult = {
   devHint?: string
 }
 
+export type GuestOrderSummary = {
+  id: string
+  orderNumber: string
+  storeId: string
+  storeName: string
+  total: number
+}
+
+export type PlaceGuestOrderPayload = {
+  customerPhone: string
+  customerName?: string
+  items: Array<{
+    productVariantId: string
+    quantity: number
+  }>
+}
+
+export type PlaceGuestOrderResult = {
+  orders: GuestOrderSummary[]
+}
+
+export async function placeGuestOrder(
+  payload: PlaceGuestOrderPayload,
+): Promise<PlaceGuestOrderResult> {
+  const root = resolveCatalogApiRoot()
+  const url = `${root}/catalog/orders`
+
+  let res: Response
+  try {
+    res = await fetch(url, {
+      method: 'POST',
+      cache: 'no-store',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    })
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : 'Network error'
+    throw new Error(msg)
+  }
+
+  let body: unknown
+  try {
+    body = await res.json()
+  } catch {
+    throw new Error(`HTTP ${res.status}`)
+  }
+
+  if (!res.ok) {
+    const envelope = body as { message?: string | string[] }
+    const raw = envelope.message
+    const message = Array.isArray(raw) ? raw.join(', ') : raw
+    throw new Error(message || `HTTP ${res.status}`)
+  }
+
+  const envelope = body as ApiResponse<PlaceGuestOrderResult> & PlaceGuestOrderResult
+  const data = envelope.data ?? (Array.isArray(envelope.orders) ? envelope : null)
+
+  if (!data?.orders?.length) {
+    throw new Error('Unexpected response from server')
+  }
+
+  return { orders: data.orders }
+}
+
 export async function fetchCatalogProductById(
   id: string,
   options: CatalogQueryOptions = {},

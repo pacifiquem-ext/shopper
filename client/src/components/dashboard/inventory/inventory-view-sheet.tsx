@@ -5,6 +5,7 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { Separator } from '@/components/ui/separator'
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { StockBadge } from '@/components/dashboard/shared/status-badges'
+import { SheetDetailSkeleton } from '@/components/dashboard/shared/loading-placeholders'
 import type { ProductDetails } from '@/types'
 import { Download, Plus, Printer, ShieldCheck, Truck, Warehouse } from 'lucide-react'
 import { useTranslations } from 'next-intl'
@@ -15,6 +16,7 @@ interface InventoryViewSheetProps {
   onOpenChange: (open: boolean) => void
   product: ProductDetails | null
   onOpenAdjust?: (id: string, mode: 'restock' | 'adjust') => void
+  isLoading?: boolean
 }
 
 export function InventoryViewSheet({
@@ -22,6 +24,7 @@ export function InventoryViewSheet({
   onOpenChange,
   product,
   onOpenAdjust,
+  isLoading = false,
 }: InventoryViewSheetProps) {
   const t = useTranslations('dashboard')
 
@@ -62,7 +65,7 @@ export function InventoryViewSheet({
                   type="button"
                   variant="outline"
                   onClick={() => product && onOpenAdjust(product.id, 'restock')}
-                  disabled={!product}
+                  disabled={!product || isLoading}
                   className="h-9 rounded-lg border-gray-200 bg-white text-gray-700 hover:bg-brand-50 hover:text-brand-900"
                 >
                   <Plus className="h-4 w-4" />
@@ -73,7 +76,7 @@ export function InventoryViewSheet({
                 type="button"
                 variant="outline"
                 onClick={downloadAsPdf}
-                disabled={!product}
+                disabled={!product || isLoading}
                 className="h-9 rounded-lg border-gray-200 bg-white text-gray-700 hover:bg-brand-50 hover:text-brand-900"
               >
                 <Printer className="h-4 w-4" />
@@ -112,6 +115,15 @@ export function InventoryViewSheet({
         </SheetHeader>
 
         <ScrollArea className="h-full">
+          {isLoading ? (
+            <SheetDetailSkeleton label={t('inventory.viewSheet.loading')} />
+          ) : !product ? (
+            <div className="p-5">
+              <div className="rounded-2xl border border-dashed border-gray-200 bg-gray-50 p-6 text-center text-sm text-gray-600">
+                {t('inventory.viewSheet.empty')}
+              </div>
+            </div>
+          ) : (
           <div className="space-y-4 p-5">
             <div data-product-print className="space-y-4">
               <div className="flex items-start justify-between gap-4">
@@ -276,12 +288,8 @@ export function InventoryViewSheet({
               </div>
             </div>
 
-            {!product && (
-              <div className="rounded-2xl border border-gray-200 bg-white p-8 text-center text-sm text-gray-500">
-                {t('inventory.viewSheet.empty')}
-              </div>
-            )}
           </div>
+          )}
         </ScrollArea>
 
         <div className="border-t border-gray-200 bg-white p-4">
@@ -292,7 +300,7 @@ export function InventoryViewSheet({
                 type="button"
                 variant="outline"
                 onClick={downloadAsPdf}
-                disabled={!product}
+                disabled={!product || isLoading}
                 className="h-9 rounded-lg border-gray-200 bg-white text-gray-700 hover:bg-brand-50 hover:text-brand-900"
               >
                 <Download className="h-4 w-4" />

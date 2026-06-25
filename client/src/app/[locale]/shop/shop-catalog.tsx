@@ -88,7 +88,7 @@ function buildProductCardLabels(
     storeLabel: t('storeLabel', { name: product.store.displayName }),
     addToCartAria: t('addToCartAria'),
     addedLabel: t('addedToCart'),
-    toastAdded: t('addToCartAria'),
+    toastAdded: t('toastAddedToCart'),
     wishlistAria: t('wishlistAria'),
     wishlistSavedToast: t('savedToWishlist'),
     wishlistRemovedToast: t('removedFromWishlist'),
@@ -318,14 +318,14 @@ export async function ShopPage({
 
   return (
     <div className='min-h-screen bg-[#F5F1EB] text-[#2B2B2B]'>
-      <CartIconButton />
+      {!(compactHero && !storeContext) ? <CartIconButton variant='fixed' /> : null}
       {!storeContext && !compactHero ? <BecomeSellerShopButton label={t('becomeSeller')} /> : null}
       {compactHero && !storeContext ? (
         <header className='relative'>
           <div
             className={cn(
               shopPageGutter,
-              'flex flex-wrap items-center justify-between gap-x-4 gap-y-2 pt-5 pb-4 sm:pb-5',
+              'flex flex-col gap-3 pt-4 pb-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:gap-x-4 sm:gap-y-2 sm:pt-5 sm:pb-4',
             )}
           >
             <div className='min-w-0 flex-1'>
@@ -333,33 +333,39 @@ export async function ShopPage({
                 <Sparkles className='size-3 shrink-0' aria-hidden />
                 <span className='truncate'>{t('heroEyebrow')}</span>
               </p>
-              <h1 className='truncate text-2xl font-black tracking-[-0.04em] text-[#2B2B2B] sm:text-3xl'>
+              <h1 className='text-xl font-black tracking-[-0.04em] text-[#2B2B2B] sm:text-2xl md:text-3xl'>
                 {t('brandTitle')}
                 <span className='text-[#B76E5D]'>{t('brandSuffix')}</span>
               </h1>
             </div>
-            <div className='flex shrink-0 items-center gap-2'>
-              <Button
-                asChild
-                size='sm'
-                variant='outline'
-                className='h-9 gap-1.5 rounded-full border-[rgba(43,43,43,0.1)] bg-white/75 px-4 text-xs font-semibold text-[#2B2B2B] shadow-sm backdrop-blur-md hover:border-[#B76E5D]/35 hover:bg-white sm:h-10 sm:gap-2 sm:px-5 sm:text-sm'
+            <div className='flex w-full shrink-0 items-center justify-end gap-1.5 sm:w-auto sm:gap-2'>
+              <Link
+                href='/login'
+                prefetch={false}
+                aria-label={t('login')}
+                className='group inline-flex h-9 shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-full border border-[rgba(43,43,43,0.14)] bg-white px-3 text-xs font-semibold leading-none text-[#2B2B2B] shadow-sm transition-colors hover:border-[#B76E5D]/45 hover:bg-[#FAF7F3] hover:text-[#2B2B2B] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B76E5D]/40 sm:h-10 sm:px-4 sm:text-sm'
               >
-                <Link href='/login' prefetch={false} className='inline-flex items-center gap-1.5'>
-                  <LogIn className='size-3.5 shrink-0 sm:size-4' aria-hidden strokeWidth={2.25} />
-                  {t('login')}
-                </Link>
-              </Button>
-              <Button
-                asChild
-                size='sm'
-                className='h-9 gap-1.5 rounded-full border-0 bg-[#B76E5D] px-4 text-xs font-semibold text-white shadow-[0_4px_18px_rgba(183,110,93,0.38)] hover:bg-[#A66250] sm:h-10 sm:gap-2 sm:px-5 sm:text-sm'
+                <LogIn
+                  className='size-3.5 shrink-0 text-[#2B2B2B] transition-colors group-hover:text-[#2B2B2B] sm:size-4'
+                  aria-hidden
+                  strokeWidth={2.25}
+                />
+                <span className='hidden sm:inline'>{t('login')}</span>
+              </Link>
+              <Link
+                href={merchantSignupHref() as '/signup'}
+                prefetch={false}
+                aria-label={t('becomeSeller')}
+                className='group inline-flex h-9 shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-full bg-[#B76E5D] px-3 text-xs font-semibold leading-none text-white shadow-[0_4px_18px_rgba(183,110,93,0.38)] transition-colors hover:bg-[#A66250] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B76E5D]/50 sm:h-10 sm:px-4 sm:text-sm'
               >
-                <Link href={merchantSignupHref() as '/signup'} prefetch={false} className='inline-flex items-center gap-1.5'>
-                  <StoreIcon className='size-3.5 shrink-0 sm:size-4' aria-hidden strokeWidth={2.25} />
-                  {t('becomeSeller')}
-                </Link>
-              </Button>
+                <StoreIcon
+                  className='size-3.5 shrink-0 text-white transition-colors group-hover:text-white sm:size-4'
+                  aria-hidden
+                  strokeWidth={2.25}
+                />
+                <span className='hidden lg:inline'>{t('becomeSeller')}</span>
+              </Link>
+              <CartIconButton variant='inline' />
             </div>
           </div>
         </header>
@@ -469,7 +475,7 @@ export async function ShopPage({
         id='products'
         className={cn(
           shopPageGutter,
-          compactHero && !storeContext ? 'pt-4 pb-6 sm:pt-6' : 'py-10',
+          compactHero && !storeContext ? 'pt-3 pb-6 sm:pt-6' : 'py-8 sm:py-10',
         )}
       >
         <ShopCatalogFilters

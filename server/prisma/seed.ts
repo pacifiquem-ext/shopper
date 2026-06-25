@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client';
+import * as bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
 
@@ -513,6 +514,45 @@ async function seedDashboardData() {
     console.log('Dashboard data seeded successfully!');
 }
 
+async function seedDevMerchant() {
+    if (process.env.NODE_ENV === 'production') {
+        return;
+    }
+
+    const phoneNumber = process.env.SEED_DEV_MERCHANT_PHONE?.trim();
+    const password = process.env.SEED_DEV_MERCHANT_PASSWORD;
+
+    if (!phoneNumber || !password) {
+        console.log(
+            'Skipping dev merchant seed (set SEED_DEV_MERCHANT_PHONE and SEED_DEV_MERCHANT_PASSWORD to enable).'
+        );
+        return;
+    }
+
+    const existing = await prisma.user.findUnique({
+        where: { phoneNumber },
+    });
+
+    if (existing) {
+        console.log(`Dev merchant already exists (${phoneNumber})`);
+        return;
+    }
+
+    const passwordHash = await bcrypt.hash(password, 10);
+
+    await prisma.user.create({
+        data: {
+            fullName: 'Dev Merchant',
+            phoneNumber,
+            passwordHash,
+            role: 'STORE_OWNER',
+            status: 'ACTIVE',
+        },
+    });
+
+    console.log(`Dev merchant seeded — phone: ${phoneNumber}`);
+}
+
 async function main() {
     console.log('Start seeding...');
 
@@ -554,6 +594,7 @@ async function main() {
             }
         }
 
+        await seedDevMerchant();
         await seedDashboardData();
 
         console.log('Seeding finished.');

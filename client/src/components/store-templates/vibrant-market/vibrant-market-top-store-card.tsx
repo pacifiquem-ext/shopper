@@ -29,34 +29,36 @@ export function VibrantMarketTopStoreCard({
       <Link
         href={href}
         prefetch={false}
-        className='relative m-2 block overflow-hidden rounded-xl bg-gradient-to-br from-[var(--vm-primary-light)] to-[var(--vm-bg)] text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--vm-primary)]'
+        className='relative mx-1.5 block overflow-hidden rounded-xl bg-gradient-to-br from-[var(--vm-primary-light)] to-[var(--vm-bg)] text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--vm-primary)] sm:mx-2'
       >
-        <div className='relative aspect-[4/5] w-full'>
-          <div className='absolute inset-0 flex items-center justify-center p-6'>
-            {store.logoUrl ? (
-              <div className='flex h-[min(72%,11.5rem)] w-[min(88%,13rem)] items-center justify-center rounded-2xl bg-[var(--vm-surface)] p-4 shadow-[0_10px_28px_rgba(0,0,0,0.28)] ring-1 ring-[var(--vm-secondary)]/18 transition-transform duration-500 group-hover/card:scale-[1.03]'>
-                <img
-                  src={store.logoUrl}
-                  alt={store.displayName}
-                  loading='lazy'
-                  className='max-h-full max-w-full object-contain object-center'
-                />
-              </div>
-            ) : (
-              <div className='flex size-[min(55%,9rem)] items-center justify-center rounded-2xl bg-[var(--vm-surface)] shadow-[0_8px_24px_rgba(0,0,0,0.22)] ring-1 ring-[var(--vm-secondary)]/18'>
+        <div className='relative aspect-[4/5] w-full overflow-hidden bg-gradient-to-br from-[var(--vm-primary-light)] to-[var(--vm-bg)]'>
+          {store.logoUrl ? (
+            <img
+              src={store.logoUrl}
+              alt={store.displayName}
+              loading='lazy'
+              className='absolute inset-0 size-full object-cover object-center transition-transform duration-500 group-hover/card:scale-[1.03]'
+            />
+          ) : (
+            <div className='absolute inset-0 flex items-center justify-center'>
+              <div className='flex size-24 items-center justify-center rounded-2xl bg-[var(--vm-surface)] shadow-[0_8px_24px_rgba(0,0,0,0.22)] ring-1 ring-[var(--vm-secondary)]/18 sm:size-28'>
                 <Store
                   className='size-14 text-[var(--vm-secondary)]'
                   aria-hidden
                   strokeWidth={1.25}
                 />
               </div>
-            )}
-          </div>
+            </div>
+          )}
+          <div
+            aria-hidden
+            className='pointer-events-none absolute inset-0 bg-gradient-to-t from-[rgba(15,23,42,0.22)] via-[rgba(15,23,42,0.04)] to-transparent'
+          />
         </div>
       </Link>
 
-      <div className='flex flex-1 flex-col gap-2 px-4 pb-4 pt-1'>
-        <h3 className='line-clamp-2 text-base font-black text-[var(--vm-ink)]'>
+      <div className='flex flex-1 flex-col gap-2 px-3 pb-3 pt-1 sm:px-4 sm:pb-4'>
+        <h3 className='line-clamp-2 text-sm font-black text-[var(--vm-ink)] sm:text-base'>
           {store.displayName}
         </h3>
         <p className='text-xs font-medium text-[var(--vm-muted)]'>{productCountLabel}</p>

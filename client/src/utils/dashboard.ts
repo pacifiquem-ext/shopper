@@ -13,11 +13,12 @@ export function toBaseSku(sku: string): string {
 export function formatDateRange(
   from: Date | undefined,
   to: Date | undefined,
-  fallback: string
+  fallback: string,
+  locale = 'en-GB',
 ): string {
   if (!from) return fallback
 
-  const formatter = new Intl.DateTimeFormat(undefined, {
+  const formatter = new Intl.DateTimeFormat(locale, {
     month: 'short',
     day: 'numeric',
     year: 'numeric',

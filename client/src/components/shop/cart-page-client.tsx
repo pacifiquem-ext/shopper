@@ -25,6 +25,7 @@ import { cn } from '@/lib/utils'
 
 import type { SiteFooterStoreContext } from './site-footer'
 import { CartStoreShell, type CartStoreShellTexts } from './cart-store-shell'
+import { PlaceOrderDialog } from './place-order-dialog'
 import { SiteFooter } from './site-footer'
 
 const CART_LOADING_ITEMS = ['cart-line-one', 'cart-line-two', 'cart-line-three'] as const
@@ -67,6 +68,7 @@ export function CartPageClient({
   const t = useTranslations('cart')
   const [items, setItems] = useState<CartItem[]>([])
   const [mounted, setMounted] = useState(false)
+  const [placeOrderOpen, setPlaceOrderOpen] = useState(false)
 
   useEffect(() => {
     const syncCart = () => {
@@ -449,7 +451,7 @@ export function CartPageClient({
 
             <button
               type='button'
-              onClick={() => window.alert(t('checkoutComingSoon'))}
+              onClick={() => setPlaceOrderOpen(true)}
               disabled={!hasItems}
               className={cn(
                 'mt-6 inline-flex h-12 w-full items-center justify-center rounded-full px-6 text-sm font-semibold text-white transition-all hover:-translate-y-0.5 disabled:pointer-events-none disabled:opacity-45',
@@ -459,10 +461,10 @@ export function CartPageClient({
                 theme === 'ishusho-crafts' && 'text-[var(--ic-on-secondary)]',
               )}
             >
-              {t('checkout')}
+              {t('placeOrder')}
             </button>
             <p className={cn('mt-3 text-center text-xs leading-5', tokens.muted)}>
-              {t('checkoutHint')}
+              {t('placeOrderHint')}
             </p>
           </div>
         </aside>
@@ -472,24 +474,40 @@ export function CartPageClient({
 
   if (tokens.useTemplateChrome && store && shellTexts && footerStore) {
     return (
-      <CartStoreShell
-        theme={theme}
-        storeName={store.displayName}
-        logoUrl={store.logoUrl}
-        footerStore={footerStore}
-        cartHref={cartHref}
-        texts={shellTexts}
-      >
-        {cartBody}
-      </CartStoreShell>
+      <>
+        <CartStoreShell
+          theme={theme}
+          storeName={store.displayName}
+          logoUrl={store.logoUrl}
+          footerStore={footerStore}
+          cartHref={cartHref}
+          texts={shellTexts}
+        >
+          {cartBody}
+        </CartStoreShell>
+        <PlaceOrderDialog
+          open={placeOrderOpen}
+          onOpenChange={setPlaceOrderOpen}
+          items={items}
+          onSuccess={clearCart}
+        />
+      </>
     )
   }
 
   return (
-    <div className={tokens.page}>
-      {cartBody}
-      <SiteFooter store={footerStore ?? undefined} />
-    </div>
+    <>
+      <div className={tokens.page}>
+        {cartBody}
+        <SiteFooter store={footerStore ?? undefined} />
+      </div>
+      <PlaceOrderDialog
+        open={placeOrderOpen}
+        onOpenChange={setPlaceOrderOpen}
+        items={items}
+        onSuccess={clearCart}
+      />
+    </>
   )
 }
 

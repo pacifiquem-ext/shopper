@@ -1,5 +1,6 @@
 'use client'
 
+import { ExportButton } from '@/components/dashboard/shared/export-button'
 import { KpiStatCard } from '@/components/dashboard/shared/kpi-stat-card'
 import { OrderCommunicationModal } from '@/components/dashboard/orders/order-communication-modal'
 import { PaymentVerificationModal } from '@/components/dashboard/orders/payment-verification-modal'
@@ -25,11 +26,9 @@ import type {
   FulfillmentStatus,
 } from '@/types'
 import { cn } from '@/lib/utils'
-import { formatDateRange } from '@/utils/dashboard'
 import {
   ChevronDown,
   Columns3,
-  Download,
   Eye,
   Filter,
   Package,
@@ -40,10 +39,12 @@ import {
   Truck,
   User,
 } from 'lucide-react'
-import { useTranslations } from 'next-intl'
+import { useTranslations, useFormatter } from 'next-intl'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import type { DateRange } from 'react-day-picker'
 import { ordersService, type OrderApi, type OrderMessageApi } from '@/services/orders.service'
+import { fetchOrderKpiSnapshot, getLastSevenDaysRange, type OrderKpiSnapshot } from '@/lib/order-kpi-stats'
+import { useSearchParams } from 'next/navigation'
 
 function mapPaymentStatus(s: string): PaymentStatus {
   return s === 'SUCCESS' ? 'success' : 'pending'
@@ -168,6 +169,8 @@ function apiToMessages(msgs: OrderMessageApi[]): Array<{
 
 export default function OrdersPage() {
   const t = useTranslations('dashboard')
+  const formatter = useFormatter()
+  const searchParams = useSearchParams()
 
   const [tab, setTab] = useState<OrdersTab>('all')
   const [query, setQuery] = useState('')
@@ -187,11 +190,33 @@ export default function OrdersPage() {
     message: string
     timestamp: string
   }>>>({})
+  const [kpiStats, setKpiStats] = useState<OrderKpiSnapshot | null>(null)
+  const [kpiLoading, setKpiLoading] = useState(true)
+  const [rowsLoading, setRowsLoading] = useState(true)
+  const [detailLoading, setDetailLoading] = useState(false)
+  const [messagesLoading, setMessagesLoading] = useState(false)
 
-  const dateRangeLabel = useMemo(
-    () => formatDateRange(range?.from, range?.to, t('orders.dateRange')),
-    [range?.from, range?.to, t]
+  const kpiTrendLabel = useMemo(
+    () => (change: string) => t('orders.stats.trendChange', { change }),
+    [t],
   )
+
+  const dateFormat = useMemo(
+    () => ({ month: 'short' as const, day: 'numeric' as const, year: 'numeric' as const }),
+    [],
+  )
+
+  const dateRangeLabel = useMemo(() => {
+    if (!range?.from) return t('orders.lastSevenDays')
+
+    const fromStr = formatter.dateTime(range.from, dateFormat)
+    const toStr = range.to ? formatter.dateTime(range.to, dateFormat) : ''
+    return toStr ? `${fromStr} - ${toStr}` : fromStr
+  }, [range?.from, range?.to, formatter, dateFormat, t])
+
+  useEffect(() => {
+    setRange(getLastSevenDaysRange())
+  }, [])
 
   // rows loaded via useEffect below
 
@@ -204,10 +229,13 @@ export default function OrdersPage() {
 
   // Fetch orders whenever the date range changes
   useEffect(() => {
+    if (!range?.from) return
+
     const filters: Parameters<typeof ordersService.getAll>[0] = { limit: 100 }
     if (range?.from) filters.dateFrom = range.from.toISOString().split('T')[0]
     if (range?.to) filters.dateTo = range.to.toISOString().split('T')[0]
 
+    setRowsLoading(true)
     ordersService.getAll(filters).then((res) => {
       const list: any = res?.data
       const orders: OrderApi[] = list?.data ?? []
@@ -218,18 +246,50 @@ export default function OrdersPage() {
       })
       setRows(mapped)
       setOrderUuidMap(uuidMap)
-    })
+    }).finally(() => setRowsLoading(false))
   }, [range, t])
+
+  useEffect(() => {
+    if (!range?.from) return
+
+    let cancelled = false
+    setKpiLoading(true)
+
+    fetchOrderKpiSnapshot(range, kpiTrendLabel)
+      .then((snapshot) => {
+        if (!cancelled) setKpiStats(snapshot)
+      })
+      .catch(() => {
+        if (!cancelled) setKpiStats(null)
+      })
+      .finally(() => {
+        if (!cancelled) setKpiLoading(false)
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [range, kpiTrendLabel])
 
   // Lazy-load order detail when selectedOrderId changes
   useEffect(() => {
-    if (!selectedOrderId || detailsById.has(selectedOrderId)) return
+    if (!selectedOrderId || detailsById.has(selectedOrderId)) {
+      setDetailLoading(false)
+      return
+    }
     const uuid = orderUuidMap[selectedOrderId]
     if (!uuid) return
+    let cancelled = false
+    setDetailLoading(true)
     ordersService.getById(uuid).then((res) => {
       const o: OrderApi | null = (res?.data as any)?.data ?? res?.data ?? null
-      if (o) setDetailsById((prev) => new Map(prev).set(selectedOrderId, apiToOrderDetails(o, t)))
+      if (o && !cancelled) setDetailsById((prev) => new Map(prev).set(selectedOrderId, apiToOrderDetails(o, t)))
+    }).finally(() => {
+      if (!cancelled) setDetailLoading(false)
     })
+    return () => {
+      cancelled = true
+    }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedOrderId, orderUuidMap])
 
@@ -237,6 +297,13 @@ export default function OrdersPage() {
     setSelectedOrderId(id)
     setViewOpen(true)
   }, [])
+
+  // Open an order view when coming from a notification click (?order=#1001).
+  useEffect(() => {
+    const orderNumber = searchParams.get('order')
+    if (!orderNumber) return
+    openView(orderNumber)
+  }, [openView, searchParams])
 
   const handleConfirmPayment = useCallback(async (orderId: string) => {
     const uuid = orderUuidMap[orderId]
@@ -275,11 +342,14 @@ export default function OrdersPage() {
     setCommunicationOpen(true)
     const uuid = orderUuidMap[orderId]
     if (!uuid) return
+    setMessagesLoading(true)
     try {
       const res = await ordersService.getMessages(uuid)
       const msgs: OrderMessageApi[] = (res?.data as any)?.data ?? res?.data ?? []
       setOrderMessages((prev) => ({ ...prev, [orderId]: apiToMessages(msgs) }))
-    } catch {}
+    } catch {} finally {
+      setMessagesLoading(false)
+    }
   }, [orderUuidMap])
 
   const openPaymentModal = useCallback((orderId: string) => {
@@ -292,20 +362,6 @@ export default function OrdersPage() {
     for (const r of rows) result[r.id] = r.payment === 'success'
     return result
   }, [rows])
-
-  const handleExport = useCallback(async () => {
-    try {
-      const blob = await ordersService.exportCsv()
-      const url = URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
-      a.download = 'orders.csv'
-      document.body.appendChild(a)
-      a.click()
-      document.body.removeChild(a)
-      URL.revokeObjectURL(url)
-    } catch {}
-  }, [])
 
   const downloadAsPdf = () => {
     if (!selectedOrder) return
@@ -471,6 +527,7 @@ export default function OrdersPage() {
         paymentConfirmed={paymentConfirmed}
         onOpenCommunication={openCommunication}
         onOpenPaymentModal={openPaymentModal}
+        isLoading={detailLoading && viewOpen && Boolean(selectedOrderId)}
       />
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
@@ -500,15 +557,12 @@ export default function OrdersPage() {
         </div>
 
         <div className="flex items-center gap-2 sm:pt-[42px]">
-          <Button
-            type="button"
-            variant="outline"
+          <ExportButton
+            fetchBlob={() => ordersService.exportCsv()}
+            filename="orders.csv"
+            label={t('orders.export')}
             className="h-9 rounded-lg border-gray-200 bg-white text-gray-700 hover:bg-brand-50 hover:text-brand-900"
-            onClick={handleExport}
-          >
-            <Download className="h-4 w-4" />
-            {t('orders.export')}
-          </Button>
+          />
           <Button
             type="button"
             variant="outline"
@@ -523,23 +577,27 @@ export default function OrdersPage() {
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
         <KpiStatCard
           title={t('orders.stats.totalOrders')}
-          value={String(rows.length)}
-          trendLabel={t('orders.stats.lastWeek')}
+          value={String(kpiStats?.total ?? 0)}
+          trendLabel={kpiStats?.trends.total}
+          isLoading={kpiLoading}
         />
         <KpiStatCard
           title={t('orders.stats.orderItemsOverTime')}
-          value={String(rows.filter((r) => r.payment === 'pending').length)}
-          trendLabel={t('orders.stats.lastWeek')}
+          value={String(kpiStats?.unpaid ?? 0)}
+          trendLabel={kpiStats?.trends.unpaid}
+          isLoading={kpiLoading}
         />
         <KpiStatCard
           title={t('orders.stats.returnsOrders')}
-          value="0"
-          trendLabel={t('orders.stats.lastWeek')}
+          value={String(kpiStats?.cancelled ?? 0)}
+          trendLabel={kpiStats?.trends.cancelled}
+          isLoading={kpiLoading}
         />
         <KpiStatCard
           title={t('orders.stats.fulfilledOverTime')}
-          value={String(rows.filter((r) => r.fulfillment === 'fulfilled').length)}
-          trendLabel={t('orders.stats.lastWeek')}
+          value={String(kpiStats?.fulfilled ?? 0)}
+          trendLabel={kpiStats?.trends.fulfilled}
+          isLoading={kpiLoading}
         />
       </div>
 
@@ -612,6 +670,7 @@ export default function OrdersPage() {
             enableSelection
             enablePagination
             defaultPageSize={10}
+            isLoading={rowsLoading}
             emptyState={<span>{t('orders.empty')}</span>}
             className="rounded-xl"
           />
@@ -630,6 +689,7 @@ export default function OrdersPage() {
             : 'Customer'
         }
         messages={activeModalOrderId ? orderMessages[activeModalOrderId] || [] : []}
+        isLoadingMessages={messagesLoading}
         onSendMessage={(msg) => {
           if (activeModalOrderId) handleSendMessage(activeModalOrderId, msg)
         }}

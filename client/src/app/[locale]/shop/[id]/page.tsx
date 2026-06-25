@@ -10,12 +10,13 @@ import { BecomeSellerShopButton } from '@/components/shop/become-seller-shop-but
 import { CartIconButton } from '@/components/shop/cart-icon-button'
 import { ProductDetailsBody, ProductDetailsTopBar } from '@/components/shop/product-details-body'
 import { SiteFooter } from '@/components/shop/site-footer'
+import { StoreContextSync } from '@/components/shop/store-context-sync'
 import { IshushoCraftsProductPage } from '@/components/store-templates/ishusho-crafts/ishusho-crafts-product-page'
 import { VibrantMarketProductPage } from '@/components/store-templates/vibrant-market/vibrant-market-product-page'
 import { extractSubdomain, isProductId, normalizeStoreSubdomain } from '@/lib/host'
 import { marketplaceShopAbsoluteUrl } from '@/lib/marketplace-url'
 import { buildSiteFooterStoreContext } from '@/lib/store-footer-context'
-import { storeCartPath } from '@/lib/store-navigation'
+import { storeCartPath, storeShopPath } from '@/lib/store-navigation'
 import {
   isIshushoCraftsTemplate,
   isVibrantMarketTemplate,
@@ -94,6 +95,7 @@ export default async function ProductDetailsPage({
 
   const marketplaceHref = subdomain ? marketplaceShopAbsoluteUrl(locale) : null
   const cartHref = storeCartPath(data.store.subdomain, Boolean(subdomain))
+  const shopHref = storeShopPath(data.store.subdomain, Boolean(subdomain))
   const template = resolveStoreTemplate(data.store)
 
   if (isIshushoCraftsTemplate(template)) {
@@ -103,7 +105,7 @@ export default async function ProductDetailsPage({
         product={data}
         marketplaceHref={marketplaceHref}
         cartHref={cartHref}
-        tProduct={t}
+        shopHref={shopHref}
         texts={{
           backToShop: t('backToShop'),
           approvedStore: t('approvedStore'),
@@ -125,7 +127,7 @@ export default async function ProductDetailsPage({
         product={data}
         marketplaceHref={marketplaceHref}
         cartHref={cartHref}
-        tProduct={t}
+        shopHref={shopHref}
         texts={{
           backToShop: t('backToShop'),
           approvedStore: t('approvedStore'),
@@ -142,6 +144,7 @@ export default async function ProductDetailsPage({
 
   return (
     <div className='min-h-screen bg-[#F5F1EB] text-[#2B2B2B]'>
+      <StoreContextSync subdomain={data.store.subdomain} />
       <CartIconButton />
       <BecomeSellerShopButton label={tMarketplace('becomeSeller')} position='nearCart' />
 
@@ -149,9 +152,10 @@ export default async function ProductDetailsPage({
         theme='default'
         backLabel={t('backToShop')}
         approvedLabel={t('approvedStore')}
+        backHref={shopHref}
       />
 
-      <ProductDetailsBody product={data} theme='default' t={t} />
+      <ProductDetailsBody product={data} theme='default' />
 
       <SiteFooter store={storeFooter} />
     </div>

@@ -4,11 +4,7 @@ import {
   type StoreTemplateId,
 } from '@/lib/store-templates'
 
-/** Matches the marketplace homepage footer — not the store brand picker blue. */
-const MARKETPLACE_FOOTER = {
-  primary: '#B76E5D',
-  accent: '#7D8F69',
-} as const
+import { MARKETPLACE_BRAND } from '@/lib/marketplace-brand-colors'
 
 export type FooterThemeTokens = {
   borderColor: string
@@ -41,7 +37,7 @@ export function resolveFooterTheme(template: StoreTemplateId): FooterThemeTokens
     }
   }
 
-  const { primary } = MARKETPLACE_FOOTER
+  const { primary } = MARKETPLACE_BRAND
 
   return {
     borderColor: 'rgba(166, 98, 80, 0.35)',

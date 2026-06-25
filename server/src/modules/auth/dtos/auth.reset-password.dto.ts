@@ -8,6 +8,7 @@ import {
     Matches,
     MinLength,
 } from 'class-validator';
+import { NormalizePhone } from '../../../common/helper/decorators/normalize-phone.decorator';
 
 export class ResetPasswordDto {
     @ApiProperty({
@@ -15,6 +16,7 @@ export class ResetPasswordDto {
         example: '+250788123456',
         required: true,
     })
+    @NormalizePhone()
     @IsNotEmpty()
     @IsPhoneNumber()
     phoneNumber: string;

@@ -10,6 +10,7 @@ import {
   deliveryZonesService,
   type DeliveryZoneApi,
 } from '@/services/delivery-zones.service'
+import { TurningZeroLoader } from '@/components/ui/turning-zero-loader'
 
 interface DeliveryZoneLocal {
   id: string
@@ -145,7 +146,7 @@ export default function DeliverySettingsPage() {
       <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
         {isLoading ? (
           <div className="flex min-h-[300px] items-center justify-center">
-            <div className="h-8 w-8 animate-spin rounded-full border-4 border-brand-900 border-t-transparent" />
+            <TurningZeroLoader size="md" />
           </div>
         ) : (
           <div className="space-y-4">

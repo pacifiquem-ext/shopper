@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/table'
 import { cn } from '@/lib/utils'
 import { useTranslations } from 'next-intl'
+import { TurningZeroLoader } from '@/components/ui/turning-zero-loader'
 import * as React from 'react'
 
 type RowId = string | number
@@ -32,6 +33,8 @@ type DataTableProps<T> = {
   defaultSelectedIds?: RowId[]
   onSelectionChange?: (selectedIds: RowId[], selectedRows: T[]) => void
   emptyState?: React.ReactNode
+  isLoading?: boolean
+  loadingRowCount?: number
   enablePagination?: boolean
   defaultPageSize?: number
   pageSizeOptions?: number[]
@@ -46,6 +49,8 @@ export function DataTable<T>({
   defaultSelectedIds,
   onSelectionChange,
   emptyState,
+  isLoading = false,
+  loadingRowCount = 6,
   enablePagination = false,
   defaultPageSize = 10,
   pageSizeOptions = [10, 20, 50],
@@ -149,7 +154,18 @@ export function DataTable<T>({
         </TableHeader>
 
         <TableBody>
-          {pageData.length === 0 ? (
+          {isLoading ? (
+            <TableRow className="hover:bg-white">
+              <TableCell
+                colSpan={columns.length + (enableSelection ? 1 : 0)}
+                className="py-16"
+              >
+                <div className="flex items-center justify-center">
+                  <TurningZeroLoader size="md" />
+                </div>
+              </TableCell>
+            </TableRow>
+          ) : pageData.length === 0 ? (
             <TableRow className="hover:bg-white">
               <TableCell
                 colSpan={columns.length + (enableSelection ? 1 : 0)}

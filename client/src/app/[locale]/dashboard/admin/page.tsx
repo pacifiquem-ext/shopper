@@ -14,6 +14,7 @@ import {
   Store,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { TurningZeroLoader } from '@/components/ui/turning-zero-loader'
 import { adminService, type AdminStoreApi, type AdminStoreKycApi } from '@/services/admin.service'
 import { useAuthStore } from '@/store/auth.store'
 
@@ -193,7 +194,7 @@ export default function AdminPage() {
       <div className="space-y-3">
         {isLoading ? (
           <div className="flex min-h-[300px] items-center justify-center rounded-2xl border border-gray-200 bg-white">
-            <div className="h-8 w-8 animate-spin rounded-full border-4 border-brand-900 border-t-transparent" />
+            <TurningZeroLoader size="md" />
           </div>
         ) : filtered.length === 0 ? (
           <div className="flex min-h-[300px] flex-col items-center justify-center gap-3 rounded-2xl border border-gray-200 bg-white text-gray-400">
@@ -310,7 +311,7 @@ export default function AdminPage() {
                   <div className="border-t border-gray-100 bg-gray-50 px-5 py-4">
                     {!kyc ? (
                       <div className="py-4 text-center text-sm text-gray-400">
-                        <div className="mx-auto h-5 w-5 animate-spin rounded-full border-2 border-brand-900 border-t-transparent" />
+                        <TurningZeroLoader size="sm" className="mx-auto" />
                       </div>
                     ) : (
                       <div className="grid grid-cols-1 gap-4 text-sm sm:grid-cols-2 lg:grid-cols-3">

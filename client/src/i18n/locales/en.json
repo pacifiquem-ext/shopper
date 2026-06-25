@@ -53,7 +53,9 @@
     "newBadge": "New",
     "offBadge": "-{percent}%",
     "addToCartAria": "Add to cart",
+    "chooseOptionsAria": "Choose options",
     "addedToCart": "Added",
+    "toastAddedToCart": "Added to cart",
     "wishlistAria": "Save to wishlist",
     "savedToWishlist": "Saved to wishlist",
     "removedFromWishlist": "Removed from wishlist",
@@ -147,12 +149,14 @@
     "deliveryDisabled": "Delivery not available",
     "deliveryLocation": "Delivers to {location}",
     "variants": "Variants",
+    "selectVariant": "Choose an option",
+    "price": "Price",
     "inStock": "{count} available",
     "stockUnknown": "Stock unknown"
   },
   "cart": {
     "title": "Your cart",
-    "subtitle": "Review your selected products, adjust quantities, and prepare your order before checkout.",
+    "subtitle": "Review your selected products, adjust quantities, then place your order with your phone number.",
     "eyebrow": "Shopping bag",
     "cartIconAria": "Open your cart",
     "cartIconAriaWithCount": "Open your cart, {count} items",
@@ -171,6 +175,22 @@
     "delivery": "Delivery",
     "calculatedLater": "Calculated later",
     "estimatedTotal": "Estimated total",
+    "placeOrder": "Place order",
+    "placeOrderHint": "Enter your phone number so the vendor can contact you to confirm delivery.",
+    "placeOrderTitle": "Place your order",
+    "placeOrderDescription": "Share a phone number the vendor can use to confirm your order and delivery details.",
+    "placeOrderPhoneLabel": "Your phone number",
+    "placeOrderPhoneHint": "Use international format with country code, e.g. +250788123456 (no spaces).",
+    "placeOrderPhonePlaceholder": "+250788123456",
+    "placeOrderCancel": "Cancel",
+    "placeOrderConfirm": "Confirm order",
+    "placeOrderSubmitting": "Placing order…",
+    "placeOrderSuccessOne": "Order {orderNumber} placed. The vendor will contact you shortly.",
+    "placeOrderSuccessMany": "{count} orders placed. Vendors will contact you shortly.",
+    "placeOrderError": "Could not place your order. Please try again.",
+    "placeOrderInsufficientStock": "Not enough stock left (available: {available}, you requested: {requested}). Remove or reduce items in your cart, or choose another product.",
+    "placeOrderPhoneRequired": "Phone number is required",
+    "placeOrderPhoneInvalid": "Use international format, e.g. +250788123456",
     "checkout": "Continue to checkout",
     "checkoutHint": "Checkout and payment will be connected after the cart flow is confirmed.",
     "checkoutComingSoon": "Checkout will be connected next.",
@@ -241,13 +261,19 @@
       "subtitle": "Upload a logo and pick colors. You can adjust later.",
       "logoAlt": "Store logo",
       "logoTitle": "Logo",
-      "logoSubtitle": "A clear square image works best.",
+      "logoSubtitle": "Use a 4:5 portrait image (e.g. 800×1000px). JPG or PNG, at least 400×500px.",
       "addLogo": "Add logo",
       "uploading": "Uploading...",
       "uploadLogo": "Upload your logo",
       "dragDrop": "Click to browse or drag and drop",
       "removeLogoBtn": "Remove logo",
       "removeLogo": "Remove",
+      "logoHint": "Portrait 4:5 ratio, minimum 400×500px. We crop and resize to 800×1000 for store cards.",
+      "logoErrors": {
+        "invalidType": "Use a JPG, PNG, or WebP image.",
+        "tooSmall": "Image is too small ({width}×{height}px). Minimum is 400×500px.",
+        "loadFailed": "Could not read that image. Try another file."
+      },
       "primaryColor": "Primary color",
       "secondaryColor": "Secondary color",
       "previewTitle": "Preview",
@@ -383,11 +409,48 @@
       "subscription": "Subscription",
       "logout": "Logout"
     },
+    "profile": {
+      "title": "Your profile",
+      "subtitle": "Account details for your OnlineShop.rw login.",
+      "fallbackName": "User",
+      "notProvided": "Not provided",
+      "fields": {
+        "fullName": "Full name",
+        "phone": "Phone number",
+        "email": "Email",
+        "accountStatus": "Account status"
+      },
+      "roles": {
+        "storeOwner": "Store owner",
+        "customer": "Customer",
+        "platformAdmin": "Platform admin"
+      },
+      "status": {
+        "active": "Active",
+        "pendingVerification": "Pending phone verification",
+        "suspended": "Suspended",
+        "unknown": "Unknown"
+      }
+    },
     "sidebar": {
       "brand": "OnlineShop.rw",
       "subtitle": "Inventory",
       "role": "Store owner",
       "defaultUserName": "User"
+    },
+    "storeSettings": {
+      "branding": {
+        "storeLogo": "Store Logo",
+        "uploadLogo": "Upload New Logo",
+        "uploading": "Uploading...",
+        "logoHint": "Portrait 4:5 ratio, minimum 400×500px. We crop and resize to 800×1000 for store cards.",
+        "logoAlt": "Store logo preview",
+        "logoErrors": {
+          "invalidType": "Use a JPG, PNG, or WebP image.",
+          "tooSmall": "Image is too small ({width}×{height}px). Minimum is 400×500px.",
+          "loadFailed": "Could not read that image. Try another file."
+        }
+      }
     },
     "header": {
       "appShort": "OS",
@@ -399,22 +462,13 @@
       "customRange": "Custom range",
       "apply": "Apply",
       "export": "Export",
+      "exporting": "Exporting…",
+      "generateReport": "Generate Report",
       "notificationsAria": "Notifications",
       "notificationsTitle": "Notifications",
-      "notifications": {
-        "sample1": {
-          "title": "New order received",
-          "body": "Order #1024 was placed 5 minutes ago."
-        },
-        "sample2": {
-          "title": "Low stock alert",
-          "body": "2 items are running low. Consider restocking."
-        },
-        "sample3": {
-          "title": "Payout processed",
-          "body": "Your payout was processed successfully."
-        }
-      },
+      "notificationsLoading": "Loading…",
+      "notificationsEmpty": "No new notifications yet.",
+      "notificationsNewOrderTitle": "New order {orderNumber}",
       "userMenuAria": "User menu",
       "profile": "Profile",
       "settings": "Settings",
@@ -436,6 +490,7 @@
       "export": "Export",
       "moreActions": "More actions",
       "searchPlaceholder": "Search inventory",
+      "loading": "Loading inventory…",
       "empty": "No products found",
       "adjustDialog": {
         "restockTitle": "Restock",
@@ -516,6 +571,7 @@
         "downloadPdf": "Download as PDF",
         "close": "Close",
         "empty": "Select a product to see details.",
+        "loading": "Loading product details…",
         "footerHint": "Tip: Use Download as PDF to print or save the product details.",
         "available": "Available",
         "subtitle": "SKU: {sku} • Category: {category}",
@@ -582,6 +638,7 @@
     "products": {
       "title": "Products",
       "subtitle": "Create, organize, and publish what you sell.",
+      "listHint": "Click a product name to preview how it looks on your storefront.",
       "export": "Export",
       "createProduct": "Create product",
       "searchPlaceholder": "Search products",
@@ -609,6 +666,37 @@
         "needsAttention": "Needs attention",
         "draftProducts": "Draft products",
         "notPublished": "Not published"
+      },
+      "charts": {
+        "kpis": {
+          "totalRevenue": "Total Revenue",
+          "unitsSold": "Total Orders",
+          "avgOrderValue": "Avg. Order Value",
+          "activeProducts": "Active Products",
+          "revenuePeriod": "This month",
+          "ordersPeriod": "This month",
+          "aovPeriod": "Per order"
+        },
+        "salesPerformance": {
+          "title": "Sales Performance",
+          "subtitle": "Revenue and orders over the last 30 days",
+          "thisWeek": "This Week",
+          "lastWeek": "Last Week",
+          "thisMonth": "This Month",
+          "lastMonth": "Last Month",
+          "weekLabel": "Week {number}",
+          "revenue": "Revenue",
+          "orders": "Orders",
+          "noData": "No sales data yet."
+        },
+        "trending": {
+          "title": "Trending Products",
+          "salesTrend": "Sales trend",
+          "unitsSold": "{count} units sold",
+          "empty": "No sales yet.",
+          "emptyTitle": "Nothing to show yet",
+          "emptyDescription": "Top sellers will appear here once customers start buying your products."
+        }
       },
       "filters": {
         "title": "Filters",
@@ -643,6 +731,9 @@
         "action": "Action",
         "moreAria": "More actions",
         "view": "View",
+        "viewLive": "View live page",
+        "edit": "Edit",
+        "delete": "Delete",
         "na": "N/A"
       },
       "create": {
@@ -652,6 +743,7 @@
         "back": "Back",
         "next": "Next",
         "finish": "Finish",
+        "submitting": "Saving product…",
         "sections": {
           "applies": "Applies to this product",
           "mediaHint": "Disable if this product doesn't need images right now.",
@@ -747,13 +839,27 @@
           "nextBody": "After saving, you can add stock in Inventory and set up variants more deeply."
         }
       },
+      "preview": {
+        "loading": "Loading product…",
+        "loadError": "We could not load this product.",
+        "notFound": "Product not found.",
+        "backToProducts": "Back to products",
+        "subtitle": "{category} · {stock} units in stock",
+        "storefrontBanner": "Storefront preview — this is how customers see your product.",
+        "draftNotice": "This product is not published yet. Only you can preview it here until you set the status to Active.",
+        "cartHint": "Add to cart (preview only)"
+      },
       "viewSheet": {
         "title": "Product details",
         "addStock": "Add stock",
         "downloadPdf": "Download as PDF",
         "printTitle": "Product",
         "empty": "Select a product to see details.",
+        "loading": "Loading product details…",
         "zoom": "Zoom",
+        "viewLivePage": "View live page",
+        "viewLivePageDisabled": "Publish the product (Active status) to view it on your storefront.",
+        "photoThumbAria": "Show photo {index}",
         "subtitle": "{vendor} • {category}",
         "yes": "Yes",
         "no": "No",
@@ -790,12 +896,23 @@
       }
     },
     "orders": {
-      "dateRange": "Jan 1 - Jan 30, 2024",
+      "dateRange": "Select date range",
+      "lastSevenDays": "Last 7 days",
       "export": "Export",
       "moreActions": "More actions",
       "createOrder": "Create order",
       "searchPlaceholder": "Search order, customer or date",
       "empty": "No orders found",
+      "communication": {
+        "title": "Order Communication",
+        "description": "Communicate with {customerName} about order {orderId}",
+        "loading": "Loading messages…",
+        "emptyTitle": "No messages yet",
+        "emptyDescription": "Start the conversation with {customerName}",
+        "placeholder": "Type your message to the customer...",
+        "sendAria": "Send message",
+        "hint": "Press Enter to send, Shift+Enter for new line"
+      },
       "viewSheet": {
         "title": "Order details",
         "titleWithId": "Order {id}",
@@ -901,7 +1018,7 @@
         "orderItemsOverTime": "Order items over time",
         "returnsOrders": "Returns Orders",
         "fulfilledOverTime": "Fulfilled orders over time",
-        "lastWeek": "25.2% last week"
+        "trendChange": "{change}% vs prior period"
       },
       "tabs": {
         "all": "All",

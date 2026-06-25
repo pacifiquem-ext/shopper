@@ -14,7 +14,13 @@ function getCartCount(): number {
   return readCart().reduce((sum, item) => sum + item.quantity, 0)
 }
 
-export function CartIconButton() {
+type CartIconButtonProps = {
+  /** `fixed` floats within page gutters; `inline` sits in a header/toolbar row. */
+  variant?: 'fixed' | 'inline'
+  className?: string
+}
+
+export function CartIconButton({ variant = 'fixed', className }: CartIconButtonProps) {
   const t = useTranslations('cart')
   const pathname = usePathname()
   const [count, setCount] = useState(0)
@@ -57,32 +63,40 @@ export function CartIconButton() {
   const aria = count > 0 ? t('cartIconAriaWithCount', { count }) : t('cartIconAria')
   const display = count > 99 ? '99+' : String(count)
 
-  return (
+  const linkClass = cn(
+    'group relative inline-flex shrink-0 items-center justify-center rounded-full border border-[rgba(43,43,43,0.08)] bg-white text-[#2B2B2B] shadow-sm transition-colors duration-300 ease-out hover:border-[#B76E5D]/35 hover:bg-[#FAF7F3] hover:text-[#2B2B2B] active:scale-95',
+    variant === 'inline'
+      ? 'h-9 w-9 sm:h-10 sm:w-10'
+      : 'pointer-events-auto h-10 w-10 sm:h-11 sm:w-11',
+    className,
+  )
+
+  const cartLink = (
     <Link
       href={cartHref}
       aria-label={aria}
       title={aria}
       prefetch={false}
-      className='group fixed top-5 right-5 z-50 inline-flex size-14 items-center justify-center rounded-full border border-[rgba(43,43,43,0.08)] bg-white/70 text-[#2B2B2B] shadow-[0_8px_28px_rgba(43,43,43,0.10),0_2px_6px_rgba(43,43,43,0.06)] backdrop-blur-md transition-all duration-300 ease-out hover:-translate-y-0.5 hover:border-[#B76E5D]/50 hover:bg-white/85 hover:shadow-[0_12px_36px_rgba(43,43,43,0.14)] active:scale-95 sm:top-6 sm:right-6'
+      className={linkClass}
     >
       <ShoppingBag
         aria-hidden
         className={cn(
-          'size-5 transition-colors duration-300 group-hover:text-[#B76E5D]',
+          'size-4 transition-colors duration-300 group-hover:text-[#B76E5D] sm:size-[18px]',
           pulse && 'animate-[os-cart-pop_520ms_cubic-bezier(0.2,0.8,0.2,1)_both]',
         )}
-        strokeWidth={1.75}
+        strokeWidth={2}
       />
 
       {mounted && count > 0 ? (
         <span
           aria-hidden
           className={cn(
-            'absolute -right-1 -top-1 inline-flex min-w-[22px] items-center justify-center rounded-full bg-[#B76E5D] px-1.5 text-[11px] font-bold leading-none text-white shadow-[0_2px_8px_rgba(183,110,93,0.45)] ring-2 ring-[#F5F1EB] transition-transform duration-300',
+            'absolute -right-0.5 -top-0.5 inline-flex min-w-[18px] items-center justify-center rounded-full bg-[#B76E5D] px-1 text-[10px] font-bold leading-none text-white shadow-[0_2px_6px_rgba(183,110,93,0.4)] ring-2 ring-[#F5F1EB] sm:min-w-[20px] sm:text-[11px]',
             pulse && 'scale-110',
           )}
         >
-          <span className='py-1 tabular-nums'>{display}</span>
+          <span className='py-0.5 tabular-nums'>{display}</span>
         </span>
       ) : null}
 
@@ -94,5 +108,17 @@ export function CartIconButton() {
         )}
       />
     </Link>
+  )
+
+  if (variant === 'inline') {
+    return cartLink
+  }
+
+  return (
+    <div className="pointer-events-none fixed inset-x-0 top-4 z-50 sm:top-6">
+      <div className='mx-auto flex w-full max-w-screen-2xl justify-end px-3 sm:px-4 lg:px-5'>
+        {cartLink}
+      </div>
+    </div>
   )
 }

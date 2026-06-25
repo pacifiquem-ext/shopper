@@ -83,6 +83,9 @@ export default function SignupPage() {
                     />
                   </FormControl>
                 </div>
+                <p className="pt-1 text-xs text-gray-500">
+                  Use international format with country code, e.g. +250788123456 (no spaces).
+                </p>
                 <FormMessage className="absolute pt-1 text-xs" />
               </FormItem>
             )}
@@ -99,7 +102,9 @@ export default function SignupPage() {
                   <FormControl>
                     <Input
                       placeholder="Email (Optional)"
-                      type="email"
+                      type="text"
+                      inputMode="email"
+                      autoComplete="email"
                       className="rounded-none border-0 bg-transparent px-0 shadow-none focus:outline-none focus-visible:ring-0 focus-visible:ring-transparent focus-visible:ring-offset-0"
                       {...field}
                     />

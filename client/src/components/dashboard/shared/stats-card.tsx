@@ -1,5 +1,6 @@
 'use client'
 
+import { TurningZeroLoader } from '@/components/ui/turning-zero-loader'
 import { cn } from '@/lib/utils'
 import { LucideIcon } from 'lucide-react'
 import { ArrowUpRight, ArrowDownRight } from 'lucide-react'
@@ -17,6 +18,7 @@ export interface StatsCardProps {
   }
   action?: React.ReactNode
   className?: string
+  isLoading?: boolean
 }
 
 export function StatsCard({
@@ -28,6 +30,7 @@ export function StatsCard({
   trend,
   action,
   className,
+  isLoading = false,
 }: StatsCardProps) {
   const trendIsPositive = trend?.isPositive ?? (trend ? trend.value >= 0 : undefined)
 
@@ -36,7 +39,13 @@ export function StatsCard({
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
           <div className="text-xs font-semibold text-gray-500">{title}</div>
-          <div className="mt-2 text-2xl font-semibold text-gray-900">{value}</div>
+          {isLoading ? (
+            <div className="mt-2">
+              <TurningZeroLoader size="sm" />
+            </div>
+          ) : (
+            <div className="mt-2 text-2xl font-semibold text-gray-900">{value}</div>
+          )}
         </div>
         {action ? (
           action
@@ -46,7 +55,7 @@ export function StatsCard({
           </div>
         )}
       </div>
-      {trend && (
+      {trend && !isLoading && (
         <div
           className={cn(
             'mt-3 flex items-center gap-1 text-xs font-semibold',

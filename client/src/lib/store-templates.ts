@@ -1,3 +1,5 @@
+import { MARKETPLACE_BRAND } from '@/lib/marketplace-brand-colors'
+
 export type StoreTemplateId = 'DEFAULT' | 'VIBRANT_MARKET' | 'ISHUSHO_CRAFTS'
 
 export type BrandColorsWithTemplate = {
@@ -79,7 +81,7 @@ export const STORE_TEMPLATE_BRAND_PRESETS: Record<
   StoreTemplateId,
   { primary: string; secondary: string }
 > = {
-  DEFAULT: { primary: '#1d4ed8', secondary: '#e8edfb' },
+  DEFAULT: { primary: MARKETPLACE_BRAND.primary, secondary: MARKETPLACE_BRAND.canvas },
   VIBRANT_MARKET: {
     primary: VIBRANT_MARKET_COLORS.primary,
     secondary: VIBRANT_MARKET_COLORS.secondary,
@@ -95,7 +97,11 @@ export const STORE_TEMPLATE_PICKER_UI: Record<
   StoreTemplateId,
   { primary: string; secondary: string; accent: string }
 > = {
-  DEFAULT: { primary: '#1d4ed8', secondary: '#e8edfb', accent: '#1d4ed8' },
+  DEFAULT: {
+    primary: MARKETPLACE_BRAND.primary,
+    secondary: MARKETPLACE_BRAND.canvas,
+    accent: MARKETPLACE_BRAND.secondary,
+  },
   VIBRANT_MARKET: {
     primary: VIBRANT_MARKET_COLORS.primary,
     secondary: VIBRANT_MARKET_COLORS.secondary,

@@ -5,6 +5,7 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { Separator } from '@/components/ui/separator'
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { OrderStatusBadge } from '@/components/dashboard/shared/status-badges'
+import { SheetDetailSkeleton } from '@/components/dashboard/shared/loading-placeholders'
 import type { OrderDetails } from '@/types'
 import { Download, Package, Printer, Truck, User } from 'lucide-react'
 import { useTranslations } from 'next-intl'
@@ -24,6 +25,7 @@ interface OrderViewSheetProps {
   paymentConfirmed?: Record<string, boolean>
   onOpenCommunication?: (orderId: string) => void
   onOpenPaymentModal?: (orderId: string) => void
+  isLoading?: boolean
 }
 
 export function OrderViewSheet({
@@ -34,6 +36,7 @@ export function OrderViewSheet({
   paymentConfirmed = {},
   onOpenCommunication,
   onOpenPaymentModal,
+  isLoading = false,
 }: OrderViewSheetProps) {
   const t = useTranslations('dashboard')
 
@@ -65,7 +68,7 @@ export function OrderViewSheet({
                 const el = document.querySelector('[data-order-print]')
                 if (el) window.print()
               }}
-              disabled={!order}
+              disabled={!order || isLoading}
               className="h-9 w-9 shrink-0 text-gray-600 hover:bg-brand-50 hover:text-brand-900"
               aria-label="Print order"
             >
@@ -108,6 +111,9 @@ export function OrderViewSheet({
         </SheetHeader>
 
         <ScrollArea className="h-full">
+          {isLoading ? (
+            <SheetDetailSkeleton />
+          ) : (
           <div className="space-y-4 p-5">
             <div data-order-print className="space-y-4">
               <div className="flex items-start justify-between gap-4">
@@ -434,6 +440,7 @@ export function OrderViewSheet({
               </div>
             )}
           </div>
+          )}
         </ScrollArea>
 
         <div className="border-t border-gray-200 bg-white p-4">
@@ -444,7 +451,7 @@ export function OrderViewSheet({
                 type="button"
                 variant="outline"
                 onClick={downloadAsPdf}
-                disabled={!order}
+                disabled={!order || isLoading}
                 className="h-9 rounded-lg border-gray-200 bg-white text-gray-700 hover:bg-brand-50 hover:text-brand-900"
               >
                 <Download className="h-4 w-4" />

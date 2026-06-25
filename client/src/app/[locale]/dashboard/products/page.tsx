@@ -1,14 +1,16 @@
 'use client'
 
+import { ExportButton } from '@/components/dashboard/shared/export-button'
 import { ProductStatusBadge } from '@/components/dashboard/shared/status-badges'
 import { StatsCard } from '@/components/dashboard/shared/stats-card'
 import { FilterPopover } from '@/components/dashboard/shared/filter-popover'
 import { ImageZoomDialog } from '@/components/dashboard/shared/image-zoom-dialog'
 import { DeleteConfirmationDialog } from '@/components/dashboard/shared/delete-confirmation-dialog'
-import { SalesPerformanceChart } from '@/components/dashboard/products/sales-performance-chart'
+import { SalesPerformanceChart, type SalesChartPoint, type SalesSummaryPoint } from '@/components/dashboard/products/sales-performance-chart'
 import { TrendingProductsChart } from '@/components/dashboard/products/trending-products-chart'
 import { ProductFormModal } from '@/components/dashboard/products/product-form-modal'
-import { ProductViewSheet } from '@/components/dashboard/products/product-view-sheet'
+import { LoaderPanel } from '@/components/ui/turning-zero-loader'
+import { extractEntity, extractPaginatedItems } from '@/lib/api-response'
 import { Button } from '@/components/ui/button'
 import { DataTable, type DataTableColumn } from '@/components/ui/data-table'
 import {
@@ -21,20 +23,17 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { Sheet } from '@/components/ui/sheet'
 import { Switch } from '@/components/ui/switch'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Textarea } from '@/components/ui/textarea'
 import type {
   ProductRow,
-  ProductDetailsExtended,
   ProductsTab,
   ProductStatus,
   ProductFilters,
 } from '@/types'
 import { cn } from '@/lib/utils'
-import { clampPercent, toBaseSku } from '@/utils/dashboard'
-import { printContent } from '@/utils/print'
+import { clampPercent } from '@/utils/dashboard'
 import {
   ArrowUpRight,
   ArrowDownRight,
@@ -43,7 +42,6 @@ import {
   ChevronDown,
   ChevronLeft,
   ChevronRight,
-  Download,
   Eye,
   Filter,
   MoreHorizontal,
@@ -59,11 +57,21 @@ import {
   Edit,
 } from 'lucide-react'
 import type { Route } from 'next'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useSearchParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
-import { useCallback, useEffect, useId, useMemo, useState } from 'react'
+import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react'
+import { TurningZeroLoader } from '@/components/ui/turning-zero-loader'
 import { productsService, type ProductApi, type CreateProductPayload } from '@/services/products.service'
-import { analyticsService } from '@/services/analytics.service'
+import { storeSettingsService } from '@/services/store-settings.service'
+import {
+  analyticsService,
+  type DashboardMetrics,
+  type InventorySummary,
+  type SalesTrendPoint,
+  type TopProduct,
+} from '@/services/analytics.service'
+import { storeProductPath } from '@/lib/store-navigation'
+import { Link, useRouter } from '@/i18n/navigation'
 
 function mapProductStatus(s: string): ProductStatus {
   if (s === 'DRAFT') return 'draft'
@@ -97,56 +105,6 @@ function apiToProductRow(p: ProductApi): ProductRow {
     }),
     primaryImageUrl: p.primaryImage,
     variantsCount: p.variants.length,
-  }
-}
-
-function apiToProductDetails(p: ProductApi): ProductDetailsExtended {
-  const prices = p.variants.map((v) => v.price).filter((x) => x > 0)
-  const minPrice = prices.length ? Math.min(...prices) : 0
-  const maxPrice = prices.length ? Math.max(...prices) : 0
-  const costs = p.variants.map((v) => v.cost).filter((c): c is number => c != null && c > 0)
-  const avgCost = costs.length ? costs.reduce((a, b) => a + b, 0) / costs.length : 0
-  const compareAt = p.variants[0]?.compareAt
-  return {
-    id: p.id,
-    name: p.name,
-    vendor: p.vendor,
-    category: p.category,
-    status: mapProductStatus(p.status),
-    description: p.description ?? '',
-    tags: p.tags ?? [],
-    images: p.images ?? [],
-    variants: p.variants.map((v) => ({
-      id: v.id,
-      title: v.title,
-      sku: v.sku,
-      color: v.colorName ? { name: v.colorName, hex: v.colorHex ?? '#000000' } : undefined,
-      size: v.size,
-      stock: v.inventory?.onHand ?? 0,
-      price: v.price.toLocaleString(),
-    })),
-    pricing: {
-      priceFrom: minPrice.toLocaleString(),
-      priceTo: maxPrice.toLocaleString(),
-      cost: avgCost ? Math.round(avgCost).toLocaleString() : '',
-      margin:
-        avgCost > 0 && minPrice > 0
-          ? `${Math.round(((minPrice - avgCost) / minPrice) * 100)}%`
-          : '',
-      compareAt: compareAt ? compareAt.toLocaleString() : '',
-    },
-    delivery: {
-      enabled: p.deliveryEnabled,
-      location: p.deliveryLocation,
-      price: p.deliveryPrice ? p.deliveryPrice.toLocaleString() : '',
-    },
-    staff: { createdBy: 'Store Owner', updatedBy: 'Store Owner' },
-    notes: { internalNote: '' },
-    updatedAt: new Date(p.updatedAt).toLocaleDateString('en-GB', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric',
-    }),
   }
 }
 
@@ -207,6 +165,25 @@ function buildCreatePayload(draft: {
   }
 }
 
+function sumSalesInRange(points: SalesTrendPoint[], startMs: number, endMs: number) {
+  return points.reduce(
+    (acc, p) => {
+      const t = new Date(p.date).getTime()
+      if (t >= startMs && t < endMs) {
+        acc.revenue += p.revenue
+        acc.orders += p.orders
+      }
+      return acc
+    },
+    { revenue: 0, orders: 0 },
+  )
+}
+
+function pctChange(current: number, previous: number) {
+  if (previous === 0) return current > 0 ? 100 : 0
+  return ((current - previous) / previous) * 100
+}
+
 export default function ProductsPage() {
   const t = useTranslations('dashboard')
   const router = useRouter()
@@ -216,8 +193,6 @@ export default function ProductsPage() {
 
   const [tab, setTab] = useState<ProductsTab>('all')
   const [query, setQuery] = useState('')
-  const [viewOpen, setViewOpen] = useState(false)
-  const [selectedProductId, setSelectedProductId] = useState<string | null>(null)
   const [createOpen, setCreateOpen] = useState(false)
   const [isEditMode, setIsEditMode] = useState(false)
   const [editingProductId, setEditingProductId] = useState<string | null>(null)
@@ -281,58 +256,100 @@ export default function ProductsPage() {
     internalNote: '',
   })
 
-  useEffect(() => {
-    const action = searchParams.get('action')
-    if (action === 'create') {
-      setCreateOpen(true)
-    }
-  }, [searchParams])
-
   const [rows, setRows] = useState<ProductRow[]>([])
-  const [isLoading, setIsLoading] = useState(false)
-  const [trendingProducts, setTrendingProducts] = useState<
-    Array<{ id: string; name: string; sales: number; trend: number; sparklinePoints: [number, number][] }>
-  >([])
-
-  const [detailsById, setDetailsById] = useState<Record<string, ProductDetailsExtended>>({})
-
-  useEffect(() => {
-    setIsLoading(true)
-    productsService
-      .getAll({ limit: 100 })
-      .then((res) => {
-        const list: any = res?.data
-        const products: ProductApi[] = list?.data ?? []
-        setRows(products.map(apiToProductRow))
-      })
-      .finally(() => setIsLoading(false))
-  }, [])
+  const [isLoading, setIsLoading] = useState(true)
+  const [hasLoadedOnce, setHasLoadedOnce] = useState(false)
+  const [editLoading, setEditLoading] = useState(false)
+  const [analyticsLoading, setAnalyticsLoading] = useState(true)
+  const [dashboardMetrics, setDashboardMetrics] = useState<DashboardMetrics | null>(null)
+  const [inventorySummary, setInventorySummary] = useState<InventorySummary | null>(null)
+  const [salesTrend, setSalesTrend] = useState<SalesTrendPoint[]>([])
+  const [topProducts, setTopProducts] = useState<TopProduct[]>([])
+  const [storeVendorName, setStoreVendorName] = useState('')
 
   useEffect(() => {
-    analyticsService.getTopProducts(5).then((res) => {
-      const data: any[] = (res?.data as any)?.data ?? res?.data ?? []
-      if (Array.isArray(data)) {
-        setTrendingProducts(
-          data.map((p) => ({
-            id: p.productId as string,
-            name: p.productName as string,
-            sales: (p.unitsSold as number) ?? 0,
-            trend: 0,
-            sparklinePoints: [] as [number, number][],
-          })),
-        )
+    storeSettingsService.getSettings().then((res) => {
+      const data = (res?.data as { data?: { displayName?: string } })?.data ?? res?.data
+      const name = typeof data?.displayName === 'string' ? data.displayName.trim() : ''
+      if (name) {
+        setStoreVendorName(name)
+        setDraftProduct((p) => ({ ...p, vendor: p.vendor || name }))
       }
     })
   }, [])
 
+  const openCreateProduct = useCallback(() => {
+    setIsEditMode(false)
+    setEditingProductId(null)
+    setDraftProduct((p) => ({ ...p, vendor: storeVendorName }))
+    setCreateOpen(true)
+  }, [storeVendorName])
+
   useEffect(() => {
-    if (!selectedProductId || detailsById[selectedProductId]) return
-    productsService.getById(selectedProductId).then((res) => {
-      const p: ProductApi | null = (res?.data as any)?.data ?? res?.data ?? null
-      if (p) setDetailsById((prev) => ({ ...prev, [selectedProductId]: apiToProductDetails(p) }))
-    })
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedProductId])
+    const action = searchParams.get('action')
+    if (action === 'create') {
+      openCreateProduct()
+    }
+  }, [searchParams, openCreateProduct])
+
+  useEffect(() => {
+    let cancelled = false
+    setIsLoading(true)
+
+    productsService
+      .getAll({ limit: 100 })
+      .then((res) => {
+        if (cancelled) return
+        const products = extractPaginatedItems<ProductApi>(res)
+        setRows(products.map(apiToProductRow))
+      })
+      .catch(() => {
+        if (!cancelled) setRows([])
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setIsLoading(false)
+          setHasLoadedOnce(true)
+        }
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  useEffect(() => {
+    let cancelled = false
+    setAnalyticsLoading(true)
+
+    analyticsService
+      .getDashboardOverview('month', { topLimit: 5, trendDays: 60 })
+      .then((res) => {
+        if (cancelled) return
+        const overview = (res as { data?: typeof res })?.data ?? res
+        if (overview && typeof overview === 'object' && 'metrics' in overview) {
+          setDashboardMetrics(overview.metrics)
+          setTopProducts(Array.isArray(overview.topProducts) ? overview.topProducts : [])
+          setInventorySummary(overview.inventory ?? null)
+          setSalesTrend(Array.isArray(overview.salesTrend) ? overview.salesTrend : [])
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setDashboardMetrics(null)
+          setTopProducts([])
+          setInventorySummary(null)
+          setSalesTrend([])
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setAnalyticsLoading(false)
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   const addImages = useCallback((urls: string[]) => {
     const cleaned = urls.map((u) => u.trim()).filter(Boolean)
@@ -345,20 +362,30 @@ export default function ProductsPage() {
     setDraftProduct((p) => ({ ...p, images: p.images.filter((u) => u !== url) }))
   }, [])
 
-  const openView = useCallback((id: string) => {
-    setSelectedProductId(id)
-    setViewOpen(true)
-  }, [])
-
   const openEdit = useCallback(async (id: string) => {
+    setIsEditMode(true)
+    setEditingProductId(id)
+    setCreateOpen(true)
+    setEditLoading(true)
+
     let p: ProductApi | null = null
     try {
       const res = await productsService.getById(id)
       p = (res?.data as any)?.data ?? res?.data ?? null
-    } catch { return }
-    if (!p) return
-
-    setDetailsById((prev) => ({ ...prev, [id]: apiToProductDetails(p!) }))
+    } catch {
+      setCreateOpen(false)
+      setIsEditMode(false)
+      setEditingProductId(null)
+      return
+    } finally {
+      setEditLoading(false)
+    }
+    if (!p) {
+      setCreateOpen(false)
+      setIsEditMode(false)
+      setEditingProductId(null)
+      return
+    }
 
     const firstVariant = p.variants[0]
     setDraftProduct({
@@ -390,11 +417,15 @@ export default function ProductsPage() {
       deliveryPrice: String(p.deliveryPrice ?? ''),
       internalNote: '',
     })
-
-    setIsEditMode(true)
-    setEditingProductId(id)
-    setCreateOpen(true)
   }, [])
+
+  const editQueryHandled = useRef<string | null>(null)
+  useEffect(() => {
+    const editId = searchParams.get('edit')
+    if (!editId || editQueryHandled.current === editId) return
+    editQueryHandled.current = editId
+    void openEdit(editId)
+  }, [searchParams, openEdit])
 
   const openDeleteConfirm = useCallback((product: ProductRow) => {
     setProductToDelete({ id: product.id, name: product.name, stock: product.totalStock })
@@ -410,22 +441,6 @@ export default function ProductsPage() {
     setDeleteOpen(false)
     setProductToDelete(null)
   }, [productToDelete])
-
-  const handleExport = useCallback(async () => {
-    try {
-      const blob = await productsService.exportCsv()
-      const url = URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
-      a.download = 'products.csv'
-      document.body.appendChild(a)
-      a.click()
-      document.body.removeChild(a)
-      URL.revokeObjectURL(url)
-    } catch {}
-  }, [])
-
-  const selectedProduct = selectedProductId ? detailsById[selectedProductId] : undefined
 
   const vendors = useMemo(() => {
     const set = new Set<string>()
@@ -476,19 +491,108 @@ export default function ProductsPage() {
   }, [rows])
 
   const stockBar = useMemo(() => {
+    if (inventorySummary) {
+      const total =
+        inventorySummary.inStock + inventorySummary.lowStock + inventorySummary.outOfStock
+      if (total === 0) return { inPct: 0, lowPct: 0, outPct: 0 }
+      const inPct = clampPercent((inventorySummary.inStock / total) * 100)
+      const lowPct = clampPercent((inventorySummary.lowStock / total) * 100)
+      const outPct = clampPercent(100 - inPct - lowPct)
+      return { inPct, lowPct, outPct }
+    }
+
     const total = rows.length
     if (total === 0) return { inPct: 0, lowPct: 0, outPct: 0 }
 
     const inStockCount = rows.filter((r) => r.totalStock >= 10).length
     const lowStockCount = rows.filter((r) => r.totalStock > 0 && r.totalStock < 10).length
-    const outCount = rows.filter((r) => r.totalStock === 0).length
 
     const inPct = clampPercent((inStockCount / total) * 100)
     const lowPct = clampPercent((lowStockCount / total) * 100)
     const outPct = clampPercent(100 - inPct - lowPct)
 
     return { inPct, lowPct, outPct }
-  }, [rows])
+  }, [rows, inventorySummary])
+
+  const fmtCurrency = useCallback(
+    (n: number) => `$${n.toLocaleString(undefined, { maximumFractionDigits: 0 })}`,
+    [],
+  )
+
+  const dashMetric = useCallback(
+    (v: string | number | undefined) => (analyticsLoading ? '—' : String(v ?? 0)),
+    [analyticsLoading],
+  )
+
+  const avgOrderValue = useMemo(() => {
+    if (!dashboardMetrics || dashboardMetrics.totalOrders === 0) return 0
+    return dashboardMetrics.totalRevenue / dashboardMetrics.totalOrders
+  }, [dashboardMetrics])
+
+  const salesSummary = useMemo((): SalesSummaryPoint[] => {
+    const now = Date.now()
+    const day = 24 * 60 * 60 * 1000
+    const thisWeek = sumSalesInRange(salesTrend, now - 7 * day, now)
+    const lastWeek = sumSalesInRange(salesTrend, now - 14 * day, now - 7 * day)
+    const thisMonth = sumSalesInRange(salesTrend, now - 30 * day, now)
+    const lastMonth = sumSalesInRange(salesTrend, now - 60 * day, now - 30 * day)
+
+    return [
+      {
+        label: t('products.charts.salesPerformance.thisWeek'),
+        value: thisWeek.revenue,
+        change: pctChange(thisWeek.revenue, lastWeek.revenue),
+      },
+      {
+        label: t('products.charts.salesPerformance.lastWeek'),
+        value: lastWeek.revenue,
+        change: pctChange(lastWeek.revenue, sumSalesInRange(salesTrend, now - 21 * day, now - 14 * day).revenue),
+      },
+      {
+        label: t('products.charts.salesPerformance.thisMonth'),
+        value: thisMonth.revenue,
+        change: pctChange(thisMonth.revenue, lastMonth.revenue),
+      },
+      {
+        label: t('products.charts.salesPerformance.lastMonth'),
+        value: lastMonth.revenue,
+        change: pctChange(lastMonth.revenue, sumSalesInRange(salesTrend, now - 90 * day, now - 60 * day).revenue),
+      },
+    ]
+  }, [salesTrend, t])
+
+  const salesChartData = useMemo((): SalesChartPoint[] => {
+    if (salesTrend.length === 0) return []
+
+    const day = 24 * 60 * 60 * 1000
+    const now = Date.now()
+    const weeks: SalesChartPoint[] = []
+
+    for (let i = 7; i >= 0; i--) {
+      const end = now - i * 7 * day
+      const start = end - 7 * day
+      const bucket = sumSalesInRange(salesTrend, start, end)
+      weeks.push({
+        label: t('products.charts.salesPerformance.weekLabel', { number: 8 - i }),
+        revenue: bucket.revenue,
+        units: bucket.orders,
+      })
+    }
+
+    return weeks
+  }, [salesTrend, t])
+
+  const trendingProducts = useMemo(
+    () =>
+      topProducts.map((p) => ({
+        id: p.productId,
+        name: p.productName,
+        sales: p.unitsSold,
+        trend: 0,
+        sparklinePoints: [] as [number, number][],
+      })),
+    [topProducts],
+  )
 
   const applyFilters = () => {
     setFilters(filtersDraft)
@@ -537,12 +641,15 @@ export default function ProductsPage() {
                 </div>
               )}
             </div>
-            <div className="min-w-0">
+            <Link
+              href={`/dashboard/products/${r.id}`}
+              className="min-w-0 text-left hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-900/30"
+            >
               <div className="truncate font-semibold text-gray-900">{r.name}</div>
               <div className="truncate text-xs font-medium text-gray-500">
                 {t('products.table.variantsCount', { count: r.variantsCount })}
               </div>
-            </div>
+            </Link>
           </div>
         ),
       },
@@ -598,26 +705,33 @@ export default function ProductsPage() {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-44 border-gray-200 bg-white text-gray-900">
-              <DropdownMenuItem
-                onClick={() => openView(r.id)}
-                className="cursor-pointer focus:bg-brand-50 focus:text-brand-900"
-              >
-                <Eye className="mr-2 h-4 w-4" />
-                {t('products.table.view')}
+              <DropdownMenuItem asChild className="cursor-pointer focus:bg-brand-50 focus:text-brand-900">
+                <Link href={`/dashboard/products/${r.id}`}>
+                  <Eye className="mr-2 h-4 w-4" />
+                  {t('products.table.view')}
+                </Link>
               </DropdownMenuItem>
+              {r.status === 'active' ? (
+                <DropdownMenuItem asChild className="cursor-pointer focus:bg-brand-50 focus:text-brand-900">
+                  <Link href={storeProductPath(r.id)} target="_blank" rel="noopener noreferrer">
+                    <ArrowUpRight className="mr-2 h-4 w-4" />
+                    {t('products.table.viewLive')}
+                  </Link>
+                </DropdownMenuItem>
+              ) : null}
               <DropdownMenuItem
                 onClick={() => openEdit(r.id)}
                 className="cursor-pointer focus:bg-brand-50 focus:text-brand-900"
               >
                 <Edit className="mr-2 h-4 w-4" />
-                Edit
+                {t('products.table.edit')}
               </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={() => openDeleteConfirm(r)}
                 className="cursor-pointer text-rose-600 focus:bg-rose-50 focus:text-rose-700"
               >
                 <Trash2 className="mr-2 h-4 w-4" />
-                Delete
+                {t('products.table.delete')}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -626,7 +740,7 @@ export default function ProductsPage() {
         headerClassName: 'w-[56px]',
       },
     ],
-    [openView, openEdit, openDeleteConfirm, statusLabel, t]
+    [openEdit, openDeleteConfirm, statusLabel, t]
   )
 
   const openZoom = (url: string) => {
@@ -634,36 +748,25 @@ export default function ProductsPage() {
     setZoomOpen(true)
   }
 
-  const downloadAsPdf = () => {
-    printContent({
-      title: t('products.viewSheet.printTitle'),
-      selector: '[data-product-print]',
-      hideSelector: '[data-hide-print]',
-    })
-  }
-
   return (
-    <Sheet open={viewOpen} onOpenChange={setViewOpen}>
-      <div className="flex w-full max-w-6xl flex-col gap-6">
+    <div className="flex w-full max-w-6xl flex-col gap-6">
         <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-start">
           <div>
             <h1 className="text-3xl font-bold tracking-tight text-gray-900">{t('products.title')}</h1>
             <p className="mt-2 text-gray-500">{t('products.subtitle')}</p>
+            <p className="mt-1 text-sm font-medium text-brand-900/80">{t('products.listHint')}</p>
           </div>
 
           <div className="flex flex-wrap items-center gap-2 sm:pt-[42px]">
-            <Button
-              type="button"
-              variant="outline"
+            <ExportButton
+              fetchBlob={() => productsService.exportCsv()}
+              filename="products.csv"
+              label={t('products.export')}
               className="h-9 rounded-lg border-gray-200 bg-white text-gray-700 hover:bg-brand-50 hover:text-brand-900"
-              onClick={handleExport}
-            >
-              <Download className="mr-2 h-4 w-4" />
-              {t('products.export')}
-            </Button>
+            />
             <Button
               type="button"
-              onClick={() => setCreateOpen(true)}
+              onClick={openCreateProduct}
               className="h-9 rounded-lg bg-brand-900 text-white hover:bg-brand-800"
             >
               <Plus className="mr-2 h-4 w-4" />
@@ -674,37 +777,60 @@ export default function ProductsPage() {
 
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
           <StatsCard
-            title="Total Revenue"
-            value="$48,574"
+            title={t('products.charts.kpis.totalRevenue')}
+            value={fmtCurrency(dashboardMetrics?.totalRevenue ?? 0)}
             icon={Banknote}
             iconBgColor="bg-emerald-50"
             iconColor="text-emerald-600"
-            trend={{ value: 12.5, label: '12.5% from last month', isPositive: true }}
+            isLoading={analyticsLoading}
+            trend={{
+              value: 0,
+              label: t('products.charts.kpis.revenuePeriod'),
+              isPositive: true,
+            }}
           />
 
           <StatsCard
-            title="Units Sold"
-            value="1,847"
+            title={t('products.charts.kpis.unitsSold')}
+            value={dashMetric(dashboardMetrics?.totalOrders)}
             icon={ShoppingCart}
             iconBgColor="bg-blue-50"
             iconColor="text-blue-600"
-            trend={{ value: 8.2, label: '8.2% from last month', isPositive: true }}
+            isLoading={analyticsLoading}
+            trend={{
+              value: 0,
+              label: t('products.charts.kpis.ordersPeriod'),
+              isPositive: true,
+            }}
           />
 
           <StatsCard
-            title="Avg. Order Value"
-            value="$26.30"
+            title={t('products.charts.kpis.avgOrderValue')}
+            value={fmtCurrency(avgOrderValue)}
             icon={TrendingUp}
             iconBgColor="bg-purple-50"
             iconColor="text-purple-600"
-            trend={{ value: -3.1, label: '3.1% from last month', isPositive: false }}
+            isLoading={analyticsLoading}
+            trend={{
+              value: 0,
+              label: t('products.charts.kpis.aovPeriod'),
+              isPositive: true,
+            }}
           />
 
           <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
             <div className="flex items-start justify-between gap-4">
               <div>
-                <div className="text-xs font-semibold text-gray-500">Active Products</div>
-                <div className="mt-2 text-2xl font-semibold text-gray-900">{stats.active}</div>
+                <div className="text-xs font-semibold text-gray-500">{t('products.charts.kpis.activeProducts')}</div>
+                {analyticsLoading ? (
+                  <div className="mt-2">
+                    <TurningZeroLoader size="sm" />
+                  </div>
+                ) : (
+                <div className="mt-2 text-2xl font-semibold text-gray-900">
+                  {dashMetric(dashboardMetrics?.activeProducts ?? stats.active)}
+                </div>
+                )}
               </div>
               <FilterPopover
                 title={t('products.filters.title')}
@@ -813,6 +939,12 @@ export default function ProductsPage() {
             </div>
 
             <div className="mt-3">
+              {analyticsLoading ? (
+                <div className="flex items-center justify-center py-4">
+                  <TurningZeroLoader size="sm" />
+                </div>
+              ) : (
+                <>
               <div className="flex h-2 w-full overflow-hidden rounded-full bg-gray-100">
                 <div className="h-full bg-emerald-500" style={{ width: `${stockBar.inPct}%` }} />
                 <div className="h-full bg-amber-500" style={{ width: `${stockBar.lowPct}%` }} />
@@ -832,6 +964,8 @@ export default function ProductsPage() {
                   <span>{t('products.kpis.outOfStock')}</span>
                 </div>
               </div>
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -839,45 +973,25 @@ export default function ProductsPage() {
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
           <div className="lg:col-span-2">
             <SalesPerformanceChart
-              title="Sales Performance"
-              subtitle="Revenue and units sold over the last 30 days"
-              data={[
-                { label: 'This Week', value: 12847, change: 15.3 },
-                { label: 'Last Week', value: 11234, change: 8.7 },
-                { label: 'This Month', value: 48574, change: 12.5 },
-                { label: 'Last Month', value: 43189, change: -3.2 },
-              ]}
-              salesPoints={[
-                [0, 0.45],
-                [0.1, 0.52],
-                [0.2, 0.48],
-                [0.3, 0.55],
-                [0.4, 0.62],
-                [0.5, 0.58],
-                [0.6, 0.65],
-                [0.7, 0.72],
-                [0.8, 0.68],
-                [0.9, 0.75],
-                [1, 0.78],
-              ]}
-              revenuePoints={[
-                [0, 0.38],
-                [0.1, 0.42],
-                [0.2, 0.45],
-                [0.3, 0.48],
-                [0.4, 0.55],
-                [0.5, 0.52],
-                [0.6, 0.58],
-                [0.7, 0.65],
-                [0.8, 0.62],
-                [0.9, 0.68],
-                [1, 0.72],
-              ]}
+              title={t('products.charts.salesPerformance.title')}
+              subtitle={t('products.charts.salesPerformance.subtitle')}
+              summary={salesSummary}
+              chartData={salesChartData}
+              isLoading={analyticsLoading}
+              revenueLabel={t('products.charts.salesPerformance.revenue')}
+              unitsLabel={t('products.charts.salesPerformance.orders')}
+              emptyLabel={t('products.charts.salesPerformance.noData')}
+              formatValue={fmtCurrency}
             />
           </div>
 
           <TrendingProductsChart
-            title="Trending Products"
+            title={t('products.charts.trending.title')}
+            legendLabel={t('products.charts.trending.salesTrend')}
+            unitsSoldLabel={(count) => t('products.charts.trending.unitsSold', { count })}
+            emptyTitle={t('products.charts.trending.emptyTitle')}
+            emptyDescription={t('products.charts.trending.emptyDescription')}
+            isLoading={analyticsLoading}
             products={trendingProducts}
           />
         </div>
@@ -1039,68 +1153,22 @@ export default function ProductsPage() {
             </div>
           </div>
 
-          <div className="p-2">
-            <DataTable
-              data={filteredRows}
-              columns={columns}
-              getRowId={(r) => r.id}
-              enableSelection
-              enablePagination
-              emptyState={<div className="text-sm">{t('products.empty')}</div>}
-            />
+          <div className="p-2 min-h-[280px]">
+            {!hasLoadedOnce || isLoading ? (
+              <LoaderPanel minHeightClassName="min-h-[280px]" label={t('products.preview.loading')} />
+            ) : (
+              <DataTable
+                data={filteredRows}
+                columns={columns}
+                getRowId={(r) => r.id}
+                enableSelection
+                enablePagination
+                isLoading={false}
+                emptyState={<div className="text-sm">{t('products.empty')}</div>}
+              />
+            )}
           </div>
         </div>
-      </div>
-
-      <ProductViewSheet
-        product={selectedProduct ?? null}
-        onZoomImage={openZoom}
-        onAddStock={(product) => {
-          const baseSku = toBaseSku(product.variants[0]?.sku ?? '')
-          if (!baseSku) return
-          router.push(
-            `/dashboard/inventory?sku=${encodeURIComponent(baseSku)}&action=restock` as Route,
-          )
-        }}
-        onDownloadPdf={downloadAsPdf}
-        statusLabel={statusLabel}
-        translations={{
-          title: t('products.viewSheet.title'),
-          subtitle: (params) => t('products.viewSheet.subtitle', params),
-          empty: t('products.viewSheet.empty'),
-          na: t('products.table.na'),
-          yes: t('products.viewSheet.yes'),
-          no: t('products.viewSheet.no'),
-          addStock: t('products.viewSheet.addStock'),
-          downloadPdf: t('products.viewSheet.downloadPdf'),
-          zoom: t('products.viewSheet.zoom'),
-          variantsCount: (params) => t('products.viewSheet.variantsCount', params),
-          sections: {
-            gallery: t('products.viewSheet.sections.gallery'),
-            pricing: t('products.viewSheet.sections.pricing'),
-            delivery: t('products.viewSheet.sections.delivery'),
-            description: t('products.viewSheet.sections.description'),
-            variants: t('products.viewSheet.sections.variants'),
-            staff: t('products.viewSheet.sections.staff'),
-          },
-          fields: {
-            cost: t('products.viewSheet.fields.cost'),
-            margin: t('products.viewSheet.fields.margin'),
-            compareAt: t('products.viewSheet.fields.compareAt'),
-            deliveryEnabled: t('products.viewSheet.fields.deliveryEnabled'),
-            deliveryLocation: t('products.viewSheet.fields.deliveryLocation'),
-            deliveryPrice: t('products.viewSheet.fields.deliveryPrice'),
-            createdBy: t('products.viewSheet.fields.createdBy'),
-            updatedBy: t('products.viewSheet.fields.updatedBy'),
-          },
-          table: {
-            variant: t('products.viewSheet.table.variant'),
-            sku: t('products.viewSheet.table.sku'),
-            stock: t('products.viewSheet.table.stock'),
-            price: t('products.viewSheet.table.price'),
-          },
-        }}
-      />
 
       <ProductFormModal
         open={createOpen}
@@ -1109,53 +1177,51 @@ export default function ProductsPage() {
         draftProduct={draftProduct}
         setDraftProduct={setDraftProduct}
         onSubmit={async () => {
+          const vendor = storeVendorName || draftProduct.vendor
           if (isEditMode && editingProductId) {
-            try {
-              const res = await productsService.update(editingProductId, {
-                name: draftProduct.name,
-                description: draftProduct.description || undefined,
-                vendor: draftProduct.vendor,
-                category: draftProduct.category,
-                status: draftProduct.status,
-                tags: draftProduct.tags
-                  .split(',')
-                  .map((t) => t.trim())
-                  .filter(Boolean),
-                images: draftProduct.images.length > 0 ? draftProduct.images : undefined,
-                primaryImage: draftProduct.images[0] || undefined,
-                deliveryEnabled: draftProduct.deliveryEnabled,
-                deliveryLocation: draftProduct.deliveryLocation || undefined,
-                deliveryPrice: draftProduct.deliveryPrice
-                  ? Number(draftProduct.deliveryPrice)
-                  : undefined,
-              })
-              const updated: ProductApi | null = (res?.data as any)?.data ?? res?.data ?? null
-              if (updated) {
-                setRows((prev) =>
-                  prev.map((r) => (r.id === editingProductId ? apiToProductRow(updated) : r)),
-                )
-                setDetailsById((prev) => ({
-                  ...prev,
-                  [editingProductId]: apiToProductDetails(updated),
-                }))
-              }
-            } catch {}
+            const res = await productsService.update(editingProductId, {
+              name: draftProduct.name,
+              description: draftProduct.description || undefined,
+              vendor,
+              category: draftProduct.category,
+              status: draftProduct.status,
+              tags: draftProduct.tags
+                .split(',')
+                .map((t) => t.trim())
+                .filter(Boolean),
+              images: draftProduct.images.length > 0 ? draftProduct.images : undefined,
+              primaryImage: draftProduct.images[0] || undefined,
+              deliveryEnabled: draftProduct.deliveryEnabled,
+              deliveryLocation: draftProduct.deliveryLocation || undefined,
+              deliveryPrice: draftProduct.deliveryPrice
+                ? Number(draftProduct.deliveryPrice)
+                : undefined,
+            })
+            const updated: ProductApi | null = (res?.data as any)?.data ?? res?.data ?? null
+            if (updated) {
+              setRows((prev) =>
+                prev.map((r) => (r.id === editingProductId ? apiToProductRow(updated) : r)),
+              )
+            }
             setCreateOpen(false)
             setIsEditMode(false)
             setEditingProductId(null)
-          } else {
-            try {
-              const payload = buildCreatePayload(draftProduct)
-              const res = await productsService.create(payload)
-              const created: ProductApi | null = (res?.data as any)?.data ?? res?.data ?? null
-              if (created) setRows((prev) => [apiToProductRow(created), ...prev])
-            } catch {}
-            setCreateOpen(false)
+            return
           }
+
+          const payload = buildCreatePayload({ ...draftProduct, vendor })
+          const res = await productsService.create(payload)
+          const created = extractEntity<ProductApi>(res)
+          if (!created) {
+            throw new Error('Product create failed')
+          }
+          setRows((prev) => [apiToProductRow(created), ...prev])
+          router.push(`/dashboard/products/${created.id}`)
         }}
         onZoomImage={openZoom}
         addImages={addImages}
         removeImage={removeImage}
+        isDraftLoading={editLoading}
       />
 
       <ImageZoomDialog
@@ -1187,6 +1253,6 @@ export default function ProductsPage() {
         confirmButtonText="Delete Product"
         cancelButtonText="Cancel"
       />
-    </Sheet>
+    </div>
   )
 }

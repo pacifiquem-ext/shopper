@@ -12,13 +12,28 @@ import { useForm } from 'react-hook-form'
 import { useAuthStore } from '@/store/auth.store'
 import { useRouter } from '@/i18n/navigation'
 import { useSearchParams } from 'next/navigation'
-import { resolvePostAuthRedirect } from '@/lib/auth-return-url'
+import { useEffect, useMemo } from 'react'
+import { resolvePostAuthRedirect, MERCHANT_DASHBOARD_PATH } from '@/lib/auth-return-url'
 
 export default function LoginPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const returnUrl = searchParams.get('returnUrl')
-  const { login, isLoading } = useAuthStore()
+  const { login, isLoading, accessToken } = useAuthStore()
+
+  const redirectTarget = useMemo(
+    () =>
+      resolvePostAuthRedirect(returnUrl, MERCHANT_DASHBOARD_PATH) as Parameters<
+        typeof router.replace
+      >[0],
+    [returnUrl],
+  )
+
+  useEffect(() => {
+    if (accessToken) {
+      router.replace(redirectTarget)
+    }
+  }, [accessToken, redirectTarget, router])
 
   const form = useForm<LoginInput>({
     resolver: zodResolver(loginSchema),
@@ -31,9 +46,7 @@ export default function LoginPage() {
   async function onSubmit(values: LoginInput) {
     const success = await login(values)
     if (success) {
-      router.push(
-        resolvePostAuthRedirect(searchParams.get('returnUrl')) as Parameters<typeof router.push>[0],
-      )
+      router.replace(redirectTarget)
     }
   }
 

@@ -14,6 +14,7 @@ type IshushoCraftsProductPageProps = {
   product: CatalogProductPublic
   marketplaceHref: string | null
   cartHref?: string
+  shopHref?: string
   texts: {
     backToShop: string
     approvedStore: string
@@ -24,15 +25,14 @@ type IshushoCraftsProductPageProps = {
     marketplaceLabel: string
     contactLabel: string
   }
-  tProduct: (key: string, values?: Record<string, string | number>) => string
 }
 
 export function IshushoCraftsProductPage({
   product,
   marketplaceHref,
   cartHref = '/cart',
+  shopHref = '/shop',
   texts,
-  tProduct,
 }: IshushoCraftsProductPageProps) {
   const themeStyle = ishushoCraftsThemeStyle() as CSSProperties
 
@@ -52,8 +52,9 @@ export function IshushoCraftsProductPage({
         theme='ishusho-crafts'
         backLabel={texts.backToShop}
         approvedLabel={texts.approvedStore}
+        backHref={shopHref}
       />
-      <ProductDetailsBody product={product} theme='ishusho-crafts' t={tProduct} />
+      <ProductDetailsBody product={product} theme='ishusho-crafts' />
       <SiteFooter
         store={buildSiteFooterStoreContext({
           store: product.store,

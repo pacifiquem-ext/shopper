@@ -1,5 +1,6 @@
 'use client'
 
+import { ExportButton } from '@/components/dashboard/shared/export-button'
 import { KpiStatCard } from '@/components/dashboard/shared/kpi-stat-card'
 import { StockBadge } from '@/components/dashboard/shared/status-badges'
 import { InventoryViewSheet } from '@/components/dashboard/inventory/inventory-view-sheet'
@@ -35,7 +36,6 @@ import { cn } from '@/lib/utils'
 import { clampPercent } from '@/utils/dashboard'
 import {
   ChevronDown,
-  Download,
   Eye,
   Filter,
   MoreHorizontal,
@@ -46,6 +46,8 @@ import {
 import { useSearchParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { extractApiPayload, extractEntity, extractPaginatedItems } from '@/lib/api-response'
+import { TurningZeroLoader, LoaderPanel } from '@/components/ui/turning-zero-loader'
 import { inventoryService, type InventoryRecordApi } from '@/services/inventory.service'
 import { analyticsService } from '@/services/analytics.service'
 
@@ -139,6 +141,9 @@ export default function InventoryPage() {
 
   const [rows, setRows] = useState<InventoryRow[]>([])
   const [totalAssetValue, setTotalAssetValue] = useState<string>('—')
+  const [isLoading, setIsLoading] = useState(true)
+  const [hasLoadedOnce, setHasLoadedOnce] = useState(false)
+  const [detailLoading, setDetailLoading] = useState(false)
 
   const [detailsById, setDetailsById] = useState<Map<string, ProductDetails>>(new Map())
 
@@ -164,6 +169,7 @@ export default function InventoryPage() {
     let cancelled = false
 
     const load = async () => {
+      setIsLoading(true)
       try {
         const [inventoryRes, summaryRes] = await Promise.all([
           inventoryService.getAll({ limit: 200 }),
@@ -172,11 +178,12 @@ export default function InventoryPage() {
 
         if (cancelled) return
 
-        const list: any = inventoryRes?.data
-        const items: InventoryRecordApi[] = list?.data ?? []
+        const items = extractPaginatedItems<InventoryRecordApi>(inventoryRes)
         setRows(items.map(apiToInventoryRow))
 
-        const summary = (summaryRes?.data as any)?.data ?? summaryRes?.data
+        const summary = extractApiPayload<{
+          totalStockValue?: number
+        }>(summaryRes) ?? summaryRes
         if (summary?.totalStockValue != null) {
           setTotalAssetValue(
             Number(summary.totalStockValue).toLocaleString(undefined, {
@@ -188,6 +195,11 @@ export default function InventoryPage() {
         }
       } catch {
         if (!cancelled) setRows([])
+      } finally {
+        if (!cancelled) {
+          setIsLoading(false)
+          setHasLoadedOnce(true)
+        }
       }
     }
 
@@ -199,17 +211,40 @@ export default function InventoryPage() {
 
   // Lazy-load detail when a product is selected
   useEffect(() => {
-    if (!selectedProductId || detailsById.has(selectedProductId)) return
-    inventoryService.getByVariantId(selectedProductId).then((res) => {
-      const r: InventoryRecordApi | null = (res?.data as any)?.data ?? res?.data ?? null
-      if (r) setDetailsById((prev) => new Map(prev).set(selectedProductId, apiToInventoryDetails(r)))
-    })
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedProductId])
+    if (!selectedProductId) {
+      setDetailLoading(false)
+      return
+    }
+
+    if (detailsById.has(selectedProductId)) {
+      setDetailLoading(false)
+      return
+    }
+
+    let cancelled = false
+    setDetailLoading(true)
+
+    inventoryService
+      .getByVariantId(selectedProductId)
+      .then((res) => {
+        const r = extractEntity<InventoryRecordApi>(res)
+        if (r && !cancelled) {
+          setDetailsById((prev) => new Map(prev).set(selectedProductId, apiToInventoryDetails(r)))
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setDetailLoading(false)
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [selectedProductId, detailsById])
 
   const openView = useCallback((id: string) => {
     setSelectedProductId(id)
     setViewOpen(true)
+    setDetailLoading(true)
   }, [])
 
   const openAdjust = useCallback((id: string, mode: 'restock' | 'adjust') => {
@@ -217,20 +252,6 @@ export default function InventoryPage() {
     setAdjustMode(mode)
     setAdjustQuantity('')
     setAdjustOpen(true)
-  }, [])
-
-  const handleExport = useCallback(async () => {
-    try {
-      const blob = await inventoryService.exportCsv()
-      const url = URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
-      a.download = 'inventory.csv'
-      document.body.appendChild(a)
-      a.click()
-      document.body.removeChild(a)
-      URL.revokeObjectURL(url)
-    } catch {}
   }, [])
 
   const applyAdjustment = useCallback(async () => {
@@ -473,9 +494,16 @@ export default function InventoryPage() {
 
       <InventoryViewSheet
         open={viewOpen}
-        onOpenChange={setViewOpen}
+        onOpenChange={(open) => {
+          setViewOpen(open)
+          if (!open) {
+            setSelectedProductId(null)
+            setDetailLoading(false)
+          }
+        }}
         product={selectedProduct}
         onOpenAdjust={openAdjust}
+        isLoading={detailLoading && Boolean(selectedProductId)}
       />
 
       <InventoryAdjustDialog
@@ -495,15 +523,12 @@ export default function InventoryPage() {
         </div>
 
         <div className="flex items-center gap-2 sm:pt-0.5">
-          <Button
-            type="button"
-            variant="outline"
+          <ExportButton
+            fetchBlob={() => inventoryService.exportCsv()}
+            filename="inventory.csv"
+            label={t('inventory.export')}
             className="h-9 rounded-lg border-gray-200 bg-white text-gray-700 hover:bg-brand-50 hover:text-brand-900"
-            onClick={handleExport}
-          >
-            <Download className="h-4 w-4" />
-            {t('inventory.export')}
-          </Button>
+          />
           <Button
             type="button"
             variant="outline"
@@ -516,14 +541,25 @@ export default function InventoryPage() {
       </div>
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <KpiStatCard title={t('inventory.kpis.totalAssetValue')} value={totalAssetValue} trendLabel={t('inventory.kpis.thisMonth')} />
+        <KpiStatCard
+          title={t('inventory.kpis.totalAssetValue')}
+          value={totalAssetValue}
+          trendLabel={t('inventory.kpis.thisMonth')}
+          isLoading={isLoading}
+        />
         <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
           <div className="flex items-start justify-between gap-4">
             <div>
               <div className="text-xs font-semibold text-gray-500">{t('inventory.kpis.products')}</div>
-              <div className="mt-2 text-2xl font-semibold text-gray-900">
-                {t('inventory.kpis.productsCount', { count: stats.total })}
-              </div>
+              {isLoading ? (
+                <div className="mt-2">
+                  <TurningZeroLoader size="sm" />
+                </div>
+              ) : (
+                <div className="mt-2 text-2xl font-semibold text-gray-900">
+                  {t('inventory.kpis.productsCount', { count: stats.total })}
+                </div>
+              )}
             </div>
             <Popover>
               <PopoverTrigger asChild>
@@ -654,6 +690,12 @@ export default function InventoryPage() {
           </div>
 
           <div className="mt-3">
+            {isLoading ? (
+              <div className="flex items-center justify-center py-4">
+                <TurningZeroLoader size="sm" />
+              </div>
+            ) : (
+              <>
             <div className="flex h-2 w-full overflow-hidden rounded-full bg-gray-100">
               <div className="h-full bg-emerald-500" style={{ width: `${stockBar.inPct}%` }} />
               <div className="h-full bg-amber-500" style={{ width: `${stockBar.lowPct}%` }} />
@@ -673,10 +715,22 @@ export default function InventoryPage() {
                 <span>{t('inventory.kpis.outOfStock', { count: stats.outOfStock })}</span>
               </div>
             </div>
+              </>
+            )}
           </div>
         </div>
-        <KpiStatCard title={t('inventory.kpis.lowStockItems')} value={String(stats.lowStock)} trendLabel={t('inventory.kpis.needsAttention')} />
-        <KpiStatCard title={t('inventory.kpis.outOfStockItems')} value={String(stats.outOfStock)} trendLabel={t('inventory.kpis.needsRestock')} />
+        <KpiStatCard
+          title={t('inventory.kpis.lowStockItems')}
+          value={String(stats.lowStock)}
+          trendLabel={t('inventory.kpis.needsAttention')}
+          isLoading={isLoading}
+        />
+        <KpiStatCard
+          title={t('inventory.kpis.outOfStockItems')}
+          value={String(stats.outOfStock)}
+          trendLabel={t('inventory.kpis.needsRestock')}
+          isLoading={isLoading}
+        />
       </div>
 
       <div className="rounded-2xl border border-gray-200 bg-white shadow-sm">
@@ -837,17 +891,22 @@ export default function InventoryPage() {
           </div>
         </div>
 
-        <div className="p-2">
-          <DataTable
-            data={filteredRows}
-            columns={columns}
-            getRowId={(r) => r.id}
-            enableSelection
-            enablePagination
-            defaultPageSize={10}
-            emptyState={<span>{t('inventory.empty')}</span>}
-            className="rounded-xl"
-          />
+        <div className="p-2 min-h-[280px]">
+          {!hasLoadedOnce || isLoading ? (
+            <LoaderPanel minHeightClassName="min-h-[280px]" label={t('inventory.loading')} />
+          ) : (
+            <DataTable
+              data={filteredRows}
+              columns={columns}
+              getRowId={(r) => r.id}
+              enableSelection
+              enablePagination
+              defaultPageSize={10}
+              isLoading={false}
+              emptyState={<span>{t('inventory.empty')}</span>}
+              className="rounded-xl"
+            />
+          )}
         </div>
       </div>
     </div>

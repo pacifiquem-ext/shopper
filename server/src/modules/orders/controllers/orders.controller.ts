@@ -28,6 +28,13 @@ import { OrderFilterDto } from '../dtos/order-filter.dto';
 import { UpdatePaymentDto } from '../dtos/update-payment.dto';
 import { UpdateFulfillmentDto } from '../dtos/update-fulfillment.dto';
 import { SendMessageDto } from '../dtos/send-message.dto';
+import { IsArray, IsString } from 'class-validator';
+
+class MarkNotificationsReadDto {
+    @IsArray()
+    @IsString({ each: true })
+    ids: string[];
+}
 
 @ApiTags('Orders')
 @Controller({ path: 'orders', version: '1' })
@@ -53,6 +60,21 @@ export class OrdersController {
     @ApiResponse({ status: HttpStatus.OK, description: 'Orders retrieved successfully' })
     async findAll(@StoreId() storeId: string, @Query() filters: OrderFilterDto) {
         return this.ordersService.findAll(storeId, filters);
+    }
+
+    @Get('notifications')
+    @ApiOperation({ summary: 'Get unread order notifications for this store' })
+    @ApiResponse({ status: HttpStatus.OK, description: 'Notifications retrieved successfully' })
+    async getNotifications(@StoreId() storeId: string, @Query('limit') limit?: string) {
+        const resolved = limit ? Math.max(1, Math.min(50, Number(limit))) : 10;
+        return this.ordersService.getNotifications(storeId, resolved);
+    }
+
+    @Put('notifications/read')
+    @ApiOperation({ summary: 'Mark notifications as read' })
+    @ApiResponse({ status: HttpStatus.OK, description: 'Notifications marked read' })
+    async markNotificationsRead(@StoreId() storeId: string, @Body() dto: MarkNotificationsReadDto) {
+        return this.ordersService.markNotificationsRead(storeId, dto.ids ?? []);
     }
 
     @Get('export')

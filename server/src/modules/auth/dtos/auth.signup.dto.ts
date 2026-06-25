@@ -8,8 +8,10 @@ import {
     IsString,
     Matches,
     MinLength,
+    ValidateIf,
 } from 'class-validator';
 import { UserRole } from '../constants/auth.enum';
+import { NormalizePhone } from '../../../common/helper/decorators/normalize-phone.decorator';
 
 export class SignupDto {
     @ApiProperty({
@@ -26,6 +28,7 @@ export class SignupDto {
         example: '+250788123456',
         required: true,
     })
+    @NormalizePhone()
     @IsNotEmpty()
     @IsPhoneNumber()
     phoneNumber: string;
@@ -34,7 +37,7 @@ export class SignupDto {
         description: 'Optional email address',
         example: 'john@example.com',
     })
-    @IsOptional()
+    @ValidateIf((_, value) => value != null && String(value).trim() !== '')
     @IsEmail()
     email?: string;
 

@@ -18,7 +18,7 @@ export const catalogProductGridClass =
 export const catalogSectionGridClass =
   'grid grid-cols-2 gap-4 sm:gap-5 lg:grid-cols-4'
 
-const catalogGridGap = 'grid gap-4 sm:gap-5'
+const catalogGridGap = 'grid gap-3 sm:gap-4 md:gap-5'
 
 const GRID_COLS = {
   1: 'grid-cols-1',

@@ -17,3 +17,8 @@ export function storeShopPath(
   if (isSubdomainHost) return '/'
   return `/shop?store=${encodeURIComponent(subdomain.trim())}`
 }
+
+/** Public product detail page on the marketplace app. */
+export function storeProductPath(productId: string): string {
+  return `/shop/${productId}`
+}

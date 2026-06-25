@@ -11,21 +11,25 @@ const Toaster = ({ ...props }: ToasterProps) => {
   return (
     <Sonner
       theme={theme as ToasterProps['theme']}
-      className="toaster group"
+      className='toaster group'
+      richColors={false}
       toastOptions={{
         classNames: {
           toast:
-            'group toast group-[.toaster]:bg-background group-[.toaster]:text-foreground group-[.toaster]:border-border group-[.toaster]:shadow-lg',
-          title: 'group-[.toast]:font-bold group-[.toast]:text-base',
-          description: 'group-[.toast]:text-muted-foreground group-[.toast]:text-sm',
-          actionButton: 'group-[.toast]:bg-primary group-[.toast]:text-primary-foreground',
-          cancelButton: 'group-[.toast]:bg-muted group-[.toast]:text-muted-foreground',
+            'group toast !min-h-0 !gap-2 !py-3 !px-4 group-[.toaster]:rounded-2xl group-[.toaster]:border group-[.toaster]:border-[rgba(43,43,43,0.08)] group-[.toaster]:bg-white/95 group-[.toaster]:text-[#2B2B2B] group-[.toaster]:shadow-[0_8px_28px_rgba(43,43,43,0.12)] group-[.toaster]:backdrop-blur-md',
+          title: 'group-[.toast]:text-sm group-[.toast]:font-semibold group-[.toast]:leading-tight',
+          description:
+            'group-[.toast]:text-xs group-[.toast]:leading-snug group-[.toast]:text-[#6E6A66]',
+          actionButton:
+            'group-[.toast]:bg-[#B76E5D] group-[.toast]:text-white',
+          cancelButton:
+            'group-[.toast]:bg-[#F5F1EB] group-[.toast]:text-[#2B2B2B]',
           success:
-            'group-[.toaster]:!bg-success-primary group-[.toaster]:!text-success-foreground group-[.toaster]:!border-success-secondary [&_[data-description]]:!text-success-foreground/90 [&_[data-close-button]]:!bg-transparent hover:[&_[data-close-button]]:!bg-white/20 [&_svg]:!text-success-foreground',
+            'group-[.toaster]:!bg-white/95 group-[.toaster]:!text-[#2B2B2B] group-[.toaster]:!border-[rgba(43,43,43,0.08)] [&_[data-icon]]:!text-[#7D8F69] [&_[data-description]]:!text-[#6E6A66]',
           error:
-            'group-[.toaster]:!bg-error-primary group-[.toaster]:!text-error-foreground group-[.toaster]:!border-error-secondary [&_[data-description]]:!text-error-foreground/90 [&_[data-close-button]]:!bg-transparent hover:[&_[data-close-button]]:!bg-white/20 [&_svg]:!text-error-foreground',
+            'group-[.toaster]:!bg-white/95 group-[.toaster]:!text-[#2B2B2B] group-[.toaster]:!border-[rgba(220,38,38,0.18)] [&_[data-icon]]:!text-[#DC2626] [&_[data-description]]:!text-[#6E6A66]',
           closeButton:
-            '!absolute !top-2 !right-2 !left-auto ![transform:none] !bg-transparent !border-transparent !text-inherit hover:!bg-black/5 dark:hover:!bg-white/10 transition-colors',
+            '!absolute !top-2 !right-2 !left-auto ![transform:none] !size-6 !rounded-full !border-transparent !bg-transparent !text-[#6E6A66] hover:!bg-[#F5F1EB] hover:!text-[#2B2B2B] transition-colors',
         },
       }}
       {...props}

@@ -46,3 +46,9 @@ export function isNewListing(createdAtIso: string, withinDays = 14): boolean {
     if (Number.isNaN(createdAt)) return false
     return Date.now() - createdAt < withinDays * 24 * 60 * 60 * 1000
 }
+
+export function firstInStockVariant<T extends { inventory?: { available: number } | null }>(
+    variants: T[],
+): T | undefined {
+    return variants.find((variant) => (variant.inventory?.available ?? 0) > 0)
+}

@@ -3,6 +3,9 @@ import { routing } from '@/i18n/routing'
 /** Default destination after new merchant signup + login. */
 export const MERCHANT_ONBOARDING_PATH = '/store'
 
+/** Default destination after merchant login. */
+export const MERCHANT_DASHBOARD_PATH = '/dashboard'
+
 export function normalizeReturnUrl(raw: string | null): string {
   if (!raw || !raw.startsWith('/') || raw.startsWith('//')) return '/'
 
@@ -30,7 +33,7 @@ export function merchantSignupHref(): string {
 
 export function resolvePostAuthRedirect(
   returnUrl: string | null,
-  fallback: string = '/',
+  fallback: string = MERCHANT_DASHBOARD_PATH,
 ): string {
   if (!returnUrl) return fallback
   return normalizeReturnUrl(returnUrl)

@@ -69,7 +69,9 @@ export function ProductQuickViewSheet({
     setActiveImage(0)
   }, [product?.id])
 
-  if (!product || !labels) return null
+  if (!product || !labels) {
+    return <Sheet open={false} onOpenChange={onOpenChange} />
+  }
 
   const gallery =
     product.images.length > 0
@@ -78,6 +80,8 @@ export function ProductQuickViewSheet({
         ? [product.primaryImage]
         : []
   const mainSrc = gallery[activeImage] ?? product.primaryImage
+  const tags = product.tags ?? []
+  const variants = product.variants ?? []
 
   const resolvedAccent =
     accentColor ??
@@ -140,7 +144,7 @@ export function ProductQuickViewSheet({
           shell,
           resolvedTemplate === 'ishusho-crafts' && 'ic-storefront',
         )}
-        style={templateVars}
+        style={vibrantVars}
       >
         <SheetHeader
           className={cn(
@@ -213,9 +217,9 @@ export function ProductQuickViewSheet({
               </div>
             ) : null}
 
-            {product.tags.length > 0 ? (
+            {tags.length > 0 ? (
               <div className='flex flex-wrap gap-2'>
-                {product.tags.slice(0, 12).map((tag) => (
+                {tags.slice(0, 12).map((tag) => (
                   <span
                     key={tag}
                     className={cn(
@@ -235,7 +239,7 @@ export function ProductQuickViewSheet({
                 {tProduct('variants')}
               </p>
               <ul className='space-y-3'>
-                {product.variants.map((v) => {
+                {variants.map((v) => {
                   const vImg = mainSrc ?? product.primaryImage ?? product.images[0] ?? null
                   return (
                     <li

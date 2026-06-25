@@ -8,8 +8,10 @@ import {
 } from '@/components/ui/dialog'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Textarea } from '@/components/ui/textarea'
+import { InlineLoadingState } from '@/components/dashboard/shared/loading-placeholders'
 import { cn } from '@/lib/utils'
 import { Send, User, ShieldCheck } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { useState } from 'react'
 
 type Message = {
@@ -27,6 +29,7 @@ type OrderCommunicationModalProps = {
   customerName: string
   messages: Message[]
   onSendMessage: (message: string) => void
+  isLoadingMessages?: boolean
 }
 
 export function OrderCommunicationModal({
@@ -36,7 +39,9 @@ export function OrderCommunicationModal({
   customerName,
   messages,
   onSendMessage,
+  isLoadingMessages = false,
 }: OrderCommunicationModalProps) {
+  const t = useTranslations('dashboard')
   const [newMessage, setNewMessage] = useState('')
 
   const handleSend = () => {
@@ -57,24 +62,28 @@ export function OrderCommunicationModal({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-3xl border-gray-200 bg-white">
         <DialogHeader>
-          <DialogTitle className="text-gray-900">Order Communication</DialogTitle>
+          <DialogTitle className="text-gray-900">{t('orders.communication.title')}</DialogTitle>
           <DialogDescription className="text-gray-600">
-            Communicate with {customerName} about order {orderId}
+            {t('orders.communication.description', { customerName, orderId })}
           </DialogDescription>
         </DialogHeader>
 
         <div className="mt-4 rounded-xl border border-gray-200 bg-white">
           <ScrollArea className="h-[500px]">
             <div className="space-y-4 p-5">
-              {messages.length === 0 ? (
+              {isLoadingMessages ? (
+                <InlineLoadingState label={t('orders.communication.loading')} />
+              ) : messages.length === 0 ? (
                 <div className="flex h-[400px] items-center justify-center">
                   <div className="text-center">
                     <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-gray-100">
                       <Send className="h-7 w-7 text-gray-400" />
                     </div>
-                    <p className="mt-4 text-sm font-medium text-gray-900">No messages yet</p>
+                    <p className="mt-4 text-sm font-medium text-gray-900">
+                      {t('orders.communication.emptyTitle')}
+                    </p>
                     <p className="mt-1 text-xs text-gray-500">
-                      Start the conversation with {customerName}
+                      {t('orders.communication.emptyDescription', { customerName })}
                     </p>
                   </div>
                 </div>
@@ -137,7 +146,7 @@ export function OrderCommunicationModal({
                 value={newMessage}
                 onChange={(e) => setNewMessage(e.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder="Type your message to the customer..."
+                placeholder={t('orders.communication.placeholder')}
                 className="min-h-[100px] resize-none rounded-xl border-gray-200 bg-white text-sm focus-visible:ring-brand-600"
               />
               <Button
@@ -147,12 +156,10 @@ export function OrderCommunicationModal({
                 className="h-auto shrink-0 rounded-xl bg-brand-600 px-5 text-white hover:bg-brand-700 disabled:opacity-50"
               >
                 <Send className="h-4 w-4" />
-                <span className="sr-only">Send message</span>
+                <span className="sr-only">{t('orders.communication.sendAria')}</span>
               </Button>
             </div>
-            <p className="mt-2 text-xs text-gray-500">
-              Press Enter to send, Shift+Enter for new line
-            </p>
+            <p className="mt-2 text-xs text-gray-500">{t('orders.communication.hint')}</p>
           </div>
         </div>
       </DialogContent>

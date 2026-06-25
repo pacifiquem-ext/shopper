@@ -13,6 +13,7 @@ type VibrantMarketProductPageProps = {
   product: CatalogProductPublic
   marketplaceHref: string | null
   cartHref?: string
+  shopHref?: string
   texts: {
     backToShop: string
     approvedStore: string
@@ -23,15 +24,14 @@ type VibrantMarketProductPageProps = {
     poweredBy: string
     marketplaceLabel: string
   }
-  tProduct: (key: string, values?: Record<string, string | number>) => string
 }
 
 export function VibrantMarketProductPage({
   product,
   marketplaceHref,
   cartHref = '/cart',
+  shopHref = '/shop',
   texts,
-  tProduct,
 }: VibrantMarketProductPageProps) {
   const themeStyle = vibrantMarketThemeStyle() as CSSProperties
 
@@ -43,13 +43,15 @@ export function VibrantMarketProductPage({
         logoUrl={product.store.logoUrl}
         promoMessages={texts.promoMessages}
         tickerAria={texts.tickerAria}
+        cartHref={cartHref}
       />
       <ProductDetailsTopBar
         theme='vibrant-market'
         backLabel={texts.backToShop}
         approvedLabel={texts.approvedStore}
+        backHref={shopHref}
       />
-      <ProductDetailsBody product={product} theme='vibrant-market' t={tProduct} />
+      <ProductDetailsBody product={product} theme='vibrant-market' />
       <SiteFooter
         store={buildSiteFooterStoreContext({
           store: product.store,

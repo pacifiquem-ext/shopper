@@ -13,7 +13,6 @@ import {
   Users,
   TrendingUp,
   TrendingDown,
-  Download,
   ExternalLink,
   Plus,
   Edit,
@@ -25,6 +24,7 @@ import {
   AlertTriangle,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { ExportButton } from '@/components/dashboard/shared/export-button'
 import { DashboardFilters } from '@/components/dashboard/shared/dashboard-filters'
 import {
   KeyValueRow,
@@ -37,6 +37,7 @@ import { useTranslations } from 'next-intl'
 import { Link } from '@/i18n/navigation'
 import { useState, useEffect, useMemo } from 'react'
 import { cn } from '@/lib/utils'
+import { LoaderPanel } from '@/components/ui/turning-zero-loader'
 import { analyticsService } from '@/services/analytics.service'
 import type { DashboardMetrics, TopProduct, InventorySummary, SalesTrendPoint, RecentActivityItem } from '@/services/analytics.service'
 
@@ -103,20 +104,6 @@ export default function DashboardPage() {
   const fmt = (n: number | undefined) => (n ?? 0).toLocaleString()
   const dash = (v: string | number | undefined) => isLoading ? '—' : String(v ?? 0)
 
-  const handleGenerateReport = async () => {
-    try {
-      const blob = await analyticsService.getReport(selectedPeriod)
-      const url = URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
-      a.download = `report-${selectedPeriod}.csv`
-      document.body.appendChild(a)
-      a.click()
-      document.body.removeChild(a)
-      URL.revokeObjectURL(url)
-    } catch {}
-  }
-
   return (
     <div className="flex w-full flex-col gap-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -131,15 +118,14 @@ export default function DashboardPage() {
         </div>
 
         <div className="flex items-center gap-3">
-          <DashboardFilters />
-          <Button
-            type="button"
+          <DashboardFilters period={selectedPeriod} />
+          <ExportButton
+            fetchBlob={() => analyticsService.getReport(selectedPeriod)}
+            filename={`report-${selectedPeriod}.csv`}
+            label={t('header.generateReport')}
             className="h-10 rounded-xl bg-brand-900 text-white hover:bg-brand-800"
-            onClick={handleGenerateReport}
-          >
-            <Download className="mr-2 h-4 w-4" />
-            Generate Report
-          </Button>
+            variant="default"
+          />
         </div>
       </div>
 
@@ -147,23 +133,27 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <KpiStatCard
           title="Total Revenue"
-          value={isLoading ? '—' : `$${fmt(dashboardMetrics?.totalRevenue)}`}
+          value={`$${fmt(dashboardMetrics?.totalRevenue)}`}
           trendLabel="Gross revenue this period"
+          isLoading={isLoading}
         />
         <KpiStatCard
           title="Total Orders"
-          value={dash(dashboardMetrics?.totalOrders)}
-          trendLabel={`${dash(dashboardMetrics?.pendingOrders)} pending`}
+          value={String(dashboardMetrics?.totalOrders ?? 0)}
+          trendLabel={`${dashboardMetrics?.pendingOrders ?? 0} pending`}
+          isLoading={isLoading}
         />
         <KpiStatCard
           title="Active Products"
-          value={dash(dashboardMetrics?.activeProducts)}
+          value={String(dashboardMetrics?.activeProducts ?? 0)}
           trendLabel="Published products"
+          isLoading={isLoading}
         />
         <KpiStatCard
           title="Total Customers"
-          value={dash(dashboardMetrics?.totalCustomers)}
+          value={String(dashboardMetrics?.totalCustomers ?? 0)}
           trendLabel="Unique customers"
+          isLoading={isLoading}
         />
       </div>
 
@@ -425,11 +415,7 @@ export default function DashboardPage() {
         </CardHeader>
         <CardContent>
           {isLoading ? (
-            <div className="space-y-3">
-              {[1, 2, 3].map((i) => (
-                <div key={i} className="h-14 animate-pulse rounded-xl bg-gray-100" />
-              ))}
-            </div>
+            <LoaderPanel minHeightClassName="min-h-[140px]" size="md" />
           ) : topProducts.length === 0 ? (
             <div className="py-8 text-center text-sm text-gray-400">No sales data yet for this period.</div>
           ) : (
@@ -577,11 +563,7 @@ export default function DashboardPage() {
         </CardHeader>
         <CardContent>
           {isLoading ? (
-            <div className="space-y-3">
-              {[1, 2, 3, 4].map((i) => (
-                <div key={i} className="h-12 animate-pulse rounded-xl bg-gray-100" />
-              ))}
-            </div>
+            <LoaderPanel minHeightClassName="min-h-[160px]" size="md" />
           ) : recentActivity.length === 0 ? (
             <div className="py-8 text-center text-sm text-gray-400">No recent activity yet.</div>
           ) : (

@@ -115,19 +115,6 @@ api.interceptors.request.use(
 
 api.interceptors.response.use(
   (response) => {
-    if (
-      response.config.method &&
-      ['post', 'put', 'patch', 'delete'].includes(response.config.method.toLowerCase())
-    ) {
-      const nestedMessage = response.data?.data?.message
-      const rootMessage = response.data?.message
-      const messageToDisplay = nestedMessage || rootMessage
-      if (messageToDisplay && messageToDisplay !== 'Created') {
-        toast.success(messageToDisplay)
-      } else if (nestedMessage) {
-        toast.success(nestedMessage)
-      }
-    }
     return response.data
   },
   async (error: any) => {

@@ -2,6 +2,8 @@ import { CardContent } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
 import type React from 'react'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
+import { ChartLoadingPlaceholder } from '@/components/dashboard/shared/loading-placeholders'
+import { MARKETPLACE_BRAND } from '@/lib/marketplace-brand-colors'
 import type { SalesTrendPoint } from '@/services/analytics.service'
 
 type MetricTileProps = {
@@ -72,13 +74,11 @@ function formatMonth(dateStr: string) {
 }
 
 export function SalesPurchaseChart({ data = [], isLoading = false }: SalesPurchaseChartProps) {
-  const brandBlue = '#6083e3'
-  const emeraldGreen = '#059669'
+  const brandPrimary = MARKETPLACE_BRAND.primary
+  const brandSecondary = MARKETPLACE_BRAND.secondary
 
   if (isLoading) {
-    return (
-      <div className="mt-2 h-[260px] w-full animate-pulse rounded-xl bg-gray-100" />
-    )
+    return <ChartLoadingPlaceholder className="mt-2" minHeightClassName="min-h-[260px]" />
   }
 
   if (data.length === 0) {
@@ -130,18 +130,18 @@ export function SalesPurchaseChart({ data = [], isLoading = false }: SalesPurcha
           <Line
             type="monotone"
             dataKey="sales"
-            stroke={brandBlue}
+            stroke={brandPrimary}
             strokeWidth={3}
-            dot={{ fill: brandBlue, r: 4 }}
+            dot={{ fill: brandPrimary, r: 4 }}
             activeDot={{ r: 6 }}
             name="Revenue"
           />
           <Line
             type="monotone"
             dataKey="purchase"
-            stroke={emeraldGreen}
+            stroke={brandSecondary}
             strokeWidth={3}
-            dot={{ fill: emeraldGreen, r: 4 }}
+            dot={{ fill: brandSecondary, r: 4 }}
             activeDot={{ r: 6 }}
             name="Cost"
           />

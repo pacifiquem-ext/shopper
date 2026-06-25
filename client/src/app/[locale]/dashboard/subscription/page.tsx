@@ -5,17 +5,19 @@ import { useTranslations } from 'next-intl'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { CheckCircle2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { TurningZeroLoader } from '@/components/ui/turning-zero-loader'
 import { storeSettingsService } from '@/services/store-settings.service'
 
 export default function SubscriptionPage() {
   const t = useTranslations('dashboard')
   const [storeName, setStoreName] = useState<string | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
     storeSettingsService.getSettings().then((res) => {
       const data = (res?.data as any)?.data ?? res?.data
       if (data?.displayName) setStoreName(data.displayName)
-    })
+    }).finally(() => setIsLoading(false))
   }, [])
 
   const proFeatures = [
@@ -34,7 +36,13 @@ export default function SubscriptionPage() {
       <div>
         <h1 className="text-3xl font-bold tracking-tight text-gray-900">{t('nav.subscription')}</h1>
         <p className="mt-2 text-gray-500">
-          {storeName ? `Managing plan for ${storeName}.` : 'Manage your current plan.'}
+          {isLoading ? (
+            <TurningZeroLoader size="sm" className="mt-2" />
+          ) : storeName ? (
+            `Managing plan for ${storeName}.`
+          ) : (
+            'Manage your current plan.'
+          )}
         </p>
       </div>
 

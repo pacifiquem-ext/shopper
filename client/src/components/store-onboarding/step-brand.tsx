@@ -4,25 +4,14 @@ import { UploadCloud } from 'lucide-react'
 import Image from 'next/image'
 import { useRef, useState } from 'react'
 import { useTranslations } from 'next-intl'
+import { toast } from 'sonner'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
+import { processStoreLogoFile } from '@/lib/store-logo-image'
 import { useStoreOnboardingStore } from '@/store/store-onboarding.store'
 import { StepHeader } from './step-header'
 import { useWizardField } from './wizard-context'
-
-function readFileAsDataUrl(file: File) {
-  return new Promise<string>((resolve, reject) => {
-    const reader = new FileReader()
-    reader.onerror = () => reject(new Error('failed'))
-    reader.onload = () => {
-      const result = reader.result
-      if (typeof result === 'string') resolve(result)
-      else reject(new Error('failed'))
-    }
-    reader.readAsDataURL(file)
-  })
-}
 
 export function StepBrand() {
   const t = useTranslations('storeOnboarding')
@@ -39,10 +28,26 @@ export function StepBrand() {
 
     setIsUploading(true)
     try {
-      const dataUrl = await readFileAsDataUrl(file)
-      setLogoDataUrl(dataUrl)
+      const result = await processStoreLogoFile(file)
+      if (!result.ok) {
+        if (result.error === 'invalid_type') {
+          toast.error(t('brand.logoErrors.invalidType'))
+        } else if (result.error === 'too_small') {
+          toast.error(
+            t('brand.logoErrors.tooSmall', {
+              width: result.width ?? 0,
+              height: result.height ?? 0,
+            }),
+          )
+        } else {
+          toast.error(t('brand.logoErrors.loadFailed'))
+        }
+        return
+      }
+      setLogoDataUrl(result.dataUrl)
     } finally {
       setIsUploading(false)
+      if (fileInputRef.current) fileInputRef.current.value = ''
     }
   }
 
@@ -59,10 +64,14 @@ export function StepBrand() {
 
       <div className="space-y-8">
         <div>
-          {/* Airbnb style drag and drop box */}
           {draft.logoDataUrl ? (
-            <div className="relative flex aspect-video w-full flex-col items-center justify-center overflow-hidden rounded-2xl border-2 border-dashed border-gray-300 bg-gray-50 transition-colors hover:bg-gray-100">
-              <Image src={draft.logoDataUrl} alt="Logo" fill className="object-contain p-4" />
+            <div className="relative mx-auto flex aspect-[4/5] w-full max-w-xs flex-col items-center justify-center overflow-hidden rounded-2xl border-2 border-dashed border-gray-300 bg-gray-50 transition-colors hover:bg-gray-100 sm:mx-0 sm:max-w-sm">
+              <Image
+                src={draft.logoDataUrl}
+                alt={t('brand.logoAlt')}
+                fill
+                className="object-cover"
+              />
               <div className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 transition-opacity hover:opacity-100">
                 <Button type="button" variant="secondary" onClick={() => setLogoDataUrl(null)}>
                   {t('brand.removeLogoBtn', { defaultValue: 'Remove logo' })}
@@ -74,12 +83,12 @@ export function StepBrand() {
               type="button"
               disabled={isUploading}
               onClick={() => fileInputRef.current?.click()}
-              className="focus:border-brand-600 flex aspect-video w-full flex-col items-center justify-center rounded-2xl border-2 border-dashed border-gray-400 bg-gray-50 transition-all hover:bg-gray-100 focus:outline-none"
+              className="focus:border-brand-600 mx-auto flex aspect-[4/5] w-full max-w-xs flex-col items-center justify-center rounded-2xl border-2 border-dashed border-gray-400 bg-gray-50 transition-all hover:bg-gray-100 focus:outline-none sm:mx-0 sm:max-w-sm"
             >
               <input
                 ref={fileInputRef}
                 type="file"
-                accept="image/*"
+                accept="image/jpeg,image/png,image/webp"
                 className="hidden"
                 onChange={(e) => handlePickLogo(e.target.files?.[0] ?? null)}
               />
@@ -89,9 +98,12 @@ export function StepBrand() {
                   ? t('brand.uploading', { defaultValue: 'Uploading...' })
                   : t('brand.uploadLogo', { defaultValue: 'Upload your logo' })}
               </div>
-              <div className="mt-2 text-sm text-gray-500">
+              <div className="mt-2 px-6 text-center text-sm text-gray-500">
                 {t('brand.dragDrop', { defaultValue: 'Click to browse or drag and drop' })}
               </div>
+              <p className="mt-3 max-w-xs px-6 text-center text-xs text-gray-500">
+                {t('brand.logoHint')}
+              </p>
             </button>
           )}
         </div>

@@ -1,6 +1,6 @@
 'use client'
 
-import { Check, Plus, ShoppingBag } from 'lucide-react'
+import { Check, ShoppingBag } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
@@ -47,7 +47,7 @@ export function QuickAddButton({
 
     toast.success(toastTitle, {
       description: item.name,
-      icon: <ShoppingBag className='size-4' />,
+      duration: 2200,
     })
   }
 
@@ -58,7 +58,7 @@ export function QuickAddButton({
       title={label}
       onClick={handleClick}
       className={cn(
-        'group/cta relative inline-flex h-11 shrink-0 items-center justify-center overflow-hidden rounded-full font-medium tracking-tight shadow-[0_6px_18px_rgba(43,43,43,0.18)] transition-all duration-500 ease-[cubic-bezier(0.2,0.8,0.2,1)] active:scale-[0.96]',
+        'group/cta relative inline-flex h-10 shrink-0 items-center justify-center overflow-hidden rounded-full px-3 font-medium tracking-tight shadow-[0_6px_18px_rgba(43,43,43,0.18)] transition-colors duration-300 ease-out active:scale-[0.96] sm:h-11 sm:px-4',
         fullWidth
           ? cn(
               'w-full rounded-xl',
@@ -67,46 +67,40 @@ export function QuickAddButton({
                 : 'bg-[var(--vm-secondary,#A3FF12)] text-[var(--vm-primary,#121212)] hover:brightness-95',
             )
           : success
-            ? 'w-[120px] bg-[#7D8F69] text-white'
-            : 'w-11 bg-[#B76E5D] text-white hover:w-[140px]',
+            ? 'bg-[#7D8F69] text-white'
+            : 'bg-[#B76E5D] text-white hover:bg-[#A66250]',
         className,
       )}
     >
-      {!fullWidth ? (
-        <Plus
-          aria-hidden
-          className={cn(
-            'absolute size-[18px] transition-all duration-300',
-            success
-              ? 'opacity-0 scale-50 -rotate-90'
-              : 'opacity-100 scale-100 rotate-0 group-hover/cta:opacity-0 group-hover/cta:scale-50',
+      {fullWidth ? (
+        <span className='inline-flex items-center gap-1.5 text-[12px] font-semibold tracking-tight'>
+          {success ? (
+            <>
+              <Check className='size-4' aria-hidden strokeWidth={2.5} />
+              {addedLabel}
+            </>
+          ) : (
+            <>
+              <ShoppingBag className='size-4' aria-hidden strokeWidth={2} />
+              {label}
+            </>
           )}
-        />
-      ) : null}
-
-      <span
-        aria-hidden={!fullWidth}
-        className={cn(
-          'inline-flex items-center gap-1.5 text-[12px] font-semibold tracking-tight transition-all duration-300',
-          fullWidth
-            ? 'opacity-100'
-            : success
-              ? 'opacity-100 translate-y-0'
-              : 'opacity-0 translate-y-1 group-hover/cta:opacity-100 group-hover/cta:translate-y-0',
-        )}
-      >
-        {success ? (
-          <>
-            <Check className='size-4' aria-hidden strokeWidth={2.5} />
-            {addedLabel}
-          </>
-        ) : (
-          <>
-            <ShoppingBag className='size-4' aria-hidden strokeWidth={2} />
-            {label}
-          </>
-        )}
-      </span>
+        </span>
+      ) : (
+        <span className='inline-flex items-center gap-1.5 text-[11px] font-semibold sm:text-xs'>
+          {success ? (
+            <>
+              <Check aria-hidden className='size-4 shrink-0' strokeWidth={2.5} />
+              <span>{addedLabel}</span>
+            </>
+          ) : (
+            <>
+              <ShoppingBag aria-hidden className='size-4 shrink-0' strokeWidth={2} />
+              <span>{label}</span>
+            </>
+          )}
+        </span>
+      )}
     </button>
   )
 }

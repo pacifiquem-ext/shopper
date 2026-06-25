@@ -116,6 +116,36 @@ export class OrdersRepository {
         });
     }
 
+    async findUnreadCustomerMessagesForStore(storeId: string, limit = 10) {
+        return this.prisma.orderMessage.findMany({
+            where: {
+                isRead: false,
+                sender: 'CUSTOMER',
+                order: {
+                    storeId,
+                },
+            },
+            orderBy: { createdAt: 'desc' },
+            take: limit,
+            include: {
+                order: {
+                    select: {
+                        id: true,
+                        orderNumber: true,
+                    },
+                },
+            },
+        });
+    }
+
+    async markMessagesRead(ids: string[]) {
+        if (ids.length === 0) return { count: 0 };
+        return this.prisma.orderMessage.updateMany({
+            where: { id: { in: ids } },
+            data: { isRead: true },
+        });
+    }
+
     async findPayments(
         storeId: string,
         params: {

@@ -50,6 +50,15 @@ export interface OrderMessageApi {
   createdAt: string
 }
 
+export interface OrderNotificationApi {
+  id: string
+  orderId: string
+  orderNumber: string
+  title: string
+  body: string
+  createdAt: string
+}
+
 export interface OrderApi {
   id: string
   orderNumber: string
@@ -93,6 +102,16 @@ export interface OrderFiltersApi {
 }
 
 export const ordersService = {
+  async getCount(filters: Omit<OrderFiltersApi, 'page' | 'limit'> = {}): Promise<number> {
+    const res = await this.getAll({ ...filters, page: 1, limit: 1 })
+    const payload = res?.data as OrderListApi | { data?: OrderListApi } | undefined
+    if (payload && 'total' in payload && typeof payload.total === 'number') {
+      return payload.total
+    }
+    const nested = (payload as { data?: OrderListApi })?.data
+    return nested?.total ?? 0
+  },
+
   async getAll(filters: OrderFiltersApi = {}): Promise<ApiResponse<OrderListApi>> {
     const params = new URLSearchParams()
     if (filters.page) params.set('page', String(filters.page))
@@ -133,6 +152,18 @@ export const ordersService = {
 
   async getMessages(id: string): Promise<ApiResponse<OrderMessageApi[]>> {
     return (await api.get(`/orders/${id}/messages`)) as ApiResponse<OrderMessageApi[]>
+  },
+
+  async getNotifications(limit: number = 10): Promise<ApiResponse<OrderNotificationApi[]>> {
+    const params = new URLSearchParams()
+    params.set('limit', String(limit))
+    return (await api.get(`/orders/notifications?${params.toString()}`)) as ApiResponse<
+      OrderNotificationApi[]
+    >
+  },
+
+  async markNotificationsRead(ids: string[]): Promise<ApiResponse<{ count: number }>> {
+    return (await api.put('/orders/notifications/read', { ids })) as ApiResponse<{ count: number }>
   },
 
   async exportCsv(): Promise<Blob> {

@@ -5,6 +5,7 @@ import {
     IsPhoneNumber,
     Length,
 } from 'class-validator';
+import { NormalizePhone } from '../../../common/helper/decorators/normalize-phone.decorator';
 
 export class VerifyPhoneDto {
     @ApiProperty({
@@ -12,6 +13,7 @@ export class VerifyPhoneDto {
         example: '+250788123456',
         required: true,
     })
+    @NormalizePhone()
     @IsNotEmpty()
     @IsPhoneNumber()
     phoneNumber: string;
