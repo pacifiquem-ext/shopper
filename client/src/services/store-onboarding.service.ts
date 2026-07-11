@@ -1,5 +1,5 @@
 import { api } from '@/lib/axios'
-import type { ApiResponse } from '@/services/auth.service'
+import type { ApiResponse } from '@onlineshop/shared'
 
 export interface UpdateDraftDto {
   draftData: Record<string, any>

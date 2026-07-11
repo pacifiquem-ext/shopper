@@ -1,3 +1,4 @@
+import type { ApiResponse } from '@onlineshop/shared'
 import { api } from '@/lib/axios'
 import type {
   LoginInput,
@@ -5,6 +6,8 @@ import type {
   ForgotPasswordInput,
   ResetPasswordInput,
 } from '@/validations/auth'
+
+export type { ApiResponse } from '@onlineshop/shared'
 
 export interface AuthTokenResponse {
   accessToken: string
@@ -17,13 +20,6 @@ export interface AuthTokenResponse {
     role: string
     status: string
   }
-}
-
-export interface ApiResponse<T = any> {
-  statusCode: number
-  message: string
-  timestamp: string
-  data: T
 }
 
 export interface VerifyPhoneInput {

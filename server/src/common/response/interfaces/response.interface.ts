@@ -1,34 +1,26 @@
 import { ClassConstructor } from 'class-transformer';
+import type {
+    ApiErrorResponse,
+    ApiSuccessResponse,
+    ItemsPage,
+    OffsetPage,
+    PaginationMetadata,
+} from '@onlineshop/shared';
 
-export interface IPaginationMetadata {
-    currentPage: number;
-    itemsPerPage: number;
-    totalItems: number;
-    totalPages: number;
-}
+/** @deprecated Prefer PaginationMetadata from @onlineshop/shared */
+export type IPaginationMetadata = PaginationMetadata;
 
-interface IApiBaseResponse {
-    statusCode: number;
-    message: string;
-    timestamp: string;
-}
+/** @deprecated Prefer ApiSuccessResponse from @onlineshop/shared */
+export type IApiSuccessResponse<T> = ApiSuccessResponse<T>;
 
-export interface IApiSuccessResponse<T> extends IApiBaseResponse {
-    data: T;
-}
+/** @deprecated Prefer ItemsPage from @onlineshop/shared */
+export type IApiPaginatedData<T> = ItemsPage<T>;
 
-export interface IApiPaginatedData<T> {
-    items: T[];
-    metadata: IPaginationMetadata;
-}
+/** @deprecated Prefer ApiSuccessResponse<ItemsPage<T>> */
+export interface IApiPaginatedResponse<T> extends ApiSuccessResponse<ItemsPage<T>> {}
 
-export interface IApiPaginatedResponse<T> extends IApiBaseResponse {
-    data: IApiPaginatedData<T>;
-}
-
-export interface IApiErrorResponse extends IApiBaseResponse {
-    error?: string | string[] | Record<string, unknown>;
-}
+/** @deprecated Prefer ApiErrorResponse from @onlineshop/shared */
+export type IApiErrorResponse = ApiErrorResponse;
 
 export interface IGenericResponse {
     success: boolean;
@@ -45,3 +37,5 @@ export interface IGenericResponseOptions {
     httpStatus: number;
     messageKey: string;
 }
+
+export type { ApiSuccessResponse, ApiErrorResponse, OffsetPage, ItemsPage, PaginationMetadata };

@@ -19,10 +19,12 @@ zones, accept payments, and grow via Basic → Pro plan upgrades. Buyers browse 
 shop storefronts, checkout, and track order status. Full product intent lives in [`README.md`](./README.md)
 (vision, pricing, journeys, modules, and explicit out-of-scope list).
 
-The repository is a **`client/` + `server/` monorepo** in active build-out:
+The repository is a **pnpm monorepo** (`client/` + `server/` + `packages/shared`) in active build-out:
 
-- **Client:** Next.js (App Router) + React + TypeScript + Tailwind + shadcn/ui + next-intl + Zustand + Axios
-- **Server:** NestJS + TypeScript + Prisma + PostgreSQL + Redis/Bull + JWT auth + nestjs-i18n + Pino
+- **Client:** Next.js (App Router) + React + TypeScript + Tailwind + AlignUI + next-intl + Zustand + Axios (`@onlineshop/client`)
+- **Server:** NestJS + TypeScript + Prisma + PostgreSQL + Redis/Bull + JWT auth + nestjs-i18n + Pino (`@onlineshop/server`)
+- **Shared:** `@onlineshop/shared` — API envelope types, domain status constants, store template IDs
+- **Dev:** from repo root run `pnpm dev` (shared build/watch + Nest + Next in parallel)
 
 The mission: ship a **fully functional, production-grade, fast full-stack application** — not a
 presentational shell — **built by AI agents** held to professional engineering standards. Every
@@ -178,9 +180,8 @@ These override convenience, speed of typing, or "I think this is probably fine."
 ```
 
 `client/` and `server/` are separate packages (each with its own `pnpm-lock.yaml` / workspace).
-There is no shared package today — keep DTOs honest via API contracts and mirrored types/Zod on the
-client; if duplication of a contract becomes painful, stop and propose a `packages/shared` (or
-equivalent) rather than inventing a third copy.
+Shared contracts live in `packages/shared` (`@onlineshop/shared`). Prefer extending that package
+instead of hand-duplicating DTO/envelope shapes on client and server.
 
 **Backend modules** live under `server/src/modules/` and are **domain-based** (auth, products,
 orders, inventory, catalog, onboarding, …). Controllers stay thin; business logic lives in
@@ -234,7 +235,7 @@ than silently deviating**, and update this section when they do.
 - **Observability:** optional **Sentry** (`SENTRY_DSN`) via app config.
 - **HTTP hardening:** Helmet, compression, throttling (`@nestjs/throttler`), CORS from config.
 - **i18n (server):** **nestjs-i18n** — message files under `server/src/languages/{en,rw}/`.
-- **Package managers:** **pnpm only** (`preinstall` enforces `only-allow pnpm` on both packages).
+- **Package managers:** **pnpm workspace** at repo root (`pnpm-workspace.yaml`). Shared must build first (`pnpm build:shared`).
 - **Testing:** **Vitest** + Playwright e2e on the client; **Jest** + Supertest patterns on the
   server (`nestjs-best-practices` test rules).
 - **Formatting & linting:** Prettier + ESLint on both packages (`eslint-config-prettier` so they

@@ -184,3 +184,18 @@ lands, move the row into §1 or §2 with status **required/optional** and implem
 - Production: distinct secrets, locked CORS origins, real Redis, no `STORE_AUTO_APPROVE=true`, no
   reliance on DEV OTP logs.
 - Prefer different secrets per environment (local / staging / production).
+
+---
+
+## Monorepo scripts (root)
+
+From the repository root after `pnpm install`:
+
+| Command | What it does |
+| ------- | ------------ |
+| `pnpm dev` | Build `@onlineshop/shared`, then run shared watch + Nest (`:3001`) + Next (`:3000`) |
+| `pnpm dev:server` | Nest only |
+| `pnpm dev:client` | Next only |
+| `pnpm build:shared` | Compile shared contracts to `packages/shared/dist` |
+
+Shared package: `packages/shared` (`@onlineshop/shared`). Client and server depend on it via `workspace:*`.

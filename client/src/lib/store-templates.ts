@@ -1,18 +1,13 @@
 import { MARKETPLACE_BRAND } from '@/lib/marketplace-brand-colors'
+import {
+  STORE_TEMPLATE_IDS,
+  parseStoreTemplateId,
+  type StoreTemplateId,
+  type BrandColorsWithTemplate,
+} from '@onlineshop/shared'
 
-export type StoreTemplateId = 'DEFAULT' | 'VIBRANT_MARKET' | 'ISHUSHO_CRAFTS'
-
-export type BrandColorsWithTemplate = {
-  primary?: string
-  secondary?: string
-  template?: StoreTemplateId
-}
-
-export const STORE_TEMPLATE_IDS = {
-  DEFAULT: 'DEFAULT',
-  VIBRANT_MARKET: 'VIBRANT_MARKET',
-  ISHUSHO_CRAFTS: 'ISHUSHO_CRAFTS',
-} as const satisfies Record<string, StoreTemplateId>
+export { STORE_TEMPLATE_IDS, parseStoreTemplateId }
+export type { StoreTemplateId, BrandColorsWithTemplate }
 
 /** Classic Market (DEFAULT) — light AlignUI green commerce, calm premium. */
 export const CLASSIC_MARKET_COLORS = {
@@ -177,16 +172,6 @@ export const STORE_TEMPLATE_OPTIONS: Array<{
     tagKey: 'ishushoCraftsTemplateTag',
   },
 ]
-
-export function parseStoreTemplateId(value: unknown): StoreTemplateId {
-  const normalized = typeof value === 'string' ? value.trim().toUpperCase() : ''
-  if (normalized === STORE_TEMPLATE_IDS.ISHUSHO_CRAFTS) return STORE_TEMPLATE_IDS.ISHUSHO_CRAFTS
-  if (normalized === STORE_TEMPLATE_IDS.VIBRANT_MARKET) return STORE_TEMPLATE_IDS.VIBRANT_MARKET
-  if (normalized === 'CLASSIC_MARKET' || normalized === 'KIGALI_CLASSIC' || normalized === 'LAKE_BREEZE') {
-    return STORE_TEMPLATE_IDS.DEFAULT
-  }
-  return STORE_TEMPLATE_IDS.DEFAULT
-}
 
 export function isVibrantMarketTemplate(template?: string | null): boolean {
   return template === STORE_TEMPLATE_IDS.VIBRANT_MARKET

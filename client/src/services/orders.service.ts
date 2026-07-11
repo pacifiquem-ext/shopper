@@ -1,5 +1,5 @@
 import { api } from '@/lib/axios'
-import type { ApiResponse } from '@/services/auth.service'
+import type { ApiResponse, OffsetPage } from '@onlineshop/shared'
 
 export interface OrderLineItemApi {
   id: string
@@ -83,13 +83,7 @@ export interface OrderApi {
   messages?: OrderMessageApi[]
 }
 
-export interface OrderListApi {
-  data: OrderApi[]
-  total: number
-  page: number
-  limit: number
-  totalPages: number
-}
+export type OrderListApi = OffsetPage<OrderApi>
 
 export interface OrderFiltersApi {
   page?: number

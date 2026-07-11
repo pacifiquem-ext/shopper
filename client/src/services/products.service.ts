@@ -1,5 +1,5 @@
+import type { ApiResponse, OffsetPage } from '@onlineshop/shared'
 import { api } from '@/lib/axios'
-import type { ApiResponse } from '@/services/auth.service'
 
 export interface ProductVariantApi {
   id: string
@@ -36,13 +36,8 @@ export interface ProductApi {
   updatedAt: string
 }
 
-export interface ProductListApi {
-  data: ProductApi[]
-  total: number
-  page: number
-  limit: number
-  totalPages: number
-}
+/** Nested under ApiResponse — matches Nest products list controller. */
+export type ProductListApi = OffsetPage<ProductApi>
 
 export interface CreateProductPayload {
   name: string

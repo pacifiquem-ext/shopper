@@ -192,7 +192,7 @@ api.interceptors.response.use(
         lastNetworkErrorToastAt = now
         toast.error('Cannot connect to API server', {
           description:
-            'Ensure the NestJS server is running (pnpm dev in server/) and NEXT_PUBLIC_API_URL is correct.',
+            'Ensure the API is running (`pnpm dev` from the repo root) and NEXT_PUBLIC_API_URL is correct.',
         })
       }
 

@@ -1,0 +1,23 @@
+{
+  "name": "onlineshop",
+  "version": "1.0.0",
+  "private": true,
+  "description": "OnlineShop.rw monorepo — client, server, shared",
+  "packageManager": "pnpm@10.12.1",
+  "engines": {
+    "node": ">=20.0.0",
+    "pnpm": ">=9.0.0"
+  },
+  "scripts": {
+    "preinstall": "npx only-allow pnpm",
+    "build:shared": "pnpm --filter @onlineshop/shared build",
+    "dev": "pnpm build:shared && pnpm run --parallel --filter @onlineshop/shared --filter @onlineshop/server --filter @onlineshop/client dev",
+    "dev:client": "pnpm --filter @onlineshop/client dev",
+    "dev:server": "pnpm --filter @onlineshop/server dev",
+    "dev:shared": "pnpm --filter @onlineshop/shared dev",
+    "build": "pnpm build:shared && pnpm --filter @onlineshop/server build && pnpm --filter @onlineshop/client build",
+    "typecheck": "pnpm --filter @onlineshop/shared typecheck && pnpm --filter @onlineshop/client type-check",
+    "lint": "pnpm --filter @onlineshop/client lint && pnpm --filter @onlineshop/server lint",
+    "test": "pnpm --filter @onlineshop/client test --run && pnpm --filter @onlineshop/server test"
+  }
+}

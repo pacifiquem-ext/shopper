@@ -1,4 +1,4 @@
-import type { ApiResponse } from '@/services/auth.service'
+import type { ApiResponse } from '@onlineshop/shared'
 
 function isServer(): boolean {
   return typeof window === 'undefined'

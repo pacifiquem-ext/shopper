@@ -6,6 +6,8 @@ const withNextIntl = createNextIntlPlugin()
 const withBundleAnalyzer = bundleAnalyzer({ enabled: process.env.ANALYZE === 'true' })
 
 const nextConfig: NextConfig = {
+  transpilePackages: ['@onlineshop/shared'],
+
   webpack(config) {
     config.module.rules.push({
       test: /\.svg$/,

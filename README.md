@@ -168,3 +168,32 @@ To maintain project focus, the following features are strictly excluded from the
 ## 10. Strategic Structure
 
 Basic must feel functional but limited. Pro must feel necessary for real growth. The core product strategy is to demonstrate that analytics and discounts increase revenue even slightly, to encourage businesses to upgrade. The overall goal is to create dependency on Pro capabilities.
+
+
+---
+
+## Developer setup (monorepo)
+
+```bash
+# from repo root
+pnpm install
+cp server/.env.example server/.env   # or use your local secrets
+cp client/.env.example client/.env.local
+pnpm dev   # builds @onlineshop/shared, then runs shared watch + Nest + Next together
+```
+
+Packages:
+
+| Package | Path | Role |
+| ------- | ---- | ---- |
+| `@onlineshop/shared` | `packages/shared` | API envelope, statuses, template IDs |
+| `@onlineshop/server` | `server` | NestJS API |
+| `@onlineshop/client` | `client` | Next.js app |
+
+API success responses always look like:
+
+```json
+{ "statusCode": 200, "message": "...", "timestamp": "...", "data": { } }
+```
+
+List endpoints nest offset pagination under `data`: `{ data: T[], total, page, limit, totalPages }`.

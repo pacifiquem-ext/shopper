@@ -1,5 +1,5 @@
 import { api } from '@/lib/axios'
-import type { ApiResponse } from '@/services/auth.service'
+import type { ApiResponse, OffsetPage } from '@onlineshop/shared'
 
 export interface PaymentOrderApi {
   orderNumber: string
@@ -22,13 +22,7 @@ export interface PaymentApi {
   order: PaymentOrderApi
 }
 
-export interface PaymentListApi {
-  data: PaymentApi[]
-  total: number
-  page: number
-  limit: number
-  totalPages: number
-}
+export type PaymentListApi = OffsetPage<PaymentApi>
 
 export interface PaymentFiltersApi {
   page?: number

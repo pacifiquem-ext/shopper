@@ -1,5 +1,5 @@
 {
-  "name": "onlineshop_rw",
+  "name": "@onlineshop/client",
   "version": "1.0.0",
   "private": true,
   "author": {
@@ -113,7 +113,8 @@
     "tailwindcss-animate": "^1.0.7",
     "vaul": "latest",
     "zod": "^3.25.76",
-    "zustand": "^5.0.11"
+    "zustand": "^5.0.11",
+    "@onlineshop/shared": "workspace:*"
   },
   "devDependencies": {
     "@chromatic-com/storybook": "^4.0.1",

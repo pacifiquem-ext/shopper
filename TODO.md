@@ -125,6 +125,7 @@ _(empty — pick from Next up and move here with owner + date)_
 ### Foundation
 
 - [x] Monorepo layout: `client/` (Next.js App Router) + `server/` (NestJS) with pnpm
+- [x] Root pnpm workspace: `pnpm dev` runs shared + server + client; `@onlineshop/shared` API contracts
 - [x] Prisma schema + migrations: users, OTP, refresh tokens, stores/KYC/drafts, products/variants, inventory, orders/payments/fulfillment/messages, delivery zones, analytics snapshots
 - [x] Nest common layer: config, database (Neon cold-start retry), cache/Redis module, request guards, response filters, tenant/store decorators, health (`/health`)
 - [x] Docker Compose: Postgres 16 + Redis 7 + optional server service
