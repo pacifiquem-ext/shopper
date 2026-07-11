@@ -32,7 +32,7 @@ export function Sparkline({
       <path
         d={d}
         fill="none"
-        className={cn('stroke-brand-900', strokeClassName)}
+        className={cn('stroke-primary-base', strokeClassName)}
         strokeWidth={strokeWidth}
         strokeLinecap="round"
       />

@@ -151,12 +151,30 @@ export async function ShopPage({
   const newProducts = filtersActive
     ? []
     : filterAndSortProducts({ products, category }).slice(0, 4)
-  const catalogStore = data.store ?? products[0]?.store ?? null
+  const catalogStore = data.store ?? null
 
-  const storeContext = subdomain
+  // Invalid / unknown store slug — do not fake a storefront from the query param alone.
+  if (subdomain && !catalogStore) {
+    return (
+      <div className='mx-auto flex min-h-[50vh] max-w-lg flex-col items-center justify-center gap-4 px-4 py-20 text-center'>
+        <p className='text-label-sm uppercase tracking-wide text-text-soft-400'>
+          {t('storeNotFoundEyebrow')}
+        </p>
+        <h1 className='text-title-h5 text-text-strong-950'>{t('storeNotFoundTitle')}</h1>
+        <p className='text-paragraph-sm text-text-sub-600'>
+          {t('storeNotFoundBody', { store: subdomain })}
+        </p>
+        <Button asChild variant='outline' className='mt-2 rounded-full'>
+          <Link href='/'>{t('homeLink')}</Link>
+        </Button>
+      </div>
+    )
+  }
+
+  const storeContext = subdomain && catalogStore
     ? {
-        subdomain,
-        displayName: catalogStore?.displayName ?? subdomain,
+        subdomain: catalogStore.subdomain || subdomain,
+        displayName: catalogStore.displayName,
       }
     : null
 
@@ -382,7 +400,7 @@ export async function ShopPage({
                 href='/login'
                 prefetch={false}
                 aria-label={t('login')}
-                className='group inline-flex h-9 shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-full border border-stroke-soft-200 bg-white px-3 text-xs font-semibold leading-none text-text-strong-950 shadow-sm transition-colors hover:border-primary-base/45 hover:bg-bg-weak-50 hover:text-text-strong-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-base/40 sm:h-10 sm:px-4 sm:text-sm'
+                className='group inline-flex h-9 shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-full border border-stroke-soft-200 bg-bg-white-0 px-3 text-xs font-semibold leading-none text-text-strong-950 shadow-regular-xs transition-colors hover:border-primary-base/45 hover:bg-bg-weak-50 hover:text-text-strong-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-base/40 sm:h-10 sm:px-4 sm:text-sm'
               >
                 <LogIn
                   className='size-3.5 shrink-0 text-text-strong-950 transition-colors group-hover:text-text-strong-950 sm:size-4'
@@ -395,7 +413,7 @@ export async function ShopPage({
                 href={merchantSignupHref() as '/signup'}
                 prefetch={false}
                 aria-label={t('becomeSeller')}
-                className='group inline-flex h-9 shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-full bg-primary-base px-3 text-xs font-semibold leading-none text-white shadow-[0_4px_18px_color-mix(in_srgb,var(--color-primary-base)_38%,transparent)] transition-colors hover:bg-primary-darker hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-base/50 sm:h-10 sm:px-4 sm:text-sm'
+                className='group inline-flex h-9 shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-full bg-primary-base px-3 text-xs font-semibold leading-none text-static-white shadow-regular-xs transition-colors hover:bg-primary-darker hover:text-static-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-base/50 sm:h-10 sm:px-4 sm:text-sm'
               >
                 <StoreIcon
                   className='size-3.5 shrink-0 text-white transition-colors group-hover:text-white sm:size-4'
@@ -423,12 +441,12 @@ export async function ShopPage({
         >
           <div className='os-fade-up relative z-10 max-w-3xl'>
             {storeContext ? (
-              <span className='mb-5 inline-flex items-center gap-2 rounded-full border border-[#B76E5D]/30 bg-primary-base/10 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.08em] text-primary-base backdrop-blur-md'>
+              <span className='mb-5 inline-flex items-center gap-2 rounded-full border border-[#1daf61]/30 bg-primary-base/10 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.08em] text-primary-base backdrop-blur-md'>
                 <StoreIcon className='size-3.5' aria-hidden strokeWidth={2.25} />
                 {t('storeEyebrow')}
               </span>
             ) : (
-              <span className='mb-5 inline-flex items-center gap-2 rounded-full border border-stroke-soft-200 bg-white/60 px-3 py-1.5 text-xs font-medium text-text-strong-950 shadow-[0_2px_6px_rgba(43,43,43,0.04)] backdrop-blur-md'>
+              <span className='mb-5 inline-flex items-center gap-2 rounded-full border border-stroke-soft-200 bg-white/60 px-3 py-1.5 text-xs font-medium text-text-strong-950 shadow-regular-xs backdrop-blur-md'>
                 <Sparkles className='size-3.5 text-primary-base' aria-hidden />
                 {t('heroEyebrow')}
               </span>
@@ -436,23 +454,23 @@ export async function ShopPage({
             <h1 className='max-w-4xl text-5xl font-black tracking-[-0.055em] text-text-strong-950 md:text-7xl'>
               {storeContext ? storeContext.displayName : t('heroTitle')}
             </h1>
-            <p className='mt-6 max-w-2xl text-base leading-8 text-[#6E6A66] md:text-lg'>
+            <p className='mt-6 max-w-2xl text-base leading-8 text-[#5c5c5c] md:text-lg'>
               {storeContext
                 ? t('storeHeroSubtitle', { store: storeContext.displayName })
                 : t('heroSubtitle')}
             </p>
             <div className='mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap'>
-              <Button asChild size='lg' className='h-13 rounded-full bg-primary-base px-8 text-white shadow-[0_12px_32px_rgba(183,110,93,0.28)] transition-transform hover:-translate-y-0.5 hover:bg-primary-darker'>
+              <Button asChild size='lg' className='h-13 rounded-full bg-primary-base px-8 text-static-white shadow-regular-xs transition-transform hover:-translate-y-0.5 hover:bg-primary-darker'>
                 <a href='#products'>
                   {t('heroCta')}
                   <ArrowRight className='size-4' aria-hidden />
                 </a>
               </Button>
-              <Button asChild size='lg' variant='outline' className='h-13 rounded-full border-stroke-soft-200 bg-white/60 px-8 text-text-strong-950 backdrop-blur-md hover:border-[#B76E5D]/30 hover:bg-white/80 hover:text-text-strong-950'>
+              <Button asChild size='lg' variant='outline' className='h-13 rounded-full border-stroke-soft-200 bg-bg-white-0 px-8 text-text-strong-950 shadow-regular-xs hover:border-primary-base/25 hover:bg-bg-weak-50 hover:text-text-strong-950'>
                 <a href='#new-arrivals'>{t('heroSecondaryCta')}</a>
               </Button>
               {!storeContext ? (
-                <Button asChild size='lg' variant='outline' className='h-13 rounded-full border-[#B76E5D]/35 bg-white/70 px-8 text-primary-base backdrop-blur-md hover:border-[#B76E5D]/50 hover:bg-white'>
+                <Button asChild size='lg' variant='outline' className='h-13 rounded-full border-stroke-soft-200 bg-bg-white-0 px-8 text-primary-base shadow-regular-xs hover:border-primary-base/35 hover:bg-primary-alpha-10'>
                   <Link href={merchantSignupHref() as '/signup'} prefetch={false}>
                     {t('becomeSeller')}
                   </Link>
@@ -460,17 +478,17 @@ export async function ShopPage({
               ) : null}
             </div>
             <div className='mt-8 grid max-w-xl grid-cols-3 gap-3 text-sm'>
-              <div className='rounded-2xl border border-stroke-soft-200 bg-white/60 p-4 shadow-[0_1px_2px_rgba(43,43,43,0.03)] backdrop-blur-md'>
+              <div className='rounded-2xl border border-stroke-soft-200 bg-bg-white-0 p-4 shadow-regular-xs'>
                 <p className='text-2xl font-bold text-text-strong-950'>{products.length}</p>
-                <p className='text-[#6E6A66]'>{t('statProducts')}</p>
+                <p className='text-text-sub-600'>{t('statProducts')}</p>
               </div>
-              <div className='rounded-2xl border border-stroke-soft-200 bg-white/60 p-4 shadow-[0_1px_2px_rgba(43,43,43,0.03)] backdrop-blur-md'>
+              <div className='rounded-2xl border border-stroke-soft-200 bg-bg-white-0 p-4 shadow-regular-xs'>
                 <p className='text-2xl font-bold text-text-strong-950'>{categories.length}</p>
-                <p className='text-[#6E6A66]'>{t('statCategories')}</p>
+                <p className='text-text-sub-600'>{t('statCategories')}</p>
               </div>
-              <div className='rounded-2xl border border-stroke-soft-200 bg-white/60 p-4 shadow-[0_1px_2px_rgba(43,43,43,0.03)] backdrop-blur-md'>
+              <div className='rounded-2xl border border-stroke-soft-200 bg-bg-white-0 p-4 shadow-regular-xs'>
                 <p className='text-2xl font-bold text-text-strong-950'>{products.reduce((sum, p) => sum + availableStock(p), 0)}</p>
-                <p className='text-[#6E6A66]'>{t('statStock')}</p>
+                <p className='text-text-sub-600'>{t('statStock')}</p>
               </div>
             </div>
           </div>
@@ -487,20 +505,20 @@ export async function ShopPage({
                 <Link
                   href={`/shop/${product.id}`}
                   key={product.id}
-                  className={`absolute w-56 overflow-hidden rounded-[2rem] border border-stroke-soft-200 bg-white/65 p-2 shadow-[0_24px_60px_rgba(43,43,43,0.12)] backdrop-blur-md transition-transform hover:scale-[1.025] hover:border-[#B76E5D]/40 ${positions[index]}`}
+                  className={`absolute w-56 overflow-hidden rounded-20 border border-stroke-soft-200 bg-bg-white-0 p-2 shadow-regular-md transition-transform hover:scale-[1.02] hover:border-primary-base/30 ${positions[index]}`}
                 >
-                  <div className='aspect-square overflow-hidden rounded-[1.45rem] bg-[#EAE4DC]'>
+                  <div className='aspect-square overflow-hidden rounded-[1.25rem] bg-bg-soft-200'>
                     {img ? (
                       <img src={img} alt={product.name} className='size-full object-cover' />
                     ) : (
                       <div className='flex size-full items-center justify-center'>
-                        <Package className='size-8 text-[#6E6A66]' aria-hidden />
+                        <Package className='size-8 text-text-soft-400' aria-hidden />
                       </div>
                     )}
                   </div>
                   <div className='px-2 py-3'>
                     <p className='line-clamp-1 text-sm font-semibold text-text-strong-950'>{product.name}</p>
-                    <p className='text-xs text-[#6E6A66]'>{formatRwf(product.priceFrom ?? 0)} RWF</p>
+                    <p className='text-xs text-text-sub-600'>{formatRwf(product.priceFrom ?? 0)} RWF</p>
                   </div>
                 </Link>
               )
@@ -529,7 +547,7 @@ export async function ShopPage({
         <ShopProductGridsWithQuickView
           quickViewEnabled
           showFullPageLink={!storeContext}
-          accentColor='#B76E5D'
+          accentColor='#1daf61'
           newArrivals={
             hasCatalogSectionItems(newProducts.length)
               ? {

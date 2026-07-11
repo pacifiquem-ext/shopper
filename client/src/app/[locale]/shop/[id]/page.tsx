@@ -71,12 +71,12 @@ export default async function ProductDetailsPage({
     if (process.env.NODE_ENV === 'development' && devHint) {
       return (
         <div className='mx-auto max-w-3xl px-4 py-16'>
-          <p className='text-center text-[#2B2B2B]'>{t('notFound')}</p>
-          <pre className='mt-4 overflow-x-auto rounded-md border border-[rgba(43,43,43,0.08)] bg-white/70 p-3 text-left text-xs break-words whitespace-pre-wrap text-[#6E6A66] backdrop-blur-md'>
+          <p className='text-center text-[#171717]'>{t('notFound')}</p>
+          <pre className='mt-4 overflow-x-auto rounded-md border border-stroke-soft-200 bg-white/70 p-3 text-left text-xs break-words whitespace-pre-wrap text-[#5c5c5c] backdrop-blur-md'>
             {devHint}
           </pre>
           <div className='mt-6 flex justify-center'>
-            <Button asChild variant='outline' className='rounded-full border-[rgba(43,43,43,0.08)] bg-white/60 text-[#2B2B2B] backdrop-blur-md hover:bg-white/85 hover:text-[#2B2B2B]'>
+            <Button asChild variant='outline' className='rounded-full border-stroke-soft-200 bg-white/60 text-[#171717] backdrop-blur-md hover:bg-white/85 hover:text-[#171717]'>
               <Link href='/shop'>{t('backToShop')}</Link>
             </Button>
           </div>

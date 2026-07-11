@@ -35,15 +35,15 @@ export function InventoryAdjustDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[calc(100vw-24px)] max-w-lg rounded-2xl border border-gray-200 bg-white p-0 shadow-xl">
-        <div className="border-b border-gray-100 px-6 py-4">
+      <DialogContent className="w-[calc(100vw-24px)] max-w-lg rounded-2xl border border-stroke-soft-200 bg-white p-0 shadow-xl">
+        <div className="border-b border-stroke-soft-200 px-6 py-4">
           <DialogHeader>
-            <DialogTitle className="text-lg font-semibold text-gray-900">
+            <DialogTitle className="text-lg font-semibold text-text-strong-950">
               {mode === 'restock'
                 ? t('inventory.adjustDialog.restockTitle')
                 : t('inventory.adjustDialog.adjustTitle')}
             </DialogTitle>
-            <DialogDescription className="mt-1 text-sm text-gray-600">
+            <DialogDescription className="mt-1 text-sm text-text-sub-600">
               {productId ? t('inventory.adjustDialog.subtitle') : ''}
             </DialogDescription>
           </DialogHeader>
@@ -51,7 +51,7 @@ export function InventoryAdjustDialog({
 
         <div className="space-y-4 px-6 py-6">
           <div className="grid gap-2">
-            <Label className="text-sm font-semibold text-gray-700">
+            <Label className="text-sm font-semibold text-text-sub-600">
               {t('inventory.adjustDialog.quantity')}
             </Label>
             <Input
@@ -63,34 +63,34 @@ export function InventoryAdjustDialog({
                   ? t('inventory.adjustDialog.restockPlaceholder')
                   : t('inventory.adjustDialog.adjustPlaceholder')
               }
-              className="h-10 rounded-xl border-brand-200 bg-white"
+              className="h-10 rounded-xl border-primary-base/20 bg-white"
             />
           </div>
 
-          <div className="rounded-2xl border border-gray-200 bg-gray-50 p-4 text-sm text-gray-700">
-            <div className="text-xs font-semibold text-gray-500">
+          <div className="rounded-2xl border border-stroke-soft-200 bg-bg-weak-50 p-4 text-sm text-text-sub-600">
+            <div className="text-xs font-semibold text-text-soft-400">
               {t('inventory.adjustDialog.noteTitle')}
             </div>
-            <div className="mt-1 text-sm text-gray-700">
+            <div className="mt-1 text-sm text-text-sub-600">
               {t('inventory.adjustDialog.noteBody')}
             </div>
           </div>
         </div>
 
-        <div className="border-t border-gray-100 px-6 py-4">
+        <div className="border-t border-stroke-soft-200 px-6 py-4">
           <div className="flex flex-col-reverse gap-2 sm:flex-row sm:items-center sm:justify-between">
             <Button
               type="button"
               variant="outline"
               onClick={() => onOpenChange(false)}
-              className="h-10 rounded-xl border-gray-200 bg-white text-gray-700 hover:bg-brand-50 hover:text-brand-900"
+              className="h-10 rounded-xl border-stroke-soft-200 bg-white text-text-sub-600 hover:bg-primary-alpha-10 hover:text-primary-base"
             >
               {t('inventory.adjustDialog.cancel')}
             </Button>
             <Button
               type="button"
               onClick={onConfirm}
-              className="h-10 rounded-xl bg-brand-900 text-white hover:bg-brand-800"
+              className="h-10 rounded-xl bg-primary-base text-white hover:bg-primary-darker"
             >
               {mode === 'restock'
                 ? t('inventory.adjustDialog.confirmRestock')

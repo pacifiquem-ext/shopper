@@ -27,6 +27,20 @@ const nextConfig: NextConfig = {
 
   typedRoutes: true,
 
+  async rewrites() {
+    // Browser → same-origin /backend/* → Nest (avoids local CORS entirely)
+    const target = (process.env.API_PROXY_TARGET || 'http://127.0.0.1:3001').replace(
+      /\/+$/,
+      '',
+    )
+    return [
+      {
+        source: '/backend/:path*',
+        destination: `${target}/:path*`,
+      },
+    ]
+  },
+
   eslint: {
     ignoreDuringBuilds: process.env.NODE_ENV === 'production',
   },

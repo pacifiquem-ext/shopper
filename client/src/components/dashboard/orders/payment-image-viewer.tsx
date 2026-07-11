@@ -34,12 +34,12 @@ export function PaymentImageViewer({
 
   if (!imageUrl) {
     return (
-      <div className="rounded-2xl border border-gray-200 bg-white p-5">
-        <h3 className="text-sm font-semibold text-gray-900">{title}</h3>
-        <div className="mt-4 flex items-center justify-center rounded-xl border-2 border-dashed border-gray-200 bg-gray-50 p-8">
+      <div className="rounded-2xl border border-stroke-soft-200 bg-white p-5">
+        <h3 className="text-sm font-semibold text-text-strong-950">{title}</h3>
+        <div className="mt-4 flex items-center justify-center rounded-xl border-2 border-dashed border-stroke-soft-200 bg-bg-weak-50 p-8">
           <div className="text-center">
             <AlertCircle className="mx-auto h-10 w-10 text-gray-400" />
-            <p className="mt-2 text-sm font-medium text-gray-500">{noImageText}</p>
+            <p className="mt-2 text-sm font-medium text-text-soft-400">{noImageText}</p>
           </div>
         </div>
       </div>
@@ -48,9 +48,9 @@ export function PaymentImageViewer({
 
   return (
     <>
-      <div className="rounded-2xl border border-gray-200 bg-white p-5">
+      <div className="rounded-2xl border border-stroke-soft-200 bg-white p-5">
         <div className="flex items-center justify-between">
-          <h3 className="text-sm font-semibold text-gray-900">{title}</h3>
+          <h3 className="text-sm font-semibold text-text-strong-950">{title}</h3>
           {isConfirmed && (
             <div className="flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700">
               <Check className="h-3.5 w-3.5" />
@@ -60,7 +60,7 @@ export function PaymentImageViewer({
         </div>
 
         <div className="mt-4 space-y-3">
-          <div className="group relative overflow-hidden rounded-xl border border-gray-200 bg-gray-50">
+          <div className="group relative overflow-hidden rounded-xl border border-stroke-soft-200 bg-bg-weak-50">
             <img
               src={imageUrl}
               alt="Payment proof"
@@ -71,7 +71,7 @@ export function PaymentImageViewer({
                 type="button"
                 size="sm"
                 onClick={() => setZoomOpen(true)}
-                className="h-9 rounded-lg bg-white text-gray-900 hover:bg-gray-100"
+                className="h-9 rounded-lg bg-white text-text-strong-950 hover:bg-bg-weak-50"
               >
                 <ZoomIn className="mr-2 h-4 w-4" />
                 View Full Size
@@ -86,7 +86,7 @@ export function PaymentImageViewer({
                   link.download = 'payment-proof.jpg'
                   link.click()
                 }}
-                className="h-9 rounded-lg border-white bg-white/90 text-gray-900 hover:bg-white"
+                className="h-9 rounded-lg border-white bg-white/90 text-text-strong-950 hover:bg-white"
               >
                 <Download className="h-4 w-4" />
               </Button>
@@ -118,9 +118,9 @@ export function PaymentImageViewer({
       </div>
 
       <Dialog open={zoomOpen} onOpenChange={setZoomOpen}>
-        <DialogContent className="max-w-4xl border-gray-200 bg-white">
+        <DialogContent className="max-w-4xl border-stroke-soft-200 bg-white">
           <DialogHeader>
-            <DialogTitle className="text-gray-900">Payment Proof</DialogTitle>
+            <DialogTitle className="text-text-strong-950">Payment Proof</DialogTitle>
           </DialogHeader>
           <div className="mt-4">
             <img

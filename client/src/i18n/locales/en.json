@@ -8,7 +8,7 @@
     }
   },
   "hero": {
-    "title": "NextJS Boilerplate template",
+    "title": "OnlineShop.rw",
     "tagline": "One place to discover products from trusted local stores.",
     "openShop": "Browse products"
   },
@@ -71,6 +71,9 @@
     "storeMetaDescription": "Browse products from {store} on OnlineShop.rw.",
     "storeHeroSubtitle": "You are browsing {store}'s storefront. Every product below is sold and shipped by this store.",
     "storeEmpty": "{store} has not added any products yet.",
+    "storeNotFoundEyebrow": "Store not found",
+    "storeNotFoundTitle": "We could not find that store",
+    "storeNotFoundBody": "No approved storefront matches “{store}”. Check the link or browse the marketplace.",
     "searchLabel": "Search",
     "searchPlaceholder": "Search products",
     "homeLink": "Home",
@@ -450,7 +453,8 @@
       "brand": "OnlineShop.rw",
       "subtitle": "Inventory",
       "role": "Store owner",
-      "defaultUserName": "User"
+      "defaultUserName": "User",
+      "logout": "Log out"
     },
     "storeSettings": {
       "branding": {
@@ -1189,6 +1193,46 @@
         "orders": "Orders, delivery zones & payments",
         "marketplace": "Marketplace discovery for new customers"
       }
+    },
+    "fields": {
+      "fullName": "Full name",
+      "phone": "Phone number (e.g. +2507…)",
+      "phoneHint": "Use international format with country code, e.g. +250788123456 (no spaces).",
+      "emailOptional": "Email (optional)",
+      "password": "Password",
+      "newPassword": "New password",
+      "otp": "6-digit code",
+      "otpShort": "6-digit OTP"
+    },
+    "login": {
+      "forgotPassword": "Forgot password?",
+      "submit": "Log in",
+      "submitting": "Logging in…"
+    },
+    "signup": {
+      "submit": "Sign up",
+      "submitting": "Signing up…"
+    },
+    "forgot": {
+      "hint": "Enter your phone number to receive an OTP to reset your password.",
+      "sent": "We have sent an OTP to your phone number. Please check your SMS.",
+      "submit": "Send reset code",
+      "submitting": "Sending…",
+      "backToLogin": "Back to log in",
+      "proceedReset": "Continue to reset password"
+    },
+    "reset": {
+      "hint": "Enter the OTP sent to your phone and your new password.",
+      "submit": "Reset password",
+      "submitting": "Resetting…",
+      "backToLogin": "Back to log in"
+    },
+    "verify": {
+      "title": "Verify your phone",
+      "hintWithPhone": "We sent a 6-digit code to {phone}",
+      "hint": "Enter your phone number and the 6-digit code we sent you.",
+      "submit": "Verify",
+      "submitting": "Verifying…"
     }
   }
 }

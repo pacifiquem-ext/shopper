@@ -89,35 +89,35 @@ export function ProductQuickViewSheet({
       ? VIBRANT_MARKET_COLORS.secondary
       : resolvedTemplate === 'ishusho-crafts'
         ? ISHUSHO_CRAFTS_COLORS.accent
-        : '#B76E5D')
+        : '#1daf61')
 
   const ink =
     resolvedTemplate === 'vibrant-market'
       ? `text-[${VIBRANT_MARKET_COLORS.ink}]`
       : isDark
         ? 'text-[#F5EDE4]'
-        : 'text-[#2B2B2B]'
+        : 'text-[#171717]'
   const muted =
     resolvedTemplate === 'vibrant-market'
       ? `text-[${VIBRANT_MARKET_COLORS.muted}]`
       : isDark
         ? 'text-[#C4B5A6]'
-        : 'text-[#6E6A66]'
+        : 'text-[#5c5c5c]'
   const panel =
     resolvedTemplate === 'vibrant-market'
       ? 'border-[var(--vm-border)] bg-white'
       : isDark
         ? 'border-white/10 bg-[#1A1612]'
-        : 'border-[rgba(43,43,43,0.08)] bg-white/60'
+        : 'border-stroke-soft-200 bg-white/60'
   const mediaBg =
-    resolvedTemplate === 'vibrant-market' ? 'bg-[var(--vm-primary-light)]' : isDark ? 'bg-[#2A231C]' : 'bg-[#EAE4DC]'
+    resolvedTemplate === 'vibrant-market' ? 'bg-[var(--vm-primary-light)]' : isDark ? 'bg-[#2A231C]' : 'bg-[#ebebeb]'
   const shell =
     resolvedTemplate === 'vibrant-market'
       ? 'border-[var(--vm-border)] bg-[var(--vm-bg)]'
       : isDark
         ? 'border-white/10 bg-[#111111]'
-        : 'border-[rgba(43,43,43,0.08)] bg-[#F5F1EB]'
-  const headerBorder = resolvedTemplate === 'vibrant-market' ? 'border-[var(--vm-border)]' : isDark ? 'border-white/10' : 'border-[rgba(43,43,43,0.08)]'
+        : 'border-stroke-soft-200 bg-[#f7f7f7]'
+  const headerBorder = resolvedTemplate === 'vibrant-market' ? 'border-[var(--vm-border)]' : isDark ? 'border-white/10' : 'border-stroke-soft-200'
   const vibrantVars =
     resolvedTemplate === 'vibrant-market'
       ? ({
@@ -247,7 +247,7 @@ export function ProductQuickViewSheet({
                       className={cn(
                         'flex flex-wrap items-center justify-between gap-3 rounded-xl border px-3 py-3',
                         panel,
-                        isDark ? 'bg-[var(--ic-primary-light)]/80' : 'bg-[#EAE4DC]/50',
+                        isDark ? 'bg-[var(--ic-primary-light)]/80' : 'bg-[#ebebeb]/50',
                       )}
                     >
                       <div className='min-w-0'>
@@ -317,11 +317,11 @@ export function ProductQuickViewSheet({
                   className={cn(
                     'inline-flex size-7 items-center justify-center rounded-full border',
                     panel,
-                    isDark ? 'bg-[var(--ic-primary-light)]' : 'bg-[#EAE4DC]/70',
+                    isDark ? 'bg-[var(--ic-primary-light)]' : 'bg-[#ebebeb]/70',
                   )}
                 >
                   <Check
-                    className={cn('size-3.5', isDark ? 'text-[#C9A66B]' : 'text-[#7D8F69]')}
+                    className={cn('size-3.5', isDark ? 'text-[#C9A66B]' : 'text-[#1daf61]')}
                     aria-hidden
                     strokeWidth={2.5}
                   />
@@ -334,11 +334,11 @@ export function ProductQuickViewSheet({
                     className={cn(
                       'inline-flex size-7 items-center justify-center rounded-full border',
                       panel,
-                      isDark ? 'bg-[var(--ic-primary-light)]' : 'bg-[#EAE4DC]/70',
+                      isDark ? 'bg-[var(--ic-primary-light)]' : 'bg-[#ebebeb]/70',
                     )}
                   >
                     <Truck
-                      className={cn('size-3.5', isDark ? 'text-[#C9A66B]' : 'text-[#7D8F69]')}
+                      className={cn('size-3.5', isDark ? 'text-[#C9A66B]' : 'text-[#1daf61]')}
                       aria-hidden
                       strokeWidth={2.25}
                     />
@@ -351,7 +351,7 @@ export function ProductQuickViewSheet({
                     className={cn(
                       'inline-flex size-7 items-center justify-center rounded-full border',
                       panel,
-                      isDark ? 'bg-[var(--ic-primary-light)]' : 'bg-[#EAE4DC]/70',
+                      isDark ? 'bg-[var(--ic-primary-light)]' : 'bg-[#ebebeb]/70',
                     )}
                   >
                     <Truck className='size-3.5' aria-hidden strokeWidth={2.25} />
@@ -365,11 +365,11 @@ export function ProductQuickViewSheet({
                     className={cn(
                       'inline-flex size-7 items-center justify-center rounded-full border',
                       panel,
-                      isDark ? 'bg-[var(--ic-primary-light)]' : 'bg-[#EAE4DC]/70',
+                      isDark ? 'bg-[var(--ic-primary-light)]' : 'bg-[#ebebeb]/70',
                     )}
                   >
                     <MapPin
-                      className={cn('size-3.5', isDark ? 'text-[#C9A66B]' : 'text-[#7D8F69]')}
+                      className={cn('size-3.5', isDark ? 'text-[#C9A66B]' : 'text-[#1daf61]')}
                       aria-hidden
                       strokeWidth={2.25}
                     />
@@ -410,7 +410,7 @@ export function ProductQuickViewSheet({
         <SheetFooter
           className={cn(
             'border-t px-5 py-4',
-            resolvedTemplate === 'vibrant-market' ? 'border-[var(--vm-border)] bg-[var(--vm-bg)]' : isDark ? 'border-white/10 bg-[#111111]' : 'border-[rgba(43,43,43,0.08)] bg-[#F5F1EB]',
+            resolvedTemplate === 'vibrant-market' ? 'border-[var(--vm-border)] bg-[var(--vm-bg)]' : isDark ? 'border-white/10 bg-[#111111]' : 'border-stroke-soft-200 bg-[#f7f7f7]',
           )}
         >
           <div
@@ -426,7 +426,7 @@ export function ProductQuickViewSheet({
                 'h-11 rounded-full',
                 isDark
                   ? 'border-white/20 bg-transparent text-[#F5EDE4] hover:bg-white/5'
-                  : 'border-[rgba(43,43,43,0.08)] bg-white/70 text-[#2B2B2B] hover:bg-white',
+                  : 'border-stroke-soft-200 bg-white/70 text-[#171717] hover:bg-white',
                 !showFullPageLink && 'w-full sm:w-full',
               )}
               onClick={() => onOpenChange(false)}

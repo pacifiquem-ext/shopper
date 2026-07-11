@@ -3,9 +3,10 @@ import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios'
 import { toast } from 'sonner'
 import { MERCHANT_ONBOARDING_PATH } from '@/lib/auth-return-url'
 import { useAuthStore } from '@/store/auth.store'
+import { getPublicApiBaseUrl } from '@/lib/api-base-url'
 
 export const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/v1',
+  baseURL: getPublicApiBaseUrl(),
   timeout: 100000,
   headers: {
     'Content-Type': 'application/json',
@@ -192,7 +193,7 @@ api.interceptors.response.use(
         lastNetworkErrorToastAt = now
         toast.error('Cannot connect to API server', {
           description:
-            'Ensure the API is running (`pnpm dev` from the repo root) and NEXT_PUBLIC_API_URL is correct.',
+            'Ensure the API is running (`pnpm dev` from the repo root). Local browser calls go to /backend/v1 (Next rewrite → Nest :3001).',
         })
       }
 

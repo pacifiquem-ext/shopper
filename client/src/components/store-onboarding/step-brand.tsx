@@ -65,7 +65,7 @@ export function StepBrand() {
       <div className="space-y-8">
         <div>
           {draft.logoDataUrl ? (
-            <div className="relative mx-auto flex aspect-[4/5] w-full max-w-xs flex-col items-center justify-center overflow-hidden rounded-2xl border-2 border-dashed border-gray-300 bg-gray-50 transition-colors hover:bg-gray-100 sm:mx-0 sm:max-w-sm">
+            <div className="relative mx-auto flex aspect-[4/5] w-full max-w-xs flex-col items-center justify-center overflow-hidden rounded-2xl border-2 border-dashed border-stroke-soft-200 bg-gray-50 transition-colors hover:bg-gray-100 sm:mx-0 sm:max-w-sm">
               <Image
                 src={draft.logoDataUrl}
                 alt={t('brand.logoAlt')}
@@ -83,7 +83,7 @@ export function StepBrand() {
               type="button"
               disabled={isUploading}
               onClick={() => fileInputRef.current?.click()}
-              className="focus:border-brand-600 mx-auto flex aspect-[4/5] w-full max-w-xs flex-col items-center justify-center rounded-2xl border-2 border-dashed border-gray-400 bg-gray-50 transition-all hover:bg-gray-100 focus:outline-none sm:mx-0 sm:max-w-sm"
+              className="focus:border-primary-base mx-auto flex aspect-[4/5] w-full max-w-xs flex-col items-center justify-center rounded-2xl border-2 border-dashed border-gray-400 bg-gray-50 transition-all hover:bg-gray-100 focus:outline-none sm:mx-0 sm:max-w-sm"
             >
               <input
                 ref={fileInputRef}
@@ -118,7 +118,7 @@ export function StepBrand() {
                 'relative mt-2 flex h-14 items-center rounded-full border px-2 transition-colors focus-within:border-2',
                 brandPrimaryColorField.hasError
                   ? 'border-red-500 focus-within:border-red-500'
-                  : 'focus-within:border-brand-600 border-gray-300'
+                  : 'focus-within:border-primary-base border-stroke-soft-200'
               )}
             >
               <input
@@ -150,7 +150,7 @@ export function StepBrand() {
                 'relative mt-2 flex h-14 items-center rounded-full border px-2 transition-colors focus-within:border-2',
                 brandSecondaryColorField.hasError
                   ? 'border-red-500 focus-within:border-red-500'
-                  : 'focus-within:border-brand-600 border-gray-300'
+                  : 'focus-within:border-primary-base border-stroke-soft-200'
               )}
             >
               <input

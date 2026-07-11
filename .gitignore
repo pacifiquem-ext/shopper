@@ -10,3 +10,10 @@ coverage
 *.tsbuildinfo
 .turbo
 packages/shared/dist
+
+# Local E2E / audit screenshots (do not commit)
+e2e-audit/screens/
+audit*.png
+final__*.png
+soft-ui-*.png
+.playwright-mcp/

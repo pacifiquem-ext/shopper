@@ -30,7 +30,7 @@ export function BecomeSellerShopButton({
             asChild
             type='button'
             className={cn(
-              'h-10 gap-0 rounded-full border border-[#B76E5D]/25 bg-[#B76E5D] px-0 text-sm font-semibold text-white shadow-[0_8px_28px_rgba(183,110,93,0.35),0_2px_6px_rgba(43,43,43,0.08)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#A66250] hover:shadow-[0_12px_32px_rgba(183,110,93,0.4)] active:scale-95 sm:h-11 sm:gap-2 sm:px-5',
+              'h-10 gap-0 rounded-full border border-primary-base/20 bg-primary-base px-0 text-sm font-semibold text-static-white shadow-regular-xs transition-all duration-200 hover:-translate-y-0.5 hover:bg-primary-darker hover:shadow-regular-sm active:scale-95 sm:h-11 sm:gap-2 sm:px-5',
               position === 'nearCart' && 'mr-12 sm:mr-14',
               className,
             )}

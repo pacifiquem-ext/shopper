@@ -58,7 +58,7 @@ export function QuickAddButton({
       title={label}
       onClick={handleClick}
       className={cn(
-        'group/cta relative inline-flex h-10 shrink-0 items-center justify-center overflow-hidden rounded-full px-3 font-medium tracking-tight shadow-[0_6px_18px_rgba(43,43,43,0.18)] transition-colors duration-300 ease-out active:scale-[0.96] sm:h-11 sm:px-4',
+        'group/cta relative inline-flex h-10 shrink-0 items-center justify-center overflow-hidden rounded-full px-3 font-medium tracking-tight shadow-regular-xs transition-colors duration-200 ease-out active:scale-[0.98] sm:h-11 sm:px-4',
         fullWidth
           ? cn(
               'w-full rounded-xl',
@@ -67,8 +67,8 @@ export function QuickAddButton({
                 : 'bg-[var(--vm-secondary,#A3FF12)] text-[var(--vm-primary,#121212)] hover:brightness-95',
             )
           : success
-            ? 'bg-[#7D8F69] text-white'
-            : 'bg-[#B76E5D] text-white hover:bg-[#A66250]',
+            ? 'bg-primary-base text-static-white'
+            : 'bg-primary-base text-static-white hover:bg-primary-darker',
         className,
       )}
     >

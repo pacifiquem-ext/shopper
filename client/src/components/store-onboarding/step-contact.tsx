@@ -40,7 +40,7 @@ export function StepContact() {
               {t('common.optional', { defaultValue: '(Optional)' })}
             </span>
           </Label>
-          <div className="focus-within:border-brand-600 flex items-center border-b border-gray-300 py-2 transition-colors">
+          <div className="focus-within:border-primary-base flex items-center border-b border-stroke-soft-200 py-2 transition-colors">
             <Input
               type="email"
               value={draft.contactEmail || ''}
@@ -60,7 +60,7 @@ export function StepContact() {
               {t('common.optional', { defaultValue: '(Optional)' })}
             </span>
           </Label>
-          <div className="focus-within:border-brand-600 flex items-center border-b border-gray-300 py-2 transition-colors">
+          <div className="focus-within:border-primary-base flex items-center border-b border-stroke-soft-200 py-2 transition-colors">
             <Input
               type="tel"
               value={draft.contactPhone || ''}
@@ -80,7 +80,7 @@ export function StepContact() {
               {t('common.optional', { defaultValue: '(Optional)' })}
             </span>
           </Label>
-          <div className="focus-within:border-brand-600 border-b border-gray-300 transition-colors">
+          <div className="focus-within:border-primary-base border-b border-stroke-soft-200 transition-colors">
             <Textarea
               value={draft.contactAddress || ''}
               onChange={(e) => setContactAddress(e.target.value)}
@@ -100,7 +100,7 @@ export function StepContact() {
               {t('common.optional', { defaultValue: '(Optional)' })}
             </span>
           </Label>
-          <div className="focus-within:border-brand-600 border-b border-gray-300 transition-colors">
+          <div className="focus-within:border-primary-base border-b border-stroke-soft-200 transition-colors">
             <Textarea
               value={draft.aboutUs || ''}
               onChange={(e) => setAboutUs(e.target.value)}

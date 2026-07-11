@@ -1,28 +1,13 @@
+import { getInternalApiBaseUrl, getPublicApiBaseUrl } from '@/lib/api-base-url'
 import type { ApiResponse } from '@onlineshop/shared'
 
 function isServer(): boolean {
   return typeof window === 'undefined'
 }
 
-/** Ensures base ends with `/v1` (or other `/vN`) so paths like `/catalog/groups` resolve correctly. */
-function normalizeApiRoot(raw: string): string {
-  const trimmed = raw.trim().replace(/\/+$/, '')
-  if (/\/v\d+$/i.test(trimmed)) {
-    return trimmed
-  }
-  return `${trimmed}/v1`
-}
 
-/**
- * Base URL for catalog fetches from the Next server (RSC).
- * Prefer `NEXT_INTERNAL_API_URL` so it can use `127.0.0.1` and match Nest `HTTP_PORT` even when
- * `NEXT_PUBLIC_API_URL` points at the wrong host (e.g. same port as the Next dev server).
- */
 function resolveCatalogApiRoot(): string {
-  const internal = isServer() ? process.env.NEXT_INTERNAL_API_URL : undefined
-  const raw =
-    (internal ?? process.env.NEXT_PUBLIC_API_URL ?? 'http://127.0.0.1:3001/v1').trim()
-  return normalizeApiRoot(raw)
+  return isServer() ? getInternalApiBaseUrl() : getPublicApiBaseUrl()
 }
 
 import type { BrandColorsWithTemplate, StoreTemplateId } from '@/lib/store-templates'

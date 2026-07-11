@@ -29,11 +29,11 @@ export function ImageZoomDialog({
 }: ImageZoomDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[calc(100vw-24px)] max-w-5xl overflow-hidden rounded-2xl border border-gray-200 bg-white p-0 shadow-xl">
-        <div className="border-b border-gray-100 px-6 py-4">
+      <DialogContent className="w-[calc(100vw-24px)] max-w-5xl overflow-hidden rounded-2xl border border-stroke-soft-200 bg-white p-0 shadow-xl">
+        <div className="border-b border-stroke-soft-200 px-6 py-4">
           <DialogHeader>
-            <DialogTitle className="text-lg font-semibold text-gray-900">{title}</DialogTitle>
-            <DialogDescription className="mt-1 text-sm text-gray-600">{subtitle}</DialogDescription>
+            <DialogTitle className="text-lg font-semibold text-text-strong-950">{title}</DialogTitle>
+            <DialogDescription className="mt-1 text-sm text-text-sub-600">{subtitle}</DialogDescription>
           </DialogHeader>
         </div>
         <div className="bg-black">

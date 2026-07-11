@@ -627,7 +627,7 @@ export default function ProductsPage() {
         header: t('products.table.name'),
         cell: (r) => (
           <div className="flex min-w-0 items-center gap-3">
-            <div className="h-10 w-10 overflow-hidden rounded-xl border border-gray-200 bg-gray-50">
+            <div className="h-10 w-10 overflow-hidden rounded-xl border border-stroke-soft-200 bg-bg-weak-50">
               {r.primaryImageUrl ? (
                 <img
                   src={r.primaryImageUrl}
@@ -636,17 +636,17 @@ export default function ProductsPage() {
                   loading="lazy"
                 />
               ) : (
-                <div className="flex h-full w-full items-center justify-center text-gray-500">
+                <div className="flex h-full w-full items-center justify-center text-text-soft-400">
                   <Package className="h-4 w-4" />
                 </div>
               )}
             </div>
             <Link
               href={`/dashboard/products/${r.id}`}
-              className="min-w-0 text-left hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-900/30"
+              className="min-w-0 text-left hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-base/30"
             >
-              <div className="truncate font-semibold text-gray-900">{r.name}</div>
-              <div className="truncate text-xs font-medium text-gray-500">
+              <div className="truncate font-semibold text-text-strong-950">{r.name}</div>
+              <div className="truncate text-xs font-medium text-text-soft-400">
                 {t('products.table.variantsCount', { count: r.variantsCount })}
               </div>
             </Link>
@@ -656,25 +656,25 @@ export default function ProductsPage() {
       {
         id: 'category',
         header: t('products.table.category'),
-        cell: (r) => <div className="text-sm text-gray-700">{r.category}</div>,
+        cell: (r) => <div className="text-sm text-text-sub-600">{r.category}</div>,
       },
       {
         id: 'vendor',
         header: t('products.table.vendor'),
-        cell: (r) => <div className="text-sm text-gray-700">{r.vendor}</div>,
+        cell: (r) => <div className="text-sm text-text-sub-600">{r.vendor}</div>,
       },
       {
         id: 'price',
         header: t('products.table.price'),
-        cell: (r) => <div className="text-sm font-semibold text-gray-900">{r.priceRange}</div>,
+        cell: (r) => <div className="text-sm font-semibold text-text-strong-950">{r.priceRange}</div>,
       },
       {
         id: 'stock',
         header: t('products.table.stock'),
         cell: (r) => (
           <div className="flex items-center gap-2">
-            <div className="text-sm font-semibold text-gray-900">{r.totalStock}</div>
-            <div className="text-xs font-medium text-gray-500">{t('products.table.units')}</div>
+            <div className="text-sm font-semibold text-text-strong-950">{r.totalStock}</div>
+            <div className="text-xs font-medium text-text-soft-400">{t('products.table.units')}</div>
           </div>
         ),
       },
@@ -686,7 +686,7 @@ export default function ProductsPage() {
       {
         id: 'updated',
         header: t('products.table.updated'),
-        cell: (r) => <div className="text-sm text-gray-700">{r.updatedAt}</div>,
+        cell: (r) => <div className="text-sm text-text-sub-600">{r.updatedAt}</div>,
       },
       {
         id: 'action',
@@ -698,21 +698,21 @@ export default function ProductsPage() {
                 type="button"
                 variant="ghost"
                 size="icon"
-                className="h-8 w-8 rounded-lg text-gray-700 hover:bg-brand-50 hover:text-brand-900"
+                className="h-8 w-8 rounded-lg text-text-sub-600 hover:bg-primary-alpha-10 hover:text-primary-base"
                 aria-label={t('products.table.moreAria')}
               >
                 <MoreHorizontal className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-44 border-gray-200 bg-white text-gray-900">
-              <DropdownMenuItem asChild className="cursor-pointer focus:bg-brand-50 focus:text-brand-900">
+            <DropdownMenuContent align="end" className="w-44 border-stroke-soft-200 bg-white text-text-strong-950">
+              <DropdownMenuItem asChild className="cursor-pointer focus:bg-primary-alpha-10 focus:text-primary-base">
                 <Link href={`/dashboard/products/${r.id}`}>
                   <Eye className="mr-2 h-4 w-4" />
                   {t('products.table.view')}
                 </Link>
               </DropdownMenuItem>
               {r.status === 'active' ? (
-                <DropdownMenuItem asChild className="cursor-pointer focus:bg-brand-50 focus:text-brand-900">
+                <DropdownMenuItem asChild className="cursor-pointer focus:bg-primary-alpha-10 focus:text-primary-base">
                   <Link href={storeProductPath(r.id)} target="_blank" rel="noopener noreferrer">
                     <ArrowUpRight className="mr-2 h-4 w-4" />
                     {t('products.table.viewLive')}
@@ -721,7 +721,7 @@ export default function ProductsPage() {
               ) : null}
               <DropdownMenuItem
                 onClick={() => openEdit(r.id)}
-                className="cursor-pointer focus:bg-brand-50 focus:text-brand-900"
+                className="cursor-pointer focus:bg-primary-alpha-10 focus:text-primary-base"
               >
                 <Edit className="mr-2 h-4 w-4" />
                 {t('products.table.edit')}
@@ -752,9 +752,9 @@ export default function ProductsPage() {
     <div className="flex w-full max-w-6xl flex-col gap-6">
         <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-start">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight text-gray-900">{t('products.title')}</h1>
-            <p className="mt-2 text-gray-500">{t('products.subtitle')}</p>
-            <p className="mt-1 text-sm font-medium text-brand-900/80">{t('products.listHint')}</p>
+            <h1 className="text-3xl font-bold tracking-tight text-text-strong-950">{t('products.title')}</h1>
+            <p className="mt-2 text-text-soft-400">{t('products.subtitle')}</p>
+            <p className="mt-1 text-sm font-medium text-primary-base/80">{t('products.listHint')}</p>
           </div>
 
           <div className="flex flex-wrap items-center gap-2 sm:pt-[42px]">
@@ -762,12 +762,12 @@ export default function ProductsPage() {
               fetchBlob={() => productsService.exportCsv()}
               filename="products.csv"
               label={t('products.export')}
-              className="h-9 rounded-lg border-gray-200 bg-white text-gray-700 hover:bg-brand-50 hover:text-brand-900"
+              className="h-9 rounded-lg border-stroke-soft-200 bg-white text-text-sub-600 hover:bg-primary-alpha-10 hover:text-primary-base"
             />
             <Button
               type="button"
               onClick={openCreateProduct}
-              className="h-9 rounded-lg bg-brand-900 text-white hover:bg-brand-800"
+              className="h-9 rounded-lg bg-primary-base text-white hover:bg-primary-darker"
             >
               <Plus className="mr-2 h-4 w-4" />
               {t('products.createProduct')}
@@ -818,16 +818,16 @@ export default function ProductsPage() {
             }}
           />
 
-          <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
+          <div className="rounded-2xl border border-stroke-soft-200 bg-bg-white-0 p-4 shadow-regular-xs">
             <div className="flex items-start justify-between gap-4">
               <div>
-                <div className="text-xs font-semibold text-gray-500">{t('products.charts.kpis.activeProducts')}</div>
+                <div className="text-xs font-semibold text-text-soft-400">{t('products.charts.kpis.activeProducts')}</div>
                 {analyticsLoading ? (
                   <div className="mt-2">
                     <TurningZeroLoader size="sm" />
                   </div>
                 ) : (
-                <div className="mt-2 text-2xl font-semibold text-gray-900">
+                <div className="mt-2 text-2xl font-semibold text-text-strong-950">
                   {dashMetric(dashboardMetrics?.activeProducts ?? stats.active)}
                 </div>
                 )}
@@ -843,15 +843,15 @@ export default function ProductsPage() {
               >
                 <div className="grid grid-cols-1 gap-4">
                   <div className="grid gap-2">
-                    <Label htmlFor="products-kpi-filter-vendor" className="text-xs font-semibold text-gray-600">{t('products.filters.vendor')}</Label>
+                    <Label htmlFor="products-kpi-filter-vendor" className="text-xs font-semibold text-text-sub-600">{t('products.filters.vendor')}</Label>
                     <Select
                       value={filtersDraft.vendor}
                       onValueChange={(value) => setFiltersDraft((p) => ({ ...p, vendor: value }))}
                     >
-                      <SelectTrigger className="h-9 rounded-lg border-gray-200 bg-white text-sm">
+                      <SelectTrigger className="h-9 rounded-lg border-stroke-soft-200 bg-white text-sm">
                         <SelectValue />
                       </SelectTrigger>
-                      <SelectContent className="border-gray-200 bg-white text-gray-900">
+                      <SelectContent className="border-stroke-soft-200 bg-white text-text-strong-950">
                         <SelectItem value="any">{t('products.filters.any')}</SelectItem>
                         {vendors.map((v) => (
                           <SelectItem key={v} value={v}>
@@ -863,15 +863,15 @@ export default function ProductsPage() {
                   </div>
 
                   <div className="grid gap-2">
-                    <Label htmlFor="products-kpi-filter-category" className="text-xs font-semibold text-gray-600">{t('products.filters.category')}</Label>
+                    <Label htmlFor="products-kpi-filter-category" className="text-xs font-semibold text-text-sub-600">{t('products.filters.category')}</Label>
                     <Select
                       value={filtersDraft.category}
                       onValueChange={(value) => setFiltersDraft((p) => ({ ...p, category: value }))}
                     >
-                      <SelectTrigger className="h-9 rounded-lg border-gray-200 bg-white text-sm">
+                      <SelectTrigger className="h-9 rounded-lg border-stroke-soft-200 bg-white text-sm">
                         <SelectValue />
                       </SelectTrigger>
-                      <SelectContent className="border-gray-200 bg-white text-gray-900">
+                      <SelectContent className="border-stroke-soft-200 bg-white text-text-strong-950">
                         <SelectItem value="any">{t('products.filters.any')}</SelectItem>
                         {categories.map((c) => (
                           <SelectItem key={c} value={c}>
@@ -883,15 +883,15 @@ export default function ProductsPage() {
                   </div>
 
                   <div className="grid gap-2">
-                    <Label htmlFor="products-kpi-filter-status" className="text-xs font-semibold text-gray-600">{t('products.filters.status')}</Label>
+                    <Label htmlFor="products-kpi-filter-status" className="text-xs font-semibold text-text-sub-600">{t('products.filters.status')}</Label>
                     <Select
                       value={filtersDraft.status}
                       onValueChange={(value) => setFiltersDraft((p) => ({ ...p, status: value as ProductStatus | 'any' }))}
                     >
-                      <SelectTrigger className="h-9 rounded-lg border-gray-200 bg-white text-sm">
+                      <SelectTrigger className="h-9 rounded-lg border-stroke-soft-200 bg-white text-sm">
                         <SelectValue />
                       </SelectTrigger>
-                      <SelectContent className="border-gray-200 bg-white text-gray-900">
+                      <SelectContent className="border-stroke-soft-200 bg-white text-text-strong-950">
                         <SelectItem value="any">{t('products.filters.any')}</SelectItem>
                         <SelectItem value="active">{t('products.status.active')}</SelectItem>
                         <SelectItem value="draft">{t('products.status.draft')}</SelectItem>
@@ -902,7 +902,7 @@ export default function ProductsPage() {
 
                   <div className="grid grid-cols-2 gap-3">
                     <div className="grid gap-2">
-                      <Label htmlFor="products-filter-min-stock" className="text-xs font-semibold text-gray-600">{t('products.filters.minStock')}</Label>
+                      <Label htmlFor="products-filter-min-stock" className="text-xs font-semibold text-text-sub-600">{t('products.filters.minStock')}</Label>
                       <Input
                         id="products-filter-min-stock"
                         value={filtersDraft.minStock == null ? '' : String(filtersDraft.minStock)}
@@ -914,11 +914,11 @@ export default function ProductsPage() {
                         }
                         inputMode="numeric"
                         placeholder={t('products.filters.stockPlaceholder')}
-                        className="h-9 rounded-lg border-gray-200 bg-white"
+                        className="h-9 rounded-lg border-stroke-soft-200 bg-white"
                       />
                     </div>
                     <div className="grid gap-2">
-                      <Label htmlFor="products-filter-max-stock" className="text-xs font-semibold text-gray-600">{t('products.filters.maxStock')}</Label>
+                      <Label htmlFor="products-filter-max-stock" className="text-xs font-semibold text-text-sub-600">{t('products.filters.maxStock')}</Label>
                       <Input
                         id="products-filter-max-stock"
                         value={filtersDraft.maxStock == null ? '' : String(filtersDraft.maxStock)}
@@ -930,7 +930,7 @@ export default function ProductsPage() {
                         }
                         inputMode="numeric"
                         placeholder={t('products.filters.stockPlaceholder')}
-                        className="h-9 rounded-lg border-gray-200 bg-white"
+                        className="h-9 rounded-lg border-stroke-soft-200 bg-white"
                       />
                     </div>
                   </div>
@@ -945,12 +945,12 @@ export default function ProductsPage() {
                 </div>
               ) : (
                 <>
-              <div className="flex h-2 w-full overflow-hidden rounded-full bg-gray-100">
+              <div className="flex h-2 w-full overflow-hidden rounded-full bg-bg-weak-50">
                 <div className="h-full bg-emerald-500" style={{ width: `${stockBar.inPct}%` }} />
                 <div className="h-full bg-amber-500" style={{ width: `${stockBar.lowPct}%` }} />
                 <div className="h-full bg-rose-500" style={{ width: `${stockBar.outPct}%` }} />
               </div>
-              <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs font-medium text-gray-600">
+              <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs font-medium text-text-sub-600">
                 <div className="inline-flex items-center gap-2 whitespace-nowrap">
                   <span className="h-2 w-2 rounded-full bg-emerald-500" />
                   <span>{t('products.kpis.inStock')}</span>
@@ -996,10 +996,10 @@ export default function ProductsPage() {
           />
         </div>
 
-        <div className="rounded-2xl border border-gray-200 bg-white shadow-sm">
-          <div className="flex flex-col gap-3 border-b border-gray-100 p-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="rounded-2xl border border-stroke-soft-200 bg-bg-white-0 shadow-regular-xs">
+          <div className="flex flex-col gap-3 border-b border-stroke-soft-200 p-4 sm:flex-row sm:items-center sm:justify-between">
             <Tabs value={tab} onValueChange={(v) => setTab(v as ProductsTab)}>
-              <TabsList className="h-9 rounded-lg bg-gray-50">
+              <TabsList className="h-9 rounded-lg bg-bg-weak-50">
                 <TabsTrigger value="all" className="rounded-md text-sm">
                   {t('products.tabs.all')}
                 </TabsTrigger>
@@ -1022,7 +1022,7 @@ export default function ProductsPage() {
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                   placeholder={t('products.searchPlaceholder')}
-                  className="h-9 rounded-lg border-gray-200 bg-gray-50 pr-3 pl-9"
+                  className="h-9 rounded-lg border-stroke-soft-200 bg-bg-weak-50 pr-3 pl-9"
                 />
               </div>
               <Popover>
@@ -1031,26 +1031,26 @@ export default function ProductsPage() {
                     type="button"
                     aria-label={t('products.filters.aria')}
                     className={cn(
-                      'flex h-9 w-9 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-700 shadow-xs transition-colors',
-                      'hover:bg-brand-50 hover:text-brand-900'
+                      'flex h-9 w-9 items-center justify-center rounded-lg border border-stroke-soft-200 bg-white text-text-sub-600 shadow-xs transition-colors',
+                      'hover:bg-primary-alpha-10 hover:text-primary-base'
                     )}
                   >
                     <Filter className="h-4 w-4" />
                   </button>
                 </PopoverTrigger>
-                <PopoverContent align="end" className="w-[360px] border-gray-200 bg-white p-4 text-gray-900 shadow-md">
+                <PopoverContent align="end" className="w-[360px] border-stroke-soft-200 bg-white p-4 text-text-strong-950 shadow-md">
                   <div>
-                    <div className="text-sm font-semibold text-gray-900">{t('products.filters.title')}</div>
-                    <div className="mt-0.5 text-xs font-medium text-gray-500">{t('products.filters.subtitle')}</div>
+                    <div className="text-sm font-semibold text-text-strong-950">{t('products.filters.title')}</div>
+                    <div className="mt-0.5 text-xs font-medium text-text-soft-400">{t('products.filters.subtitle')}</div>
                   </div>
                   <div className="mt-4 grid grid-cols-1 gap-4">
                     <div className="grid gap-2">
-                      <Label htmlFor="products-table-filter-vendor" className="text-xs font-semibold text-gray-600">{t('products.filters.vendor')}</Label>
+                      <Label htmlFor="products-table-filter-vendor" className="text-xs font-semibold text-text-sub-600">{t('products.filters.vendor')}</Label>
                       <select
                         id="products-table-filter-vendor"
                         value={filtersDraft.vendor}
                         onChange={(e) => setFiltersDraft((p) => ({ ...p, vendor: e.target.value }))}
-                        className="h-9 w-full rounded-lg border border-gray-200 bg-white px-3 text-sm text-gray-900"
+                        className="h-9 w-full rounded-lg border border-stroke-soft-200 bg-white px-3 text-sm text-text-strong-950"
                       >
                         <option value="any">{t('products.filters.any')}</option>
                         {vendors.map((v) => (
@@ -1062,12 +1062,12 @@ export default function ProductsPage() {
                     </div>
 
                     <div className="grid gap-2">
-                      <Label htmlFor="products-table-filter-category" className="text-xs font-semibold text-gray-600">{t('products.filters.category')}</Label>
+                      <Label htmlFor="products-table-filter-category" className="text-xs font-semibold text-text-sub-600">{t('products.filters.category')}</Label>
                       <select
                         id="products-table-filter-category"
                         value={filtersDraft.category}
                         onChange={(e) => setFiltersDraft((p) => ({ ...p, category: e.target.value }))}
-                        className="h-9 w-full rounded-lg border border-gray-200 bg-white px-3 text-sm text-gray-900"
+                        className="h-9 w-full rounded-lg border border-stroke-soft-200 bg-white px-3 text-sm text-text-strong-950"
                       >
                         <option value="any">{t('products.filters.any')}</option>
                         {categories.map((c) => (
@@ -1079,14 +1079,14 @@ export default function ProductsPage() {
                     </div>
 
                     <div className="grid gap-2">
-                      <Label htmlFor="products-table-filter-status" className="text-xs font-semibold text-gray-600">{t('products.filters.status')}</Label>
+                      <Label htmlFor="products-table-filter-status" className="text-xs font-semibold text-text-sub-600">{t('products.filters.status')}</Label>
                       <select
                         id="products-table-filter-status"
                         value={filtersDraft.status}
                         onChange={(e) =>
                           setFiltersDraft((p) => ({ ...p, status: e.target.value as ProductStatus | 'any' }))
                         }
-                        className="h-9 w-full rounded-lg border border-gray-200 bg-white px-3 text-sm text-gray-900"
+                        className="h-9 w-full rounded-lg border border-stroke-soft-200 bg-white px-3 text-sm text-text-strong-950"
                       >
                         <option value="any">{t('products.filters.any')}</option>
                         <option value="active">{t('products.status.active')}</option>
@@ -1097,7 +1097,7 @@ export default function ProductsPage() {
 
                     <div className="grid grid-cols-2 gap-3">
                       <div className="grid gap-2">
-                        <Label htmlFor="products-table-filter-min-stock" className="text-xs font-semibold text-gray-600">{t('products.filters.minStock')}</Label>
+                        <Label htmlFor="products-table-filter-min-stock" className="text-xs font-semibold text-text-sub-600">{t('products.filters.minStock')}</Label>
                         <Input
                           id="products-table-filter-min-stock"
                           value={filtersDraft.minStock == null ? '' : String(filtersDraft.minStock)}
@@ -1109,11 +1109,11 @@ export default function ProductsPage() {
                           }
                           inputMode="numeric"
                           placeholder={t('products.filters.stockPlaceholder')}
-                          className="h-9 rounded-lg border-gray-200 bg-white"
+                          className="h-9 rounded-lg border-stroke-soft-200 bg-white"
                         />
                       </div>
                       <div className="grid gap-2">
-                        <Label htmlFor="products-table-filter-max-stock" className="text-xs font-semibold text-gray-600">{t('products.filters.maxStock')}</Label>
+                        <Label htmlFor="products-table-filter-max-stock" className="text-xs font-semibold text-text-sub-600">{t('products.filters.maxStock')}</Label>
                         <Input
                           id="products-table-filter-max-stock"
                           value={filtersDraft.maxStock == null ? '' : String(filtersDraft.maxStock)}
@@ -1125,7 +1125,7 @@ export default function ProductsPage() {
                           }
                           inputMode="numeric"
                           placeholder={t('products.filters.stockPlaceholder')}
-                          className="h-9 rounded-lg border-gray-200 bg-white"
+                          className="h-9 rounded-lg border-stroke-soft-200 bg-white"
                         />
                       </div>
                     </div>
@@ -1136,14 +1136,14 @@ export default function ProductsPage() {
                       type="button"
                       variant="outline"
                       onClick={clearFilters}
-                      className="h-9 rounded-lg border-gray-200 bg-white text-gray-700 hover:bg-brand-50 hover:text-brand-900"
+                      className="h-9 rounded-lg border-stroke-soft-200 bg-white text-text-sub-600 hover:bg-primary-alpha-10 hover:text-primary-base"
                     >
                       {t('products.filters.clear')}
                     </Button>
                     <Button
                       type="button"
                       onClick={applyFilters}
-                      className="h-9 rounded-lg bg-brand-900 text-white hover:bg-brand-800"
+                      className="h-9 rounded-lg bg-primary-base text-white hover:bg-primary-darker"
                     >
                       {t('products.filters.apply')}
                     </Button>

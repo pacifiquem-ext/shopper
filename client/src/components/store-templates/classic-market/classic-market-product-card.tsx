@@ -58,7 +58,7 @@ export function ClassicMarketProductCard({ product, labels, listingLabels, onOpe
   )
 
   return (
-    <article className="group flex h-full flex-col overflow-hidden rounded-20 border border-[var(--kc-border)] bg-[var(--kc-surface)] shadow-[0_1px_2px_rgba(23,23,23,0.04)] transition hover:-translate-y-0.5 hover:shadow-[0_12px_32px_rgba(23,23,23,0.08)]">
+    <article className="group flex h-full flex-col overflow-hidden rounded-20 border border-[var(--kc-border)] bg-[var(--kc-surface)] shadow-regular-xs transition hover:-translate-y-0.5 hover:shadow-soft-card-hover">
       {openQuickView ? (
         <button
           type="button"

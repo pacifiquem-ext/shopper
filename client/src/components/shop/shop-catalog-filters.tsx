@@ -1,12 +1,14 @@
 'use client'
 
 import { Search } from 'lucide-react'
+import { useLocale } from 'next-intl'
+import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useRef, useTransition } from 'react'
 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { usePathname, useRouter } from '@/i18n/navigation'
+import { usePathname } from '@/i18n/navigation'
 import { buildCatalogQueryString, type CatalogFilterParams } from '@/lib/catalog-query'
 import { cn } from '@/lib/utils'
 
@@ -41,21 +43,38 @@ export function ShopCatalogFilters({
   resetPath = '/',
   compactSearch = false,
 }: ShopCatalogFiltersProps) {
+  /** next/navigation preserves query strings; next-intl router can drop them. */
   const router = useRouter()
   const pathname = usePathname()
+  const locale = useLocale()
   const [isPending, startTransition] = useTransition()
   const searchInputRef = useRef<HTMLInputElement>(null)
+
+  const toLocaleHref = useCallback(
+    (path: string, qs: string) => {
+      const bare = path.startsWith('/') ? path : `/${path}`
+      const withLocale =
+        bare === '/'
+          ? `/${locale}`
+          : bare.startsWith(`/${locale}`) || bare.startsWith(`/${locale}/`)
+            ? bare
+            : `/${locale}${bare}`
+      return qs ? `${withLocale}?${qs}` : withLocale
+    },
+    [locale],
+  )
 
   const navigate = useCallback(
     (overrides: Partial<Record<keyof CatalogFilterParams, string | null | undefined>>) => {
       const qs = buildCatalogQueryString(filters, overrides)
-      const href = qs ? `${pathname}?${qs}` : pathname
+      const href = toLocaleHref(pathname || '/', qs)
       startTransition(() => {
-        router.push(href as Parameters<typeof router.push>[0])
+        // Typed routes don't model dynamic query strings; cast is intentional.
+        router.push(href as never)
         router.refresh()
       })
     },
-    [filters, pathname, router],
+    [filters, pathname, router, toLocaleHref],
   )
 
   const clearSearchAndGoHome = useCallback(() => {
@@ -64,12 +83,12 @@ export function ShopCatalogFilters({
       { store: filters.store },
       { q: null, category: null, sort: null },
     )
-    const href = qs ? `${resetPath}?${qs}` : resetPath
+    const href = toLocaleHref(resetPath || '/', qs)
     startTransition(() => {
-      router.push(href as Parameters<typeof router.push>[0])
+      router.push(href as never)
       router.refresh()
     })
-  }, [filters.q, filters.store, resetPath, router])
+  }, [filters.q, filters.store, resetPath, router, toLocaleHref])
 
   useEffect(() => {
     const el = searchInputRef.current
@@ -94,21 +113,25 @@ export function ShopCatalogFilters({
   return (
     <section
       className={cn(
-        'rounded-2xl border border-[rgba(43,43,43,0.08)] bg-white/60 p-3 shadow-[0_1px_2px_rgba(43,43,43,0.03)] backdrop-blur-md sm:rounded-[2rem] sm:p-4',
+        'rounded-20 border border-stroke-soft-200 bg-bg-white-0 p-3 shadow-regular-xs sm:rounded-[1.25rem] sm:p-4',
         isPending && 'opacity-80',
       )}
       aria-busy={isPending}
     >
-      <form onSubmit={handleSubmit} className='grid gap-3 lg:grid-cols-[1fr_auto_auto] lg:items-end'>
+      <form
+        method='get'
+        onSubmit={handleSubmit}
+        className='grid gap-3 lg:grid-cols-[1fr_auto_auto] lg:items-end'
+      >
         <div className='space-y-2'>
           <Label
             htmlFor='catalog-q'
             className={cn(
-              'flex items-center gap-2 text-[#2B2B2B]',
+              'flex items-center gap-2 text-[#171717]',
               compactSearch && 'sr-only',
             )}
           >
-            <Search className='size-4 text-[#6E6A66]' aria-hidden />
+            <Search className='size-4 text-[#5c5c5c]' aria-hidden />
             {labels.searchLabel}
           </Label>
           <Input
@@ -122,7 +145,7 @@ export function ShopCatalogFilters({
             onChange={(event) => {
               if (event.target.value === '') clearSearchAndGoHome()
             }}
-            className='h-11 rounded-2xl border-[rgba(43,43,43,0.08)] bg-[#EAE4DC]/60 text-[#2B2B2B] placeholder:text-[#6E6A66] sm:h-12'
+            className='h-11 rounded-2xl border-stroke-soft-200 bg-bg-weak-50 text-text-strong-950 placeholder:text-text-soft-400 shadow-none sm:h-12'
           />
         </div>
         <div className='grid grid-cols-1 gap-3 min-[480px]:grid-cols-[1fr_auto] lg:contents'>
@@ -132,7 +155,7 @@ export function ShopCatalogFilters({
               name='sort'
               aria-label={labels.sortLabel}
               defaultValue={filters.sort ?? 'newest'}
-              className='h-11 w-full min-w-0 rounded-2xl border border-[rgba(43,43,43,0.08)] bg-[#EAE4DC]/60 px-4 text-sm text-[#2B2B2B] sm:h-12'
+              className='h-11 w-full min-w-0 rounded-2xl border border-stroke-soft-200 bg-bg-weak-50 px-4 text-sm text-text-strong-950 sm:h-12'
             >
               <option value='newest'>{labels.sortNewest}</option>
               <option value='trending'>{labels.sortTrending}</option>
@@ -143,7 +166,7 @@ export function ShopCatalogFilters({
           <Button
             type='submit'
             disabled={isPending}
-            className='h-11 w-full rounded-2xl bg-[#B76E5D] px-7 text-white shadow-[0_8px_22px_rgba(183,110,93,0.25)] hover:bg-[#A66250] disabled:opacity-70 min-[480px]:w-auto sm:h-12 lg:w-auto'
+            className='h-11 w-full rounded-2xl bg-primary-base px-7 text-static-white shadow-regular-xs hover:bg-primary-darker disabled:opacity-70 min-[480px]:w-auto sm:h-12 lg:w-auto'
           >
             {labels.applyFilters}
           </Button>
@@ -157,10 +180,10 @@ export function ShopCatalogFilters({
           disabled={isPending}
           onClick={() => navigate({ category: null })}
           className={cn(
-            'shrink-0 rounded-full',
+            'shrink-0 rounded-full shadow-none',
             !activeCategory
-              ? 'bg-[#B76E5D] text-white shadow-[0_4px_14px_rgba(183,110,93,0.25)] hover:bg-[#A66250]'
-              : 'border-[rgba(43,43,43,0.08)] bg-white/60 text-[#2B2B2B] backdrop-blur-md hover:bg-white/85 hover:text-[#2B2B2B]',
+              ? 'bg-primary-base text-static-white hover:bg-primary-darker'
+              : 'border-stroke-soft-200 bg-bg-white-0 text-text-sub-600 hover:bg-bg-weak-50 hover:text-text-strong-950',
           )}
         >
           {labels.allCategories}
@@ -175,13 +198,13 @@ export function ShopCatalogFilters({
               disabled={isPending}
               onClick={() => navigate({ category: item.name })}
               className={cn(
-                'shrink-0 rounded-full',
+                'shrink-0 rounded-full shadow-none',
                 isActive
-                  ? 'bg-[#B76E5D] text-white shadow-[0_4px_14px_rgba(183,110,93,0.25)] hover:bg-[#A66250]'
-                  : 'border-[rgba(43,43,43,0.08)] bg-white/60 text-[#2B2B2B] backdrop-blur-md hover:bg-white/85 hover:text-[#2B2B2B]',
+                  ? 'bg-primary-base text-static-white hover:bg-primary-darker'
+                  : 'border-stroke-soft-200 bg-bg-white-0 text-text-sub-600 hover:bg-bg-weak-50 hover:text-text-strong-950',
               )}
             >
-              {item.name} <span className='ml-1 text-[#6E6A66]'>({item.total})</span>
+              {item.name} <span className='ml-1 text-text-soft-400'>({item.total})</span>
             </Button>
           )
         })}

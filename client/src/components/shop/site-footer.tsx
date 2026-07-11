@@ -57,7 +57,7 @@ export function SiteFooter({ className, store }: SiteFooterProps) {
     const contactPhoneTel =
       store.contactPhone?.replace(/\s/g, '') || t('contact.phoneTel')
     const ctaButtonClass =
-      'h-11 w-fit rounded-full border-0 px-6 text-sm font-semibold shadow-[0_8px_22px_rgba(0,0,0,0.12)] transition-colors'
+      'h-11 w-fit rounded-full border-0 px-6 text-sm font-semibold shadow-regular-sm transition-colors'
     const ctaButtonStyle = {
       backgroundColor: theme.buttonBackground,
       color: theme.buttonText,
@@ -316,7 +316,7 @@ export function SiteFooter({ className, store }: SiteFooterProps) {
   return (
     <footer
       className={cn(
-        'relative isolate overflow-hidden border-t border-[#A66250]/35 bg-[#B76E5D] text-white',
+        'relative isolate overflow-hidden border-t border-[#178c4e]/35 bg-[#1daf61] text-white',
         className,
       )}
     >
@@ -325,7 +325,7 @@ export function SiteFooter({ className, store }: SiteFooterProps) {
         className='pointer-events-none absolute inset-0 opacity-100'
         style={{
           background:
-            'radial-gradient(900px 460px at 10% 0%, rgba(255,255,255,0.22), transparent 65%), radial-gradient(720px 420px at 92% 10%, rgba(125,143,105,0.26), transparent 62%), radial-gradient(520px 340px at 55% 35%, rgba(0,0,0,0.12), transparent 70%), linear-gradient(180deg, rgba(183,110,93,1) 0%, rgba(166,98,80,1) 55%, rgba(117,63,50,1) 100%)',
+            'radial-gradient(900px 460px at 10% 0%, rgba(255,255,255,0.22), transparent 65%), radial-gradient(720px 420px at 92% 10%, rgba(125,143,105,0.26), transparent 62%), radial-gradient(520px 340px at 55% 35%, rgba(0,0,0,0.12), transparent 70%), linear-gradient(180deg, rgba(29, 175, 97,1) 0%, rgba(166,98,80,1) 55%, rgba(117,63,50,1) 100%)',
         }}
       />
       <div
@@ -358,7 +358,7 @@ export function SiteFooter({ className, store }: SiteFooterProps) {
             <Button
               asChild
               type='button'
-              className='h-11 w-fit rounded-full border-0 bg-white px-6 text-sm font-semibold text-[#B76E5D] shadow-[0_8px_22px_rgba(0,0,0,0.12)] transition-colors hover:bg-white/95 hover:text-[#A66250]'
+              className='h-11 w-fit rounded-full border-0 bg-white px-6 text-sm font-semibold text-[#1daf61] shadow-regular-sm transition-colors hover:bg-white/95 hover:text-[#178c4e]'
             >
               <Link href={merchantSignupHref() as '/signup'} className='inline-flex items-center gap-2'>
                 {t('becomeSeller')}

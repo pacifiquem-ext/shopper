@@ -44,16 +44,16 @@ export function DashboardFilters({ period = 'month' }: DashboardFiltersProps) {
         <PopoverTrigger asChild>
           <button
             type="button"
-            className="flex h-9 items-center gap-2 rounded-lg border border-gray-200 bg-white px-4 text-sm font-medium text-gray-700 shadow-sm transition-colors hover:bg-brand-50 hover:text-brand-900"
+            className="flex h-9 items-center gap-2 rounded-lg border border-stroke-soft-200 bg-bg-white-0 px-4 text-sm font-medium text-text-sub-600 shadow-regular-xs transition-colors hover:bg-bg-weak-50 hover:text-text-strong-950"
           >
             {label}
-            <ChevronDown className="h-4 w-4 text-gray-500" />
+            <ChevronDown className="h-4 w-4 text-text-soft-400" />
           </button>
         </PopoverTrigger>
         <PopoverContent
           align="end"
           className={cn(
-            'border-gray-200 bg-white p-2 text-gray-900 shadow-md',
+            'border-stroke-soft-200 bg-white p-2 text-text-strong-950 shadow-md',
             preset === 'custom' ? 'w-[360px]' : 'w-60'
           )}
         >
@@ -62,8 +62,8 @@ export function DashboardFilters({ period = 'month' }: DashboardFiltersProps) {
               type="button"
               onClick={() => setPreset('mtd')}
               className={cn(
-                'w-full rounded-md px-3 py-2 text-left text-sm transition-colors hover:bg-brand-50 hover:text-brand-900',
-                preset === 'mtd' && 'bg-brand-50 text-brand-900'
+                'w-full rounded-md px-3 py-2 text-left text-sm transition-colors hover:bg-primary-alpha-10 hover:text-primary-base',
+                preset === 'mtd' && 'bg-primary-alpha-10 text-primary-base'
               )}
             >
               {t('header.monthToDate')}
@@ -72,8 +72,8 @@ export function DashboardFilters({ period = 'month' }: DashboardFiltersProps) {
               type="button"
               onClick={() => setPreset('ytd')}
               className={cn(
-                'w-full rounded-md px-3 py-2 text-left text-sm transition-colors hover:bg-brand-50 hover:text-brand-900',
-                preset === 'ytd' && 'bg-brand-50 text-brand-900'
+                'w-full rounded-md px-3 py-2 text-left text-sm transition-colors hover:bg-primary-alpha-10 hover:text-primary-base',
+                preset === 'ytd' && 'bg-primary-alpha-10 text-primary-base'
               )}
             >
               {t('header.yearToDate')}
@@ -82,8 +82,8 @@ export function DashboardFilters({ period = 'month' }: DashboardFiltersProps) {
               type="button"
               onClick={() => setPreset('custom')}
               className={cn(
-                'w-full rounded-md px-3 py-2 text-left text-sm transition-colors hover:bg-brand-50 hover:text-brand-900',
-                preset === 'custom' && 'bg-brand-50 text-brand-900'
+                'w-full rounded-md px-3 py-2 text-left text-sm transition-colors hover:bg-primary-alpha-10 hover:text-primary-base',
+                preset === 'custom' && 'bg-primary-alpha-10 text-primary-base'
               )}
             >
               {t('header.custom')}
@@ -91,13 +91,13 @@ export function DashboardFilters({ period = 'month' }: DashboardFiltersProps) {
           </div>
 
           {preset === 'custom' && (
-            <div className="mt-3 rounded-md border border-gray-200 p-2">
-              <div className="mb-2 text-xs font-medium text-gray-600">{t('header.customRange')}</div>
+            <div className="mt-3 rounded-md border border-stroke-soft-200 p-2">
+              <div className="mb-2 text-xs font-medium text-text-sub-600">{t('header.customRange')}</div>
               <div className="max-h-[360px] overflow-auto">
                 <Calendar mode="range" selected={customRange} onSelect={setCustomRange} numberOfMonths={1} />
               </div>
               <div className="mt-2 flex justify-end">
-                <Button type="button" size="sm" className="bg-brand-900 hover:bg-brand-800 text-white">
+                <Button type="button" size="sm" className="bg-primary-base hover:bg-primary-darker text-white">
                   {t('header.apply')}
                 </Button>
               </div>
@@ -110,8 +110,8 @@ export function DashboardFilters({ period = 'month' }: DashboardFiltersProps) {
         fetchBlob={() => analyticsService.getReport(exportPeriod)}
         filename={`report-${exportPeriod}.csv`}
         label={t('header.export')}
-        className="h-9 rounded-lg bg-brand-900 px-4 text-sm font-semibold text-white shadow-sm hover:bg-brand-800"
-        variant="default"
+        className="h-9 rounded-lg border-stroke-soft-200 bg-bg-white-0 px-4 text-sm font-medium text-text-sub-600 shadow-regular-xs hover:bg-bg-weak-50 hover:text-text-strong-950"
+        variant="outline"
         size="sm"
       />
     </div>

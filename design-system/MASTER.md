@@ -18,6 +18,9 @@ Premium multi-tenant commerce for Rwanda: **refined, high-contrast, calm density
 
 - Canvas: `bg-bg-weak-50`
 - Surfaces: `bg-bg-white-0` + `border-stroke-soft-200` + `rounded-20` cards / `rounded-10` controls
+- Shadows: prefer `shadow-regular-xs` / `shadow-regular-sm` / `shadow-regular-md` or `shadow-soft-card` (+ hover). Avoid black/opaque custom shadows and loud green glows.
+- Borders: always soft hairlines (`stroke-soft-200` ≈ `#e8e8e8`). Never `rgba(23,23,23,…)` or pure black borders on white UI.
+- CTAs: one filled primary per view; secondary actions use outline/neutral stroke (`border-stroke-soft-200` + `shadow-regular-xs`).
 - Type: Inter (`--font-inter`), AlignUI text scales (`text-label-*`, `text-paragraph-*`, `text-title-*`)
 - Icons: Remix Icon (`@remixicon/react`)
 

@@ -45,7 +45,7 @@ export function StepBusinessAddress() {
                 'flex items-center border-b py-2 transition-colors',
                 provinceField.hasError
                   ? 'border-red-500 focus-within:border-red-500'
-                  : 'focus-within:border-brand-600 border-gray-300'
+                  : 'focus-within:border-primary-base border-stroke-soft-200'
               )}
             >
               <Input
@@ -71,7 +71,7 @@ export function StepBusinessAddress() {
                 'flex items-center border-b py-2 transition-colors',
                 districtField.hasError
                   ? 'border-red-500 focus-within:border-red-500'
-                  : 'focus-within:border-brand-600 border-gray-300'
+                  : 'focus-within:border-primary-base border-stroke-soft-200'
               )}
             >
               <Input
@@ -97,7 +97,7 @@ export function StepBusinessAddress() {
                 'flex items-center border-b py-2 transition-colors',
                 sectorField.hasError
                   ? 'border-red-500 focus-within:border-red-500'
-                  : 'focus-within:border-brand-600 border-gray-300'
+                  : 'focus-within:border-primary-base border-stroke-soft-200'
               )}
             >
               <Input
@@ -126,7 +126,7 @@ export function StepBusinessAddress() {
               'flex items-center border-b py-2 transition-colors',
               physicalAddressField.hasError
                 ? 'border-red-500 focus-within:border-red-500'
-                : 'focus-within:border-brand-600 border-gray-300'
+                : 'focus-within:border-primary-base border-stroke-soft-200'
             )}
           >
             <Input
@@ -150,7 +150,7 @@ export function StepBusinessAddress() {
               {t('common.optional', { defaultValue: '(Optional)' })}
             </span>
           </Label>
-          <div className="focus-within:border-brand-600 flex items-center border-b border-gray-300 py-2 transition-colors">
+          <div className="focus-within:border-primary-base flex items-center border-b border-stroke-soft-200 py-2 transition-colors">
             <Input
               value={draft.businessAddress?.googleMapsUrl || ''}
               onChange={(e) => setBusinessAddress({ googleMapsUrl: e.target.value })}

@@ -31,13 +31,13 @@ export function TrendingProductsChart({
   isLoading = false,
 }: TrendingProductsChartProps) {
   return (
-    <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+    <div className="rounded-2xl border border-stroke-soft-200 bg-white p-5 shadow-sm">
       <div className="flex items-center justify-between">
-        <h3 className="text-sm font-semibold text-gray-900">{title}</h3>
+        <h3 className="text-sm font-semibold text-text-strong-950">{title}</h3>
         <div className="flex items-center gap-2">
           <div className="flex items-center gap-1.5">
             <div className="h-2 w-2 rounded-full bg-emerald-500" />
-            <span className="text-xs font-medium text-gray-500">{legendLabel}</span>
+            <span className="text-xs font-medium text-text-soft-400">{legendLabel}</span>
           </div>
         </div>
       </div>
@@ -46,12 +46,12 @@ export function TrendingProductsChart({
         {isLoading ? (
           <ChartLoadingPlaceholder minHeightClassName="min-h-[220px]" />
         ) : products.length === 0 ? (
-          <div className="flex min-h-[220px] flex-col items-center justify-center rounded-xl border border-dashed border-gray-200 bg-gray-50/80 px-6 py-10 text-center">
+          <div className="flex min-h-[220px] flex-col items-center justify-center rounded-xl border border-dashed border-stroke-soft-200 bg-bg-weak-50/80 px-6 py-10 text-center">
             <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white shadow-xs">
               <Package className="h-6 w-6 text-gray-400" aria-hidden />
             </div>
             <p className="mt-4 text-sm font-semibold text-gray-800">{emptyTitle}</p>
-            <p className="mt-1.5 max-w-[260px] text-xs leading-relaxed font-medium text-gray-500">
+            <p className="mt-1.5 max-w-[260px] text-xs leading-relaxed font-medium text-text-soft-400">
               {emptyDescription}
             </p>
           </div>
@@ -60,15 +60,15 @@ export function TrendingProductsChart({
             <Link
               key={product.id}
               href={`/dashboard/products/${product.id}`}
-              className="flex items-center gap-3 rounded-xl border border-gray-100 bg-gray-50/50 p-3 transition-colors hover:bg-gray-100/50"
+              className="flex items-center gap-3 rounded-xl border border-stroke-soft-200 bg-bg-weak-50/50 p-3 transition-colors hover:bg-bg-weak-50/50"
             >
-              <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-white text-xs font-semibold text-gray-700 shadow-xs">
+              <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-white text-xs font-semibold text-text-sub-600 shadow-xs">
                 {idx + 1}
               </div>
 
               <div className="min-w-0 flex-1">
-                <div className="truncate text-sm font-semibold text-gray-900">{product.name}</div>
-                <div className="mt-0.5 text-xs font-medium text-gray-500">
+                <div className="truncate text-sm font-semibold text-text-strong-950">{product.name}</div>
+                <div className="mt-0.5 text-xs font-medium text-text-soft-400">
                   {unitsSoldLabel(product.sales)}
                 </div>
               </div>

@@ -95,7 +95,7 @@ export default function DashboardPage() {
   }, [selectedPeriod])
 
   const quickLinks = useMemo(() => [
-    { label: 'Create Product', href: '/dashboard/products?action=create', icon: Plus, color: 'bg-brand-50 text-brand-900' },
+    { label: 'Create Product', href: '/dashboard/products?action=create', icon: Plus, color: 'bg-primary-alpha-10 text-primary-base' },
     { label: 'View Orders', href: '/dashboard/orders', icon: Layers, color: 'bg-sky-50 text-sky-900' },
     { label: 'Manage Inventory', href: '/dashboard/inventory', icon: Boxes, color: 'bg-emerald-50 text-emerald-900' },
     { label: 'Store Settings', href: '/dashboard/store-settings', icon: Edit, color: 'bg-violet-50 text-violet-900' },
@@ -108,13 +108,13 @@ export default function DashboardPage() {
     <div className="flex w-full flex-col gap-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <div className="flex items-center gap-2 text-gray-900">
-            <div className="bg-brand-50 text-brand-900 flex h-9 w-9 items-center justify-center rounded-xl">
+          <div className="flex items-center gap-2 text-text-strong-950">
+            <div className="bg-primary-alpha-10 text-primary-base flex h-9 w-9 items-center justify-center rounded-xl">
               <Box className="h-4 w-4" />
             </div>
             <h1 className="text-xl font-semibold">{t('nav.dashboard')}</h1>
           </div>
-          <p className="mt-1 text-sm text-gray-500">Welcome back! Here's what's happening with your store.</p>
+          <p className="mt-1 text-sm text-text-soft-400">Welcome back! Here's what's happening with your store.</p>
         </div>
 
         <div className="flex items-center gap-3">
@@ -123,8 +123,8 @@ export default function DashboardPage() {
             fetchBlob={() => analyticsService.getReport(selectedPeriod)}
             filename={`report-${selectedPeriod}.csv`}
             label={t('header.generateReport')}
-            className="h-10 rounded-xl bg-brand-900 text-white hover:bg-brand-800"
-            variant="default"
+            className="h-10 rounded-xl border-stroke-soft-200 bg-bg-white-0 px-4 text-sm font-medium text-text-sub-600 shadow-regular-xs hover:bg-bg-weak-50 hover:text-text-strong-950"
+            variant="outline"
           />
         </div>
       </div>
@@ -158,9 +158,9 @@ export default function DashboardPage() {
       </div>
 
       {/* Quick Links */}
-      <Card className="rounded-2xl border border-gray-200/70 bg-white shadow-sm">
+      <Card className="rounded-20 border border-stroke-soft-200 bg-bg-white-0 shadow-regular-xs">
         <CardHeader>
-          <CardTitle className="text-sm font-semibold text-gray-900">Quick Actions</CardTitle>
+          <CardTitle className="text-sm font-semibold text-text-strong-950">Quick Actions</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
@@ -168,12 +168,12 @@ export default function DashboardPage() {
               <Link
                 key={link.href}
                 href={link.href}
-                className="group flex flex-col items-center gap-3 rounded-xl border border-gray-200 bg-white p-4 transition-all hover:border-brand-200 hover:bg-brand-50"
+                className="group flex flex-col items-center gap-3 rounded-xl border border-stroke-soft-200 bg-white p-4 transition-all hover:border-primary-base/20 hover:bg-primary-alpha-10"
               >
                 <div className={cn('flex h-12 w-12 items-center justify-center rounded-xl transition-transform group-hover:scale-110', link.color)}>
                   <link.icon className="h-5 w-5" />
                 </div>
-                <span className="text-center text-sm font-medium text-gray-900">{link.label}</span>
+                <span className="text-center text-sm font-medium text-text-strong-950">{link.label}</span>
               </Link>
             ))}
           </div>
@@ -182,17 +182,17 @@ export default function DashboardPage() {
 
       {/* Orders & Inventory Overview */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <Card className="rounded-2xl border border-gray-200/70 bg-white shadow-sm">
+        <Card className="rounded-20 border border-stroke-soft-200 bg-bg-white-0 shadow-regular-xs">
           <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-4">
             <div>
-              <CardTitle className="text-sm font-semibold text-gray-900">Orders Overview</CardTitle>
-              <div className="mt-1 text-xs text-gray-500">Current order status breakdown</div>
+              <CardTitle className="text-sm font-semibold text-text-strong-950">Orders Overview</CardTitle>
+              <div className="mt-1 text-xs text-text-soft-400">Current order status breakdown</div>
             </div>
             <Link href="/dashboard/orders">
               <Button
                 type="button"
                 variant="ghost"
-                className="h-9 w-9 rounded-lg bg-white p-0 text-gray-700 hover:bg-brand-50 hover:text-brand-900"
+                className="h-9 w-9 rounded-lg bg-white p-0 text-text-sub-600 hover:bg-primary-alpha-10 hover:text-primary-base"
               >
                 <ExternalLink className="h-4 w-4" />
               </Button>
@@ -202,11 +202,11 @@ export default function DashboardPage() {
             <div className="flex items-center justify-between rounded-xl bg-gradient-to-br from-gray-50 to-gray-100/50 p-4 transition-all hover:shadow-sm">
               <div className="flex items-center gap-3">
                 <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-white shadow-sm">
-                  <Clock className="h-5 w-5 text-gray-700" />
+                  <Clock className="h-5 w-5 text-text-sub-600" />
                 </div>
                 <div>
-                  <div className="text-xs font-medium text-gray-500">Pending</div>
-                  <div className="text-2xl font-bold text-gray-900">{dash(dashboardMetrics?.pendingOrders)}</div>
+                  <div className="text-xs font-medium text-text-soft-400">Pending</div>
+                  <div className="text-2xl font-bold text-text-strong-950">{dash(dashboardMetrics?.pendingOrders)}</div>
                 </div>
               </div>
               <div className="text-right">
@@ -220,8 +220,8 @@ export default function DashboardPage() {
                   <RotateCcw className="h-5 w-5 text-sky-700" />
                 </div>
                 <div>
-                  <div className="text-xs font-medium text-gray-500">Total Orders</div>
-                  <div className="text-2xl font-bold text-gray-900">{dash(dashboardMetrics?.totalOrders)}</div>
+                  <div className="text-xs font-medium text-text-soft-400">Total Orders</div>
+                  <div className="text-2xl font-bold text-text-strong-950">{dash(dashboardMetrics?.totalOrders)}</div>
                 </div>
               </div>
               <div className="text-right">
@@ -235,34 +235,34 @@ export default function DashboardPage() {
                   <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white shadow-sm">
                     <CheckCircle2 className="h-4 w-4 text-[--color-emerald-600]" />
                   </div>
-                  <div className="text-xs font-medium text-gray-500">Completed</div>
+                  <div className="text-xs font-medium text-text-soft-400">Completed</div>
                 </div>
-                <div className="mt-2 text-xl font-bold text-gray-900">{dash(dashboardMetrics?.completedOrders)}</div>
+                <div className="mt-2 text-xl font-bold text-text-strong-950">{dash(dashboardMetrics?.completedOrders)}</div>
               </div>
               <div className="rounded-xl bg-gradient-to-br from-amber-50/30 to-yellow-50/20 p-4 transition-all hover:shadow-sm">
                 <div className="flex items-center gap-2">
                   <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white shadow-sm">
                     <AlertTriangle className="h-4 w-4 text-amber-500" />
                   </div>
-                  <div className="text-xs font-medium text-gray-500">Low Stock</div>
+                  <div className="text-xs font-medium text-text-soft-400">Low Stock</div>
                 </div>
-                <div className="mt-2 text-xl font-bold text-gray-900">{dash(inventorySummary?.lowStock)}</div>
+                <div className="mt-2 text-xl font-bold text-text-strong-950">{dash(inventorySummary?.lowStock)}</div>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="rounded-2xl border border-gray-200/70 bg-white shadow-sm">
+        <Card className="rounded-20 border border-stroke-soft-200 bg-bg-white-0 shadow-regular-xs">
           <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-4">
             <div>
-              <CardTitle className="text-sm font-semibold text-gray-900">Inventory Status</CardTitle>
-              <div className="mt-1 text-xs text-gray-500">Stock levels and alerts</div>
+              <CardTitle className="text-sm font-semibold text-text-strong-950">Inventory Status</CardTitle>
+              <div className="mt-1 text-xs text-text-soft-400">Stock levels and alerts</div>
             </div>
             <Link href="/dashboard/inventory">
               <Button
                 type="button"
                 variant="ghost"
-                className="h-9 w-9 rounded-lg bg-white p-0 text-gray-700 hover:bg-brand-50 hover:text-brand-900"
+                className="h-9 w-9 rounded-lg bg-white p-0 text-text-sub-600 hover:bg-primary-alpha-10 hover:text-primary-base"
               >
                 <ExternalLink className="h-4 w-4" />
               </Button>
@@ -278,31 +278,31 @@ export default function DashboardPage() {
                   <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-white shadow-sm">
                     <Banknote className="h-4 w-4 text-[--color-emerald-600]" />
                   </div>
-                  <div className="text-xs font-medium text-gray-500">Total Stock Value</div>
+                  <div className="text-xs font-medium text-text-soft-400">Total Stock Value</div>
                 </div>
-                <div className="mt-3 text-3xl font-bold text-gray-900">
+                <div className="mt-3 text-3xl font-bold text-text-strong-950">
                   {isLoading ? '—' : `$${fmt(inventorySummary?.totalStockValue)}`}
                 </div>
-                <div className="mt-1 text-xs text-gray-500">Across all products</div>
+                <div className="mt-1 text-xs text-text-soft-400">Across all products</div>
               </div>
             </div>
 
             <div className="grid grid-cols-3 gap-3">
               <div className="group rounded-xl bg-gradient-to-br from-gray-50 to-slate-50/50 p-4 transition-all hover:shadow-sm">
                 <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white shadow-sm transition-transform group-hover:scale-110">
-                  <Box className="h-4 w-4 text-gray-700" />
+                  <Box className="h-4 w-4 text-text-sub-600" />
                 </div>
-                <div className="mt-3 text-xs font-medium text-gray-500">In Stock</div>
-                <div className="mt-1 text-xl font-bold text-gray-900">{dash(inventorySummary?.totalStockQuantity)}</div>
+                <div className="mt-3 text-xs font-medium text-text-soft-400">In Stock</div>
+                <div className="mt-1 text-xl font-bold text-text-strong-950">{dash(inventorySummary?.totalStockQuantity)}</div>
                 <div className="mt-0.5 text-xs text-gray-400">units</div>
               </div>
 
               <div className="group rounded-xl bg-gradient-to-br from-slate-50 to-gray-100/50 p-4 transition-all hover:shadow-sm">
                 <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white shadow-sm transition-transform group-hover:scale-110">
-                  <AlertTriangle className="h-4 w-4 text-gray-600" />
+                  <AlertTriangle className="h-4 w-4 text-text-sub-600" />
                 </div>
-                <div className="mt-3 text-xs font-medium text-gray-500">Low Stock</div>
-                <div className="mt-1 text-xl font-bold text-gray-900">{dash(inventorySummary?.lowStock)}</div>
+                <div className="mt-3 text-xs font-medium text-text-soft-400">Low Stock</div>
+                <div className="mt-1 text-xl font-bold text-text-strong-950">{dash(inventorySummary?.lowStock)}</div>
                 <div className="mt-0.5 text-xs text-gray-400">items</div>
               </div>
 
@@ -310,8 +310,8 @@ export default function DashboardPage() {
                 <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white shadow-sm transition-transform group-hover:scale-110">
                   <XCircle className="h-4 w-4 text-red-500" />
                 </div>
-                <div className="mt-3 text-xs font-medium text-gray-500">Out of Stock</div>
-                <div className="mt-1 text-xl font-bold text-gray-900">{dash(inventorySummary?.outOfStock)}</div>
+                <div className="mt-3 text-xs font-medium text-text-soft-400">Out of Stock</div>
+                <div className="mt-1 text-xl font-bold text-text-strong-950">{dash(inventorySummary?.outOfStock)}</div>
                 <div className="mt-0.5 text-xs text-gray-400">items</div>
               </div>
             </div>
@@ -320,16 +320,16 @@ export default function DashboardPage() {
       </div>
 
       {/* Sales Overview */}
-      <Card className="rounded-2xl border border-gray-200/70 bg-white shadow-sm">
+      <Card className="rounded-20 border border-stroke-soft-200 bg-bg-white-0 shadow-regular-xs">
         <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-4">
           <div>
-            <CardTitle className="text-sm font-semibold text-gray-900">{t('cards.salesOverview')}</CardTitle>
-            <div className="mt-1 text-xs text-gray-500">{t('cards.salesSubtitle')}</div>
+            <CardTitle className="text-sm font-semibold text-text-strong-950">{t('cards.salesOverview')}</CardTitle>
+            <div className="mt-1 text-xs text-text-soft-400">{t('cards.salesSubtitle')}</div>
           </div>
           <Button
             type="button"
             variant="ghost"
-            className="h-9 w-9 rounded-lg bg-white p-0 text-gray-700 hover:bg-brand-50 hover:text-brand-900"
+            className="h-9 w-9 rounded-lg bg-white p-0 text-text-sub-600 hover:bg-primary-alpha-10 hover:text-primary-base"
           >
             <span className="sr-only">{t('cards.more')}</span>
             <Info className="h-4 w-4" />
@@ -340,11 +340,11 @@ export default function DashboardPage() {
             <div className="group rounded-xl bg-gradient-to-br from-gray-50 to-slate-50/50 p-5 transition-all hover:shadow-sm">
               <div className="flex items-center gap-3">
                 <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-white shadow-sm transition-transform group-hover:scale-110">
-                  <ShoppingBag className="h-5 w-5 text-gray-700" />
+                  <ShoppingBag className="h-5 w-5 text-text-sub-600" />
                 </div>
                 <div>
-                  <div className="text-xs font-medium text-gray-500">{t('cards.totalSales')}</div>
-                  <div className="text-2xl font-bold text-gray-900">{dash(dashboardMetrics?.totalOrders)}</div>
+                  <div className="text-xs font-medium text-text-soft-400">{t('cards.totalSales')}</div>
+                  <div className="text-2xl font-bold text-text-strong-950">{dash(dashboardMetrics?.totalOrders)}</div>
                 </div>
               </div>
               <div className="mt-2 text-xs text-gray-400">Total orders placed</div>
@@ -356,8 +356,8 @@ export default function DashboardPage() {
                   <ArrowUpRight className="h-5 w-5 text-sky-700" />
                 </div>
                 <div>
-                  <div className="text-xs font-medium text-gray-500">{t('cards.revenue')}</div>
-                  <div className="text-2xl font-bold text-gray-900">
+                  <div className="text-xs font-medium text-text-soft-400">{t('cards.revenue')}</div>
+                  <div className="text-2xl font-bold text-text-strong-950">
                     {isLoading ? '—' : `$${fmt(dashboardMetrics?.totalRevenue)}`}
                   </div>
                 </div>
@@ -368,11 +368,11 @@ export default function DashboardPage() {
             <div className="group rounded-xl bg-gradient-to-br from-slate-50 to-gray-100/50 p-5 transition-all hover:shadow-sm">
               <div className="flex items-center gap-3">
                 <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-white shadow-sm transition-transform group-hover:scale-110">
-                  <ArrowDownRight className="h-5 w-5 text-gray-600" />
+                  <ArrowDownRight className="h-5 w-5 text-text-sub-600" />
                 </div>
                 <div>
-                  <div className="text-xs font-medium text-gray-500">Completed</div>
-                  <div className="text-2xl font-bold text-gray-900">{dash(dashboardMetrics?.completedOrders)}</div>
+                  <div className="text-xs font-medium text-text-soft-400">Completed</div>
+                  <div className="text-2xl font-bold text-text-strong-950">{dash(dashboardMetrics?.completedOrders)}</div>
                 </div>
               </div>
               <div className="mt-2 text-xs text-gray-400">Fulfilled orders</div>
@@ -384,8 +384,8 @@ export default function DashboardPage() {
                   <Users className="h-5 w-5 text-[--color-emerald-600]" />
                 </div>
                 <div>
-                  <div className="text-xs font-medium text-gray-500">{t('cards.profit')}</div>
-                  <div className="text-2xl font-bold text-gray-900">{dash(dashboardMetrics?.totalCustomers)}</div>
+                  <div className="text-xs font-medium text-text-soft-400">{t('cards.profit')}</div>
+                  <div className="text-2xl font-bold text-text-strong-950">{dash(dashboardMetrics?.totalCustomers)}</div>
                 </div>
               </div>
               <div className="mt-2 text-xs text-gray-400">Unique customers</div>
@@ -395,18 +395,18 @@ export default function DashboardPage() {
       </Card>
 
       {/* Top Products */}
-      <Card className="rounded-2xl border border-gray-200/70 bg-white shadow-sm">
+      <Card className="rounded-20 border border-stroke-soft-200 bg-bg-white-0 shadow-regular-xs">
         <CardHeader className="flex flex-row items-start justify-between space-y-0">
           <div>
-            <CardTitle className="text-sm font-semibold text-gray-900">Top Selling Products</CardTitle>
-            <div className="mt-1 text-xs text-gray-500">Best performers this {selectedPeriod}</div>
+            <CardTitle className="text-sm font-semibold text-text-strong-950">Top Selling Products</CardTitle>
+            <div className="mt-1 text-xs text-text-soft-400">Best performers this {selectedPeriod}</div>
           </div>
           <Link href="/dashboard/products">
             <Button
               type="button"
               variant="ghost"
               size="sm"
-              className="h-8 rounded-lg text-xs text-brand-900 hover:bg-brand-50"
+              className="h-8 rounded-lg text-xs text-primary-base hover:bg-primary-alpha-10"
             >
               View All
               <ExternalLink className="ml-1 h-3 w-3" />
@@ -421,18 +421,18 @@ export default function DashboardPage() {
           ) : (
             <div className="space-y-3">
               {topProducts.map((product, idx) => (
-                <div key={product.productId} className="flex items-center justify-between rounded-xl border border-gray-200 bg-gray-50 p-3">
+                <div key={product.productId} className="flex items-center justify-between rounded-xl border border-stroke-soft-200 bg-bg-weak-50 p-3">
                   <div className="flex items-center gap-3">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-50 text-sm font-bold text-brand-900">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary-alpha-10 text-sm font-bold text-primary-base">
                       {idx + 1}
                     </div>
                     <div>
-                      <div className="text-sm font-semibold text-gray-900">{product.productName}</div>
-                      <div className="text-xs text-gray-500">{product.unitsSold} sold</div>
+                      <div className="text-sm font-semibold text-text-strong-950">{product.productName}</div>
+                      <div className="text-xs text-text-soft-400">{product.unitsSold} sold</div>
                     </div>
                   </div>
                   <div className="text-right">
-                    <div className="text-sm font-bold text-gray-900">${fmt(product.revenue)}</div>
+                    <div className="text-sm font-bold text-text-strong-950">${fmt(product.revenue)}</div>
                   </div>
                 </div>
               ))}
@@ -443,14 +443,14 @@ export default function DashboardPage() {
 
       {/* Product & Customer Stats */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        <Card className="rounded-2xl border border-gray-200/70 bg-white shadow-sm">
+        <Card className="rounded-20 border border-stroke-soft-200 bg-bg-white-0 shadow-regular-xs">
           <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-0">
-            <CardTitle className="text-sm font-semibold text-gray-900">Product Summary</CardTitle>
+            <CardTitle className="text-sm font-semibold text-text-strong-950">Product Summary</CardTitle>
             <Link href="/dashboard/products">
               <Button
                 type="button"
                 variant="ghost"
-                className="h-9 w-9 rounded-lg bg-white p-0 text-gray-700 hover:bg-brand-50 hover:text-brand-900"
+                className="h-9 w-9 rounded-lg bg-white p-0 text-text-sub-600 hover:bg-primary-alpha-10 hover:text-primary-base"
               >
                 <ExternalLink className="h-4 w-4" />
               </Button>
@@ -459,7 +459,7 @@ export default function DashboardPage() {
           <CardContent className="grid grid-cols-2 gap-4 pt-4">
             <MetricTile
               icon={<Package className="h-4 w-4" />}
-              iconClassName="bg-brand-50 text-brand-900"
+              iconClassName="bg-primary-alpha-10 text-primary-base"
               label="Active Products"
               value={dash(dashboardMetrics?.activeProducts)}
             />
@@ -472,13 +472,13 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
 
-        <Card className="rounded-2xl border border-gray-200/70 bg-white shadow-sm">
+        <Card className="rounded-20 border border-stroke-soft-200 bg-bg-white-0 shadow-regular-xs">
           <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-0">
-            <CardTitle className="text-sm font-semibold text-gray-900">{t('cards.productDetails')}</CardTitle>
+            <CardTitle className="text-sm font-semibold text-text-strong-950">{t('cards.productDetails')}</CardTitle>
             <Button
               type="button"
               variant="ghost"
-              className="h-9 w-9 rounded-lg bg-white p-0 text-gray-700 hover:bg-brand-50 hover:text-brand-900"
+              className="h-9 w-9 rounded-lg bg-white p-0 text-text-sub-600 hover:bg-primary-alpha-10 hover:text-primary-base"
             >
               <span className="sr-only">{t('cards.more')}</span>
               <Info className="h-4 w-4" />
@@ -491,13 +491,13 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
 
-        <Card className="rounded-2xl border border-gray-200/70 bg-white shadow-sm">
+        <Card className="rounded-20 border border-stroke-soft-200 bg-bg-white-0 shadow-regular-xs">
           <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-0">
-            <CardTitle className="text-sm font-semibold text-gray-900">{t('cards.noOfUsers')}</CardTitle>
+            <CardTitle className="text-sm font-semibold text-text-strong-950">{t('cards.noOfUsers')}</CardTitle>
             <Button
               type="button"
               variant="ghost"
-              className="h-9 w-9 rounded-lg bg-white p-0 text-gray-700 hover:bg-brand-50 hover:text-brand-900"
+              className="h-9 w-9 rounded-lg bg-white p-0 text-text-sub-600 hover:bg-primary-alpha-10 hover:text-primary-base"
             >
               <span className="sr-only">{t('cards.more')}</span>
               <Info className="h-4 w-4" />
@@ -520,15 +520,15 @@ export default function DashboardPage() {
         </Card>
       </div>
 
-      <Card className="rounded-2xl border border-gray-200/70 bg-white shadow-sm">
+      <Card className="rounded-20 border border-stroke-soft-200 bg-bg-white-0 shadow-regular-xs">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-0">
           <div>
-            <CardTitle className="text-sm font-semibold text-gray-900">{t('cards.salesPurchaseStats')}</CardTitle>
-            <div className="mt-1 text-xs text-gray-500">{t('cards.salesPurchaseStatsSubtitle')}</div>
+            <CardTitle className="text-sm font-semibold text-text-strong-950">{t('cards.salesPurchaseStats')}</CardTitle>
+            <div className="mt-1 text-xs text-text-soft-400">{t('cards.salesPurchaseStatsSubtitle')}</div>
           </div>
-          <div className="flex items-center gap-6 text-xs text-gray-500">
+          <div className="flex items-center gap-6 text-xs text-text-soft-400">
             <div className="flex items-center gap-2">
-              <span className="h-2 w-2 rounded-full bg-brand-600" />
+              <span className="h-2 w-2 rounded-full bg-primary-base" />
               <span>{t('cards.sales')}</span>
             </div>
             <div className="flex items-center gap-2">
@@ -543,18 +543,18 @@ export default function DashboardPage() {
       </Card>
 
       {/* Recent Activity */}
-      <Card className="rounded-2xl border border-gray-200/70 bg-white shadow-sm">
+      <Card className="rounded-20 border border-stroke-soft-200 bg-bg-white-0 shadow-regular-xs">
         <CardHeader className="flex flex-row items-start justify-between space-y-0">
           <div>
-            <CardTitle className="text-sm font-semibold text-gray-900">Recent Activity</CardTitle>
-            <div className="mt-1 text-xs text-gray-500">Latest order events across your store</div>
+            <CardTitle className="text-sm font-semibold text-text-strong-950">Recent Activity</CardTitle>
+            <div className="mt-1 text-xs text-text-soft-400">Latest order events across your store</div>
           </div>
           <Link href="/dashboard/orders">
             <Button
               type="button"
               variant="ghost"
               size="sm"
-              className="h-8 rounded-lg text-xs text-brand-900 hover:bg-brand-50"
+              className="h-8 rounded-lg text-xs text-primary-base hover:bg-primary-alpha-10"
             >
               View Orders
               <ExternalLink className="ml-1 h-3 w-3" />
@@ -571,14 +571,14 @@ export default function DashboardPage() {
               {recentActivity.map((item) => (
                 <div
                   key={item.id}
-                  className="flex items-start gap-3 rounded-xl border border-gray-100 bg-gray-50 px-4 py-3"
+                  className="flex items-start gap-3 rounded-xl border border-stroke-soft-200 bg-bg-weak-50 px-4 py-3"
                 >
-                  <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-brand-50">
-                    <TrendingUp className="h-3.5 w-3.5 text-brand-900" />
+                  <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-primary-alpha-10">
+                    <TrendingUp className="h-3.5 w-3.5 text-primary-base" />
                   </div>
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center justify-between gap-2">
-                      <span className="text-sm font-semibold text-gray-900">{item.title}</span>
+                      <span className="text-sm font-semibold text-text-strong-950">{item.title}</span>
                       <span className="shrink-0 text-xs text-gray-400">
                         {new Date(item.createdAt).toLocaleDateString('en-RW', {
                           day: '2-digit',
@@ -586,7 +586,7 @@ export default function DashboardPage() {
                         })}
                       </span>
                     </div>
-                    <div className="text-xs text-gray-500">
+                    <div className="text-xs text-text-soft-400">
                       {item.orderNumber} · {item.customerName}
                     </div>
                   </div>

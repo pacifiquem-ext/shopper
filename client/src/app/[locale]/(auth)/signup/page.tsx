@@ -12,8 +12,10 @@ import { useAuthStore } from '@/store/auth.store'
 import { useRouter } from '@/i18n/navigation'
 import { useSearchParams } from 'next/navigation'
 import { MERCHANT_ONBOARDING_PATH, withReturnUrl } from '@/lib/auth-return-url'
+import { useTranslations } from 'next-intl'
 
 export default function SignupPage() {
+  const t = useTranslations('auth')
   const router = useRouter()
   const searchParams = useSearchParams()
   const returnUrl = searchParams.get('returnUrl')
@@ -29,10 +31,8 @@ export default function SignupPage() {
   })
 
   async function onSubmit(values: SignupInput) {
-    // We send payload to global store which triggers toast on success
     const success = await signup(values)
     if (success) {
-      // Store the phone number locally to automatically detect it in the verify-phone page
       localStorage.setItem('pendingVerificationPhone', values.phoneNumber)
       router.push(
         withReturnUrl('/verify-phone', returnUrl ?? MERCHANT_ONBOARDING_PATH) as Parameters<
@@ -45,18 +45,26 @@ export default function SignupPage() {
   return (
     <AuthCard activeTab="signup" returnUrl={returnUrl}>
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="w-full space-y-5">
-          {/* Full Name Field */}
+        <form
+          method="post"
+          action="#"
+          onSubmit={(event) => {
+            event.preventDefault()
+            void form.handleSubmit(onSubmit)(event)
+          }}
+          className="w-full space-y-5"
+        >
           <FormField
             control={form.control}
             name="fullName"
             render={({ field }) => (
               <FormItem className="relative space-y-0">
-                <div className="focus-within:border-brand-600 flex items-center border-b border-gray-300 py-2 transition-colors">
+                <div className="focus-within:border-primary-base flex items-center border-b border-stroke-soft-200 py-2 transition-colors">
                   <UserIcon className="mr-3 h-5 w-5 text-gray-400" />
                   <FormControl>
                     <Input
-                      placeholder="Full Name"
+                      autoComplete="name"
+                      placeholder={t('fields.fullName')}
                       className="rounded-none border-0 bg-transparent px-0 shadow-none focus:outline-none focus-visible:ring-0 focus-visible:ring-transparent focus-visible:ring-offset-0"
                       {...field}
                     />
@@ -67,44 +75,42 @@ export default function SignupPage() {
             )}
           />
 
-          {/* Phone Number Field */}
           <FormField
             control={form.control}
             name="phoneNumber"
             render={({ field }) => (
               <FormItem className="relative space-y-0 pt-3">
-                <div className="focus-within:border-brand-600 flex items-center border-b border-gray-300 py-2 transition-colors">
+                <div className="focus-within:border-primary-base flex items-center border-b border-stroke-soft-200 py-2 transition-colors">
                   <Phone className="mr-3 h-5 w-5 text-gray-400" />
                   <FormControl>
                     <Input
-                      placeholder="Phone Number (e.g. +2507...)"
+                      type="tel"
+                      autoComplete="tel"
+                      placeholder={t('fields.phone')}
                       className="rounded-none border-0 bg-transparent px-0 shadow-none focus:outline-none focus-visible:ring-0 focus-visible:ring-transparent focus-visible:ring-offset-0"
                       {...field}
                     />
                   </FormControl>
                 </div>
-                <p className="pt-1 text-xs text-gray-500">
-                  Use international format with country code, e.g. +250788123456 (no spaces).
-                </p>
+                <p className="pt-1 text-xs text-gray-500">{t('fields.phoneHint')}</p>
                 <FormMessage className="absolute pt-1 text-xs" />
               </FormItem>
             )}
           />
 
-          {/* Email Field (Optional) */}
           <FormField
             control={form.control}
             name="email"
             render={({ field }) => (
               <FormItem className="relative space-y-0 pt-3">
-                <div className="focus-within:border-brand-600 flex items-center border-b border-gray-300 py-2 transition-colors">
+                <div className="focus-within:border-primary-base flex items-center border-b border-stroke-soft-200 py-2 transition-colors">
                   <Mail className="mr-3 h-5 w-5 text-gray-400" />
                   <FormControl>
                     <Input
-                      placeholder="Email (Optional)"
-                      type="text"
+                      type="email"
                       inputMode="email"
                       autoComplete="email"
+                      placeholder={t('fields.emailOptional')}
                       className="rounded-none border-0 bg-transparent px-0 shadow-none focus:outline-none focus-visible:ring-0 focus-visible:ring-transparent focus-visible:ring-offset-0"
                       {...field}
                     />
@@ -115,18 +121,18 @@ export default function SignupPage() {
             )}
           />
 
-          {/* Password Field */}
           <FormField
             control={form.control}
             name="password"
             render={({ field }) => (
               <FormItem className="relative space-y-0 pt-3">
-                <div className="focus-within:border-brand-600 flex items-center border-b border-gray-300 py-2 transition-colors">
+                <div className="focus-within:border-primary-base flex items-center border-b border-stroke-soft-200 py-2 transition-colors">
                   <Lock className="mr-3 h-5 w-5 text-gray-400" />
                   <FormControl>
                     <Input
                       type="password"
-                      placeholder="Password"
+                      autoComplete="new-password"
+                      placeholder={t('fields.password')}
                       className="rounded-none border-0 bg-transparent px-0 shadow-none focus:outline-none focus-visible:ring-0 focus-visible:ring-transparent focus-visible:ring-offset-0"
                       {...field}
                     />
@@ -141,9 +147,9 @@ export default function SignupPage() {
             <Button
               type="submit"
               disabled={isLoading}
-              className="bg-brand-700 hover:bg-brand-800 rounded-full px-8 py-2 font-bold shadow-md transition-transform active:scale-95 disabled:opacity-50"
+              className="rounded-full bg-primary-base px-8 py-2 font-bold text-static-white shadow-regular-xs transition-transform hover:bg-primary-darker active:scale-95 disabled:opacity-50"
             >
-              {isLoading ? 'SIGNING UP...' : 'SIGN UP'}
+              {isLoading ? t('signup.submitting') : t('signup.submit')}
             </Button>
           </div>
         </form>

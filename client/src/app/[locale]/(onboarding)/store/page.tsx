@@ -192,14 +192,14 @@ export default function StoreOnboardingPage() {
                 const step = resumeDraft()
                 navigateToStep(step)
               }}
-              className="bg-brand-700 hover:bg-brand-800 w-full rounded-full py-6 text-base font-bold shadow-md transition-transform active:scale-95"
+              className="bg-primary-darker hover:bg-primary-darker w-full rounded-full py-6 text-base font-bold shadow-regular-xs transition-transform active:scale-95"
             >
               {t('resumeModal.resumeButton')}
             </Button>
             <Button
               variant="outline"
               onClick={discardDraft}
-              className="w-full rounded-full border-gray-300 py-6 text-base font-bold text-gray-700 transition-colors hover:bg-gray-50"
+              className="w-full rounded-full border-stroke-soft-200 py-6 text-base font-bold text-gray-700 transition-colors hover:bg-gray-50"
             >
               {t('resumeModal.discardButton')}
             </Button>
@@ -212,7 +212,7 @@ export default function StoreOnboardingPage() {
         <header className="flex w-full items-center justify-between px-6 py-5 md:px-10 md:py-8">
           <div className="flex items-center gap-2">
             {/* Logo or brand icon */}
-            <div className="text-brand-900 flex items-center gap-2 text-xl font-bold tracking-tight">
+            <div className="text-primary-base flex items-center gap-2 text-xl font-bold tracking-tight">
               <Store className="h-8 w-8" />
             </div>
           </div>

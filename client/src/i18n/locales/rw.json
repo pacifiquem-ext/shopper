@@ -71,6 +71,9 @@
     "storeMetaDescription": "Reba ibicuruzwa byo mu iduka rya {store} kuri OnlineShop.rw.",
     "storeHeroSubtitle": "Uri kureba iduka rya {store}. Buri gicuruzwa kiri hano gicuruzwa kandi cyoherezwa n'iri duka.",
     "storeEmpty": "{store} ntirarashyiramo ibicuruzwa.",
+    "storeNotFoundEyebrow": "Iduka ntiriboneka",
+    "storeNotFoundTitle": "Ntidushoboye kubona iryo duka",
+    "storeNotFoundBody": "Nta duka ryemewe rihuye na “{store}”. Reba umurongo cyangwa usure isoko.",
     "searchLabel": "Shakisha",
     "searchPlaceholder": "Shakisha ibicuruzwa",
     "homeLink": "Ahabanza",
@@ -450,7 +453,8 @@
       "brand": "OnlineShop.rw",
       "subtitle": "Inventory",
       "role": "Nyir'iduka",
-      "defaultUserName": "Ukoresha"
+      "defaultUserName": "Ukoresha",
+      "logout": "Sohoka"
     },
     "storeSettings": {
       "branding": {
@@ -1189,6 +1193,46 @@
         "orders": "Amabwiriza, uturere two gutanga n'ubwishyu",
         "marketplace": "Isoko rigufasha kubona abakiriya bashya"
       }
+    },
+    "fields": {
+      "fullName": "Amazina yose",
+      "phone": "Nomero ya telefone (urugero +2507…)",
+      "phoneHint": "Koresha imiterere mpuzamahanga hamwe na kode y'igihugu, urugero +250788123456 (nta mwanya).",
+      "emailOptional": "Imeri (si ngombwa)",
+      "password": "Ijambo ry'ibanga",
+      "newPassword": "Ijambo ry'ibanga rishya",
+      "otp": "Kode y'imibare 6",
+      "otpShort": "OTP y'imibare 6"
+    },
+    "login": {
+      "forgotPassword": "Wibagiwe ijambo ry'ibanga?",
+      "submit": "Injira",
+      "submitting": "Turimo kwinjira…"
+    },
+    "signup": {
+      "submit": "Iyandikishe",
+      "submitting": "Turimo kwiyandikisha…"
+    },
+    "forgot": {
+      "hint": "Andika nomero ya telefone kugira ngo wakire OTP yo gusubiramo ijambo ry'ibanga.",
+      "sent": "Twohereje OTP kuri telefone yawe. Reba ubutumwa bwa SMS.",
+      "submit": "Ohereza kode",
+      "submitting": "Turimo kohereza…",
+      "backToLogin": "Subira ku kwinjira",
+      "proceedReset": "Komeza usubiramo ijambo ry'ibanga"
+    },
+    "reset": {
+      "hint": "Andika OTP yoherejwe kuri telefone n'ijambo ry'ibanga rishya.",
+      "submit": "Subiramo ijambo ry'ibanga",
+      "submitting": "Turimo gusubiramo…",
+      "backToLogin": "Subira ku kwinjira"
+    },
+    "verify": {
+      "title": "Emeza telefone yawe",
+      "hintWithPhone": "Twohereje kode y'imibare 6 kuri {phone}",
+      "hint": "Andika nomero ya telefone n'ikode y'imibare 6 twohereje.",
+      "submit": "Emeza",
+      "submitting": "Turimo kwemeza…"
     }
   }
 }

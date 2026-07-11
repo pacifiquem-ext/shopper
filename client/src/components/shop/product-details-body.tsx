@@ -54,20 +54,20 @@ function themeTokens(theme: ProductDetailsTheme) {
     }
   }
   return {
-    ink: 'text-[#2B2B2B]',
-    muted: 'text-[#6E6A66]',
-    border: 'border-[rgba(43,43,43,0.08)]',
-    surface: 'bg-white/60 backdrop-blur-md',
-    surfaceSoft: 'bg-[#EAE4DC]/55',
-    accent: 'text-[#7D8F69]',
-    accentBg: 'bg-[#B76E5D]',
-    accentHover: 'hover:bg-[#A66250]',
-    icon: 'text-[#7D8F69]',
-    shadow: 'shadow-[0_1px_2px_rgba(43,43,43,0.03)]',
-    ctaShadow: 'shadow-[0_8px_22px_rgba(183,110,93,0.28)]',
-    badge: 'border-[rgba(43,43,43,0.08)] bg-white/60 text-[#2B2B2B]',
-    mediaEmpty: 'bg-[#EAE4DC]',
-    variantSelected: 'border-[#B76E5D] bg-[#EAE4DC]/70 ring-2 ring-[#B76E5D]/30',
+    ink: 'text-[#171717]',
+    muted: 'text-[#5c5c5c]',
+    border: 'border-stroke-soft-200',
+    surface: 'bg-bg-white-0',
+    surfaceSoft: 'bg-bg-weak-50',
+    accent: 'text-primary-base',
+    accentBg: 'bg-primary-base',
+    accentHover: 'hover:bg-primary-darker',
+    icon: 'text-primary-base',
+    shadow: 'shadow-regular-xs',
+    ctaShadow: 'shadow-regular-xs',
+    badge: 'border-stroke-soft-200 bg-bg-white-0 text-text-strong-950',
+    mediaEmpty: 'bg-bg-soft-200',
+    variantSelected: 'border-primary-base bg-primary-alpha-10 ring-2 ring-primary-base/20',
   }
 }
 
@@ -158,7 +158,7 @@ export function ProductDetailsBody({ product, theme, preview = false }: ProductD
             tokens.surface,
             tokens.shadow,
             theme === 'default' &&
-              'os-soft-pop hover:shadow-[0_2px_4px_rgba(43,43,43,0.04),0_24px_48px_rgba(43,43,43,0.10)]',
+              'os-soft-pop hover:shadow-soft-card-hover',
           )}
         >
           <AspectRatio ratio={1}>
@@ -303,7 +303,7 @@ export function ProductDetailsBody({ product, theme, preview = false }: ProductD
             tokens.surface,
             tokens.shadow,
             theme === 'default' &&
-              'os-fade-up hover:shadow-[0_2px_4px_rgba(43,43,43,0.04),0_16px_36px_rgba(43,43,43,0.06)]',
+              'os-fade-up hover:shadow-soft-card-hover',
           )}
           style={theme === 'default' ? { animationDelay: '110ms' } : undefined}
         >
@@ -535,7 +535,7 @@ export function ProductDetailsTopBar({
       className={cn(
         'border-b',
         tokens.border,
-        theme === 'default' && 'bg-[#F5F1EB]',
+        theme === 'default' && 'bg-[#f7f7f7]',
         theme === 'vibrant-market' && 'bg-[var(--vm-bg)]',
         theme === 'ishusho-crafts' && 'bg-[var(--ic-bg)]',
       )}
@@ -560,7 +560,7 @@ export function ProductDetailsTopBar({
           className={cn(
             'inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold',
             tokens.badge,
-            theme === 'default' && 'shadow-[0_1px_2px_rgba(43,43,43,0.03)] backdrop-blur-md',
+            theme === 'default' && 'shadow-regular-xs backdrop-blur-md',
           )}
         >
           <ShieldCheck className={cn('size-3.5', tokens.icon)} aria-hidden strokeWidth={2.25} />

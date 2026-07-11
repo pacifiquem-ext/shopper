@@ -54,7 +54,7 @@ export function ClassicMarketHero({ storeName, tagline, eyebrow, ctaShop, ctaBro
             {[0, 1, 2, 3].map((i) => (
               <div
                 key={i}
-                className={`overflow-hidden rounded-20 border border-[var(--kc-border)] bg-[var(--kc-primary-light)] shadow-[0_1px_2px_rgba(23,23,23,0.04)] ${i === 0 ? 'row-span-2 min-h-[240px]' : 'min-h-[112px]'}`}
+                className={`overflow-hidden rounded-20 border border-[var(--kc-border)] bg-[var(--kc-primary-light)] shadow-regular-xs ${i === 0 ? 'row-span-2 min-h-[240px]' : 'min-h-[112px]'}`}
                 style={{
                   background:
                     i === 0

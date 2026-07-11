@@ -49,16 +49,16 @@ export function DeleteConfirmationDialog({
 }: DeleteConfirmationDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md overflow-hidden rounded-2xl border border-gray-200 bg-white p-0 shadow-xl">
-        <div className="border-b border-gray-100 px-6 py-4">
+      <DialogContent className="max-w-md overflow-hidden rounded-2xl border border-stroke-soft-200 bg-white p-0 shadow-xl">
+        <div className="border-b border-stroke-soft-200 px-6 py-4">
           <DialogHeader>
             <div className="flex items-center gap-3">
               <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-rose-50">
                 <AlertTriangle className="h-6 w-6 text-rose-600" />
               </div>
               <div>
-                <DialogTitle className="text-lg font-semibold text-gray-900">{title}</DialogTitle>
-                <DialogDescription className="mt-1 text-sm text-gray-600">
+                <DialogTitle className="text-lg font-semibold text-text-strong-950">{title}</DialogTitle>
+                <DialogDescription className="mt-1 text-sm text-text-sub-600">
                   {description}
                 </DialogDescription>
               </div>
@@ -110,14 +110,14 @@ export function DeleteConfirmationDialog({
           </div>
         </div>
 
-        <div className="border-t border-gray-100 px-6 py-4">
+        <div className="border-t border-stroke-soft-200 px-6 py-4">
           <div className="flex items-center justify-end gap-3">
             <Button
               type="button"
               variant="outline"
               onClick={() => onOpenChange(false)}
               disabled={isLoading}
-              className="h-10 rounded-xl border-gray-200 bg-white text-gray-700 hover:bg-gray-50"
+              className="h-10 rounded-xl border-stroke-soft-200 bg-white text-text-sub-600 hover:bg-bg-weak-50"
             >
               {cancelButtonText}
             </Button>

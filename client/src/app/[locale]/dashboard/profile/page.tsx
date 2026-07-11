@@ -35,11 +35,11 @@ export default function ProfilePage() {
   return (
     <div className="flex w-full max-w-3xl flex-col gap-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight text-gray-900">{t('title')}</h1>
-        <p className="mt-2 text-gray-500">{t('subtitle')}</p>
+        <h1 className="text-3xl font-bold tracking-tight text-text-strong-950">{t('title')}</h1>
+        <p className="mt-2 text-text-soft-400">{t('subtitle')}</p>
       </div>
 
-      <Card className="border-gray-200 shadow-sm">
+      <Card className="border-stroke-soft-200 shadow-sm">
         {isLoading ? (
           <CardContent className="flex items-center justify-center py-16">
             <TurningZeroLoader size="md" label={t('title')} />
@@ -48,7 +48,7 @@ export default function ProfilePage() {
           <>
         <CardHeader className="flex flex-row items-center gap-4 space-y-0">
           <Avatar className="h-16 w-16">
-            <AvatarFallback className="bg-brand-50 text-brand-900 text-lg font-semibold">
+            <AvatarFallback className="bg-primary-alpha-10 text-primary-base text-lg font-semibold">
               {initials || 'U'}
             </AvatarFallback>
           </Avatar>
@@ -98,13 +98,13 @@ function ProfileRow({
   value: string
 }) {
   return (
-    <div className="flex items-start gap-3 rounded-xl border border-gray-100 bg-gray-50/80 px-4 py-3">
-      <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-500">
+    <div className="flex items-start gap-3 rounded-xl border border-stroke-soft-200 bg-bg-weak-50/80 px-4 py-3">
+      <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-stroke-soft-200 bg-white text-text-soft-400">
         <Icon className="h-4 w-4" aria-hidden />
       </span>
       <div className="min-w-0">
-        <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">{label}</p>
-        <p className="mt-0.5 break-all text-sm font-medium text-gray-900">{value}</p>
+        <p className="text-xs font-semibold uppercase tracking-wide text-text-soft-400">{label}</p>
+        <p className="mt-0.5 break-all text-sm font-medium text-text-strong-950">{value}</p>
       </div>
     </div>
   )

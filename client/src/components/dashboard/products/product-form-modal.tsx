@@ -205,27 +205,27 @@ export function ProductFormModal({
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="max-h-[85vh] w-[calc(100vw-24px)] max-w-4xl overflow-hidden rounded-2xl border border-brand-200 bg-white p-0 shadow-xl">
+      <DialogContent className="max-h-[85vh] w-[calc(100vw-24px)] max-w-4xl overflow-hidden rounded-2xl border border-primary-base/20 bg-white p-0 shadow-xl">
         <div className="relative grid grid-cols-1 lg:grid-cols-[280px_1fr]">
           {isDraftLoading && (
             <div className="absolute inset-0 z-50 flex flex-col items-center justify-center gap-3 bg-white/85 backdrop-blur-[1px]">
               <TurningZeroLoader size="md" label={t('products.preview.loading')} />
-              <p className="text-sm font-medium text-gray-600">{t('products.preview.loading')}</p>
+              <p className="text-sm font-medium text-text-sub-600">{t('products.preview.loading')}</p>
             </div>
           )}
           {isSubmitting && (
             <div className="absolute inset-0 z-50 flex flex-col items-center justify-center gap-3 bg-white/85 backdrop-blur-[1px]">
               <TurningZeroLoader size="md" label={t('products.create.submitting')} />
-              <p className="text-sm font-medium text-gray-600">{t('products.create.submitting')}</p>
+              <p className="text-sm font-medium text-text-sub-600">{t('products.create.submitting')}</p>
             </div>
           )}
-          <div className="border-b border-brand-100 bg-brand-50/30 p-5 lg:border-b-0 lg:border-r lg:border-brand-100">
+          <div className="border-b border-stroke-soft-200 bg-primary-alpha-10/30 p-5 lg:border-b-0 lg:border-r lg:border-stroke-soft-200">
             <div className="flex items-center justify-between gap-3">
               <div>
-                <DialogTitle className="text-lg font-semibold text-gray-900">
+                <DialogTitle className="text-lg font-semibold text-text-strong-950">
                   {isEditMode ? 'Edit Product' : t('products.create.title')}
                 </DialogTitle>
-                <DialogDescription className="mt-1 text-sm text-gray-600">
+                <DialogDescription className="mt-1 text-sm text-text-sub-600">
                   {isEditMode ? 'Update product information and settings' : t('products.create.subtitle')}
                 </DialogDescription>
               </div>
@@ -244,8 +244,8 @@ export function ProductFormModal({
                     className={cn(
                       'flex w-full items-start gap-3 rounded-xl border px-3 py-2 text-left transition-colors',
                       active
-                        ? 'border-brand-200 bg-white text-brand-900'
-                        : 'border-transparent bg-transparent text-gray-700 hover:bg-white',
+                        ? 'border-primary-base/20 bg-white text-primary-base'
+                        : 'border-transparent bg-transparent text-text-sub-600 hover:bg-white',
                       done ? 'opacity-100' : 'opacity-90'
                     )}
                   >
@@ -253,10 +253,10 @@ export function ProductFormModal({
                       className={cn(
                         'mt-0.5 flex h-5 w-5 items-center justify-center rounded-full border text-xs font-bold',
                         active
-                          ? 'border-brand-200 bg-brand-50 text-brand-900'
+                          ? 'border-primary-base/20 bg-primary-alpha-10 text-primary-base'
                           : done
                             ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
-                            : 'border-brand-200 bg-white text-gray-700'
+                            : 'border-primary-base/20 bg-white text-text-sub-600'
                       )}
                     >
                       {done ? <Check className="h-3.5 w-3.5" /> : idx + 1}
@@ -265,12 +265,12 @@ export function ProductFormModal({
                       <span className="block text-sm font-semibold">
                         {s.title}{' '}
                         {!enabled ? (
-                          <span className="ml-2 inline-flex items-center rounded-full border border-brand-200 bg-brand-50 px-2 py-0.5 text-[11px] font-semibold text-gray-700">
+                          <span className="ml-2 inline-flex items-center rounded-full border border-primary-base/20 bg-primary-alpha-10 px-2 py-0.5 text-[11px] font-semibold text-text-sub-600">
                             {t('products.create.sections.skippedPill')}
                           </span>
                         ) : null}
                       </span>
-                      <span className="mt-0.5 block text-xs font-medium text-gray-500">{s.description}</span>
+                      <span className="mt-0.5 block text-xs font-medium text-text-soft-400">{s.description}</span>
                     </span>
                   </button>
                 )
@@ -279,11 +279,11 @@ export function ProductFormModal({
           </div>
 
           <div className="flex max-h-[85vh] flex-col">
-            <DialogHeader className="border-b border-brand-100 px-6 py-4">
+            <DialogHeader className="border-b border-stroke-soft-200 px-6 py-4">
               <div className="flex items-start justify-between gap-3">
                 <div>
-                  <DialogTitle className="text-lg font-semibold text-gray-900">{createSteps[createStep]?.title}</DialogTitle>
-                  <DialogDescription className="mt-1 text-sm text-gray-600">
+                  <DialogTitle className="text-lg font-semibold text-text-strong-950">{createSteps[createStep]?.title}</DialogTitle>
+                  <DialogDescription className="mt-1 text-sm text-text-sub-600">
                     {createSteps[createStep]?.description}
                   </DialogDescription>
                 </div>
@@ -296,39 +296,39 @@ export function ProductFormModal({
                   <div className="space-y-4">
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                       <div className="space-y-2">
-                        <Label className="text-sm font-semibold text-gray-700">{t('products.create.fields.name')}</Label>
+                        <Label className="text-sm font-semibold text-text-sub-600">{t('products.create.fields.name')}</Label>
                         <Input
                           value={draftProduct.name}
                           onChange={(e) => setDraftProduct((p) => ({ ...p, name: e.target.value }))}
                           placeholder={t('products.create.fields.namePlaceholder')}
-                          className="h-10 rounded-xl border-brand-200 bg-white"
+                          className="h-10 rounded-xl border-primary-base/20 bg-white"
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label className="text-sm font-semibold text-gray-700">{t('products.create.fields.vendor')}</Label>
-                        <div className="flex h-10 items-center rounded-xl border border-brand-200 bg-gray-50 px-3 text-sm font-medium text-gray-900">
+                        <Label className="text-sm font-semibold text-text-sub-600">{t('products.create.fields.vendor')}</Label>
+                        <div className="flex h-10 items-center rounded-xl border border-primary-base/20 bg-bg-weak-50 px-3 text-sm font-medium text-text-strong-950">
                           {draftProduct.vendor || t('products.table.na')}
                         </div>
                       </div>
                       <div className="space-y-2">
-                        <Label className="text-sm font-semibold text-gray-700">{t('products.create.fields.category')}</Label>
+                        <Label className="text-sm font-semibold text-text-sub-600">{t('products.create.fields.category')}</Label>
                         <Input
                           value={draftProduct.category}
                           onChange={(e) => setDraftProduct((p) => ({ ...p, category: e.target.value }))}
                           placeholder={t('products.create.fields.categoryPlaceholder')}
-                          className="h-10 rounded-xl border-brand-200 bg-white"
+                          className="h-10 rounded-xl border-primary-base/20 bg-white"
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label className="text-sm font-semibold text-gray-700">{t('products.create.fields.status')}</Label>
+                        <Label className="text-sm font-semibold text-text-sub-600">{t('products.create.fields.status')}</Label>
                         <Select
                           value={draftProduct.status}
                           onValueChange={(value) => setDraftProduct((p) => ({ ...p, status: value as ProductStatus }))}
                         >
-                          <SelectTrigger className="h-10 rounded-xl border-brand-200 bg-white">
+                          <SelectTrigger className="h-10 rounded-xl border-primary-base/20 bg-white">
                             <SelectValue />
                           </SelectTrigger>
-                          <SelectContent className="border-brand-200 bg-white text-gray-900">
+                          <SelectContent className="border-primary-base/20 bg-white text-text-strong-950">
                             <SelectItem value="DRAFT">{t('products.status.draft')}</SelectItem>
                             <SelectItem value="ACTIVE">{t('products.status.active')}</SelectItem>
                             <SelectItem value="ARCHIVED">{t('products.status.archived')}</SelectItem>
@@ -337,33 +337,33 @@ export function ProductFormModal({
                       </div>
                     </div>
                     <div className="space-y-2">
-                      <Label className="text-sm font-semibold text-gray-700">{t('products.create.fields.description')}</Label>
+                      <Label className="text-sm font-semibold text-text-sub-600">{t('products.create.fields.description')}</Label>
                       <Textarea
                         value={draftProduct.description}
                         onChange={(e) => setDraftProduct((p) => ({ ...p, description: e.target.value }))}
                         placeholder={t('products.create.fields.descriptionPlaceholder')}
-                        className="min-h-[120px] rounded-xl border-brand-200 bg-white"
+                        className="min-h-[120px] rounded-xl border-primary-base/20 bg-white"
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label className="text-sm font-semibold text-gray-700">{t('products.create.fields.tags')}</Label>
+                      <Label className="text-sm font-semibold text-text-sub-600">{t('products.create.fields.tags')}</Label>
                       <Input
                         value={draftProduct.tags}
                         onChange={(e) => setDraftProduct((p) => ({ ...p, tags: e.target.value }))}
                         placeholder={t('products.create.fields.tagsPlaceholder')}
-                        className="h-10 rounded-xl border-brand-200 bg-white"
+                        className="h-10 rounded-xl border-primary-base/20 bg-white"
                       />
-                      <div className="text-xs font-medium text-gray-500">{t('products.create.fields.tagsHint')}</div>
+                      <div className="text-xs font-medium text-text-soft-400">{t('products.create.fields.tagsHint')}</div>
                     </div>
                   </div>
                 ) : null}
 
                 {createStep === 1 ? (
                   <div className="space-y-4">
-                    <div className="flex items-center justify-between gap-3 rounded-2xl border border-brand-200 bg-white px-4 py-3 shadow-sm">
+                    <div className="flex items-center justify-between gap-3 rounded-2xl border border-primary-base/20 bg-white px-4 py-3 shadow-sm">
                       <div className="min-w-0">
-                        <div className="text-sm font-semibold text-gray-900">{t('products.create.sections.applies')}</div>
-                        <div className="mt-0.5 text-xs font-medium text-gray-500">{t('products.create.sections.mediaHint')}</div>
+                        <div className="text-sm font-semibold text-text-strong-950">{t('products.create.sections.applies')}</div>
+                        <div className="mt-0.5 text-xs font-medium text-text-soft-400">{t('products.create.sections.mediaHint')}</div>
                       </div>
                       <Switch
                         checked={draftProduct.mediaSectionEnabled}
@@ -372,14 +372,14 @@ export function ProductFormModal({
                     </div>
 
                     {!draftProduct.mediaSectionEnabled ? (
-                      <div className="rounded-2xl border border-dashed border-brand-200 bg-brand-50/30 p-6">
-                        <div className="text-sm font-semibold text-gray-900">{t('products.create.sections.skippedTitle')}</div>
-                        <div className="mt-1 text-sm text-gray-600">{t('products.create.sections.skippedBody')}</div>
+                      <div className="rounded-2xl border border-dashed border-primary-base/20 bg-primary-alpha-10/30 p-6">
+                        <div className="text-sm font-semibold text-text-strong-950">{t('products.create.sections.skippedTitle')}</div>
+                        <div className="mt-1 text-sm text-text-sub-600">{t('products.create.sections.skippedBody')}</div>
                         <div className="mt-4">
                           <Button
                             type="button"
                             onClick={() => setSectionEnabled('media', true)}
-                            className="h-10 rounded-xl bg-brand-900 text-white hover:bg-brand-800"
+                            className="h-10 rounded-xl bg-primary-base text-white hover:bg-primary-darker"
                           >
                             {t('products.create.sections.enable')}
                           </Button>
@@ -388,16 +388,16 @@ export function ProductFormModal({
                     ) : null}
 
                     {draftProduct.mediaSectionEnabled ? (
-                      <div className="rounded-2xl border border-brand-200 bg-white p-4 shadow-sm">
+                      <div className="rounded-2xl border border-primary-base/20 bg-white p-4 shadow-sm">
                         <div className="flex items-center justify-between gap-3">
                           <div>
-                            <div className="text-sm font-semibold text-gray-900">{t('products.create.media.addImages')}</div>
-                            <div className="mt-1 text-xs font-medium text-gray-500">{t('products.create.media.addImagesHint')}</div>
+                            <div className="text-sm font-semibold text-text-strong-950">{t('products.create.media.addImages')}</div>
+                            <div className="mt-1 text-xs font-medium text-text-soft-400">{t('products.create.media.addImagesHint')}</div>
                           </div>
                         </div>
 
                         <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                          <div className="text-xs font-medium text-gray-600">{t('products.create.media.uploadHint')}</div>
+                          <div className="text-xs font-medium text-text-sub-600">{t('products.create.media.uploadHint')}</div>
                           <div>
                             <input
                               id={mediaUploadInputId}
@@ -417,7 +417,7 @@ export function ProductFormModal({
                               type="button"
                               variant="outline"
                               onClick={() => document.getElementById(mediaUploadInputId)?.click()}
-                              className="h-10 rounded-xl border-brand-200 bg-white text-gray-700 hover:bg-brand-50 hover:text-brand-900"
+                              className="h-10 rounded-xl border-primary-base/20 bg-white text-text-sub-600 hover:bg-primary-alpha-10 hover:text-primary-base"
                             >
                               <Plus className="mr-2 h-4 w-4" />
                               {t('products.create.media.upload')}
@@ -430,7 +430,7 @@ export function ProductFormModal({
                             value={draftProduct.newImageUrl}
                             onChange={(e) => setDraftProduct((p) => ({ ...p, newImageUrl: e.target.value }))}
                             placeholder={t('products.create.media.urlPlaceholder')}
-                            className="h-10 flex-1 rounded-xl border-brand-200 bg-white"
+                            className="h-10 flex-1 rounded-xl border-primary-base/20 bg-white"
                           />
                           <Button
                             type="button"
@@ -440,7 +440,7 @@ export function ProductFormModal({
                               addImages([url])
                               setDraftProduct((p) => ({ ...p, newImageUrl: '' }))
                             }}
-                            className="h-10 rounded-xl bg-brand-900 text-white hover:bg-brand-800"
+                            className="h-10 rounded-xl bg-primary-base text-white hover:bg-primary-darker"
                           >
                             <Plus className="mr-2 h-4 w-4" />
                             {t('products.create.media.add')}
@@ -450,7 +450,7 @@ export function ProductFormModal({
                         {draftProduct.images.length > 0 ? (
                           <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
                             {draftProduct.images.map((url) => (
-                              <div key={url} className="group relative overflow-hidden rounded-2xl border border-brand-200 bg-brand-50/30">
+                              <div key={url} className="group relative overflow-hidden rounded-2xl border border-primary-base/20 bg-primary-alpha-10/30">
                                 <img
                                   src={url}
                                   alt={draftProduct.name || t('products.create.media.defaultAlt')}
@@ -461,7 +461,7 @@ export function ProductFormModal({
                                   <button
                                     type="button"
                                     onClick={() => onZoomImage(url)}
-                                    className="inline-flex h-8 items-center gap-2 rounded-lg bg-white/90 px-2 text-xs font-semibold text-gray-900"
+                                    className="inline-flex h-8 items-center gap-2 rounded-lg bg-white/90 px-2 text-xs font-semibold text-text-strong-950"
                                   >
                                     <ZoomIn className="h-3.5 w-3.5" />
                                     {t('products.create.media.zoom')}
@@ -469,7 +469,7 @@ export function ProductFormModal({
                                   <button
                                     type="button"
                                     onClick={() => removeImage(url)}
-                                    className="inline-flex h-8 items-center rounded-lg bg-white/90 px-2 text-xs font-semibold text-gray-900"
+                                    className="inline-flex h-8 items-center rounded-lg bg-white/90 px-2 text-xs font-semibold text-text-strong-950"
                                   >
                                     {t('products.create.media.remove')}
                                   </button>
@@ -478,7 +478,7 @@ export function ProductFormModal({
                             ))}
                           </div>
                         ) : (
-                          <div className="mt-4 rounded-2xl border border-dashed border-brand-200 bg-brand-50/30 p-6 text-sm text-gray-600">
+                          <div className="mt-4 rounded-2xl border border-dashed border-primary-base/20 bg-primary-alpha-10/30 p-6 text-sm text-text-sub-600">
                             {t('products.create.media.empty')}
                           </div>
                         )}
@@ -489,10 +489,10 @@ export function ProductFormModal({
 
                 {createStep === 2 ? (
                   <div className="space-y-4">
-                    <div className="flex items-center justify-between gap-3 rounded-2xl border border-brand-200 bg-white px-4 py-3 shadow-sm">
+                    <div className="flex items-center justify-between gap-3 rounded-2xl border border-primary-base/20 bg-white px-4 py-3 shadow-sm">
                       <div className="min-w-0">
-                        <div className="text-sm font-semibold text-gray-900">{t('products.create.sections.applies')}</div>
-                        <div className="mt-0.5 text-xs font-medium text-gray-500">{t('products.create.sections.variantsHint')}</div>
+                        <div className="text-sm font-semibold text-text-strong-950">{t('products.create.sections.applies')}</div>
+                        <div className="mt-0.5 text-xs font-medium text-text-soft-400">{t('products.create.sections.variantsHint')}</div>
                       </div>
                       <Switch
                         checked={draftProduct.variantsSectionEnabled}
@@ -501,14 +501,14 @@ export function ProductFormModal({
                     </div>
 
                     {!draftProduct.variantsSectionEnabled ? (
-                      <div className="rounded-2xl border border-dashed border-brand-200 bg-brand-50/30 p-6">
-                        <div className="text-sm font-semibold text-gray-900">{t('products.create.sections.skippedTitle')}</div>
-                        <div className="mt-1 text-sm text-gray-600">{t('products.create.sections.skippedBody')}</div>
+                      <div className="rounded-2xl border border-dashed border-primary-base/20 bg-primary-alpha-10/30 p-6">
+                        <div className="text-sm font-semibold text-text-strong-950">{t('products.create.sections.skippedTitle')}</div>
+                        <div className="mt-1 text-sm text-text-sub-600">{t('products.create.sections.skippedBody')}</div>
                         <div className="mt-4">
                           <Button
                             type="button"
                             onClick={() => setSectionEnabled('variants', true)}
-                            className="h-10 rounded-xl bg-brand-900 text-white hover:bg-brand-800"
+                            className="h-10 rounded-xl bg-primary-base text-white hover:bg-primary-darker"
                           >
                             {t('products.create.sections.enable')}
                           </Button>
@@ -518,15 +518,15 @@ export function ProductFormModal({
 
                     {draftProduct.variantsSectionEnabled ? (
                       <>
-                        <div className="rounded-2xl border border-brand-200 bg-white p-4 shadow-sm">
-                          <div className="text-sm font-semibold text-gray-900">{t('products.create.variants.colors')}</div>
-                          <div className="mt-1 text-xs font-medium text-gray-500">{t('products.create.variants.colorsHint')}</div>
+                        <div className="rounded-2xl border border-primary-base/20 bg-white p-4 shadow-sm">
+                          <div className="text-sm font-semibold text-text-strong-950">{t('products.create.variants.colors')}</div>
+                          <div className="mt-1 text-xs font-medium text-text-soft-400">{t('products.create.variants.colorsHint')}</div>
                           <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
                             {draftProduct.colors.map((c, idx) => (
-                              <div key={`${c.name}-${idx}`} className="flex items-center gap-3 rounded-xl border border-brand-200 bg-white p-3">
+                              <div key={`${c.name}-${idx}`} className="flex items-center gap-3 rounded-xl border border-primary-base/20 bg-white p-3">
                                 <label
                                   htmlFor={`products-create-color-${idx}`}
-                                  className="inline-flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-xl border border-brand-200 bg-white"
+                                  className="inline-flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-xl border border-primary-base/20 bg-white"
                                   title={t('products.create.variants.colorPickerAria')}
                                 >
                                   <span className="h-7 w-7 rounded-lg" style={{ backgroundColor: c.hex }} />
@@ -560,7 +560,7 @@ export function ProductFormModal({
                                       return { ...p, colors: next }
                                     })
                                   }
-                                  className="h-9 flex-1 rounded-lg border-brand-200 bg-white"
+                                  className="h-9 flex-1 rounded-lg border-primary-base/20 bg-white"
                                   placeholder={t('products.create.variants.colorNamePlaceholder')}
                                 />
                                 <Button
@@ -573,7 +573,7 @@ export function ProductFormModal({
                                       colors: p.colors.filter((_, i) => i !== idx),
                                     }))
                                   }
-                                  className="h-9 w-9 rounded-lg text-gray-700 hover:bg-brand-50 hover:text-brand-900"
+                                  className="h-9 w-9 rounded-lg text-text-sub-600 hover:bg-primary-alpha-10 hover:text-primary-base"
                                   aria-label={t('products.create.variants.removeColorAria')}
                                 >
                                   <X className="h-4 w-4" />
@@ -591,7 +591,7 @@ export function ProductFormModal({
                                   colors: [...p.colors, { name: '', hex: '#111827' }],
                                 }))
                               }
-                              className="h-9 rounded-lg border-brand-200 bg-white text-gray-700 hover:bg-brand-50 hover:text-brand-900"
+                              className="h-9 rounded-lg border-primary-base/20 bg-white text-text-sub-600 hover:bg-primary-alpha-10 hover:text-primary-base"
                             >
                               <Plus className="mr-2 h-4 w-4" />
                               {t('products.create.variants.addColor')}
@@ -599,9 +599,9 @@ export function ProductFormModal({
                           </div>
                         </div>
 
-                        <div className="rounded-2xl border border-brand-200 bg-white p-4 shadow-sm">
-                          <div className="text-sm font-semibold text-gray-900">{t('products.create.variants.sizes')}</div>
-                          <div className="mt-1 text-xs font-medium text-gray-500">{t('products.create.variants.sizesHint')}</div>
+                        <div className="rounded-2xl border border-primary-base/20 bg-white p-4 shadow-sm">
+                          <div className="text-sm font-semibold text-text-strong-950">{t('products.create.variants.sizes')}</div>
+                          <div className="mt-1 text-xs font-medium text-text-soft-400">{t('products.create.variants.sizesHint')}</div>
                           <div className="mt-4 flex flex-wrap gap-2">
                             {draftProduct.sizes.map((s) => (
                               <button
@@ -613,10 +613,10 @@ export function ProductFormModal({
                                     sizes: p.sizes.filter((x) => x !== s),
                                   }))
                                 }
-                                className="inline-flex items-center gap-2 rounded-full border border-brand-200 bg-brand-50 px-3 py-1 text-sm font-semibold text-gray-800"
+                                className="inline-flex items-center gap-2 rounded-full border border-primary-base/20 bg-primary-alpha-10 px-3 py-1 text-sm font-semibold text-gray-800"
                               >
                                 {s}
-                                <span className="text-gray-500">×</span>
+                                <span className="text-text-soft-400">×</span>
                               </button>
                             ))}
                           </div>
@@ -633,7 +633,7 @@ export function ProductFormModal({
                                 }))
                               }
                               placeholder={t('products.create.variants.modelsPlaceholder')}
-                              className="h-10 flex-1 rounded-xl border-brand-200 bg-white"
+                              className="h-10 flex-1 rounded-xl border-primary-base/20 bg-white"
                             />
                           </div>
                         </div>
@@ -646,38 +646,38 @@ export function ProductFormModal({
                   <div className="space-y-4">
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                       <div className="space-y-2">
-                        <Label className="text-sm font-semibold text-gray-700">{t('products.create.pricing.price')}</Label>
+                        <Label className="text-sm font-semibold text-text-sub-600">{t('products.create.pricing.price')}</Label>
                         <Input
                           value={draftProduct.price}
                           onChange={(e) => setDraftProduct((p) => ({ ...p, price: e.target.value }))}
                           placeholder={t('products.create.pricing.pricePlaceholder')}
-                          className="h-10 rounded-xl border-brand-200 bg-white"
+                          className="h-10 rounded-xl border-primary-base/20 bg-white"
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label className="text-sm font-semibold text-gray-700">{t('products.create.pricing.compareAt')}</Label>
+                        <Label className="text-sm font-semibold text-text-sub-600">{t('products.create.pricing.compareAt')}</Label>
                         <Input
                           value={draftProduct.compareAt}
                           onChange={(e) => setDraftProduct((p) => ({ ...p, compareAt: e.target.value }))}
                           placeholder={t('products.create.pricing.compareAtPlaceholder')}
-                          className="h-10 rounded-xl border-brand-200 bg-white"
+                          className="h-10 rounded-xl border-primary-base/20 bg-white"
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label className="text-sm font-semibold text-gray-700">{t('products.create.pricing.cost')}</Label>
+                        <Label className="text-sm font-semibold text-text-sub-600">{t('products.create.pricing.cost')}</Label>
                         <Input
                           value={draftProduct.cost}
                           onChange={(e) => setDraftProduct((p) => ({ ...p, cost: e.target.value }))}
                           placeholder={t('products.create.pricing.costPlaceholder')}
-                          className="h-10 rounded-xl border-brand-200 bg-white"
+                          className="h-10 rounded-xl border-primary-base/20 bg-white"
                         />
                       </div>
-                      <div className="rounded-2xl border border-brand-200 bg-brand-50/30 p-4 text-sm text-gray-700">
-                        <div className="flex items-center gap-2 font-semibold text-gray-900">
+                      <div className="rounded-2xl border border-primary-base/20 bg-primary-alpha-10/30 p-4 text-sm text-text-sub-600">
+                        <div className="flex items-center gap-2 font-semibold text-text-strong-950">
                           <Sparkles className="h-4 w-4" />
                           {t('products.create.pricing.smartHintTitle')}
                         </div>
-                        <div className="mt-2 text-sm text-gray-600">{t('products.create.pricing.smartHintBody')}</div>
+                        <div className="mt-2 text-sm text-text-sub-600">{t('products.create.pricing.smartHintBody')}</div>
                       </div>
                     </div>
                   </div>
@@ -685,10 +685,10 @@ export function ProductFormModal({
 
                 {createStep === 4 ? (
                   <div className="space-y-4">
-                    <div className="flex items-center justify-between gap-3 rounded-2xl border border-brand-200 bg-white px-4 py-3 shadow-sm">
+                    <div className="flex items-center justify-between gap-3 rounded-2xl border border-primary-base/20 bg-white px-4 py-3 shadow-sm">
                       <div className="min-w-0">
-                        <div className="text-sm font-semibold text-gray-900">{t('products.create.sections.applies')}</div>
-                        <div className="mt-0.5 text-xs font-medium text-gray-500">{t('products.create.sections.deliveryHint')}</div>
+                        <div className="text-sm font-semibold text-text-strong-950">{t('products.create.sections.applies')}</div>
+                        <div className="mt-0.5 text-xs font-medium text-text-soft-400">{t('products.create.sections.deliveryHint')}</div>
                       </div>
                       <Switch
                         checked={draftProduct.deliverySectionEnabled}
@@ -697,14 +697,14 @@ export function ProductFormModal({
                     </div>
 
                     {!draftProduct.deliverySectionEnabled ? (
-                      <div className="rounded-2xl border border-dashed border-brand-200 bg-brand-50/30 p-6">
-                        <div className="text-sm font-semibold text-gray-900">{t('products.create.sections.skippedTitle')}</div>
-                        <div className="mt-1 text-sm text-gray-600">{t('products.create.sections.skippedBody')}</div>
+                      <div className="rounded-2xl border border-dashed border-primary-base/20 bg-primary-alpha-10/30 p-6">
+                        <div className="text-sm font-semibold text-text-strong-950">{t('products.create.sections.skippedTitle')}</div>
+                        <div className="mt-1 text-sm text-text-sub-600">{t('products.create.sections.skippedBody')}</div>
                         <div className="mt-4">
                           <Button
                             type="button"
                             onClick={() => setSectionEnabled('delivery', true)}
-                            className="h-10 rounded-xl bg-brand-900 text-white hover:bg-brand-800"
+                            className="h-10 rounded-xl bg-primary-base text-white hover:bg-primary-darker"
                           >
                             {t('products.create.sections.enable')}
                           </Button>
@@ -716,44 +716,44 @@ export function ProductFormModal({
                       <>
                         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                           <div className="space-y-2">
-                            <Label className="text-sm font-semibold text-gray-700">{t('products.create.delivery.enabled')}</Label>
+                            <Label className="text-sm font-semibold text-text-sub-600">{t('products.create.delivery.enabled')}</Label>
                             <select
                               value={draftProduct.deliveryEnabled ? 'yes' : 'no'}
                               onChange={(e) =>
                                 setDraftProduct((p) => ({ ...p, deliveryEnabled: e.target.value === 'yes' }))
                               }
-                              className="h-10 w-full rounded-xl border border-gray-200 bg-white px-3 text-sm text-gray-900"
+                              className="h-10 w-full rounded-xl border border-stroke-soft-200 bg-white px-3 text-sm text-text-strong-950"
                             >
                               <option value="yes">{t('products.viewSheet.yes')}</option>
                               <option value="no">{t('products.viewSheet.no')}</option>
                             </select>
                           </div>
                           <div className="space-y-2">
-                            <Label className="text-sm font-semibold text-gray-700">{t('products.create.delivery.location')}</Label>
+                            <Label className="text-sm font-semibold text-text-sub-600">{t('products.create.delivery.location')}</Label>
                             <Input
                               value={draftProduct.deliveryLocation}
                               onChange={(e) => setDraftProduct((p) => ({ ...p, deliveryLocation: e.target.value }))}
                               placeholder={t('products.create.delivery.locationPlaceholder')}
-                              className="h-10 rounded-xl border-brand-200 bg-white"
+                              className="h-10 rounded-xl border-primary-base/20 bg-white"
                             />
                           </div>
                           <div className="space-y-2">
-                            <Label className="text-sm font-semibold text-gray-700">{t('products.create.delivery.price')}</Label>
+                            <Label className="text-sm font-semibold text-text-sub-600">{t('products.create.delivery.price')}</Label>
                             <Input
                               value={draftProduct.deliveryPrice}
                               onChange={(e) => setDraftProduct((p) => ({ ...p, deliveryPrice: e.target.value }))}
                               placeholder={t('products.create.delivery.pricePlaceholder')}
-                              className="h-10 rounded-xl border-brand-200 bg-white"
+                              className="h-10 rounded-xl border-primary-base/20 bg-white"
                             />
                           </div>
                         </div>
                         <div className="space-y-2">
-                          <Label className="text-sm font-semibold text-gray-700">{t('products.create.delivery.internalNote')}</Label>
+                          <Label className="text-sm font-semibold text-text-sub-600">{t('products.create.delivery.internalNote')}</Label>
                           <Textarea
                             value={draftProduct.internalNote}
                             onChange={(e) => setDraftProduct((p) => ({ ...p, internalNote: e.target.value }))}
                             placeholder={t('products.create.delivery.internalNotePlaceholder')}
-                            className="min-h-[120px] rounded-xl border-brand-200 bg-white"
+                            className="min-h-[120px] rounded-xl border-primary-base/20 bg-white"
                           />
                         </div>
                       </>
@@ -763,13 +763,13 @@ export function ProductFormModal({
 
                 {createStep === 5 ? (
                   <div className="space-y-4">
-                    <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
+                    <div className="rounded-2xl border border-stroke-soft-200 bg-bg-white-0 p-4 shadow-regular-xs">
                       <div className="flex items-start justify-between gap-3">
                         <div>
-                          <div className="text-sm font-semibold text-gray-900">{t('products.create.review.title')}</div>
-                          <div className="mt-1 text-xs font-medium text-gray-500">{t('products.create.review.subtitle')}</div>
+                          <div className="text-sm font-semibold text-text-strong-950">{t('products.create.review.title')}</div>
+                          <div className="mt-1 text-xs font-medium text-text-soft-400">{t('products.create.review.subtitle')}</div>
                         </div>
-                        <Badge className="rounded-full border-gray-200 bg-gray-50 text-gray-700 hover:bg-gray-50">
+                        <Badge className="rounded-full border-stroke-soft-200 bg-bg-weak-50 text-text-sub-600 hover:bg-bg-weak-50">
                           {statusLabel(draftProduct.status)}
                         </Badge>
                       </div>
@@ -778,29 +778,29 @@ export function ProductFormModal({
 
                       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                         <div className="space-y-1">
-                          <div className="text-xs font-semibold text-gray-500">{t('products.create.fields.name')}</div>
-                          <div className="text-sm font-semibold text-gray-900">{draftProduct.name || t('products.table.na')}</div>
+                          <div className="text-xs font-semibold text-text-soft-400">{t('products.create.fields.name')}</div>
+                          <div className="text-sm font-semibold text-text-strong-950">{draftProduct.name || t('products.table.na')}</div>
                         </div>
                         <div className="space-y-1">
-                          <div className="text-xs font-semibold text-gray-500">{t('products.create.fields.vendor')}</div>
-                          <div className="text-sm font-semibold text-gray-900">{draftProduct.vendor || t('products.table.na')}</div>
+                          <div className="text-xs font-semibold text-text-soft-400">{t('products.create.fields.vendor')}</div>
+                          <div className="text-sm font-semibold text-text-strong-950">{draftProduct.vendor || t('products.table.na')}</div>
                         </div>
                         <div className="space-y-1">
-                          <div className="text-xs font-semibold text-gray-500">{t('products.create.fields.category')}</div>
-                          <div className="text-sm font-semibold text-gray-900">{draftProduct.category || t('products.table.na')}</div>
+                          <div className="text-xs font-semibold text-text-soft-400">{t('products.create.fields.category')}</div>
+                          <div className="text-sm font-semibold text-text-strong-950">{draftProduct.category || t('products.table.na')}</div>
                         </div>
                         <div className="space-y-1">
-                          <div className="text-xs font-semibold text-gray-500">{t('products.create.pricing.price')}</div>
-                          <div className="text-sm font-semibold text-gray-900">{draftProduct.price || t('products.table.na')}</div>
+                          <div className="text-xs font-semibold text-text-soft-400">{t('products.create.pricing.price')}</div>
+                          <div className="text-sm font-semibold text-text-strong-950">{draftProduct.price || t('products.table.na')}</div>
                         </div>
                       </div>
 
-                      <div className="mt-4 rounded-2xl border border-gray-200 bg-gray-50 p-4">
-                        <div className="flex items-center gap-2 text-sm font-semibold text-gray-900">
+                      <div className="mt-4 rounded-2xl border border-stroke-soft-200 bg-bg-weak-50 p-4">
+                        <div className="flex items-center gap-2 text-sm font-semibold text-text-strong-950">
                           <Sparkles className="h-4 w-4" />
                           {t('products.create.review.nextTitle')}
                         </div>
-                        <div className="mt-2 text-sm text-gray-600">{t('products.create.review.nextBody')}</div>
+                        <div className="mt-2 text-sm text-text-sub-600">{t('products.create.review.nextBody')}</div>
                       </div>
                     </div>
                   </div>
@@ -808,14 +808,14 @@ export function ProductFormModal({
               </div>
             </ScrollArea>
 
-            <div className="border-t border-gray-100 px-6 py-4">
+            <div className="border-t border-stroke-soft-200 px-6 py-4">
               <div className="flex flex-col-reverse gap-2 sm:flex-row sm:items-center sm:justify-between">
                 <Button
                   type="button"
                   variant="outline"
                   onClick={closeCreate}
                   disabled={isSubmitting || isDraftLoading}
-                  className="h-10 rounded-xl border-gray-200 bg-white text-gray-700 hover:bg-brand-50 hover:text-brand-900 disabled:opacity-50"
+                  className="h-10 rounded-xl border-stroke-soft-200 bg-white text-text-sub-600 hover:bg-primary-alpha-10 hover:text-primary-base disabled:opacity-50"
                 >
                   {t('products.create.cancel')}
                 </Button>
@@ -826,7 +826,7 @@ export function ProductFormModal({
                     variant="outline"
                     onClick={prevStep}
                     disabled={createStep === 0 || isSubmitting || isDraftLoading}
-                    className="h-10 rounded-xl border-gray-200 bg-white text-gray-700 hover:bg-brand-50 hover:text-brand-900 disabled:opacity-50"
+                    className="h-10 rounded-xl border-stroke-soft-200 bg-white text-text-sub-600 hover:bg-primary-alpha-10 hover:text-primary-base disabled:opacity-50"
                   >
                     <ChevronLeft className="mr-2 h-4 w-4" />
                     {t('products.create.back')}
@@ -836,7 +836,7 @@ export function ProductFormModal({
                       type="button"
                       onClick={nextStep}
                       disabled={!canGoNext || isSubmitting || isDraftLoading}
-                      className="h-10 rounded-xl bg-brand-900 text-white hover:bg-brand-800 disabled:opacity-50"
+                      className="h-10 rounded-xl bg-primary-base text-white hover:bg-primary-darker disabled:opacity-50"
                     >
                       {t('products.create.next')}
                       <ChevronRight className="ml-2 h-4 w-4" />
@@ -846,7 +846,7 @@ export function ProductFormModal({
                       type="button"
                       onClick={() => void handleFinish()}
                       disabled={isSubmitting || isDraftLoading}
-                      className="h-10 rounded-xl bg-brand-900 text-white hover:bg-brand-800 disabled:opacity-50"
+                      className="h-10 rounded-xl bg-primary-base text-white hover:bg-primary-darker disabled:opacity-50"
                     >
                       {isEditMode ? (
                         <>

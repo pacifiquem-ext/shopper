@@ -39,7 +39,7 @@ export function StepStoreBasics() {
               'flex items-center border-b py-2 transition-colors',
               registeredNameField.hasError
                 ? 'border-red-500 focus-within:border-red-500'
-                : 'focus-within:border-brand-600 border-gray-300'
+                : 'focus-within:border-primary-base border-stroke-soft-200'
             )}
           >
             <Input
@@ -67,7 +67,7 @@ export function StepStoreBasics() {
               'flex items-center border-b py-2 transition-colors',
               displayNameField.hasError
                 ? 'border-red-500 focus-within:border-red-500'
-                : 'focus-within:border-brand-600 border-gray-300'
+                : 'focus-within:border-primary-base border-stroke-soft-200'
             )}
           >
             <Input
@@ -90,7 +90,7 @@ export function StepStoreBasics() {
               defaultValue: 'Store Description',
             })}
           </Label>
-          <div className="focus-within:border-brand-600 border-b border-gray-300 transition-colors">
+          <div className="focus-within:border-primary-base border-b border-stroke-soft-200 transition-colors">
             <Textarea
               value={draft.description || ''}
               onChange={(e) => setDescription(e.target.value)}

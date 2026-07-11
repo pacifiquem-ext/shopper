@@ -66,7 +66,7 @@ export function VibrantMarketProductCard({
       )}
 
       {onSale ? (
-        <span className='absolute left-3 top-3 inline-flex items-center gap-1 rounded-full bg-[var(--vm-accent)] px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-[var(--vm-on-primary)] shadow-[0_2px_8px_rgba(234,88,12,0.22)] sm:text-[11px]'>
+        <span className='absolute left-3 top-3 inline-flex items-center gap-1 rounded-full bg-[var(--vm-accent)] px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-[var(--vm-on-primary)] shadow-regular-xs sm:text-[11px]'>
           <Flame className='size-3 shrink-0' aria-hidden fill='currentColor' />
           {listingLabels.flashSaleBadge}
           {labels.discountBadge ? (

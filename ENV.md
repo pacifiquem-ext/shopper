@@ -118,8 +118,9 @@ Validated in part by `@t3-oss/env-nextjs` in `client/src/env.ts`. Public vars mu
 
 | Variable | Status | Default | Used by | Purpose |
 | -------- | ------ | ------- | ------- | ------- |
-| `NEXT_PUBLIC_API_URL` | optional* | `http://localhost:3001/v1` (Axios) / `http://127.0.0.1:3001/v1` (catalog) | `lib/axios.ts`, services, `env.ts` | Browser-visible API root including version segment (`/v1`) |
-| `NEXT_INTERNAL_API_URL` | optional | falls back to `NEXT_PUBLIC_API_URL` | `catalog.service.ts` (RSC only) | Server-side catalog fetches; use `http://127.0.0.1:3001/v1` so RSC does not hit the Next host by mistake |
+| `NEXT_PUBLIC_API_URL` | optional* | `/backend/v1` (local proxy) | `lib/api-base-url.ts`, axios | Browser API root. Local: relative `/backend/v1` via Next rewrite (no CORS). Prod: absolute `https://api…/v1` |
+| `NEXT_INTERNAL_API_URL` | optional | `http://127.0.0.1:3001/v1` | RSC / catalog | Absolute Nest URL for Server Components |
+| `API_PROXY_TARGET` | optional | `http://127.0.0.1:3001` | `next.config.ts` rewrites | Nest origin for `/backend/*` proxy |
 | `NEXT_PUBLIC_APP_URL` | optional | `http://localhost:3000` | `utils/constants.ts`, `marketplace-url.ts` | Public site origin for absolute marketplace/store links |
 | `NODE_ENV` | set by Next | — | Next, Playwright, env schema | `development` \| `test` \| `production` |
 | `DATABASE_URL` | optional in schema | — | `client/src/env.ts` only | Present in t3 env schema; **client does not own the DB** — prefer leaving unset unless a client script needs it |

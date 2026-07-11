@@ -26,7 +26,7 @@ export function TurningZeroLoader({
       role="status"
       aria-label={label}
       className={cn(
-        'inline-block shrink-0 animate-spin rounded-full border-brand-900 border-t-transparent',
+        'inline-block shrink-0 animate-spin rounded-full border-primary-base border-t-transparent',
         sizeClasses[size],
         className,
       )}
@@ -56,7 +56,7 @@ export function LoaderPanel({
       )}
     >
       <TurningZeroLoader size={size} label={label} />
-      {label ? <p className="text-sm font-medium text-gray-500">{label}</p> : null}
+      {label ? <p className="text-sm font-medium text-text-soft-400">{label}</p> : null}
     </div>
   )
 }

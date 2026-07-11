@@ -409,24 +409,24 @@ export default function InventoryPage() {
         header: t('inventory.table.name'),
         cell: (r) => (
           <div className="flex min-w-0 items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-gray-200 bg-gray-50 text-gray-700">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-stroke-soft-200 bg-bg-weak-50 text-text-sub-600">
               <Package className="h-4 w-4" />
             </div>
             <div className="min-w-0">
-              <div className="truncate font-medium text-gray-900">{r.name}</div>
-              <div className="mt-0.5 truncate text-xs font-medium text-gray-500">{r.sku}</div>
+              <div className="truncate font-medium text-text-strong-950">{r.name}</div>
+              <div className="mt-0.5 truncate text-xs font-medium text-text-soft-400">{r.sku}</div>
             </div>
           </div>
         ),
       },
-      { id: 'category', header: t('inventory.table.category'), cell: (r) => r.category, className: 'text-gray-600' },
-      { id: 'sku', header: t('inventory.table.sku'), cell: (r) => r.sku, className: 'text-gray-600' },
-      { id: 'vendor', header: t('inventory.table.vendor'), cell: (r) => r.vendor, className: 'text-gray-600' },
+      { id: 'category', header: t('inventory.table.category'), cell: (r) => r.category, className: 'text-text-sub-600' },
+      { id: 'sku', header: t('inventory.table.sku'), cell: (r) => r.sku, className: 'text-text-sub-600' },
+      { id: 'vendor', header: t('inventory.table.vendor'), cell: (r) => r.vendor, className: 'text-text-sub-600' },
       {
         id: 'stock',
         header: t('inventory.table.stock'),
-        cell: (r) => <span className="font-medium text-gray-900">{r.stock}</span>,
-        className: 'text-gray-600',
+        cell: (r) => <span className="font-medium text-text-strong-950">{r.stock}</span>,
+        className: 'text-text-sub-600',
       },
       {
         id: 'status',
@@ -451,31 +451,31 @@ export default function InventoryPage() {
               <button
                 type="button"
                 aria-label={t('inventory.table.moreAria')}
-                className="flex h-8 w-8 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-700 shadow-xs transition-colors hover:bg-brand-50 hover:text-brand-900"
+                className="flex h-8 w-8 items-center justify-center rounded-lg border border-stroke-soft-200 bg-white text-text-sub-600 shadow-xs transition-colors hover:bg-primary-alpha-10 hover:text-primary-base"
               >
                 <MoreHorizontal className="h-4 w-4" />
               </button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="border-gray-200 bg-white text-gray-900 shadow-md">
+            <DropdownMenuContent align="end" className="border-stroke-soft-200 bg-white text-text-strong-950 shadow-md">
               <DropdownMenuItem
                 onSelect={() => openView(r.id)}
-                className="cursor-pointer rounded-md focus:bg-brand-50 focus:text-brand-900"
+                className="cursor-pointer rounded-md focus:bg-primary-alpha-10 focus:text-primary-base"
               >
-                <Eye className="h-4 w-4 text-gray-600" />
+                <Eye className="h-4 w-4 text-text-sub-600" />
                 <span>{t('inventory.table.view')}</span>
               </DropdownMenuItem>
               <DropdownMenuItem
                 onSelect={() => openAdjust(r.id, 'restock')}
-                className="cursor-pointer rounded-md focus:bg-brand-50 focus:text-brand-900"
+                className="cursor-pointer rounded-md focus:bg-primary-alpha-10 focus:text-primary-base"
               >
-                <Plus className="h-4 w-4 text-gray-600" />
+                <Plus className="h-4 w-4 text-text-sub-600" />
                 <span>{t('inventory.table.restock')}</span>
               </DropdownMenuItem>
               <DropdownMenuItem
                 onSelect={() => openAdjust(r.id, 'adjust')}
-                className="cursor-pointer rounded-md focus:bg-brand-50 focus:text-brand-900"
+                className="cursor-pointer rounded-md focus:bg-primary-alpha-10 focus:text-primary-base"
               >
-                <Package className="h-4 w-4 text-gray-600" />
+                <Package className="h-4 w-4 text-text-sub-600" />
                 <span>{t('inventory.table.adjustStock')}</span>
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -518,8 +518,8 @@ export default function InventoryPage() {
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="flex flex-col gap-2">
-          <div className="text-xl font-semibold leading-9 text-gray-900">{t('inventory.title')}</div>
-          <div className="text-sm text-gray-600">{t('inventory.subtitle')}</div>
+          <div className="text-xl font-semibold leading-9 text-text-strong-950">{t('inventory.title')}</div>
+          <div className="text-sm text-text-sub-600">{t('inventory.subtitle')}</div>
         </div>
 
         <div className="flex items-center gap-2 sm:pt-0.5">
@@ -527,12 +527,12 @@ export default function InventoryPage() {
             fetchBlob={() => inventoryService.exportCsv()}
             filename="inventory.csv"
             label={t('inventory.export')}
-            className="h-9 rounded-lg border-gray-200 bg-white text-gray-700 hover:bg-brand-50 hover:text-brand-900"
+            className="h-9 rounded-lg border-stroke-soft-200 bg-white text-text-sub-600 hover:bg-primary-alpha-10 hover:text-primary-base"
           />
           <Button
             type="button"
             variant="outline"
-            className="h-9 rounded-lg border-gray-200 bg-white text-gray-700 hover:bg-brand-50 hover:text-brand-900"
+            className="h-9 rounded-lg border-stroke-soft-200 bg-white text-text-sub-600 hover:bg-primary-alpha-10 hover:text-primary-base"
           >
             {t('inventory.moreActions')}
             <ChevronDown className="h-4 w-4" />
@@ -547,16 +547,16 @@ export default function InventoryPage() {
           trendLabel={t('inventory.kpis.thisMonth')}
           isLoading={isLoading}
         />
-        <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
+        <div className="rounded-2xl border border-stroke-soft-200 bg-bg-white-0 p-4 shadow-regular-xs">
           <div className="flex items-start justify-between gap-4">
             <div>
-              <div className="text-xs font-semibold text-gray-500">{t('inventory.kpis.products')}</div>
+              <div className="text-xs font-semibold text-text-soft-400">{t('inventory.kpis.products')}</div>
               {isLoading ? (
                 <div className="mt-2">
                   <TurningZeroLoader size="sm" />
                 </div>
               ) : (
-                <div className="mt-2 text-2xl font-semibold text-gray-900">
+                <div className="mt-2 text-2xl font-semibold text-text-strong-950">
                   {t('inventory.kpis.productsCount', { count: stats.total })}
                 </div>
               )}
@@ -567,32 +567,32 @@ export default function InventoryPage() {
                   type="button"
                   aria-label={t('inventory.kpis.filtersAria')}
                   className={cn(
-                    'flex h-9 w-9 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-700 shadow-xs transition-colors',
-                    'hover:bg-brand-50 hover:text-brand-900'
+                    'flex h-9 w-9 items-center justify-center rounded-lg border border-stroke-soft-200 bg-white text-text-sub-600 shadow-xs transition-colors',
+                    'hover:bg-primary-alpha-10 hover:text-primary-base'
                   )}
                 >
                   <Filter className="h-4 w-4" />
                 </button>
               </PopoverTrigger>
-              <PopoverContent align="end" className="w-[360px] border-gray-200 bg-white p-4 text-gray-900 shadow-md">
+              <PopoverContent align="end" className="w-[360px] border-stroke-soft-200 bg-white p-4 text-text-strong-950 shadow-md">
                 <div className="flex items-start justify-between gap-3">
                   <div>
-                    <div className="text-sm font-semibold text-gray-900">{t('inventory.filters.title')}</div>
-                    <div className="mt-0.5 text-xs font-medium text-gray-500">{t('inventory.filters.subtitle')}</div>
+                    <div className="text-sm font-semibold text-text-strong-950">{t('inventory.filters.title')}</div>
+                    <div className="mt-0.5 text-xs font-medium text-text-soft-400">{t('inventory.filters.subtitle')}</div>
                   </div>
                 </div>
 
                 <div className="mt-4 grid grid-cols-1 gap-4">
                   <div className="grid gap-2">
-                    <Label className="text-xs font-semibold text-gray-600">{t('inventory.filters.vendor')}</Label>
+                    <Label className="text-xs font-semibold text-text-sub-600">{t('inventory.filters.vendor')}</Label>
                     <Select
                       value={filtersDraft.vendor}
                       onValueChange={(v) => setFiltersDraft((p) => ({ ...p, vendor: v }))}
                     >
-                      <SelectTrigger className="h-9 rounded-lg border-gray-200 bg-white text-sm">
+                      <SelectTrigger className="h-9 rounded-lg border-stroke-soft-200 bg-white text-sm">
                         <SelectValue placeholder={t('inventory.filters.any')} />
                       </SelectTrigger>
-                      <SelectContent className="border-gray-200 bg-white text-gray-900">
+                      <SelectContent className="border-stroke-soft-200 bg-white text-text-strong-950">
                         <SelectItem value="any">{t('inventory.filters.any')}</SelectItem>
                         {vendors.map((v) => (
                           <SelectItem key={v} value={v}>
@@ -604,15 +604,15 @@ export default function InventoryPage() {
                   </div>
 
                   <div className="grid gap-2">
-                    <Label className="text-xs font-semibold text-gray-600">{t('inventory.filters.category')}</Label>
+                    <Label className="text-xs font-semibold text-text-sub-600">{t('inventory.filters.category')}</Label>
                     <Select
                       value={filtersDraft.category}
                       onValueChange={(v) => setFiltersDraft((p) => ({ ...p, category: v }))}
                     >
-                      <SelectTrigger className="h-9 rounded-lg border-gray-200 bg-white text-sm">
+                      <SelectTrigger className="h-9 rounded-lg border-stroke-soft-200 bg-white text-sm">
                         <SelectValue placeholder={t('inventory.filters.any')} />
                       </SelectTrigger>
-                      <SelectContent className="border-gray-200 bg-white text-gray-900">
+                      <SelectContent className="border-stroke-soft-200 bg-white text-text-strong-950">
                         <SelectItem value="any">{t('inventory.filters.any')}</SelectItem>
                         {categories.map((c) => (
                           <SelectItem key={c} value={c}>
@@ -624,15 +624,15 @@ export default function InventoryPage() {
                   </div>
 
                   <div className="grid gap-2">
-                    <Label className="text-xs font-semibold text-gray-600">{t('inventory.filters.status')}</Label>
+                    <Label className="text-xs font-semibold text-text-sub-600">{t('inventory.filters.status')}</Label>
                     <Select
                       value={filtersDraft.status}
                       onValueChange={(v) => setFiltersDraft((p) => ({ ...p, status: v as StockStatus | 'any' }))}
                     >
-                      <SelectTrigger className="h-9 rounded-lg border-gray-200 bg-white text-sm">
+                      <SelectTrigger className="h-9 rounded-lg border-stroke-soft-200 bg-white text-sm">
                         <SelectValue />
                       </SelectTrigger>
-                      <SelectContent className="border-gray-200 bg-white text-gray-900">
+                      <SelectContent className="border-stroke-soft-200 bg-white text-text-strong-950">
                         <SelectItem value="any">{t('inventory.filters.any')}</SelectItem>
                         <SelectItem value="inStock">{t('inventory.status.inStock')}</SelectItem>
                         <SelectItem value="lowStock">{t('inventory.status.lowStock')}</SelectItem>
@@ -642,19 +642,19 @@ export default function InventoryPage() {
                   </div>
 
                   <div className="grid gap-2">
-                    <Label className="text-xs font-semibold text-gray-600">{t('inventory.filters.sku')}</Label>
+                    <Label className="text-xs font-semibold text-text-sub-600">{t('inventory.filters.sku')}</Label>
                     <Input
                       value={filtersDraft.sku}
                       onChange={(e) => setFiltersDraft((p) => ({ ...p, sku: e.target.value }))}
                       placeholder={t('inventory.filters.skuPlaceholder')}
-                      className="h-9 rounded-lg border-gray-200 bg-white"
+                      className="h-9 rounded-lg border-stroke-soft-200 bg-white"
                     />
                   </div>
 
                   <div className="grid gap-2">
                     <div className="flex items-center justify-between gap-3">
-                      <Label className="text-xs font-semibold text-gray-600">{t('inventory.filters.stockRange')}</Label>
-                      <div className="text-xs font-semibold text-gray-700">
+                      <Label className="text-xs font-semibold text-text-sub-600">{t('inventory.filters.stockRange')}</Label>
+                      <div className="text-xs font-semibold text-text-sub-600">
                         {filtersDraft.stockRange[0]} - {filtersDraft.stockRange[1]}
                       </div>
                     </div>
@@ -673,14 +673,14 @@ export default function InventoryPage() {
                     type="button"
                     variant="outline"
                     onClick={clearFilters}
-                    className="h-9 rounded-lg border-gray-200 bg-white text-gray-700 hover:bg-brand-50 hover:text-brand-900"
+                    className="h-9 rounded-lg border-stroke-soft-200 bg-white text-text-sub-600 hover:bg-primary-alpha-10 hover:text-primary-base"
                   >
                     {t('inventory.filters.clear')}
                   </Button>
                   <Button
                     type="button"
                     onClick={applyFilters}
-                    className="h-9 rounded-lg bg-brand-900 text-white hover:bg-brand-800"
+                    className="h-9 rounded-lg bg-primary-base text-white hover:bg-primary-darker"
                   >
                     {t('inventory.filters.apply')}
                   </Button>
@@ -696,12 +696,12 @@ export default function InventoryPage() {
               </div>
             ) : (
               <>
-            <div className="flex h-2 w-full overflow-hidden rounded-full bg-gray-100">
+            <div className="flex h-2 w-full overflow-hidden rounded-full bg-bg-weak-50">
               <div className="h-full bg-emerald-500" style={{ width: `${stockBar.inPct}%` }} />
               <div className="h-full bg-amber-500" style={{ width: `${stockBar.lowPct}%` }} />
               <div className="h-full bg-rose-500" style={{ width: `${stockBar.outPct}%` }} />
             </div>
-            <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs font-medium text-gray-600">
+            <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs font-medium text-text-sub-600">
               <div className="inline-flex items-center gap-2 whitespace-nowrap">
                 <span className="h-2 w-2 rounded-full bg-emerald-500" />
                 <span>{t('inventory.kpis.inStock', { count: stats.inStock })}</span>
@@ -733,10 +733,10 @@ export default function InventoryPage() {
         />
       </div>
 
-      <div className="rounded-2xl border border-gray-200 bg-white shadow-sm">
-        <div className="flex flex-col gap-3 border-b border-gray-200 p-4 lg:flex-row lg:items-center lg:justify-between">
+      <div className="rounded-2xl border border-stroke-soft-200 bg-bg-white-0 shadow-regular-xs">
+        <div className="flex flex-col gap-3 border-b border-stroke-soft-200 p-4 lg:flex-row lg:items-center lg:justify-between">
           <Tabs value={tab} onValueChange={(v) => setTab(v as InventoryTab)}>
-            <TabsList className="h-9 rounded-lg bg-gray-50 p-1">
+            <TabsList className="h-9 rounded-lg bg-bg-weak-50 p-1">
               <TabsTrigger value="all" className="rounded-md text-sm">
                 {t('inventory.tabs.all')}
               </TabsTrigger>
@@ -759,7 +759,7 @@ export default function InventoryPage() {
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder={t('inventory.searchPlaceholder')}
-                className="h-9 rounded-lg border-gray-200 bg-gray-50 pr-3 pl-9"
+                className="h-9 rounded-lg border-stroke-soft-200 bg-bg-weak-50 pr-3 pl-9"
               />
             </div>
             <Popover>
@@ -768,32 +768,32 @@ export default function InventoryPage() {
                   type="button"
                   aria-label={t('inventory.table.filterAria')}
                   className={cn(
-                    'flex h-9 w-9 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-700 shadow-xs transition-colors',
-                    'hover:bg-brand-50 hover:text-brand-900'
+                    'flex h-9 w-9 items-center justify-center rounded-lg border border-stroke-soft-200 bg-white text-text-sub-600 shadow-xs transition-colors',
+                    'hover:bg-primary-alpha-10 hover:text-primary-base'
                   )}
                 >
                   <Filter className="h-4 w-4" />
                 </button>
               </PopoverTrigger>
-              <PopoverContent align="end" className="w-[360px] border-gray-200 bg-white p-4 text-gray-900 shadow-md">
+              <PopoverContent align="end" className="w-[360px] border-stroke-soft-200 bg-white p-4 text-text-strong-950 shadow-md">
                 <div className="flex items-start justify-between gap-3">
                   <div>
-                    <div className="text-sm font-semibold text-gray-900">{t('inventory.filters.title')}</div>
-                    <div className="mt-0.5 text-xs font-medium text-gray-500">{t('inventory.filters.subtitle')}</div>
+                    <div className="text-sm font-semibold text-text-strong-950">{t('inventory.filters.title')}</div>
+                    <div className="mt-0.5 text-xs font-medium text-text-soft-400">{t('inventory.filters.subtitle')}</div>
                   </div>
                 </div>
 
                 <div className="mt-4 grid grid-cols-1 gap-4">
                   <div className="grid gap-2">
-                    <Label className="text-xs font-semibold text-gray-600">{t('inventory.filters.vendor')}</Label>
+                    <Label className="text-xs font-semibold text-text-sub-600">{t('inventory.filters.vendor')}</Label>
                     <Select
                       value={filtersDraft.vendor}
                       onValueChange={(v) => setFiltersDraft((p) => ({ ...p, vendor: v }))}
                     >
-                      <SelectTrigger className="h-9 rounded-lg border-gray-200 bg-white text-sm">
+                      <SelectTrigger className="h-9 rounded-lg border-stroke-soft-200 bg-white text-sm">
                         <SelectValue placeholder={t('inventory.filters.any')} />
                       </SelectTrigger>
-                      <SelectContent className="border-gray-200 bg-white text-gray-900">
+                      <SelectContent className="border-stroke-soft-200 bg-white text-text-strong-950">
                         <SelectItem value="any">{t('inventory.filters.any')}</SelectItem>
                         {vendors.map((v) => (
                           <SelectItem key={v} value={v}>
@@ -805,15 +805,15 @@ export default function InventoryPage() {
                   </div>
 
                   <div className="grid gap-2">
-                    <Label className="text-xs font-semibold text-gray-600">{t('inventory.filters.category')}</Label>
+                    <Label className="text-xs font-semibold text-text-sub-600">{t('inventory.filters.category')}</Label>
                     <Select
                       value={filtersDraft.category}
                       onValueChange={(v) => setFiltersDraft((p) => ({ ...p, category: v }))}
                     >
-                      <SelectTrigger className="h-9 rounded-lg border-gray-200 bg-white text-sm">
+                      <SelectTrigger className="h-9 rounded-lg border-stroke-soft-200 bg-white text-sm">
                         <SelectValue placeholder={t('inventory.filters.any')} />
                       </SelectTrigger>
-                      <SelectContent className="border-gray-200 bg-white text-gray-900">
+                      <SelectContent className="border-stroke-soft-200 bg-white text-text-strong-950">
                         <SelectItem value="any">{t('inventory.filters.any')}</SelectItem>
                         {categories.map((c) => (
                           <SelectItem key={c} value={c}>
@@ -825,15 +825,15 @@ export default function InventoryPage() {
                   </div>
 
                   <div className="grid gap-2">
-                    <Label className="text-xs font-semibold text-gray-600">{t('inventory.filters.status')}</Label>
+                    <Label className="text-xs font-semibold text-text-sub-600">{t('inventory.filters.status')}</Label>
                     <Select
                       value={filtersDraft.status}
                       onValueChange={(v) => setFiltersDraft((p) => ({ ...p, status: v as StockStatus | 'any' }))}
                     >
-                      <SelectTrigger className="h-9 rounded-lg border-gray-200 bg-white text-sm">
+                      <SelectTrigger className="h-9 rounded-lg border-stroke-soft-200 bg-white text-sm">
                         <SelectValue />
                       </SelectTrigger>
-                      <SelectContent className="border-gray-200 bg-white text-gray-900">
+                      <SelectContent className="border-stroke-soft-200 bg-white text-text-strong-950">
                         <SelectItem value="any">{t('inventory.filters.any')}</SelectItem>
                         <SelectItem value="inStock">{t('inventory.status.inStock')}</SelectItem>
                         <SelectItem value="lowStock">{t('inventory.status.lowStock')}</SelectItem>
@@ -843,19 +843,19 @@ export default function InventoryPage() {
                   </div>
 
                   <div className="grid gap-2">
-                    <Label className="text-xs font-semibold text-gray-600">{t('inventory.filters.sku')}</Label>
+                    <Label className="text-xs font-semibold text-text-sub-600">{t('inventory.filters.sku')}</Label>
                     <Input
                       value={filtersDraft.sku}
                       onChange={(e) => setFiltersDraft((p) => ({ ...p, sku: e.target.value }))}
                       placeholder={t('inventory.filters.skuPlaceholder')}
-                      className="h-9 rounded-lg border-gray-200 bg-white"
+                      className="h-9 rounded-lg border-stroke-soft-200 bg-white"
                     />
                   </div>
 
                   <div className="grid gap-2">
                     <div className="flex items-center justify-between gap-3">
-                      <Label className="text-xs font-semibold text-gray-600">{t('inventory.filters.stockRange')}</Label>
-                      <div className="text-xs font-semibold text-gray-700">
+                      <Label className="text-xs font-semibold text-text-sub-600">{t('inventory.filters.stockRange')}</Label>
+                      <div className="text-xs font-semibold text-text-sub-600">
                         {filtersDraft.stockRange[0]} - {filtersDraft.stockRange[1]}
                       </div>
                     </div>
@@ -874,14 +874,14 @@ export default function InventoryPage() {
                     type="button"
                     variant="outline"
                     onClick={clearFilters}
-                    className="h-9 rounded-lg border-gray-200 bg-white text-gray-700 hover:bg-brand-50 hover:text-brand-900"
+                    className="h-9 rounded-lg border-stroke-soft-200 bg-white text-text-sub-600 hover:bg-primary-alpha-10 hover:text-primary-base"
                   >
                     {t('inventory.filters.clear')}
                   </Button>
                   <Button
                     type="button"
                     onClick={applyFilters}
-                    className="h-9 rounded-lg bg-brand-900 text-white hover:bg-brand-800"
+                    className="h-9 rounded-lg bg-primary-base text-white hover:bg-primary-darker"
                   >
                     {t('inventory.filters.apply')}
                   </Button>

@@ -25,8 +25,8 @@ export function StatsCard({
   title,
   value,
   icon: Icon,
-  iconBgColor = 'bg-brand-50',
-  iconColor = 'text-brand-600',
+  iconBgColor = 'bg-primary-alpha-10',
+  iconColor = 'text-primary-base',
   trend,
   action,
   className,
@@ -35,16 +35,16 @@ export function StatsCard({
   const trendIsPositive = trend?.isPositive ?? (trend ? trend.value >= 0 : undefined)
 
   return (
-    <div className={cn('rounded-2xl border border-gray-200 bg-white p-4 shadow-sm', className)}>
+    <div className={cn('rounded-2xl border border-stroke-soft-200 bg-bg-white-0 p-4 shadow-regular-xs', className)}>
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
-          <div className="text-xs font-semibold text-gray-500">{title}</div>
+          <div className="text-xs font-semibold text-text-soft-400">{title}</div>
           {isLoading ? (
             <div className="mt-2">
               <TurningZeroLoader size="sm" />
             </div>
           ) : (
-            <div className="mt-2 text-2xl font-semibold text-gray-900">{value}</div>
+            <div className="mt-2 text-2xl font-semibold text-text-strong-950">{value}</div>
           )}
         </div>
         {action ? (

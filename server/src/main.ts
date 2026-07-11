@@ -34,6 +34,10 @@ async function bootstrap(): Promise<void> {
         // Configure helmet to skip CSP for playground routes (handled by PlaygroundRouterService)
         app.use(
             helmet({
+                // API is called cross-origin from Next (localhost:3000 → :3001).
+                // Helmet's default CORP=same-origin blocks the browser from reading responses.
+                crossOriginResourcePolicy: { policy: 'cross-origin' },
+                crossOriginOpenerPolicy: { policy: 'same-origin-allow-popups' },
                 contentSecurityPolicy: {
                     directives: {
                         defaultSrc: ["'self'"],

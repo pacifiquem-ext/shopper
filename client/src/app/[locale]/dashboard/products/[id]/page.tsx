@@ -149,13 +149,13 @@ export default function DashboardProductDetailPage() {
           <Button
             type="button"
             variant="ghost"
-            className="-ml-2 h-9 rounded-lg px-2 text-gray-600 hover:bg-brand-50 hover:text-brand-900"
+            className="-ml-2 h-9 rounded-lg px-2 text-text-sub-600 hover:bg-primary-alpha-10 hover:text-primary-base"
             onClick={() => router.push('/dashboard/products')}
           >
             <ChevronLeft className="mr-1 size-4" aria-hidden />
             {t('products.preview.backToProducts')}
           </Button>
-          <h1 className="text-2xl font-bold tracking-tight text-gray-900">
+          <h1 className="text-2xl font-bold tracking-tight text-text-strong-950">
             {t('products.viewSheet.title')}
           </h1>
         </div>
@@ -167,7 +167,7 @@ export default function DashboardProductDetailPage() {
   if (error || !product || !productDetails) {
     return (
       <div className="mx-auto max-w-lg space-y-4 py-16 text-center">
-        <p className="text-gray-700">{error ?? t('products.preview.notFound')}</p>
+        <p className="text-text-sub-600">{error ?? t('products.preview.notFound')}</p>
         <Button asChild variant="outline" className="rounded-lg">
           <Link href="/dashboard/products">{t('products.preview.backToProducts')}</Link>
         </Button>
@@ -184,17 +184,17 @@ export default function DashboardProductDetailPage() {
           <Button
             type="button"
             variant="ghost"
-            className="-ml-2 h-9 rounded-lg px-2 text-gray-600 hover:bg-brand-50 hover:text-brand-900"
+            className="-ml-2 h-9 rounded-lg px-2 text-text-sub-600 hover:bg-primary-alpha-10 hover:text-primary-base"
             onClick={() => router.push('/dashboard/products')}
           >
             <ChevronLeft className="mr-1 size-4" aria-hidden />
             {t('products.preview.backToProducts')}
           </Button>
           <div className="flex flex-wrap items-center gap-3">
-            <h1 className="text-2xl font-bold tracking-tight text-gray-900">{product.name}</h1>
+            <h1 className="text-2xl font-bold tracking-tight text-text-strong-950">{product.name}</h1>
             <ProductStatusBadge status={status} label={statusLabel(status)} />
           </div>
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-text-soft-400">
             {t('products.preview.subtitle', {
               category: product.category,
               stock: totalStock,
@@ -206,7 +206,7 @@ export default function DashboardProductDetailPage() {
           <Button
             type="button"
             variant="outline"
-            className="h-9 rounded-lg border-gray-200 bg-white text-gray-700 hover:bg-brand-50 hover:text-brand-900"
+            className="h-9 rounded-lg border-stroke-soft-200 bg-white text-text-sub-600 hover:bg-primary-alpha-10 hover:text-primary-base"
             onClick={() => router.push(`/dashboard/products?edit=${product.id}`)}
           >
             <Edit className="mr-2 size-4" />
@@ -215,7 +215,7 @@ export default function DashboardProductDetailPage() {
           <Button
             type="button"
             variant="outline"
-            className="h-9 rounded-lg border-gray-200 bg-white text-gray-700 hover:bg-brand-50 hover:text-brand-900"
+            className="h-9 rounded-lg border-stroke-soft-200 bg-white text-text-sub-600 hover:bg-primary-alpha-10 hover:text-primary-base"
             onClick={handleAddStock}
           >
             <Plus className="mr-2 size-4" />
@@ -224,7 +224,7 @@ export default function DashboardProductDetailPage() {
           {isActive ? (
             <Button
               asChild
-              className="h-9 rounded-lg bg-brand-900 text-white hover:bg-brand-800"
+              className="h-9 rounded-lg bg-primary-base text-white hover:bg-primary-darker"
             >
               <Link
                 href={storeProductPath(product.id)}

@@ -14,8 +14,10 @@ import { useRouter } from '@/i18n/navigation'
 import { useSearchParams } from 'next/navigation'
 import { useEffect, useMemo } from 'react'
 import { resolvePostAuthRedirect, MERCHANT_DASHBOARD_PATH } from '@/lib/auth-return-url'
+import { useTranslations } from 'next-intl'
 
 export default function LoginPage() {
+  const t = useTranslations('auth')
   const router = useRouter()
   const searchParams = useSearchParams()
   const returnUrl = searchParams.get('returnUrl')
@@ -53,18 +55,27 @@ export default function LoginPage() {
   return (
     <AuthCard activeTab="login" returnUrl={returnUrl}>
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="w-full space-y-6">
-          {/* Phone Number Field */}
+        <form
+          method="post"
+          action="#"
+          onSubmit={(event) => {
+            event.preventDefault()
+            void form.handleSubmit(onSubmit)(event)
+          }}
+          className="w-full space-y-6"
+        >
           <FormField
             control={form.control}
             name="phoneNumber"
             render={({ field }) => (
               <FormItem className="relative space-y-0">
-                <div className="focus-within:border-brand-600 flex items-center border-b border-gray-300 py-2 transition-colors">
+                <div className="focus-within:border-primary-base flex items-center border-b border-stroke-soft-200 py-2 transition-colors">
                   <Phone className="mr-3 h-5 w-5 text-gray-400" />
                   <FormControl>
                     <Input
-                      placeholder="Phone Number (e.g. +2507...)"
+                      type="tel"
+                      autoComplete="tel"
+                      placeholder={t('fields.phone')}
                       className="rounded-none border-0 bg-transparent px-0 shadow-none focus:outline-none focus-visible:ring-0 focus-visible:ring-transparent focus-visible:ring-offset-0"
                       {...field}
                     />
@@ -75,18 +86,18 @@ export default function LoginPage() {
             )}
           />
 
-          {/* Password Field */}
           <FormField
             control={form.control}
             name="password"
             render={({ field }) => (
               <FormItem className="relative space-y-0 pt-4">
-                <div className="focus-within:border-brand-600 flex items-center border-b border-gray-300 py-2 transition-colors">
+                <div className="focus-within:border-primary-base flex items-center border-b border-stroke-soft-200 py-2 transition-colors">
                   <Lock className="mr-3 h-5 w-5 text-gray-400" />
                   <FormControl>
                     <Input
                       type="password"
-                      placeholder="Password"
+                      autoComplete="current-password"
+                      placeholder={t('fields.password')}
                       className="rounded-none border-0 bg-transparent px-0 shadow-none focus:outline-none focus-visible:ring-0 focus-visible:ring-transparent focus-visible:ring-offset-0"
                       {...field}
                     />
@@ -100,17 +111,17 @@ export default function LoginPage() {
           <div className="flex items-center justify-between pt-8">
             <Link
               href="/forgot-password"
-              className="text-brand-700 hover:text-brand-800 text-xs font-semibold transition-colors hover:underline"
+              className="text-primary-darker hover:text-primary-darker text-xs font-semibold transition-colors hover:underline"
             >
-              Forgot Password?
+              {t('login.forgotPassword')}
             </Link>
 
             <Button
               type="submit"
               disabled={isLoading}
-              className="bg-brand-700 hover:bg-brand-800 rounded-full px-8 py-2 font-bold shadow-md transition-transform active:scale-95 disabled:opacity-50"
+              className="rounded-full bg-primary-base px-8 py-2 font-bold text-static-white shadow-regular-xs transition-transform hover:bg-primary-darker active:scale-95 disabled:opacity-50"
             >
-              {isLoading ? 'LOGGING IN...' : 'LOGIN'}
+              {isLoading ? t('login.submitting') : t('login.submit')}
             </Button>
           </div>
         </form>

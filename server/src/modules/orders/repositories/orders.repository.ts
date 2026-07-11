@@ -162,8 +162,23 @@ export class OrdersRepository {
         if (params.method) where.method = params.method;
         if (params.dateFrom || params.dateTo) {
             where.createdAt = {};
-            if (params.dateFrom) where.createdAt.gte = new Date(params.dateFrom);
-            if (params.dateTo) where.createdAt.lte = new Date(params.dateTo);
+            if (params.dateFrom) {
+                const from = new Date(params.dateFrom);
+                if (!Number.isNaN(from.getTime())) {
+                    from.setUTCHours(0, 0, 0, 0);
+                    where.createdAt.gte = from;
+                }
+            }
+            if (params.dateTo) {
+                const to = new Date(params.dateTo);
+                if (!Number.isNaN(to.getTime())) {
+                    to.setUTCHours(23, 59, 59, 999);
+                    where.createdAt.lte = to;
+                }
+            }
+            if (Object.keys(where.createdAt).length === 0) {
+                delete where.createdAt;
+            }
         }
 
         const [payments, total] = await Promise.all([

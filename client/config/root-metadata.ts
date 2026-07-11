@@ -2,26 +2,29 @@ import type { Metadata } from 'next'
 
 export const rootMetadata: Metadata = {
   title: {
-    default: 'Next.js Boilerplate',
-    template: '%s | Next.js Boilerplate',
+    default: 'OnlineShop.rw',
+    template: '%s | OnlineShop.rw',
   },
-  description: 'A comprehensive Next.js boilerplate with modern tooling',
-  keywords: ['Next.js', 'React', 'TypeScript', 'Tailwind CSS'],
-  authors: [{ name: 'Your Name' }],
-  creator: 'Your Name',
+  description:
+    'Discover products from trusted local stores in Rwanda. Launch your storefront, manage orders, and grow on OnlineShop.rw.',
+  keywords: ['OnlineShop.rw', 'Rwanda', 'ecommerce', 'marketplace', 'local stores'],
+  authors: [{ name: 'OnlineShop.rw' }],
+  creator: 'OnlineShop.rw',
   openGraph: {
     type: 'website',
     locale: 'en_US',
-    url: 'https://your-domain.com',
-    title: 'Next.js Boilerplate',
-    description: 'A comprehensive Next.js boilerplate with modern tooling',
-    siteName: 'Next.js Boilerplate',
+    url: 'https://onlineshop.rw',
+    title: 'OnlineShop.rw',
+    description:
+      'Discover products from trusted local stores in Rwanda. Launch your storefront, manage orders, and grow.',
+    siteName: 'OnlineShop.rw',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Next.js Boilerplate',
-    description: 'A comprehensive Next.js boilerplate with modern tooling',
-    creator: '@yourusername',
+    title: 'OnlineShop.rw',
+    description:
+      'Discover products from trusted local stores in Rwanda. Launch your storefront, manage orders, and grow.',
+    creator: '@onlineshoprw',
   },
   robots: {
     index: true,

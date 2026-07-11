@@ -64,7 +64,7 @@ export function CartIconButton({ variant = 'fixed', className }: CartIconButtonP
   const display = count > 99 ? '99+' : String(count)
 
   const linkClass = cn(
-    'group relative inline-flex shrink-0 items-center justify-center rounded-full border border-[rgba(43,43,43,0.08)] bg-white text-[#2B2B2B] shadow-sm transition-colors duration-300 ease-out hover:border-[#B76E5D]/35 hover:bg-[#FAF7F3] hover:text-[#2B2B2B] active:scale-95',
+    'group relative inline-flex shrink-0 items-center justify-center rounded-full border border-stroke-soft-200 bg-bg-white-0 text-text-strong-950 shadow-regular-xs transition-colors duration-200 ease-out hover:border-primary-base/30 hover:bg-bg-weak-50 hover:text-text-strong-950 active:scale-95',
     variant === 'inline'
       ? 'h-9 w-9 sm:h-10 sm:w-10'
       : 'pointer-events-auto h-10 w-10 sm:h-11 sm:w-11',
@@ -82,7 +82,7 @@ export function CartIconButton({ variant = 'fixed', className }: CartIconButtonP
       <ShoppingBag
         aria-hidden
         className={cn(
-          'size-4 transition-colors duration-300 group-hover:text-[#B76E5D] sm:size-[18px]',
+          'size-4 transition-colors duration-300 group-hover:text-[#1daf61] sm:size-[18px]',
           pulse && 'animate-[os-cart-pop_520ms_cubic-bezier(0.2,0.8,0.2,1)_both]',
         )}
         strokeWidth={2}
@@ -92,7 +92,7 @@ export function CartIconButton({ variant = 'fixed', className }: CartIconButtonP
         <span
           aria-hidden
           className={cn(
-            'absolute -right-0.5 -top-0.5 inline-flex min-w-[18px] items-center justify-center rounded-full bg-[#B76E5D] px-1 text-[10px] font-bold leading-none text-white shadow-[0_2px_6px_rgba(183,110,93,0.4)] ring-2 ring-[#F5F1EB] sm:min-w-[20px] sm:text-[11px]',
+            'absolute -right-0.5 -top-0.5 inline-flex min-w-[18px] items-center justify-center rounded-full bg-primary-base px-1 text-[10px] font-bold leading-none text-static-white shadow-regular-xs ring-2 ring-bg-weak-50 sm:min-w-[20px] sm:text-[11px]',
             pulse && 'scale-110',
           )}
         >
@@ -103,8 +103,8 @@ export function CartIconButton({ variant = 'fixed', className }: CartIconButtonP
       <span
         aria-hidden
         className={cn(
-          'pointer-events-none absolute inset-0 rounded-full ring-2 ring-[#B76E5D]/0 transition-all duration-700',
-          pulse ? 'scale-150 opacity-0 ring-[#B76E5D]/60' : 'scale-100 opacity-0',
+          'pointer-events-none absolute inset-0 rounded-full ring-2 ring-[#1daf61]/0 transition-all duration-700',
+          pulse ? 'scale-150 opacity-0 ring-[#1daf61]/60' : 'scale-100 opacity-0',
         )}
       />
     </Link>

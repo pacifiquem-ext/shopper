@@ -71,7 +71,7 @@ export function StepDelivery() {
                       'mt-1 flex items-center border-b py-2 transition-colors',
                       hasNameError
                         ? 'border-red-500 focus-within:border-red-500'
-                        : 'focus-within:border-brand-600 border-gray-300'
+                        : 'focus-within:border-primary-base border-stroke-soft-200'
                     )}
                   >
                     <Input
@@ -96,7 +96,7 @@ export function StepDelivery() {
                       'mt-1 flex items-center border-b py-2 transition-colors',
                       hasFeeError
                         ? 'border-red-500 focus-within:border-red-500'
-                        : 'focus-within:border-brand-600 border-gray-300'
+                        : 'focus-within:border-primary-base border-stroke-soft-200'
                     )}
                   >
                     <Input
@@ -126,7 +126,7 @@ export function StepDelivery() {
                       'mt-1 flex items-center border-b py-2 transition-colors',
                       hasEtaError
                         ? 'border-red-500 focus-within:border-red-500'
-                        : 'focus-within:border-brand-600 border-gray-300'
+                        : 'focus-within:border-primary-base border-stroke-soft-200'
                     )}
                   >
                     <Input
@@ -155,7 +155,7 @@ export function StepDelivery() {
         <button
           type="button"
           onClick={addDeliveryZone}
-          className="flex w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-gray-300 bg-gray-50 py-6 text-base font-semibold text-gray-900 transition-all hover:border-gray-400 hover:bg-gray-100 focus:outline-none"
+          className="flex w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-stroke-soft-200 bg-gray-50 py-6 text-base font-semibold text-gray-900 transition-all hover:border-gray-400 hover:bg-gray-100 focus:outline-none"
         >
           <Plus className="h-5 w-5" />
           {t('delivery.addZone', { defaultValue: 'Add another zone' })}

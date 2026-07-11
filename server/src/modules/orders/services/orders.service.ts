@@ -318,8 +318,25 @@ export class OrdersService {
 
         if (dateFrom || dateTo) {
             where.placedAt = {};
-            if (dateFrom) where.placedAt.gte = new Date(dateFrom);
-            if (dateTo) where.placedAt.lte = new Date(dateTo);
+            if (dateFrom) {
+                const from = new Date(dateFrom);
+                if (!Number.isNaN(from.getTime())) {
+                    // Inclusive start of day (UTC)
+                    from.setUTCHours(0, 0, 0, 0);
+                    where.placedAt.gte = from;
+                }
+            }
+            if (dateTo) {
+                const to = new Date(dateTo);
+                if (!Number.isNaN(to.getTime())) {
+                    // Inclusive end of day (UTC) — bare YYYY-MM-DD is midnight otherwise
+                    to.setUTCHours(23, 59, 59, 999);
+                    where.placedAt.lte = to;
+                }
+            }
+            if (Object.keys(where.placedAt).length === 0) {
+                delete where.placedAt;
+            }
         }
 
         if (search) {

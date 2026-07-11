@@ -90,8 +90,8 @@ export default function PaymentsPage() {
   return (
     <div className="flex w-full max-w-6xl flex-col gap-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight text-gray-900">{t('nav.payments')}</h1>
-        <p className="mt-2 text-gray-500">Payment records for all orders.</p>
+        <h1 className="text-3xl font-bold tracking-tight text-text-strong-950">{t('nav.payments')}</h1>
+        <p className="mt-2 text-text-soft-400">Payment records for all orders.</p>
       </div>
 
       {/* Summary cards */}
@@ -103,7 +103,7 @@ export default function PaymentsPage() {
           return (
             <div
               key={s}
-              className="flex items-center gap-3 rounded-2xl border border-gray-200 bg-white p-4 shadow-sm"
+              className="flex items-center gap-3 rounded-2xl border border-stroke-soft-200 bg-bg-white-0 p-4 shadow-regular-xs"
             >
               <div
                 className={cn(
@@ -114,8 +114,8 @@ export default function PaymentsPage() {
                 <Icon className="h-5 w-5" />
               </div>
               <div>
-                <div className="text-xs text-gray-500">{cfg.label}</div>
-                <div className="text-xl font-bold text-gray-900">{isLoading ? '—' : count}</div>
+                <div className="text-xs text-text-soft-400">{cfg.label}</div>
+                <div className="text-xl font-bold text-text-strong-950">{isLoading ? '—' : count}</div>
               </div>
             </div>
           )
@@ -130,7 +130,7 @@ export default function PaymentsPage() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search by order # or customer name..."
-            className="h-10 rounded-xl border-gray-200 pl-9"
+            className="h-10 rounded-xl border-stroke-soft-200 pl-9"
           />
         </div>
         <div className="flex gap-2">
@@ -144,8 +144,8 @@ export default function PaymentsPage() {
               className={cn(
                 'h-9 rounded-lg text-xs',
                 statusFilter === s
-                  ? 'bg-brand-900 text-white hover:bg-brand-800'
-                  : 'border-gray-200 text-gray-700 hover:bg-gray-50',
+                  ? 'bg-primary-base text-white hover:bg-primary-darker'
+                  : 'border-stroke-soft-200 text-text-sub-600 hover:bg-bg-weak-50',
               )}
             >
               {s === '' ? 'All' : STATUS_CONFIG[s]?.label}
@@ -155,7 +155,7 @@ export default function PaymentsPage() {
       </div>
 
       {/* Table */}
-      <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
+      <div className="overflow-hidden rounded-2xl border border-stroke-soft-200 bg-bg-white-0 shadow-regular-xs">
         {isLoading ? (
           <div className="flex min-h-[300px] items-center justify-center">
             <TurningZeroLoader size="md" />
@@ -168,23 +168,23 @@ export default function PaymentsPage() {
         ) : (
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-gray-100 bg-gray-50 text-left">
-                <th className="px-6 py-4 text-xs font-semibold uppercase tracking-wide text-gray-500">
+              <tr className="border-b border-stroke-soft-200 bg-bg-weak-50 text-left">
+                <th className="px-6 py-4 text-xs font-semibold uppercase tracking-wide text-text-soft-400">
                   Order
                 </th>
-                <th className="px-6 py-4 text-xs font-semibold uppercase tracking-wide text-gray-500">
+                <th className="px-6 py-4 text-xs font-semibold uppercase tracking-wide text-text-soft-400">
                   Customer
                 </th>
-                <th className="px-6 py-4 text-xs font-semibold uppercase tracking-wide text-gray-500">
+                <th className="px-6 py-4 text-xs font-semibold uppercase tracking-wide text-text-soft-400">
                   Amount
                 </th>
-                <th className="px-6 py-4 text-xs font-semibold uppercase tracking-wide text-gray-500">
+                <th className="px-6 py-4 text-xs font-semibold uppercase tracking-wide text-text-soft-400">
                   Method
                 </th>
-                <th className="px-6 py-4 text-xs font-semibold uppercase tracking-wide text-gray-500">
+                <th className="px-6 py-4 text-xs font-semibold uppercase tracking-wide text-text-soft-400">
                   Status
                 </th>
-                <th className="px-6 py-4 text-xs font-semibold uppercase tracking-wide text-gray-500">
+                <th className="px-6 py-4 text-xs font-semibold uppercase tracking-wide text-text-soft-400">
                   Date
                 </th>
               </tr>
@@ -194,16 +194,16 @@ export default function PaymentsPage() {
                 const cfg = STATUS_CONFIG[p.status] ?? STATUS_CONFIG.PENDING
                 const Icon = cfg.icon
                 return (
-                  <tr key={p.id} className="transition-colors hover:bg-gray-50">
-                    <td className="px-6 py-4 font-medium text-gray-900">{p.order.orderNumber}</td>
+                  <tr key={p.id} className="transition-colors hover:bg-bg-weak-50">
+                    <td className="px-6 py-4 font-medium text-text-strong-950">{p.order.orderNumber}</td>
                     <td className="px-6 py-4">
-                      <div className="font-medium text-gray-900">{p.order.customerName}</div>
-                      <div className="text-xs text-gray-500">{p.order.customerPhone}</div>
+                      <div className="font-medium text-text-strong-950">{p.order.customerName}</div>
+                      <div className="text-xs text-text-soft-400">{p.order.customerPhone}</div>
                     </td>
-                    <td className="px-6 py-4 font-semibold text-gray-900">
+                    <td className="px-6 py-4 font-semibold text-text-strong-950">
                       {Number(p.amount).toLocaleString()} RWF
                     </td>
-                    <td className="px-6 py-4 text-gray-600">
+                    <td className="px-6 py-4 text-text-sub-600">
                       {METHOD_LABELS[p.method] ?? p.method}
                     </td>
                     <td className="px-6 py-4">
@@ -217,7 +217,7 @@ export default function PaymentsPage() {
                         {cfg.label}
                       </Badge>
                     </td>
-                    <td className="px-6 py-4 text-gray-500">{fmtDate(p.createdAt)}</td>
+                    <td className="px-6 py-4 text-text-soft-400">{fmtDate(p.createdAt)}</td>
                   </tr>
                 )
               })}
@@ -225,7 +225,7 @@ export default function PaymentsPage() {
           </table>
         )}
         {!isLoading && filtered.length > 0 && (
-          <div className="border-t border-gray-100 px-6 py-3 text-xs text-gray-500">
+          <div className="border-t border-stroke-soft-200 px-6 py-3 text-xs text-text-soft-400">
             Showing {filtered.length} of {total} payments
           </div>
         )}

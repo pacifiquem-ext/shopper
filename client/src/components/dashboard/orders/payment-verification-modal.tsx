@@ -44,20 +44,20 @@ export function PaymentVerificationModal({
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-2xl border-gray-200 bg-white">
+        <DialogContent className="max-w-2xl border-stroke-soft-200 bg-white">
           <DialogHeader>
-            <DialogTitle className="text-gray-900">Payment Verification</DialogTitle>
-            <DialogDescription className="text-gray-600">
+            <DialogTitle className="text-text-strong-950">Payment Verification</DialogTitle>
+            <DialogDescription className="text-text-sub-600">
               Review and verify payment proof for order {orderId}
             </DialogDescription>
           </DialogHeader>
 
           <div className="mt-4">
             {!imageUrl ? (
-              <div className="flex items-center justify-center rounded-xl border-2 border-dashed border-gray-200 bg-gray-50 p-12">
+              <div className="flex items-center justify-center rounded-xl border-2 border-dashed border-stroke-soft-200 bg-bg-weak-50 p-12">
                 <div className="text-center">
                   <AlertCircle className="mx-auto h-12 w-12 text-gray-400" />
-                  <p className="mt-3 text-sm font-medium text-gray-500">
+                  <p className="mt-3 text-sm font-medium text-text-soft-400">
                     No payment proof uploaded yet
                   </p>
                   <p className="mt-1 text-xs text-gray-400">
@@ -77,7 +77,7 @@ export function PaymentVerificationModal({
                   </div>
                 )}
 
-                <div className="group relative overflow-hidden rounded-xl border border-gray-200 bg-gray-50">
+                <div className="group relative overflow-hidden rounded-xl border border-stroke-soft-200 bg-bg-weak-50">
                   <img
                     src={imageUrl}
                     alt="Payment proof"
@@ -88,7 +88,7 @@ export function PaymentVerificationModal({
                       type="button"
                       size="sm"
                       onClick={() => setZoomOpen(true)}
-                      className="h-10 rounded-lg bg-white px-4 text-gray-900 hover:bg-gray-100"
+                      className="h-10 rounded-lg bg-white px-4 text-text-strong-950 hover:bg-bg-weak-50"
                     >
                       <ZoomIn className="mr-2 h-4 w-4" />
                       View Full Size
@@ -103,7 +103,7 @@ export function PaymentVerificationModal({
                         link.download = `payment-proof-${orderId}.jpg`
                         link.click()
                       }}
-                      className="h-10 rounded-lg border-white bg-white/90 px-4 text-gray-900 hover:bg-white"
+                      className="h-10 rounded-lg border-white bg-white/90 px-4 text-text-strong-950 hover:bg-white"
                     >
                       <Download className="mr-2 h-4 w-4" />
                       Download
@@ -112,10 +112,10 @@ export function PaymentVerificationModal({
                 </div>
 
                 {!isConfirmed && (
-                  <div className="flex items-center gap-3 rounded-lg border border-gray-200 bg-gray-50 p-4">
+                  <div className="flex items-center gap-3 rounded-lg border border-stroke-soft-200 bg-bg-weak-50 p-4">
                     <div className="flex-1">
-                      <p className="text-sm font-semibold text-gray-900">Verify this payment?</p>
-                      <p className="mt-0.5 text-xs text-gray-600">
+                      <p className="text-sm font-semibold text-text-strong-950">Verify this payment?</p>
+                      <p className="mt-0.5 text-xs text-text-sub-600">
                         Confirm if the payment proof is legitimate
                       </p>
                     </div>
@@ -147,9 +147,9 @@ export function PaymentVerificationModal({
       </Dialog>
 
       <Dialog open={zoomOpen} onOpenChange={setZoomOpen}>
-        <DialogContent className="max-w-5xl border-gray-200 bg-white">
+        <DialogContent className="max-w-5xl border-stroke-soft-200 bg-white">
           <DialogHeader>
-            <DialogTitle className="text-gray-900">Payment Proof - Full Size</DialogTitle>
+            <DialogTitle className="text-text-strong-950">Payment Proof - Full Size</DialogTitle>
           </DialogHeader>
           <div className="mt-4">
             {imageUrl && (

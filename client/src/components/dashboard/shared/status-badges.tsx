@@ -99,7 +99,7 @@ export function ProductStatusBadge({ status, label }: ProductStatusBadgeProps) {
   }
 
   return (
-    <Badge className="rounded-full border-gray-200 bg-gray-50 text-gray-700 hover:bg-gray-50">
+    <Badge className="rounded-full border-stroke-soft-200 bg-bg-weak-50 text-text-sub-600 hover:bg-bg-weak-50">
       {label}
     </Badge>
   )

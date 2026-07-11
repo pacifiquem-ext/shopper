@@ -43,20 +43,20 @@ export function SalesPerformanceChart({
   const brandSecondary = MARKETPLACE_BRAND.secondary
 
   return (
-    <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+    <div className="rounded-2xl border border-stroke-soft-200 bg-white p-5 shadow-sm">
       <div className="flex items-start justify-between">
         <div>
-          <h3 className="text-sm font-semibold text-gray-900">{title}</h3>
-          <p className="mt-0.5 text-xs font-medium text-gray-500">{subtitle}</p>
+          <h3 className="text-sm font-semibold text-text-strong-950">{title}</h3>
+          <p className="mt-0.5 text-xs font-medium text-text-soft-400">{subtitle}</p>
         </div>
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-1.5">
             <div className="h-2 w-2 rounded-full" style={{ backgroundColor: brandPrimary }} />
-            <span className="text-xs font-medium text-gray-600">{revenueLabel}</span>
+            <span className="text-xs font-medium text-text-sub-600">{revenueLabel}</span>
           </div>
           <div className="flex items-center gap-1.5">
             <div className="h-2 w-2 rounded-full" style={{ backgroundColor: brandSecondary }} />
-            <span className="text-xs font-medium text-gray-600">{unitsLabel}</span>
+            <span className="text-xs font-medium text-text-sub-600">{unitsLabel}</span>
           </div>
         </div>
       </div>
@@ -66,17 +66,17 @@ export function SalesPerformanceChart({
           const hasChange = item.change != null && !Number.isNaN(item.change)
           const isPositive = (item.change ?? 0) >= 0
           return (
-            <div key={item.label} className="rounded-xl border border-gray-100 bg-gray-50/50 p-3">
-              <div className="text-xs font-medium text-gray-500">{item.label}</div>
+            <div key={item.label} className="rounded-xl border border-stroke-soft-200 bg-bg-weak-50/50 p-3">
+              <div className="text-xs font-medium text-text-soft-400">{item.label}</div>
               <div className="mt-1.5 flex items-end justify-between gap-2">
-                <div className="text-lg font-semibold text-gray-900">
+                <div className="text-lg font-semibold text-text-strong-950">
                   {isLoading ? '—' : formatValue(item.value)}
                 </div>
                 {hasChange && !isLoading ? (
                   <div
                     className={cn(
                       'flex items-center gap-0.5 text-xs font-semibold',
-                      isPositive ? 'text-emerald-600' : 'text-gray-500',
+                      isPositive ? 'text-emerald-600' : 'text-text-soft-400',
                     )}
                   >
                     {isPositive ? (
@@ -97,7 +97,7 @@ export function SalesPerformanceChart({
         {isLoading ? (
           <ChartLoadingPlaceholder />
         ) : chartData.length === 0 ? (
-          <div className="flex h-[200px] w-full items-center justify-center rounded-xl bg-gray-50 text-sm text-gray-400">
+          <div className="flex h-[200px] w-full items-center justify-center rounded-xl bg-bg-weak-50 text-sm text-gray-400">
             {emptyLabel}
           </div>
         ) : (

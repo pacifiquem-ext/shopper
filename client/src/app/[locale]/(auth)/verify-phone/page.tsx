@@ -13,8 +13,10 @@ import { useRouter } from '@/i18n/navigation'
 import { useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { MERCHANT_ONBOARDING_PATH, withReturnUrl } from '@/lib/auth-return-url'
+import { useTranslations } from 'next-intl'
 
 export default function VerifyPhonePage() {
+  const t = useTranslations('auth')
   const router = useRouter()
   const searchParams = useSearchParams()
   const returnUrl = searchParams.get('returnUrl')
@@ -29,7 +31,6 @@ export default function VerifyPhonePage() {
     },
   })
 
-  // Pre-fill phone number if navigating from signup step
   useEffect(() => {
     const savedPhone = localStorage.getItem('pendingVerificationPhone')
     if (savedPhone) {
@@ -53,27 +54,36 @@ export default function VerifyPhonePage() {
   return (
     <AuthCard activeTab="signup">
       <div className="mb-6 text-center">
-        <h2 className="text-xl font-bold text-gray-800">Verify Your Phone</h2>
+        <h2 className="text-xl font-bold text-gray-800">{t('verify.title')}</h2>
         <p className="mt-2 text-sm text-gray-500">
           {detectedPhone
-            ? `We sent a 6-digit code to ${detectedPhone}`
-            : 'Enter your phone number and the 6-digit code we sent you.'}
+            ? t('verify.hintWithPhone', { phone: detectedPhone })
+            : t('verify.hint')}
         </p>
       </div>
 
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="w-full space-y-5">
-          {/* Phone Number Field */}
+        <form
+          method="post"
+          action="#"
+          onSubmit={(event) => {
+            event.preventDefault()
+            void form.handleSubmit(onSubmit)(event)
+          }}
+          className="w-full space-y-5"
+        >
           <FormField
             control={form.control}
             name="phoneNumber"
             render={({ field }) => (
               <FormItem className="relative space-y-0 pt-3">
-                <div className="focus-within:border-brand-600 flex items-center border-b border-gray-300 py-2 transition-colors">
+                <div className="focus-within:border-primary-base flex items-center border-b border-stroke-soft-200 py-2 transition-colors">
                   <Phone className="mr-3 h-5 w-5 text-gray-400" />
                   <FormControl>
                     <Input
-                      placeholder="Phone Number (e.g. +2507...)"
+                      type="tel"
+                      autoComplete="tel"
+                      placeholder={t('fields.phone')}
                       className="rounded-none border-0 bg-transparent px-0 shadow-none focus:outline-none focus-visible:ring-0 focus-visible:ring-transparent focus-visible:ring-offset-0"
                       disabled={!!detectedPhone}
                       {...field}
@@ -85,17 +95,18 @@ export default function VerifyPhonePage() {
             )}
           />
 
-          {/* OTP Code Field */}
           <FormField
             control={form.control}
             name="otpCode"
             render={({ field }) => (
               <FormItem className="relative space-y-0 pt-3">
-                <div className="focus-within:border-brand-600 flex items-center border-b border-gray-300 py-2 transition-colors">
+                <div className="focus-within:border-primary-base flex items-center border-b border-stroke-soft-200 py-2 transition-colors">
                   <KeyRound className="mr-3 h-5 w-5 text-gray-400" />
                   <FormControl>
                     <Input
-                      placeholder="6-Digit Code"
+                      inputMode="numeric"
+                      autoComplete="one-time-code"
+                      placeholder={t('fields.otp')}
                       maxLength={6}
                       className="rounded-none border-0 bg-transparent px-0 tracking-widest shadow-none focus:outline-none focus-visible:ring-0 focus-visible:ring-transparent focus-visible:ring-offset-0"
                       {...field}
@@ -111,9 +122,9 @@ export default function VerifyPhonePage() {
             <Button
               type="submit"
               disabled={isLoading}
-              className="bg-brand-700 hover:bg-brand-800 rounded-full px-8 py-2 font-bold shadow-md transition-transform active:scale-95 disabled:opacity-50"
+              className="rounded-full bg-primary-base px-8 py-2 font-bold text-static-white shadow-regular-xs transition-transform hover:bg-primary-darker active:scale-95 disabled:opacity-50"
             >
-              {isLoading ? 'VERIFYING...' : 'VERIFY'}
+              {isLoading ? t('verify.submitting') : t('verify.submit')}
             </Button>
           </div>
         </form>

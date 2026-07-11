@@ -50,7 +50,7 @@ export function StepLegal() {
                 'flex items-center border-b py-2 transition-colors',
                 ownerFullNameField.hasError
                   ? 'border-red-500 focus-within:border-red-500'
-                  : 'focus-within:border-brand-600 border-gray-300'
+                  : 'focus-within:border-primary-base border-stroke-soft-200'
               )}
             >
               <Input
@@ -76,7 +76,7 @@ export function StepLegal() {
                 'flex items-center border-b py-2 transition-colors',
                 ownerNationalityField.hasError
                   ? 'border-red-500 focus-within:border-red-500'
-                  : 'focus-within:border-brand-600 border-gray-300'
+                  : 'focus-within:border-primary-base border-stroke-soft-200'
               )}
             >
               <Input
@@ -104,7 +104,7 @@ export function StepLegal() {
                 'flex items-center border-b py-2 transition-colors',
                 ownerEmailField.hasError
                   ? 'border-red-500 focus-within:border-red-500'
-                  : 'focus-within:border-brand-600 border-gray-300'
+                  : 'focus-within:border-primary-base border-stroke-soft-200'
               )}
             >
               <Input
@@ -131,7 +131,7 @@ export function StepLegal() {
                 'flex items-center border-b py-2 transition-colors',
                 ownerPhoneNumberField.hasError
                   ? 'border-red-500 focus-within:border-red-500'
-                  : 'focus-within:border-brand-600 border-gray-300'
+                  : 'focus-within:border-primary-base border-stroke-soft-200'
               )}
             >
               <Input
@@ -159,7 +159,7 @@ export function StepLegal() {
               'flex items-center border-b py-2 transition-colors',
               countryField.hasError
                 ? 'border-red-500 focus-within:border-red-500'
-                : 'focus-within:border-brand-600 border-gray-300'
+                : 'focus-within:border-primary-base border-stroke-soft-200'
             )}
           >
             <Input

@@ -15,13 +15,13 @@ type MetricTileProps = {
 
 export function MetricTile({ icon, iconClassName, label, value }: MetricTileProps) {
   return (
-    <div className="flex items-center gap-3 rounded-2xl bg-gray-50 px-4 py-3">
+    <div className="flex items-center gap-3 rounded-2xl bg-bg-weak-50 px-4 py-3">
       <div className={cn('flex h-10 w-10 items-center justify-center rounded-xl', iconClassName)}>
         {icon}
       </div>
       <div className="min-w-0">
-        <div className="text-xs font-medium text-gray-500">{label}</div>
-        <div className="text-lg font-semibold text-gray-900">{value}</div>
+        <div className="text-xs font-medium text-text-soft-400">{label}</div>
+        <div className="text-lg font-semibold text-text-strong-950">{value}</div>
       </div>
     </div>
   )
@@ -42,8 +42,8 @@ export function MetricCell({ icon, iconClassName, label, value, className }: Met
         {icon}
       </div>
       <div className="min-w-0">
-        <div className="text-xs font-medium text-gray-500">{label}</div>
-        <div className="mt-1 text-xl font-semibold text-gray-900">{value}</div>
+        <div className="text-xs font-medium text-text-soft-400">{label}</div>
+        <div className="mt-1 text-xl font-semibold text-text-strong-950">{value}</div>
       </div>
     </div>
   )
@@ -57,8 +57,8 @@ type KeyValueRowProps = {
 export function KeyValueRow({ label, value }: KeyValueRowProps) {
   return (
     <div className="flex items-center justify-between gap-4 text-sm">
-      <div className="text-gray-500">{label}</div>
-      <div className="font-semibold text-gray-900">{value}</div>
+      <div className="text-text-soft-400">{label}</div>
+      <div className="font-semibold text-text-strong-950">{value}</div>
     </div>
   )
 }
@@ -83,7 +83,7 @@ export function SalesPurchaseChart({ data = [], isLoading = false }: SalesPurcha
 
   if (data.length === 0) {
     return (
-      <div className="mt-2 flex h-[260px] w-full items-center justify-center rounded-xl bg-gray-50 text-sm text-gray-400">
+      <div className="mt-2 flex h-[260px] w-full items-center justify-center rounded-xl bg-bg-weak-50 text-sm text-gray-400">
         No sales trend data available yet.
       </div>
     )

@@ -11,8 +11,10 @@ import { Phone } from 'lucide-react'
 import React from 'react'
 import { useForm } from 'react-hook-form'
 import { useAuthStore } from '@/store/auth.store'
+import { useTranslations } from 'next-intl'
 
 export default function ForgotPasswordPage() {
+  const t = useTranslations('auth')
   const [isSubmitted, setIsSubmitted] = React.useState(false)
   const { forgotPassword, isLoading } = useAuthStore()
 
@@ -34,32 +36,37 @@ export default function ForgotPasswordPage() {
     <AuthCard activeTab="forgot-password">
       <div className="mb-6 text-center">
         {!isSubmitted ? (
-          <>
-            <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
-              Enter your phone number to receive an OTP to reset your password.
-            </p>
-          </>
+          <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">{t('forgot.hint')}</p>
         ) : (
-          <p className="text-brand-700 dark:text-brand-400 mt-2 text-sm font-medium">
-            We have sent an OTP to your phone number. Please check your SMS.
+          <p className="text-primary-darker dark:text-primary-base mt-2 text-sm font-medium">
+            {t('forgot.sent')}
           </p>
         )}
       </div>
 
       {!isSubmitted ? (
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="w-full space-y-6">
-            {/* Phone Number Field */}
+          <form
+            method="post"
+            action="#"
+            onSubmit={(event) => {
+              event.preventDefault()
+              void form.handleSubmit(onSubmit)(event)
+            }}
+            className="w-full space-y-6"
+          >
             <FormField
               control={form.control}
               name="phoneNumber"
               render={({ field }) => (
                 <FormItem className="relative space-y-0">
-                  <div className="focus-within:border-brand-600 flex items-center border-b border-gray-300 py-2 transition-colors">
+                  <div className="focus-within:border-primary-base flex items-center border-b border-stroke-soft-200 py-2 transition-colors">
                     <Phone className="mr-3 h-5 w-5 text-gray-400" />
                     <FormControl>
                       <Input
-                        placeholder="Phone Number (e.g. +2507...)"
+                        type="tel"
+                        autoComplete="tel"
+                        placeholder={t('fields.phone')}
                         className="rounded-none border-0 bg-transparent px-0 shadow-none focus:outline-none focus-visible:ring-0 focus-visible:ring-transparent focus-visible:ring-offset-0"
                         {...field}
                       />
@@ -74,16 +81,16 @@ export default function ForgotPasswordPage() {
               <Button
                 type="submit"
                 disabled={isLoading}
-                className="bg-brand-700 hover:bg-brand-800 w-full rounded-full py-6 font-bold shadow-md transition-transform active:scale-95 disabled:opacity-50"
+                className="w-full rounded-full bg-primary-base py-6 font-bold text-static-white shadow-regular-xs transition-transform hover:bg-primary-darker active:scale-95 disabled:opacity-50"
               >
-                {isLoading ? 'SENDING...' : 'SEND RESET LINK'}
+                {isLoading ? t('forgot.submitting') : t('forgot.submit')}
               </Button>
 
               <Link
                 href="/login"
-                className="text-brand-700 hover:text-brand-800 text-sm font-semibold transition-colors hover:underline"
+                className="text-primary-darker hover:text-primary-darker text-sm font-semibold transition-colors hover:underline"
               >
-                Back to Login
+                {t('forgot.backToLogin')}
               </Link>
             </div>
           </form>
@@ -92,29 +99,14 @@ export default function ForgotPasswordPage() {
         <div className="flex flex-col items-center space-y-4 pt-4">
           <Button
             asChild
-            className="bg-brand-700 hover:bg-brand-800 w-full rounded-full py-6 font-bold shadow-md transition-transform active:scale-95"
+            className="w-full rounded-full bg-primary-base py-6 font-bold text-static-white shadow-regular-xs transition-transform hover:bg-primary-darker active:scale-95"
           >
-            <Link href="/reset-password">PROCEED TO RESET PASSWORD</Link>
+            <Link href="/reset-password">{t('forgot.proceedReset')}</Link>
           </Button>
 
-          <Button
-            variant="ghost"
-            className="text-brand-700 hover:bg-brand-50 hover:text-brand-800 dark:hover:bg-brand-900/30 w-full rounded-full py-6 font-semibold transition-colors"
-            onClick={() => {
-              // Mocking a resend action
-              console.log('Resending code to', form.getValues().phoneNumber)
-              alert('Code resent successfully!')
-            }}
-          >
-            RESEND CODE
+          <Button asChild variant="ghost">
+            <Link href="/login">{t('forgot.backToLogin')}</Link>
           </Button>
-
-          <Link
-            href="/login"
-            className="text-brand-700 hover:text-brand-800 mt-4 text-sm font-semibold transition-colors hover:underline"
-          >
-            Back to Login
-          </Link>
         </div>
       )}
     </AuthCard>

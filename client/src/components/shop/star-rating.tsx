@@ -30,7 +30,7 @@ export function StarRating({
       aria-label={ariaLabel}
     >
       <span className='relative inline-flex' aria-hidden>
-        <span className='inline-flex text-[#EAE4DC]'>
+        <span className='inline-flex text-[#ebebeb]'>
           {Array.from({ length: 5 }).map((_, index) => (
             <Star
               key={`bg-${index}`}

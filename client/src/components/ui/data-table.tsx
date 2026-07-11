@@ -138,14 +138,14 @@ export function DataTable<T>({
                 <Checkbox
                   checked={allSelected ? true : someSelected ? 'indeterminate' : false}
                   onCheckedChange={(v) => toggleAll(Boolean(v))}
-                  className="border-gray-300"
+                  className="border-stroke-soft-200"
                 />
               </TableHead>
             )}
             {columns.map((col) => (
               <TableHead
                 key={col.id}
-                className={cn('h-11 text-xs font-semibold text-gray-500', col.headerClassName)}
+                className={cn('h-11 text-xs font-semibold text-text-soft-400', col.headerClassName)}
               >
                 {col.header}
               </TableHead>
@@ -169,7 +169,7 @@ export function DataTable<T>({
             <TableRow className="hover:bg-white">
               <TableCell
                 colSpan={columns.length + (enableSelection ? 1 : 0)}
-                className="py-14 text-center text-sm text-gray-500"
+                className="py-14 text-center text-sm text-text-soft-400"
               >
                 {emptyState ?? null}
               </TableCell>
@@ -183,14 +183,14 @@ export function DataTable<T>({
                 <TableRow
                   key={String(id)}
                   data-state={isSelected ? 'selected' : undefined}
-                  className="border-gray-100 hover:bg-brand-50/40 data-[state=selected]:bg-brand-50/60 data-[state=selected]:text-gray-900"
+                  className="border-stroke-soft-200 hover:bg-primary-alpha-10/40 data-[state=selected]:bg-primary-alpha-10/60 data-[state=selected]:text-text-strong-950"
                 >
                   {enableSelection && (
                     <TableCell className="w-[44px] px-3">
                       <Checkbox
                         checked={isSelected}
                         onCheckedChange={(v) => toggleOne(id, Boolean(v))}
-                        className="border-gray-300"
+                        className="border-stroke-soft-200"
                       />
                     </TableCell>
                   )}
@@ -207,19 +207,19 @@ export function DataTable<T>({
       </Table>
 
       {enablePagination && (
-        <div className="flex flex-col gap-3 border-t border-gray-100 px-3 py-3 sm:flex-row sm:items-center sm:justify-between">
-          <div className="text-xs font-medium text-gray-500">{showingText}</div>
+        <div className="flex flex-col gap-3 border-t border-stroke-soft-200 px-3 py-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="text-xs font-medium text-text-soft-400">{showingText}</div>
 
           <div className="flex flex-wrap items-center justify-end gap-2">
             <div className="flex items-center gap-2">
-              <div className="text-xs font-medium text-gray-500">
+              <div className="text-xs font-medium text-text-soft-400">
                 {t('table.rowsPerPage')}
               </div>
               <Select value={String(pageSize)} onValueChange={(v) => setPageSize(Number(v))}>
-                <SelectTrigger className="h-8 w-[90px] rounded-lg border-gray-200 bg-white text-xs">
+                <SelectTrigger className="h-8 w-[90px] rounded-lg border-stroke-soft-200 bg-white text-xs">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent className="border-gray-200 bg-white text-gray-900">
+                <SelectContent className="border-stroke-soft-200 bg-white text-text-strong-950">
                   {pageSizeOptions.map((opt) => (
                     <SelectItem key={opt} value={String(opt)}>
                       {opt}
@@ -234,7 +234,7 @@ export function DataTable<T>({
                 type="button"
                 onClick={() => canPrev && setPage((p) => Math.max(1, p - 1))}
                 disabled={!canPrev}
-                className="h-8 rounded-lg border border-gray-200 bg-white px-3 text-xs font-semibold text-gray-700 transition-colors hover:bg-brand-50 hover:text-brand-900 disabled:cursor-not-allowed disabled:opacity-50"
+                className="h-8 rounded-lg border border-stroke-soft-200 bg-white px-3 text-xs font-semibold text-text-sub-600 transition-colors hover:bg-primary-alpha-10 hover:text-primary-base disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {t('table.previous')}
               </button>
@@ -251,8 +251,8 @@ export function DataTable<T>({
                       className={cn(
                         'h-8 w-8 rounded-lg border text-xs font-semibold transition-colors',
                         active
-                          ? 'border-brand-200 bg-brand-50 text-brand-900'
-                          : 'border-gray-200 bg-white text-gray-700 hover:bg-brand-50 hover:text-brand-900'
+                          ? 'border-primary-base/20 bg-primary-alpha-10 text-primary-base'
+                          : 'border-stroke-soft-200 bg-white text-text-sub-600 hover:bg-primary-alpha-10 hover:text-primary-base'
                       )}
                     >
                       {p}
@@ -265,7 +265,7 @@ export function DataTable<T>({
                 type="button"
                 onClick={() => canNext && setPage((p) => Math.min(totalPages, p + 1))}
                 disabled={!canNext}
-                className="h-8 rounded-lg border border-gray-200 bg-white px-3 text-xs font-semibold text-gray-700 transition-colors hover:bg-brand-50 hover:text-brand-900 disabled:cursor-not-allowed disabled:opacity-50"
+                className="h-8 rounded-lg border border-stroke-soft-200 bg-white px-3 text-xs font-semibold text-text-sub-600 transition-colors hover:bg-primary-alpha-10 hover:text-primary-base disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {t('table.next')}
               </button>

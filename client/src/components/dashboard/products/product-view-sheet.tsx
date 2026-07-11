@@ -45,17 +45,17 @@ export function ProductViewSheet({
   return (
     <SheetContent
       side="right"
-      className="flex h-full w-full flex-col gap-0 border-gray-200 bg-white p-0 sm:max-w-[1000px]"
+      className="flex h-full w-full flex-col gap-0 border-stroke-soft-200 bg-white p-0 sm:max-w-[1000px]"
     >
-      <SheetHeader className="border-b border-gray-100 px-6 py-4">
+      <SheetHeader className="border-b border-stroke-soft-200 px-6 py-4">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
-            <SheetTitle className="truncate text-lg font-semibold text-gray-900">
+            <SheetTitle className="truncate text-lg font-semibold text-text-strong-950">
               {product ? product.name : t.title}
             </SheetTitle>
-            <div className="mt-1 flex flex-wrap items-center gap-2 text-sm text-gray-600">
+            <div className="mt-1 flex flex-wrap items-center gap-2 text-sm text-text-sub-600">
               <span className="inline-flex items-center gap-2">
-                <Package className="h-4 w-4 text-gray-500" />
+                <Package className="h-4 w-4 text-text-soft-400" />
                 <span className="truncate">{product?.category ?? t.na}</span>
               </span>
               <span className="text-gray-300">•</span>
@@ -69,7 +69,7 @@ export function ProductViewSheet({
                 type="button"
                 variant="outline"
                 asChild
-                className="h-9 rounded-lg border-gray-200 bg-white text-gray-700 hover:bg-brand-50 hover:text-brand-900"
+                className="h-9 rounded-lg border-stroke-soft-200 bg-white text-text-sub-600 hover:bg-primary-alpha-10 hover:text-primary-base"
               >
                 <Link
                   href={storeProductPath(product.id)}
@@ -87,7 +87,7 @@ export function ProductViewSheet({
                 variant="outline"
                 disabled={!product}
                 title={product ? t.viewLivePageDisabled : undefined}
-                className="h-9 rounded-lg border-gray-200 bg-white text-gray-700 hover:bg-brand-50 hover:text-brand-900"
+                className="h-9 rounded-lg border-stroke-soft-200 bg-white text-text-sub-600 hover:bg-primary-alpha-10 hover:text-primary-base"
               >
                 <ArrowUpRight className="mr-2 h-4 w-4" />
                 {t.viewLivePage}
@@ -98,7 +98,7 @@ export function ProductViewSheet({
               variant="outline"
               onClick={() => product && onAddStock(product)}
               disabled={!product}
-              className="h-9 rounded-lg border-gray-200 bg-white text-gray-700 hover:bg-brand-50 hover:text-brand-900"
+              className="h-9 rounded-lg border-stroke-soft-200 bg-white text-text-sub-600 hover:bg-primary-alpha-10 hover:text-primary-base"
             >
               <Plus className="mr-2 h-4 w-4" />
               {t.addStock}
@@ -107,7 +107,7 @@ export function ProductViewSheet({
               type="button"
               variant="outline"
               onClick={onDownloadPdf}
-              className="h-9 rounded-lg border-gray-200 bg-white text-gray-700 hover:bg-brand-50 hover:text-brand-900"
+              className="h-9 rounded-lg border-stroke-soft-200 bg-white text-text-sub-600 hover:bg-primary-alpha-10 hover:text-primary-base"
             >
               <Download className="mr-2 h-4 w-4" />
               {t.downloadPdf}
@@ -121,7 +121,7 @@ export function ProductViewSheet({
           {isLoading ? (
             <SheetDetailSkeleton label={t.loading} />
           ) : !product ? (
-            <div className="rounded-2xl border border-dashed border-gray-200 bg-gray-50 p-6 text-sm text-gray-600">
+            <div className="rounded-2xl border border-dashed border-stroke-soft-200 bg-bg-weak-50 p-6 text-sm text-text-sub-600">
               {t.empty}
             </div>
           ) : (

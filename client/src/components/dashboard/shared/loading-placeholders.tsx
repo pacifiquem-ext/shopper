@@ -2,7 +2,7 @@ import { TurningZeroLoader, LoaderPanel } from '@/components/ui/turning-zero-loa
 import { cn } from '@/lib/utils'
 
 export function SkeletonBlock({ className }: { className?: string }) {
-  return <div className={cn('animate-pulse rounded-md bg-gray-100', className)} />
+  return <div className={cn('animate-pulse rounded-md bg-bg-weak-50', className)} />
 }
 
 export function SheetDetailSkeleton({ className, label }: { className?: string; label?: string }) {
@@ -17,7 +17,7 @@ export function InlineLoadingState({
   className?: string
 }) {
   return (
-    <div className={cn('flex items-center justify-center gap-2.5 py-10 text-sm text-gray-500', className)}>
+    <div className={cn('flex items-center justify-center gap-2.5 py-10 text-sm text-text-soft-400', className)}>
       <TurningZeroLoader size="sm" label={label} />
       <span>{label}</span>
     </div>

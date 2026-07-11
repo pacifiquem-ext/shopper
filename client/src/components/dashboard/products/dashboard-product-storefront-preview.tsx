@@ -37,8 +37,8 @@ export function DashboardProductStorefrontPreview({
   if (isIshushoCraftsTemplate(resolvedTemplate)) {
     const themeStyle = ishushoCraftsThemeStyle() as CSSProperties
     return (
-      <div className="overflow-hidden rounded-2xl border border-gray-200 shadow-sm">
-        <p className="border-b border-gray-100 bg-gray-50 px-4 py-2 text-xs font-medium text-gray-600">
+      <div className="overflow-hidden rounded-2xl border border-stroke-soft-200 shadow-sm">
+        <p className="border-b border-stroke-soft-200 bg-bg-weak-50 px-4 py-2 text-xs font-medium text-text-sub-600">
           {previewHint}
         </p>
         <div
@@ -64,8 +64,8 @@ export function DashboardProductStorefrontPreview({
   if (isVibrantMarketTemplate(resolvedTemplate)) {
     const themeStyle = vibrantMarketThemeStyle() as CSSProperties
     return (
-      <div className="overflow-hidden rounded-2xl border border-gray-200 shadow-sm">
-        <p className="border-b border-gray-100 bg-gray-50 px-4 py-2 text-xs font-medium text-gray-600">
+      <div className="overflow-hidden rounded-2xl border border-stroke-soft-200 shadow-sm">
+        <p className="border-b border-stroke-soft-200 bg-bg-weak-50 px-4 py-2 text-xs font-medium text-text-sub-600">
           {previewHint}
         </p>
         <div className="vm-storefront min-h-0 bg-[var(--vm-bg)] text-[var(--vm-ink)] antialiased" style={themeStyle}>
@@ -82,11 +82,11 @@ export function DashboardProductStorefrontPreview({
   }
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-gray-200 shadow-sm">
-      <p className="border-b border-gray-100 bg-gray-50 px-4 py-2 text-xs font-medium text-gray-600">
+    <div className="overflow-hidden rounded-2xl border border-stroke-soft-200 shadow-sm">
+      <p className="border-b border-stroke-soft-200 bg-bg-weak-50 px-4 py-2 text-xs font-medium text-text-sub-600">
         {previewHint}
       </p>
-      <div className="bg-[#F5F1EB] text-[#2B2B2B]">
+      <div className="bg-[#f7f7f7] text-[#171717]">
         <ProductDetailsTopBar
           theme="default"
           backLabel={backLabel}

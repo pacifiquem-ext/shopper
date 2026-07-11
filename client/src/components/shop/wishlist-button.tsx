@@ -94,8 +94,8 @@ export function WishlistButton({
 
   const baseClasses =
     variant === 'glass'
-      ? 'border border-[rgba(43,43,43,0.08)] bg-white/75 text-[#2B2B2B] backdrop-blur-md hover:border-[#B76E5D]/40 hover:bg-white shadow-[0_2px_6px_rgba(43,43,43,0.06)]'
-      : 'bg-[#2B2B2B] text-white hover:bg-[#2B2B2B]/90'
+      ? 'border border-stroke-soft-200 bg-bg-white-0/90 text-text-strong-950 shadow-regular-xs backdrop-blur-md hover:border-primary-base/30 hover:bg-bg-white-0'
+      : 'bg-bg-strong-950 text-static-white hover:bg-bg-surface-800'
 
   return (
     <button
@@ -113,8 +113,8 @@ export function WishlistButton({
       <span
         aria-hidden
         className={cn(
-          'pointer-events-none absolute inset-0 rounded-full ring-2 ring-[#B76E5D]/0 transition-all duration-500',
-          pulse ? 'scale-150 opacity-0 ring-[#B76E5D]/70' : 'scale-100 opacity-0',
+          'pointer-events-none absolute inset-0 rounded-full ring-2 ring-[#1daf61]/0 transition-all duration-500',
+          pulse ? 'scale-150 opacity-0 ring-[#1daf61]/70' : 'scale-100 opacity-0',
         )}
       />
       <Heart
@@ -122,8 +122,8 @@ export function WishlistButton({
         className={cn(
           'size-[18px] transition-all duration-300 ease-out',
           active
-            ? 'fill-[#B76E5D] text-[#B76E5D] scale-110'
-            : 'fill-transparent text-[#2B2B2B]',
+            ? 'fill-[#1daf61] text-[#1daf61] scale-110'
+            : 'fill-transparent text-[#171717]',
           pulse && 'animate-[os-heart-pop_520ms_cubic-bezier(0.2,0.8,0.2,1)_both]',
         )}
       />

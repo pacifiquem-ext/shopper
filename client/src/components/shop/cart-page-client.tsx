@@ -155,7 +155,7 @@ export function CartPageClient({
                 tokens.border,
                 tokens.surface,
                 tokens.ink,
-                theme === 'default' && 'shadow-[0_1px_2px_rgba(43,43,43,0.03)] hover:border-[#B76E5D]/40 hover:bg-white/85',
+                theme === 'default' && 'shadow-regular-xs hover:border-[#1daf61]/40 hover:bg-white/85',
                 theme === 'vibrant-market' && 'hover:border-[var(--vm-primary)]/40 hover:bg-[var(--vm-primary-light)]',
                 theme === 'ishusho-crafts' && 'hover:border-[var(--ic-secondary)]/30 hover:bg-[var(--ic-primary-light)] hover:text-[var(--ic-secondary)]',
               )}
@@ -170,7 +170,7 @@ export function CartPageClient({
                 tokens.border,
                 tokens.surface,
                 tokens.ink,
-                theme === 'default' && 'shadow-[0_1px_2px_rgba(43,43,43,0.03)]',
+                theme === 'default' && 'shadow-regular-xs',
               )}
             >
               <ShieldCheck className={cn('size-3.5', tokens.accentIcon)} aria-hidden />
@@ -218,7 +218,7 @@ export function CartPageClient({
                     tokens.border,
                     tokens.surface,
                     tokens.muted,
-                    theme === 'default' && 'hover:border-[#B76E5D]/30 hover:text-[#B76E5D]',
+                    theme === 'default' && 'hover:border-[#1daf61]/30 hover:text-[#1daf61]',
                     theme === 'vibrant-market' &&
                       'hover:border-[var(--vm-secondary)]/35 hover:text-[var(--vm-secondary)]',
                     theme === 'ishusho-crafts' && 'hover:border-[var(--ic-secondary)]/35 hover:text-[var(--ic-secondary)]',
@@ -279,7 +279,7 @@ export function CartPageClient({
                                 className={cn(
                                   'line-clamp-2 text-lg font-bold leading-tight tracking-tight transition-colors',
                                   tokens.ink,
-                                  theme === 'default' && 'hover:text-[#B76E5D]',
+                                  theme === 'default' && 'hover:text-[#1daf61]',
                                   theme === 'vibrant-market' && 'hover:text-[var(--vm-secondary)]',
                                   theme === 'ishusho-crafts' &&
                                     'font-[family-name:var(--font-ic-display)] font-semibold hover:text-[var(--ic-secondary)]',
@@ -320,7 +320,7 @@ export function CartPageClient({
                               className={cn(
                                 'inline-flex size-9 items-center justify-center rounded-full transition-colors',
                                 theme === 'default' &&
-                                  'bg-white/85 text-[#2B2B2B] shadow-[0_1px_2px_rgba(43,43,43,0.04)] hover:text-[#B76E5D]',
+                                  'bg-white/85 text-[#171717] shadow-regular-xs hover:text-[#1daf61]',
                                 theme === 'vibrant-market' &&
                                   'bg-[var(--vm-surface)] text-[var(--vm-ink)] hover:text-[var(--vm-secondary)]',
                                 theme === 'ishusho-crafts' &&
@@ -366,7 +366,7 @@ export function CartPageClient({
                                 tokens.border,
                                 tokens.surface,
                                 tokens.muted,
-                                theme === 'default' && 'hover:border-[#B76E5D]/30 hover:text-[#B76E5D]',
+                                theme === 'default' && 'hover:border-[#1daf61]/30 hover:text-[#1daf61]',
                                 theme === 'vibrant-market' &&
                                   'hover:border-[var(--vm-secondary)]/35 hover:text-[var(--vm-secondary)]',
                                 theme === 'ishusho-crafts' &&

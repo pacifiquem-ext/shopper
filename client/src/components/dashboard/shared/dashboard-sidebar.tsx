@@ -194,11 +194,14 @@ export function DashboardSidebar() {
           )}
           <Button.Root
             variant="neutral"
-            mode="ghost"
+            mode="stroke"
             size="small"
             type="button"
             onClick={handleLogout}
-            className={cn('w-full', isSidebarCollapsed && 'px-0')}
+            className={cn(
+              'w-full justify-start text-text-sub-600 hover:text-text-strong-950',
+              isSidebarCollapsed && 'justify-center px-0',
+            )}
           >
             <Button.Icon as={RiLogoutBoxRLine} />
             {!isSidebarCollapsed && <span>{t('sidebar.logout')}</span>}

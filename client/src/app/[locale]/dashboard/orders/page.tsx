@@ -430,7 +430,7 @@ export default function OrdersPage() {
         header: t('orders.table.order'),
         cell: (r) => <span className="font-medium">{r.id}</span>,
       },
-      { id: 'date', header: t('orders.table.date'), cell: (r) => r.date, className: 'text-gray-600' },
+      { id: 'date', header: t('orders.table.date'), cell: (r) => r.date, className: 'text-text-sub-600' },
       { id: 'customer', header: t('orders.table.customer'), cell: (r) => r.customer },
       {
         id: 'payment',
@@ -445,14 +445,14 @@ export default function OrdersPage() {
           />
         ),
       },
-      { id: 'total', header: t('orders.table.total'), cell: (r) => r.total, className: 'text-gray-600' },
+      { id: 'total', header: t('orders.table.total'), cell: (r) => r.total, className: 'text-text-sub-600' },
       {
         id: 'delivery',
         header: t('orders.table.delivery'),
         cell: (r) => r.delivery,
-        className: 'text-gray-600',
+        className: 'text-text-sub-600',
       },
-      { id: 'items', header: t('orders.table.items'), cell: (r) => r.items, className: 'text-gray-600' },
+      { id: 'items', header: t('orders.table.items'), cell: (r) => r.items, className: 'text-text-sub-600' },
       {
         id: 'fulfillment',
         header: t('orders.table.fulfillment'),
@@ -475,34 +475,34 @@ export default function OrdersPage() {
               <button
                 type="button"
                 aria-label={t('orders.table.moreAria')}
-                className="flex h-8 w-8 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-700 shadow-xs transition-colors hover:bg-brand-50 hover:text-brand-900"
+                className="flex h-8 w-8 items-center justify-center rounded-lg border border-stroke-soft-200 bg-white text-text-sub-600 shadow-xs transition-colors hover:bg-primary-alpha-10 hover:text-primary-base"
               >
                 <MoreHorizontal className="h-4 w-4" />
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent
               align="end"
-              className="border-gray-200 bg-white text-gray-900 shadow-md"
+              className="border-stroke-soft-200 bg-white text-text-strong-950 shadow-md"
             >
               <DropdownMenuItem
                 onSelect={() => openView(r.id)}
-                className="cursor-pointer rounded-md focus:bg-brand-50 focus:text-brand-900"
+                className="cursor-pointer rounded-md focus:bg-primary-alpha-10 focus:text-primary-base"
               >
-                <Eye className="h-4 w-4 text-gray-600" />
+                <Eye className="h-4 w-4 text-text-sub-600" />
                 <span>{t('orders.table.view')}</span>
               </DropdownMenuItem>
               <DropdownMenuItem
                 onSelect={() => openCommunication(r.id)}
-                className="cursor-pointer rounded-md focus:bg-brand-50 focus:text-brand-900"
+                className="cursor-pointer rounded-md focus:bg-primary-alpha-10 focus:text-primary-base"
               >
-                <User className="h-4 w-4 text-gray-600" />
+                <User className="h-4 w-4 text-text-sub-600" />
                 <span>Communication</span>
               </DropdownMenuItem>
               <DropdownMenuItem
                 onSelect={() => openPaymentModal(r.id)}
-                className="cursor-pointer rounded-md focus:bg-brand-50 focus:text-brand-900"
+                className="cursor-pointer rounded-md focus:bg-primary-alpha-10 focus:text-primary-base"
               >
-                <Package className="h-4 w-4 text-gray-600" />
+                <Package className="h-4 w-4 text-text-sub-600" />
                 <span>Confirm Payment</span>
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -532,23 +532,23 @@ export default function OrdersPage() {
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="flex flex-col gap-2">
-          <div className="text-xl font-semibold leading-9 text-gray-900">{t('nav.orders')}</div>
+          <div className="text-xl font-semibold leading-9 text-text-strong-950">{t('nav.orders')}</div>
 
           <Popover>
             <PopoverTrigger asChild>
               <button
                 type="button"
-                className="inline-flex h-9 w-fit items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 text-sm font-medium text-gray-700 shadow-sm transition-colors hover:bg-brand-50 hover:text-brand-900"
+                className="inline-flex h-9 w-fit items-center gap-2 rounded-lg border border-stroke-soft-200 bg-white px-3 text-sm font-medium text-text-sub-600 shadow-sm transition-colors hover:bg-primary-alpha-10 hover:text-primary-base"
               >
                 <span>{dateRangeLabel}</span>
-                <ChevronDown className="h-4 w-4 text-gray-500" />
+                <ChevronDown className="h-4 w-4 text-text-soft-400" />
               </button>
             </PopoverTrigger>
             <PopoverContent
               align="start"
-              className="w-[360px] border-gray-200 bg-white p-3 text-gray-900 shadow-md"
+              className="w-[360px] border-stroke-soft-200 bg-white p-3 text-text-strong-950 shadow-md"
             >
-              <div className="text-xs font-semibold text-gray-600">{t('orders.dateRange')}</div>
+              <div className="text-xs font-semibold text-text-sub-600">{t('orders.dateRange')}</div>
               <div className="mt-2">
                 <Calendar mode="range" numberOfMonths={1} selected={range} onSelect={setRange} />
               </div>
@@ -561,12 +561,12 @@ export default function OrdersPage() {
             fetchBlob={() => ordersService.exportCsv()}
             filename="orders.csv"
             label={t('orders.export')}
-            className="h-9 rounded-lg border-gray-200 bg-white text-gray-700 hover:bg-brand-50 hover:text-brand-900"
+            className="h-9 rounded-lg border-stroke-soft-200 bg-white text-text-sub-600 hover:bg-primary-alpha-10 hover:text-primary-base"
           />
           <Button
             type="button"
             variant="outline"
-            className="h-9 rounded-lg border-gray-200 bg-white text-gray-700 hover:bg-brand-50 hover:text-brand-900"
+            className="h-9 rounded-lg border-stroke-soft-200 bg-white text-text-sub-600 hover:bg-primary-alpha-10 hover:text-primary-base"
           >
             {t('orders.moreActions')}
             <ChevronDown className="h-4 w-4" />
@@ -601,10 +601,10 @@ export default function OrdersPage() {
         />
       </div>
 
-      <div className="rounded-2xl border border-gray-200 bg-white shadow-sm">
-        <div className="flex flex-col gap-3 border-b border-gray-200 p-4 lg:flex-row lg:items-center lg:justify-between">
+      <div className="rounded-2xl border border-stroke-soft-200 bg-bg-white-0 shadow-regular-xs">
+        <div className="flex flex-col gap-3 border-b border-stroke-soft-200 p-4 lg:flex-row lg:items-center lg:justify-between">
           <Tabs value={tab} onValueChange={(v) => setTab(v as OrdersTab)}>
-            <TabsList className="h-9 rounded-lg bg-gray-50 p-1">
+            <TabsList className="h-9 rounded-lg bg-bg-weak-50 p-1">
               <TabsTrigger value="all" className="rounded-md text-sm">
                 {t('orders.tabs.all')}
               </TabsTrigger>
@@ -622,7 +622,7 @@ export default function OrdersPage() {
               </TabsTrigger>
               <button
                 type="button"
-                className="ml-1 inline-flex h-7 items-center rounded-md px-2 text-sm font-medium text-gray-600 transition-colors hover:bg-brand-50 hover:text-brand-900"
+                className="ml-1 inline-flex h-7 items-center rounded-md px-2 text-sm font-medium text-text-sub-600 transition-colors hover:bg-primary-alpha-10 hover:text-primary-base"
               >
                 + {t('orders.tabs.add')}
               </button>
@@ -636,15 +636,15 @@ export default function OrdersPage() {
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder={t('orders.searchPlaceholder')}
-                className="h-9 rounded-lg border-brand-200 bg-gray-50 pr-3 pl-9"
+                className="h-9 rounded-lg border-primary-base/20 bg-bg-weak-50 pr-3 pl-9"
               />
             </div>
             <button
               type="button"
               aria-label={t('orders.table.filterAria')}
               className={cn(
-                'flex h-9 w-9 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-700 shadow-xs transition-colors',
-                'hover:bg-brand-50 hover:text-brand-900'
+                'flex h-9 w-9 items-center justify-center rounded-lg border border-stroke-soft-200 bg-white text-text-sub-600 shadow-xs transition-colors',
+                'hover:bg-primary-alpha-10 hover:text-primary-base'
               )}
             >
               <Filter className="h-4 w-4" />
@@ -653,8 +653,8 @@ export default function OrdersPage() {
               type="button"
               aria-label={t('orders.table.columnsAria')}
               className={cn(
-                'flex h-9 w-9 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-700 shadow-xs transition-colors',
-                'hover:bg-brand-50 hover:text-brand-900'
+                'flex h-9 w-9 items-center justify-center rounded-lg border border-stroke-soft-200 bg-white text-text-sub-600 shadow-xs transition-colors',
+                'hover:bg-primary-alpha-10 hover:text-primary-base'
               )}
             >
               <Columns3 className="h-4 w-4" />

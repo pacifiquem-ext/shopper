@@ -116,17 +116,17 @@ export default function DeliverySettingsPage() {
     <div className="flex w-full max-w-6xl flex-col gap-6">
       <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-start">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-gray-900">
+          <h1 className="text-3xl font-bold tracking-tight text-text-strong-950">
             {t('nav.deliverySettings')}
           </h1>
-          <p className="mt-2 text-gray-500">Configure delivery zones manually.</p>
+          <p className="mt-2 text-text-soft-400">Configure delivery zones manually.</p>
         </div>
         <div className="flex gap-3">
           <Button
             type="button"
             onClick={addZone}
             variant="outline"
-            className="h-10 rounded-lg border-gray-200 bg-white text-gray-700 hover:bg-brand-50 hover:text-brand-900"
+            className="h-10 rounded-lg border-stroke-soft-200 bg-white text-text-sub-600 hover:bg-primary-alpha-10 hover:text-primary-base"
           >
             <Plus className="mr-2 h-4 w-4" />
             Add Zone
@@ -135,7 +135,7 @@ export default function DeliverySettingsPage() {
             type="button"
             onClick={handleSave}
             disabled={isSaving || isLoading}
-            className="h-10 rounded-lg bg-brand-900 px-6 text-white hover:bg-brand-800 disabled:opacity-50"
+            className="h-10 rounded-lg bg-primary-base px-6 text-white hover:bg-primary-darker disabled:opacity-50"
           >
             <Save className="mr-2 h-4 w-4" />
             {isSaving ? 'Saving...' : 'Save Changes'}
@@ -143,7 +143,7 @@ export default function DeliverySettingsPage() {
         </div>
       </div>
 
-      <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+      <div className="rounded-2xl border border-stroke-soft-200 bg-white p-6 shadow-sm">
         {isLoading ? (
           <div className="flex min-h-[300px] items-center justify-center">
             <TurningZeroLoader size="md" />
@@ -151,11 +151,11 @@ export default function DeliverySettingsPage() {
         ) : (
           <div className="space-y-4">
             {zones.map((zone, index) => (
-              <div key={zone.id} className="rounded-xl border border-gray-200 bg-gray-50 p-4">
+              <div key={zone.id} className="rounded-xl border border-stroke-soft-200 bg-bg-weak-50 p-4">
                 <div className="mb-3 flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <Truck className="h-5 w-5 text-brand-900" />
-                    <span className="text-sm font-semibold text-gray-700">
+                    <Truck className="h-5 w-5 text-primary-base" />
+                    <span className="text-sm font-semibold text-text-sub-600">
                       Zone {index + 1}
                       {zone.id.startsWith('temp_') && (
                         <span className="ml-2 rounded-full bg-amber-100 px-2 py-0.5 text-xs text-amber-700">
@@ -179,17 +179,17 @@ export default function DeliverySettingsPage() {
 
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
                   <div className="space-y-2">
-                    <Label className="text-xs font-semibold text-gray-600">Zone Name</Label>
+                    <Label className="text-xs font-semibold text-text-sub-600">Zone Name</Label>
                     <Input
                       value={zone.name}
                       onChange={(e) => updateZone(zone.id, 'name', e.target.value)}
                       placeholder="e.g., Kigali City Center"
-                      className="rounded-lg border-gray-200 bg-white"
+                      className="rounded-lg border-stroke-soft-200 bg-white"
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <Label className="text-xs font-semibold text-gray-600">
+                    <Label className="text-xs font-semibold text-text-sub-600">
                       Delivery Fee (RWF)
                     </Label>
                     <Input
@@ -197,18 +197,18 @@ export default function DeliverySettingsPage() {
                       value={zone.feeRwf}
                       onChange={(e) => updateZone(zone.id, 'feeRwf', Number(e.target.value))}
                       placeholder="2000"
-                      className="rounded-lg border-gray-200 bg-white"
+                      className="rounded-lg border-stroke-soft-200 bg-white"
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <Label className="text-xs font-semibold text-gray-600">ETA (Minutes)</Label>
+                    <Label className="text-xs font-semibold text-text-sub-600">ETA (Minutes)</Label>
                     <Input
                       type="number"
                       value={zone.etaMinutes}
                       onChange={(e) => updateZone(zone.id, 'etaMinutes', Number(e.target.value))}
                       placeholder="30"
-                      className="rounded-lg border-gray-200 bg-white"
+                      className="rounded-lg border-stroke-soft-200 bg-white"
                     />
                   </div>
                 </div>
@@ -216,20 +216,20 @@ export default function DeliverySettingsPage() {
             ))}
 
             {zones.length === 0 && (
-              <div className="flex min-h-[300px] items-center justify-center rounded-xl border-2 border-dashed border-gray-200 bg-gray-50">
+              <div className="flex min-h-[300px] items-center justify-center rounded-xl border-2 border-dashed border-stroke-soft-200 bg-bg-weak-50">
                 <div className="text-center">
                   <Truck className="mx-auto h-12 w-12 text-gray-400" />
-                  <p className="mt-2 text-sm font-medium text-gray-600">
+                  <p className="mt-2 text-sm font-medium text-text-sub-600">
                     No delivery zones configured
                   </p>
-                  <p className="mt-1 text-xs text-gray-500">
+                  <p className="mt-1 text-xs text-text-soft-400">
                     Click &quot;Add Zone&quot; to create your first delivery zone
                   </p>
                   <Button
                     type="button"
                     onClick={addZone}
                     variant="outline"
-                    className="mt-4 h-9 rounded-lg border-gray-200 text-gray-700 hover:bg-brand-50 hover:text-brand-900"
+                    className="mt-4 h-9 rounded-lg border-stroke-soft-200 text-text-sub-600 hover:bg-primary-alpha-10 hover:text-primary-base"
                   >
                     <Plus className="mr-2 h-4 w-4" />
                     Add First Zone

@@ -64,7 +64,7 @@ export function StepSubdomain() {
                   ? 'border-red-400 focus-within:border-red-400'
                   : availability === 'available'
                     ? 'border-emerald-500 focus-within:border-emerald-500'
-                    : 'focus-within:border-brand-600 border-gray-300',
+                    : 'focus-within:border-primary-base border-stroke-soft-200',
             )}
           >
             <input

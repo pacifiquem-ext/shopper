@@ -1,5 +1,6 @@
 import { api } from '@/lib/axios'
 import type { ApiResponse } from '@onlineshop/shared'
+import { getPublicApiBaseUrl } from '@/lib/api-base-url'
 
 export interface UpdateDraftDto {
   draftData: Record<string, any>
@@ -59,7 +60,7 @@ export const storeOnboardingService = {
   async checkSubdomain(
     subdomain: string,
   ): Promise<ApiResponse<{ available: boolean; message: string }>> {
-    const base = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/v1').replace(
+    const base = (getPublicApiBaseUrl()).replace(
       /\/+$/,
       '',
     )

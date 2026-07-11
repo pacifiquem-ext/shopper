@@ -106,7 +106,7 @@ export function StepIndustry() {
               <button
                 type="button"
                 className={cn(
-                  'focus:border-brand-500 focus:ring-brand-500 flex h-14 w-full items-center justify-between rounded-xl border border-gray-200 bg-white px-4 text-base text-gray-900 shadow-sm outline-hidden focus:ring-2 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50',
+                  'focus:border-primary-base focus:ring-primary-base flex h-14 w-full items-center justify-between rounded-xl border border-stroke-soft-200 bg-white px-4 text-base text-text-strong-950 shadow-sm outline-hidden focus:ring-2 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50',
                   indError && 'border-red-500 focus:border-red-500 focus:ring-red-500'
                 )}
               >
@@ -126,14 +126,14 @@ export function StepIndustry() {
               </button>
             </PopoverTrigger>
             <PopoverContent
-              className="z-100 max-h-80 w-(--radix-popover-trigger-width) rounded-xl border border-gray-200 bg-white p-0 shadow-xl"
+              className="z-100 max-h-80 w-(--radix-popover-trigger-width) rounded-xl border border-stroke-soft-200 bg-white p-0 shadow-xl"
               align="start"
               sideOffset={4}
             >
               <Command className="w-full bg-transparent">
                 <CommandInput
                   placeholder="Search sectors..."
-                  className="h-12 border-none text-gray-900 ring-0 outline-hidden placeholder:text-gray-500"
+                  className="h-12 border-none text-text-strong-950 ring-0 outline-hidden placeholder:text-gray-500"
                 />
                 <CommandList className="max-h-60 overflow-y-auto p-1">
                   <CommandEmpty className="p-4 text-center text-sm text-gray-500">
@@ -149,11 +149,11 @@ export function StepIndustry() {
                           setBusinessCategoryId('') // Reset category when industry changes
                           setOpenInd(false)
                         }}
-                        className="data-[selected=true]:bg-brand-50 data-[selected=true]:text-brand-900 cursor-pointer rounded-lg px-2 py-3 text-base text-gray-900 transition-colors"
+                        className="data-[selected=true]:bg-primary-alpha-10 data-[selected=true]:text-primary-base cursor-pointer rounded-lg px-2 py-3 text-base text-text-strong-950 transition-colors"
                       >
                         <Check
                           className={cn(
-                            'text-brand-600 mr-2 h-4 w-4 shrink-0',
+                            'text-primary-base mr-2 h-4 w-4 shrink-0',
                             draft.industrySectorId === ind.id ? 'opacity-100' : 'opacity-0'
                           )}
                         />
@@ -180,7 +180,7 @@ export function StepIndustry() {
                 <button
                   type="button"
                   className={cn(
-                    'focus:border-brand-500 focus:ring-brand-500 flex h-14 w-full items-center justify-between rounded-xl border border-gray-200 bg-white px-4 text-base text-gray-900 shadow-sm outline-hidden focus:ring-2 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50',
+                    'focus:border-primary-base focus:ring-primary-base flex h-14 w-full items-center justify-between rounded-xl border border-stroke-soft-200 bg-white px-4 text-base text-text-strong-950 shadow-sm outline-hidden focus:ring-2 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50',
                     catError && 'border-red-500 focus:border-red-500 focus:ring-red-500'
                   )}
                 >
@@ -204,14 +204,14 @@ export function StepIndustry() {
                 </button>
               </PopoverTrigger>
               <PopoverContent
-                className="z-100 max-h-80 w-(--radix-popover-trigger-width) rounded-xl border border-gray-200 bg-white p-0 shadow-xl"
+                className="z-100 max-h-80 w-(--radix-popover-trigger-width) rounded-xl border border-stroke-soft-200 bg-white p-0 shadow-xl"
                 align="start"
                 sideOffset={4}
               >
                 <Command className="w-full bg-transparent">
                   <CommandInput
                     placeholder="Search categories..."
-                    className="h-12 border-none text-gray-900 ring-0 outline-hidden placeholder:text-gray-500"
+                    className="h-12 border-none text-text-strong-950 ring-0 outline-hidden placeholder:text-gray-500"
                   />
                   <CommandList className="max-h-60 overflow-y-auto p-1">
                     <CommandEmpty className="p-4 text-center text-sm text-gray-500">
@@ -226,11 +226,11 @@ export function StepIndustry() {
                             setBusinessCategoryId(cat.id)
                             setOpenCat(false)
                           }}
-                          className="data-[selected=true]:bg-brand-50 data-[selected=true]:text-brand-900 cursor-pointer rounded-lg px-2 py-3 text-base text-gray-900 transition-colors"
+                          className="data-[selected=true]:bg-primary-alpha-10 data-[selected=true]:text-primary-base cursor-pointer rounded-lg px-2 py-3 text-base text-text-strong-950 transition-colors"
                         >
                           <Check
                             className={cn(
-                              'text-brand-600 mr-2 h-4 w-4 shrink-0',
+                              'text-primary-base mr-2 h-4 w-4 shrink-0',
                               draft.businessCategoryId === cat.id ? 'opacity-100' : 'opacity-0'
                             )}
                           />

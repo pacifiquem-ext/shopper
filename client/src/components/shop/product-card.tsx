@@ -69,7 +69,7 @@ function ProductCardMedia({
 }) {
   return (
     <>
-      <div className='relative aspect-[4/5] w-full overflow-hidden bg-[#EAE4DC]'>
+      <div className='relative aspect-[4/5] w-full overflow-hidden bg-[#ebebeb]'>
         {img ? (
           <img
             src={img}
@@ -78,7 +78,7 @@ function ProductCardMedia({
             className='size-full object-cover transition-transform duration-500 group-hover/card:scale-[1.04]'
           />
         ) : (
-          <div className='flex size-full items-center justify-center text-[#6E6A66]'>
+          <div className='flex size-full items-center justify-center text-[#5c5c5c]'>
             <Package className='size-12' aria-hidden strokeWidth={1.25} />
           </div>
         )}
@@ -86,13 +86,13 @@ function ProductCardMedia({
         <div className='pointer-events-none absolute left-3 top-3 flex items-center gap-2'>
           {off != null && labels.discountBadge ? (
             <span
-              className='inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-semibold tracking-tight text-white shadow-[0_4px_12px_rgba(43,43,43,0.18)]'
+              className='inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-semibold tracking-tight text-white shadow-regular-xs'
               style={{ backgroundColor: accentColor }}
             >
               {labels.discountBadge}
             </span>
           ) : showNew ? (
-            <span className='inline-flex items-center gap-1.5 rounded-full border border-[rgba(43,43,43,0.08)] bg-white/90 px-2.5 py-1 text-[11px] font-semibold tracking-tight text-[#2B2B2B] shadow-sm'>
+            <span className='inline-flex items-center gap-1.5 rounded-full border border-stroke-soft-200 bg-bg-white-0/95 px-2.5 py-1 text-[11px] font-semibold tracking-tight text-text-strong-950 shadow-regular-xs'>
               <span aria-hidden className='size-1.5 rounded-full' style={{ backgroundColor: accentColor }} />
               {labels.newBadge}
             </span>
@@ -100,15 +100,15 @@ function ProductCardMedia({
         </div>
       </div>
 
-      <div className='flex items-center justify-between gap-2 border-t border-[rgba(43,43,43,0.06)] bg-[#F5F1EB] px-3 py-2'>
+      <div className='flex items-center justify-between gap-2 border-t border-stroke-soft-200 bg-bg-weak-50 px-3 py-2'>
         <div className='min-w-0 flex-1'>
-          <p className='truncate text-[10px] font-medium uppercase tracking-[0.12em] text-[#6E6A66]'>
+          <p className='truncate text-[10px] font-medium uppercase tracking-[0.12em] text-text-sub-600'>
             {labels.storeLabel}
           </p>
-          <p className='truncate text-xs font-semibold text-[#2B2B2B]'>{product.store.displayName}</p>
+          <p className='truncate text-xs font-semibold text-text-strong-950'>{product.store.displayName}</p>
         </div>
         {product.deliveryEnabled ? (
-          <span className='inline-flex shrink-0 items-center gap-1 rounded-full border border-[rgba(43,43,43,0.08)] bg-white px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.08em] text-[#2B2B2B]'>
+          <span className='inline-flex shrink-0 items-center gap-1 rounded-full border border-stroke-soft-200 bg-bg-white-0 px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.08em] text-text-strong-950'>
             <Truck className='size-3' style={{ color: accentColor }} aria-hidden strokeWidth={2.5} />
             {labels.deliveryAvailable}
           </span>
@@ -122,7 +122,7 @@ export function ProductCard({
   product,
   labels,
   className,
-  ratingColor = '#B76E5D',
+  ratingColor = '#1daf61',
   onOpenQuickView,
 }: ProductCardProps) {
   const img = product.primaryImage ?? product.images[0]
@@ -139,12 +139,12 @@ export function ProductCard({
   const openSheet = onOpenQuickView ? () => onOpenQuickView(product, labels) : undefined
   const hasVariantOptions = product.variants.length > 1
   const mediaClass =
-    'relative mx-1.5 block overflow-hidden rounded-xl bg-[#EAE4DC] text-left ring-offset-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B76E5D]/50 sm:mx-2 sm:rounded-[1.25rem]'
+    'relative mx-1.5 block overflow-hidden rounded-xl bg-[#ebebeb] text-left ring-offset-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1daf61]/50 sm:mx-2 sm:rounded-[1.25rem]'
 
   return (
     <article
       className={cn(
-        'group/card relative isolate flex h-full flex-col overflow-hidden rounded-2xl border border-[rgba(43,43,43,0.08)] bg-white/60 shadow-[0_1px_2px_rgba(43,43,43,0.03),0_8px_24px_rgba(43,43,43,0.05)] backdrop-blur-md transition-all duration-500 ease-out hover:-translate-y-1.5 hover:shadow-[0_2px_4px_rgba(43,43,43,0.04),0_24px_48px_rgba(43,43,43,0.10)] sm:rounded-[1.6rem]',
+        'group/card relative isolate flex h-full flex-col overflow-hidden rounded-20 border border-stroke-soft-200 bg-bg-white-0 shadow-soft-card transition-all duration-300 ease-out hover:-translate-y-0.5 hover:shadow-soft-card-hover sm:rounded-[1.25rem]',
         className,
       )}
     >
@@ -197,9 +197,9 @@ export function ProductCard({
           <span
             className={cn(
               'inline-flex shrink-0 items-center whitespace-nowrap rounded-full border px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] tabular-nums',
-              stockPill.tone === 'sold' && 'border-[rgba(43,43,43,0.12)] bg-[#EAE4DC] text-[#6E6A66]',
-              stockPill.tone === 'low' && 'border-[rgba(43,43,43,0.12)] bg-[#EAE4DC] text-[#6E6A66]',
-              stockPill.tone === 'ok' && 'border-[rgba(43,43,43,0.08)] bg-[#EAE4DC]/70 text-[#6E6A66]',
+              stockPill.tone === 'sold' && 'border-stroke-soft-200 bg-bg-weak-50 text-text-sub-600',
+              stockPill.tone === 'low' && 'border-stroke-soft-200 bg-bg-weak-50 text-text-sub-600',
+              stockPill.tone === 'ok' && 'border-stroke-soft-200 bg-bg-weak-50/80 text-text-sub-600',
             )}
           >
             {stockPill.text}
@@ -207,18 +207,18 @@ export function ProductCard({
         </div>
 
         <div className='space-y-1'>
-          <p className='text-[10px] font-semibold uppercase tracking-[0.14em] text-[#6E6A66]'>
+          <p className='text-[10px] font-semibold uppercase tracking-[0.14em] text-[#5c5c5c]'>
             {product.category}
           </p>
           {onOpenQuickView ? (
             <button type='button' onClick={openSheet} className='block w-full text-left'>
-              <h3 className='line-clamp-2 text-[15px] font-semibold leading-tight tracking-tight text-[#2B2B2B] transition-colors duration-300 group-hover/card:text-[#B76E5D]'>
+              <h3 className='line-clamp-2 text-[15px] font-semibold leading-tight tracking-tight text-[#171717] transition-colors duration-300 group-hover/card:text-[#1daf61]'>
                 {product.name}
               </h3>
             </button>
           ) : (
             <Link href={`/shop/${product.id}`} prefetch={false} className='block'>
-              <h3 className='line-clamp-2 text-[15px] font-semibold leading-tight tracking-tight text-[#2B2B2B] transition-colors duration-300 group-hover/card:text-[#B76E5D]'>
+              <h3 className='line-clamp-2 text-[15px] font-semibold leading-tight tracking-tight text-[#171717] transition-colors duration-300 group-hover/card:text-[#1daf61]'>
                 {product.name}
               </h3>
             </Link>
@@ -229,14 +229,14 @@ export function ProductCard({
           <div className='min-w-0'>
             {hasPrice && product.priceFrom != null ? (
               <div className='flex items-baseline gap-2'>
-                <p className='text-lg font-bold leading-none tracking-tight tabular-nums text-[#2B2B2B]'>
+                <p className='text-lg font-bold leading-none tracking-tight tabular-nums text-[#171717]'>
                   {formatRwf(product.priceFrom)}
-                  <span className='ml-1 text-[10px] font-semibold uppercase tracking-[0.1em] text-[#6E6A66]'>
+                  <span className='ml-1 text-[10px] font-semibold uppercase tracking-[0.1em] text-[#5c5c5c]'>
                     RWF
                   </span>
                 </p>
                 {product.compareAtFrom && product.compareAtFrom > product.priceFrom ? (
-                  <p className='text-xs font-medium tabular-nums text-[#6E6A66] line-through'>
+                  <p className='text-xs font-medium tabular-nums text-[#5c5c5c] line-through'>
                     {formatRwf(product.compareAtFrom)}
                   </p>
                 ) : null}
@@ -255,7 +255,7 @@ export function ProductCard({
                   event.stopPropagation()
                   openSheet?.()
                 }}
-                className='inline-flex h-10 shrink-0 items-center gap-1.5 self-end rounded-full bg-[#B76E5D] px-3 text-[11px] font-semibold text-white shadow-[0_6px_18px_rgba(43,43,43,0.18)] transition-colors hover:bg-[#A66250] active:scale-[0.96] sm:h-11 sm:px-4 sm:text-xs'
+                className='inline-flex h-10 shrink-0 items-center gap-1.5 self-end rounded-full bg-primary-base px-3 text-[11px] font-semibold text-static-white shadow-regular-xs transition-colors hover:bg-primary-darker active:scale-[0.98] sm:h-11 sm:px-4 sm:text-xs'
               >
                 <ShoppingBag className='size-4 shrink-0' aria-hidden strokeWidth={2} />
                 <span>{labels.addToCartAria}</span>
@@ -266,7 +266,7 @@ export function ProductCard({
                 prefetch={false}
                 aria-label={labels.addToCartAria}
                 title={labels.addToCartAria}
-                className='inline-flex h-10 shrink-0 items-center gap-1.5 self-end rounded-full bg-[#B76E5D] px-3 text-[11px] font-semibold text-white shadow-[0_6px_18px_rgba(43,43,43,0.18)] transition-colors hover:bg-[#A66250] active:scale-[0.96] sm:h-11 sm:px-4 sm:text-xs'
+                className='inline-flex h-10 shrink-0 items-center gap-1.5 self-end rounded-full bg-primary-base px-3 text-[11px] font-semibold text-static-white shadow-regular-xs transition-colors hover:bg-primary-darker active:scale-[0.98] sm:h-11 sm:px-4 sm:text-xs'
               >
                 <ShoppingBag className='size-4 shrink-0' aria-hidden strokeWidth={2} />
                 <span>{labels.addToCartAria}</span>

@@ -51,10 +51,10 @@ export function OrderConversation({
   }
 
   return (
-    <div className="rounded-2xl border border-gray-200 bg-white">
-      <div className="border-b border-gray-200 p-5">
-        <h3 className="text-sm font-semibold text-gray-900">{title}</h3>
-        <p className="mt-0.5 text-xs font-medium text-gray-500">
+    <div className="rounded-2xl border border-stroke-soft-200 bg-white">
+      <div className="border-b border-stroke-soft-200 p-5">
+        <h3 className="text-sm font-semibold text-text-strong-950">{title}</h3>
+        <p className="mt-0.5 text-xs font-medium text-text-soft-400">
           Communicate with {customerName} about order {orderId}
         </p>
       </div>
@@ -64,10 +64,10 @@ export function OrderConversation({
           {messages.length === 0 ? (
             <div className="flex h-[300px] items-center justify-center">
               <div className="text-center">
-                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-gray-100">
+                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-bg-weak-50">
                   <Send className="h-6 w-6 text-gray-400" />
                 </div>
-                <p className="mt-3 text-sm font-medium text-gray-500">{emptyStateText}</p>
+                <p className="mt-3 text-sm font-medium text-text-soft-400">{emptyStateText}</p>
               </div>
             </div>
           ) : (
@@ -83,8 +83,8 @@ export function OrderConversation({
                   className={cn(
                     'flex h-8 w-8 shrink-0 items-center justify-center rounded-full',
                     msg.sender === 'admin'
-                      ? 'bg-brand-100 text-brand-700'
-                      : 'bg-gray-100 text-gray-700'
+                      ? 'bg-primary-alpha-10 text-primary-darker'
+                      : 'bg-bg-weak-50 text-text-sub-600'
                   )}
                 >
                   {msg.sender === 'admin' ? (
@@ -101,17 +101,17 @@ export function OrderConversation({
                   )}
                 >
                   <div className="flex items-center gap-2">
-                    <span className="text-xs font-semibold text-gray-900">
+                    <span className="text-xs font-semibold text-text-strong-950">
                       {msg.senderName}
                     </span>
-                    <span className="text-xs text-gray-500">{msg.timestamp}</span>
+                    <span className="text-xs text-text-soft-400">{msg.timestamp}</span>
                   </div>
                   <div
                     className={cn(
                       'rounded-2xl px-4 py-2.5 text-sm',
                       msg.sender === 'admin'
-                        ? 'bg-brand-600 text-white'
-                        : 'bg-gray-100 text-gray-900'
+                        ? 'bg-primary-base text-white'
+                        : 'bg-bg-weak-50 text-text-strong-950'
                     )}
                   >
                     {msg.message}
@@ -123,26 +123,26 @@ export function OrderConversation({
         </div>
       </ScrollArea>
 
-      <div className="border-t border-gray-200 p-4">
+      <div className="border-t border-stroke-soft-200 p-4">
         <div className="flex gap-2">
           <Textarea
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder={placeholder}
-            className="min-h-[80px] resize-none rounded-xl border-gray-200 bg-white text-sm focus-visible:ring-brand-600"
+            className="min-h-[80px] resize-none rounded-xl border-stroke-soft-200 bg-white text-sm focus-visible:ring-primary-base"
           />
           <Button
             type="button"
             onClick={handleSend}
             disabled={!newMessage.trim()}
-            className="h-auto shrink-0 rounded-xl bg-brand-600 px-4 text-white hover:bg-brand-700 disabled:opacity-50"
+            className="h-auto shrink-0 rounded-xl bg-primary-base px-4 text-white hover:bg-primary-darker disabled:opacity-50"
           >
             <Send className="h-4 w-4" />
             <span className="sr-only">{sendLabel}</span>
           </Button>
         </div>
-        <p className="mt-2 text-xs text-gray-500">
+        <p className="mt-2 text-xs text-text-soft-400">
           Press Enter to send, Shift+Enter for new line
         </p>
       </div>

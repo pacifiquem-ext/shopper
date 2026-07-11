@@ -178,8 +178,9 @@
   --color-text-sub-600: #5c5c5c;
   --color-text-strong-950: #171717;
   --color-stroke-white-0: #ffffff;
-  --color-stroke-soft-200: #ebebeb;
-  --color-stroke-sub-300: #d1d1d1;
+  /* Soft hairline — Shopify-like; never pure black on white surfaces */
+  --color-stroke-soft-200: #e8e8e8;
+  --color-stroke-sub-300: #d4d4d4;
   --color-stroke-strong-950: #171717;
   --color-primary-dark: #1a7544;
   --color-primary-darker: #178c4e;
@@ -316,13 +317,16 @@
   --text-paragraph-xs--line-height: 1rem;
   --text-paragraph-xs--letter-spacing: 0em;
   --text-paragraph-xs--font-weight: 400;
-  --shadow-regular-xs: 0 1px 2px 0 #0a0d1408;
-  --shadow-regular-sm: 0 2px 4px #1b1c1d0a;
-  --shadow-regular-md: 0 16px 32px -12px #0e121b1a;
+  /* Ambient shadows — low opacity, soft lift (login card / Shopify surfaces) */
+  --shadow-regular-xs: 0 1px 2px 0 rgb(10 13 20 / 0.04);
+  --shadow-regular-sm: 0 2px 6px 0 rgb(27 28 29 / 0.05);
+  --shadow-regular-md: 0 12px 28px -8px rgb(14 18 27 / 0.08), 0 2px 6px -2px rgb(14 18 27 / 0.04);
   --shadow-button-primary-focus: 0 0 0 2px var(--color-bg-white-0), 0 0 0 4px var(--color-primary-alpha-10);
   --shadow-button-important-focus: 0 0 0 2px var(--color-bg-white-0), 0 0 0 4px var(--color-neutral-alpha-16);
   --shadow-button-error-focus: 0 0 0 2px var(--color-bg-white-0), 0 0 0 4px var(--color-error-alpha-10);
-  --shadow-fancy-buttons-primary: 0 1px 2px 0 #0e121b3d, 0 0 0 1px var(--color-primary-base);
+  --shadow-fancy-buttons-primary: 0 1px 2px 0 rgb(14 18 27 / 0.08), 0 0 0 1px var(--color-primary-base);
+  --shadow-soft-card: 0 1px 2px 0 rgb(10 13 20 / 0.03), 0 4px 16px -4px rgb(14 18 27 / 0.06);
+  --shadow-soft-card-hover: 0 2px 4px 0 rgb(10 13 20 / 0.04), 0 12px 32px -8px rgb(14 18 27 / 0.08);
 }
 
 @custom-variant dark (&:is(.dark *));

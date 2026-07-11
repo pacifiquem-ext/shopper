@@ -45,12 +45,12 @@ function Calendar({
         ),
         button_previous: cn(
           buttonVariants({ variant: buttonVariant }),
-          'size-(--cell-size) aria-disabled:opacity-50 p-0 select-none hover:bg-brand-50 hover:text-brand-900',
+          'size-(--cell-size) aria-disabled:opacity-50 p-0 select-none hover:bg-primary-alpha-10 hover:text-primary-base',
           defaultClassNames.button_previous
         ),
         button_next: cn(
           buttonVariants({ variant: buttonVariant }),
-          'size-(--cell-size) aria-disabled:opacity-50 p-0 select-none hover:bg-brand-50 hover:text-brand-900',
+          'size-(--cell-size) aria-disabled:opacity-50 p-0 select-none hover:bg-primary-alpha-10 hover:text-primary-base',
           defaultClassNames.button_next
         ),
         month_caption: cn(
@@ -165,7 +165,7 @@ function CalendarDayButton({
       data-range-end={modifiers.range_end}
       data-range-middle={modifiers.range_middle}
       className={cn(
-        'hover:bg-brand-50 hover:text-brand-900 data-[selected-single=true]:bg-brand-900 data-[selected-single=true]:text-white data-[selected-single=true]:hover:bg-brand-900 data-[selected-single=true]:hover:text-white data-[range-middle=true]:bg-brand-50 data-[range-middle=true]:text-brand-900 data-[range-middle=true]:hover:bg-brand-50 data-[range-middle=true]:hover:text-brand-900 data-[range-start=true]:bg-brand-900 data-[range-start=true]:text-white data-[range-start=true]:hover:bg-brand-900 data-[range-start=true]:hover:text-white data-[range-end=true]:bg-brand-900 data-[range-end=true]:text-white data-[range-end=true]:hover:bg-brand-900 data-[range-end=true]:hover:text-white group-data-[focused=true]/day:border-ring group-data-[focused=true]/day:ring-ring/50 flex aspect-square w-full min-w-(--cell-size) flex-col gap-1 leading-none font-normal group-data-[focused=true]/day:relative group-data-[focused=true]/day:z-10 group-data-[focused=true]/day:ring-[3px] data-[range-end=true]:rounded-md data-[range-end=true]:rounded-r-md data-[range-middle=true]:rounded-none data-[range-start=true]:rounded-md data-[range-start=true]:rounded-l-md [&>span]:text-xs [&>span]:opacity-70',
+        'hover:bg-primary-alpha-10 hover:text-primary-base data-[selected-single=true]:bg-primary-base data-[selected-single=true]:text-white data-[selected-single=true]:hover:bg-primary-base data-[selected-single=true]:hover:text-white data-[range-middle=true]:bg-primary-alpha-10 data-[range-middle=true]:text-primary-base data-[range-middle=true]:hover:bg-primary-alpha-10 data-[range-middle=true]:hover:text-primary-base data-[range-start=true]:bg-primary-base data-[range-start=true]:text-white data-[range-start=true]:hover:bg-primary-base data-[range-start=true]:hover:text-white data-[range-end=true]:bg-primary-base data-[range-end=true]:text-white data-[range-end=true]:hover:bg-primary-base data-[range-end=true]:hover:text-white group-data-[focused=true]/day:border-ring group-data-[focused=true]/day:ring-ring/50 flex aspect-square w-full min-w-(--cell-size) flex-col gap-1 leading-none font-normal group-data-[focused=true]/day:relative group-data-[focused=true]/day:z-10 group-data-[focused=true]/day:ring-[3px] data-[range-end=true]:rounded-md data-[range-end=true]:rounded-r-md data-[range-middle=true]:rounded-none data-[range-start=true]:rounded-md data-[range-start=true]:rounded-l-md [&>span]:text-xs [&>span]:opacity-70',
         defaultClassNames.day,
         className
       )}
