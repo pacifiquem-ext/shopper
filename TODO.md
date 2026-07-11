@@ -31,20 +31,20 @@ _(empty — pick from Next up and move here with owner + date)_
 ### §0 — Agent / repo hygiene
 
 - [ ] Continue AlignUI page migration: dashboard home/products/orders/inventory tables, onboarding wizard chrome, shop catalog hero/cards, cart checkout UI — replace residual gray-*/ad-hoc hex with AlignUI tokens and alignui components where touch surfaces
-- [ ] Visual QA with Playwright/MCP across auth, dashboard, marketplace, storefront templates
-
-### §0 — Agent / repo hygiene
-
+- [ ] Visual QA with Playwright/MCP across auth, dashboard, marketplace, storefront templates (re-run `e2e-audit/run-e2e.mjs` after major UI slices)
 - [ ] Keep `TODO.md` + `ENV.md` updated every implementation session (`AGENTS.md` §7, §14)
 - [ ] Add `CONTEXT.md` domain glossary via `domain-modeling` skill (users, stores, orders, payments, plans)
 - [ ] Record ADRs under `docs/adr/` when §13 decisions in `AGENTS.md` are resolved
+- [ ] **BUG-017** — Resolve dual lockfile / workspace root warning (`client/pnpm-lock.yaml` vs root); set `outputFileTracingRoot` if needed
 
 ### §1 — i18n parity (mandatory)
 
 - [ ] Create `server/src/languages/rw/` mirroring every `en/*.json` file (`auth`, `common`, `http`, `user`, `validation`)
 - [ ] Fix client `en`/`rw` key drift (11 missing keys under `storeOnboarding.errors.*` in `rw.json`)
 - [ ] Replace hardcoded English on subscription page (`client/src/app/[locale]/dashboard/subscription/page.tsx`) with `useTranslations` + en/rw keys
+- [ ] **BUG-012** — Dashboard home KPI / welcome / quick-action copy still hardcoded English → `useTranslations('dashboard…')` + en/rw
 - [ ] Audit server exceptions/messages still returning raw English strings instead of i18n keys (`AuthService`, domain exceptions)
+- [ ] **BUG-018** — Nest i18n: switch `HeaderResolver` → `AcceptLanguageResolver` (RFC4647 warning in logs)
 
 ### §2 — Auth & notifications
 
@@ -56,10 +56,12 @@ _(empty — pick from Next up and move here with owner + date)_
 
 - [ ] Product/store image upload pipeline (StorageDriver or chosen S3-compatible interface) end-to-end from dashboard UI
 - [ ] Payment proof upload (today `paymentProofUrl` is a string field — need real upload + merchant verification flow completeness)
+- [ ] **BUG-014** — Demo/seed product images (`/products/*.jpg`) inconsistent; empty-image UI + real media pipeline
 
 ### §4 — Orders, payments, checkout
 
 - [ ] Guest/cart checkout: ensure `POST /v1/catalog/orders` (and client cart) covers full path — delivery zone fee, stock reservation, clear error/empty states
+- [ ] **BUG-015** — Enrich guest place-order beyond phone-only (address / delivery zone selection when payments ready)
 - [ ] Payment processor integration for Rwanda (Mobile Money / card / bank) — webhooks, reconciliation, idempotency
 - [ ] Cash-on-delivery and manual proof flows: document merchant SOP in UI copy (i18n) and enforce status transitions
 - [ ] Buyer-facing order status tracking page (no live map — status only, per product scope)
@@ -91,6 +93,8 @@ _(empty — pick from Next up and move here with owner + date)_
 
 ### §9 — Reliability, performance, release
 
+- [ ] **BUG-008** — Dashboard API latency (analytics/overview, products, inventory, orders often 5–14s locally): indexes, reduce N+1, cache overview aggregates, collapse orders page `limit=1` fan-out
+- [ ] **BUG-013** — Pseudo ratings on product cards/PDP: hide or label “coming soon” until real reviews exist
 - [ ] Server test suite with real contracts for each module controller (auth, products, inventory, orders, catalog, onboarding, delivery-zones, store-settings, analytics, admin)
 - [ ] Client integration + Playwright paths: onboarding, product CRUD, inventory adjust, order fulfill, public checkout
 - [ ] Redis/Bull: either use queues for exports/snapshots or remove dead queue surface; implement midnight metrics snapshot job
@@ -167,6 +171,18 @@ _(empty — pick from Next up and move here with owner + date)_
 - [x] Client: Vitest integration sample, Playwright auth e2e sample, Storybook, ESLint/Prettier
 - [x] Server: Jest config, ESLint/Prettier, Swagger in non-production, commitlint
 
+### E2E QA bugfixes (2026-07-11) — see `BUGS.md`
+
+- [x] **BUG-001** — Auth forms `method="post"` + explicit preventDefault (no password in query string)
+- [x] **BUG-002** — Invalid store subdomain shows not-found UI (no fake storefront)
+- [x] **BUG-003** — Orders date filters: inclusive day bounds + invalid-date guards
+- [x] **BUG-004/005/006** — Catalog category/search/sort client navigation via locale-aware query URLs
+- [x] **BUG-007** — Top store cards link to `/shop/store/{subdomain}`
+- [x] **BUG-009/010** — OnlineShop.rw metadata + app icon / favicon.svg
+- [x] **BUG-011** — Auth pages en/rw i18n for fields and CTAs
+- [x] Soft UI surfaces (stroke/shadow tokens, calmer dashboard CTAs, visible Log out label)
+- [x] E2E audit harness `e2e-audit/run-e2e.mjs` + report `BUGS.md` (screenshots gitignored)
+
 ---
 
 ## Notes for the next agent
@@ -175,3 +191,5 @@ _(empty — pick from Next up and move here with owner + date)_
 2. Subscription/billing and real payments are the largest product gaps relative to `README.md`.
 3. Server Kinyarwanda packs and SMS OTP are correctness/compliance gaps — treat as high priority before production traffic.
 4. When implementing anything in **Next up**, move it to **In progress** with date; when verified, move to **Done** with a one-line “how we know it works.”
+5. Open audit leftovers are tagged **BUG-*** under Next up (§0, §1, §3, §4, §9). Re-run `node e2e-audit/run-e2e.mjs` after fixing them.
+6. Local stack: client `:3000`, API `:3001`, public catalog via Next rewrite `/backend/v1`.

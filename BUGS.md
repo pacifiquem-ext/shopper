@@ -10,23 +10,32 @@
 
 ### Fix status (post-audit)
 
-| ID | Status |
-| -- | ------ |
-| BUG-001 auth GET / password in URL | **Fixed** — `method="post"`, explicit `preventDefault`, i18n labels |
-| BUG-002 invalid store storefront | **Fixed** — dedicated not-found state |
-| BUG-003 orders date / 500 | **Hardened** — inclusive date bounds + invalid date guards |
-| BUG-004/005/006 catalog filters | **Fixed** — `next/navigation` + locale-aware query URLs |
-| BUG-007 top store links | **Fixed** — path `/shop/store/{subdomain}` |
-| BUG-009 document title boilerplate | **Fixed** — OnlineShop.rw metadata |
-| BUG-010 favicon | **Fixed** — `app/icon.tsx` + `public/favicon.svg` |
-| BUG-011 auth i18n | **Fixed** — en + rw strings on auth pages |
-| BUG-008 latency | Open (perf work remaining) |
+| ID | Status | Tracking |
+| -- | ------ | -------- |
+| BUG-001 auth GET / password in URL | **Fixed** | — |
+| BUG-002 invalid store storefront | **Fixed** | — |
+| BUG-003 orders date / 500 | **Fixed** (hardened bounds/guards) | Residual flakiness → `TODO.md` §9 if still seen |
+| BUG-004/005/006 catalog filters | **Fixed** | — |
+| BUG-007 top store links | **Fixed** | — |
+| BUG-008 dashboard API latency | **Open** (working, slow) | `TODO.md` §9 |
+| BUG-009 document title boilerplate | **Fixed** | — |
+| BUG-010 favicon | **Fixed** | — |
+| BUG-011 auth i18n | **Fixed** | — |
+| BUG-012 dashboard hardcoded English | **Open** (non-blocking) | `TODO.md` §1 |
+| BUG-013 pseudo ratings | **Open** (MVP honesty) | `TODO.md` §9 |
+| BUG-014 demo product images | **Open** (media pipeline) | `TODO.md` §3 |
+| BUG-015 guest checkout phone-only | **Open** (by design MVP) | `TODO.md` §4 |
+| BUG-016 no `GET /catalog/products` list | **N/A** (by design) | Documented API shape |
+| BUG-017 dual lockfile warning | **Open** (devex) | `TODO.md` §0 |
+| BUG-018 Nest Accept-Language warning | **Open** (devex) | `TODO.md` §1 |
+
+**Ship gate for this push:** P0/P1 user-facing bugs fixed; remaining items tracked in `TODO.md` as non-blocking follow-ups.
 
 ---
 
 ## Executive summary
 
-Core marketplace, store URLs, product detail, cart page, auth pages, merchant login, and most dashboard routes load and are usable. Several issues found in audit were addressed in a follow-up fix commit (filters, invalid store, auth forms, metadata/favicon). **Remaining open:** dashboard API latency (BUG-008) and deeper orders load optimization.
+Core marketplace, store URLs, product detail, cart, auth, and merchant dashboard **work** for local end-to-end use. P0/P1 audit blockers (auth password-in-URL, invalid store, catalog filters, store links, metadata/favicon, auth i18n, orders date hardening) are **fixed** on `main`. **Tracked follow-ups:** dashboard latency (BUG-008), dashboard/i18n polish (BUG-012), media/ratings/checkout enrichment (BUG-013–015), lockfile/i18n resolver hygiene (BUG-017–018).
 
 ---
 
@@ -68,7 +77,7 @@ Core marketplace, store URLs, product detail, cart page, auth pages, merchant lo
 | `/en?store=ikuzosupplies` | Works |
 | `/en/shop/store/ikuzosupplies` | Works |
 | `/en?store=carssupplies` | Works |
-| Store card `href`s in DOM | Correct: `/en?store={subdomain}` |
+| Store card `href`s in DOM | Correct: `/en/shop/store/{subdomain}` |
 
 ### Auth
 
@@ -243,7 +252,7 @@ Core marketplace, store URLs, product detail, cart page, auth pages, merchant lo
 | Ikuzo supplies | `/en?store=ikuzosupplies` | `/en/shop/store/ikuzosupplies` | OK |
 | Cars suplies Ltd | `/en?store=carssupplies` | `/en/shop/store/carssupplies` | OK (typo in display name is data) |
 | onlineshop | `/en?store=anythingagain` | — | OK |
-| Invalid | `/en?store=does-not-exist-xyz` | — | **BUG-002** |
+| Invalid | `/en?store=does-not-exist-xyz` | — | Not-found UI (**BUG-002 fixed**) |
 
 **Not tested in this pass:** true multi-tenant host (`storeas.localhost` / production subdomain DNS). Local routing uses query + `/shop/store/:store` only.
 
@@ -254,25 +263,25 @@ Core marketplace, store URLs, product detail, cart page, auth pages, merchant lo
 | # | Journey | Status |
 | - | ------- | ------ |
 | 1 | Browse marketplace home | Pass |
-| 2 | Filter by category (chip) | **Fail** (BUG-004) |
-| 3 | Search products | **Unreliable** (BUG-005) |
-| 4 | Sort products | Partial (BUG-006) |
+| 2 | Filter by category (chip) | **Pass** (BUG-004 fixed) |
+| 3 | Search products | **Pass** (BUG-005 fixed) |
+| 4 | Sort products | **Pass** (BUG-006 fixed) |
 | 5 | Open product detail | Pass |
 | 6 | Add to cart (PDP) | Pass (controls present) |
 | 7 | Wishlist toggle | Pass (click) |
 | 8 | Open cart | Pass |
-| 9 | Place guest order | Partial (dialog exists; full paid checkout not fully exercised) |
-| 10 | Visit store via top card / query / path | Pass (direct URL); click flaky (BUG-007) |
-| 11 | Invalid store | **Fail** UX (BUG-002) |
+| 9 | Place guest order | Partial (dialog exists; full paid checkout → `TODO.md` §4) |
+| 10 | Visit store via top card / query / path | **Pass** (BUG-007 fixed; path `/shop/store/…`) |
+| 11 | Invalid store | **Pass** not-found UI (BUG-002 fixed) |
 | 12 | Login validation | Pass |
-| 13 | Login success → dashboard | Pass (when hydrated) |
+| 13 | Login success → dashboard | Pass |
 | 14 | Logout | Pass |
-| 15 | Signup page + submit | Smoke pass (verify-phone / OTP path depends on SMS/dev OTP logs) |
+| 15 | Signup page + submit | Smoke pass (OTP depends on SMS/dev logs) |
 | 16 | Store onboarding `/store` | Auth-gated correctly |
-| 17 | Dashboard modules | Pass (shell); orders data **flaky** (BUG-003/008) |
+| 17 | Dashboard modules | Pass; **slow** under load (BUG-008 → `TODO.md` §9) |
 | 18 | Export / report download (API) | Pass |
-| 19 | Locale `/rw` | Pass (marketplace); auth still EN (BUG-011) |
-| 20 | Favicon / document title | **Fail** (BUG-009, BUG-010) |
+| 19 | Locale `/rw` | Pass marketplace + auth i18n (BUG-011 fixed) |
+| 20 | Favicon / document title | **Pass** (BUG-009/010 fixed) |
 
 ---
 
