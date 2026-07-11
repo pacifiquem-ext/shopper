@@ -15,7 +15,7 @@ Rough readiness (maintain when large slices land):
 | Marketplace / cart / guest checkout | ~55% | Catalog + cart UI real; payment processor not live |
 | Billing / Basic–Pro plans | ~10% | Subscription page presentational; no plan model or charges |
 | Pro growth features (discounts, loyalty, customer CRM, advanced analytics productization) | ~15% | Analytics endpoints exist; discount/loyalty/CRM not domain models |
-| Restaurant engine | ~0% | Productized in README; not modeled |
+| AlignUI design system | ~55% | Tokens + core components + dashboard/auth shells; page-by-page migration ongoing |
 | Release hardening (SMS, email, storage driver, e2e coverage, server rw i18n) | ~25% | Partial tests; server `languages/rw` missing |
 
 ---
@@ -27,6 +27,11 @@ _(empty — pick from Next up and move here with owner + date)_
 ---
 
 ## Next up
+
+### §0 — Agent / repo hygiene
+
+- [ ] Continue AlignUI page migration: dashboard home/products/orders/inventory tables, onboarding wizard chrome, shop catalog hero/cards, cart checkout UI — replace residual gray-*/ad-hoc hex with AlignUI tokens and alignui components where touch surfaces
+- [ ] Visual QA with Playwright/MCP across auth, dashboard, marketplace, storefront templates
 
 ### §0 — Agent / repo hygiene
 
@@ -75,11 +80,9 @@ _(empty — pick from Next up and move here with owner + date)_
 - [ ] Store theme customization + remove OnlineShop branding (Pro)
 - [ ] Analytics productization: ensure Basic vs Pro dashboard surfaces match plan gates; snapshot jobs (midnight scheduler is still a stub)
 
-### §7 — Restaurant delivery gateway
+### §7 — Restaurant (removed from scope)
 
-- [ ] Domain: menu, meal add-ons, opening hours, accept/reject orders, preparation time
-- [ ] Store type discrimination (retail vs restaurant) through onboarding → catalog → checkout
-- [ ] Restaurant Pro analytics (sales by time of day, most ordered meals, repeat insights)
+- [x] Drop restaurant business type from onboarding and product docs
 
 ### §8 — Admin & platform
 
@@ -107,6 +110,17 @@ _(empty — pick from Next up and move here with owner + date)_
 ---
 
 ## Done
+
+### Foundation
+
+- [x] AlignUI v1.2 design tokens in `client/src/styles/globals.css` (green primary, gray neutrals)
+- [x] AlignUI utils (`tv`, polymorphic, recursiveCloneChildren) + free components (Button, Input, Label, Badge, Card, Divider)
+- [x] Dashboard shell + auth shell restyled to AlignUI; Inter font; Remix Icon on new chrome
+- [x] `design-system/MASTER.md` platform + store template palettes
+- [x] Classic Market storefront template (DEFAULT) + premium template picker with previews
+- [x] Vibrant Market / Night Market token + CTA polish
+- [x] AlignUI-aligned server email HTML helpers (`server/src/common/mail/`)
+
 
 ### Foundation
 

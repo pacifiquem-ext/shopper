@@ -85,20 +85,20 @@
     }
   },
   "storeTemplates": {
-    "pickerTitle": "Storefront template",
-    "pickerHint": "Choose a layout for your shop. Tap a card to switch — your live storefront updates right away.",
+    "pickerTitle": "Choose your storefront",
+    "pickerHint": "Pick a layout customers see on your shop. Changes go live immediately after save.",
     "templateActive": "Active",
     "templateSaved": "Storefront template updated",
     "templateSaving": "Applying template…",
-    "defaultTemplate": "Standard",
-    "defaultTemplateDesc": "Classic catalog with filters and product cards — works for any store type.",
-    "defaultTemplateTag": "General",
+    "defaultTemplate": "Classic Market",
+    "defaultTemplateDesc": "Clean light storefront with green CTAs — premium and calm for everyday retail.",
+    "defaultTemplateTag": "Recommended",
     "vibrantMarketTemplate": "Vibrant Market",
-    "vibrantMarketTemplateDesc": "Bold coral theme with promo ticker and a high-energy product grid.",
-    "vibrantMarketTemplateTag": "Multi-category",
+    "vibrantMarketTemplateDesc": "High-energy daylight market with promo ticker, bold product cards, and flash-sale energy.",
+    "vibrantMarketTemplateTag": "High energy",
     "ishushoCraftsTemplate": "Night Market",
-    "ishushoCraftsTemplateDesc": "Midnight storefront with warm gold checkout accents — built for clear product browsing.",
-    "ishushoCraftsTemplateTag": "Night market",
+    "ishushoCraftsTemplateDesc": "Dark gallery layout with purple craft accents — dramatic and premium after-hours feel.",
+    "ishushoCraftsTemplateTag": "Gallery dark",
     "ishushoCrafts": {
       "heroStorefrontLabel": "Store storefront",
       "heroFallback": "Discover quality products from {store}, delivered across Rwanda.",
@@ -133,6 +133,18 @@
       "productsTitle": "Shop all products",
       "categoriesLabel": "Categories",
       "footerTagline": "Quality products from a trusted local store.",
+      "poweredBy": "Powered by OnlineShop.rw",
+      "marketplaceLabel": "Explore marketplace"
+    },
+    "classicMarket": {
+      "eyebrow": "Shop on OnlineShop.rw",
+      "defaultTagline": "Quality products from local sellers — delivered across Rwanda.",
+      "ctaShop": "Shop now",
+      "ctaBrowse": "Browse catalog",
+      "searchAria": "Search products",
+      "addToCart": "Add to cart",
+      "productsTitle": "All products",
+      "footerTagline": "Shop with {store} on OnlineShop.rw.",
       "poweredBy": "Powered by OnlineShop.rw",
       "marketplaceLabel": "Explore marketplace"
     }
@@ -226,12 +238,9 @@
         "title": "Retail store",
         "subtitle": "Sell products like fashion, electronics, cosmetics, and more."
       },
-      "restaurant": {
-        "title": "Restaurant",
-        "subtitle": "Sell meals, add-ons, and manage opening hours."
-      },
       "selected": "Selected",
-      "note": "This only affects the setup flow. You can change some settings later."
+      "note": "This only affects the setup flow. You can change some settings later.",
+      "retailOnly": "OnlineShop.rw is built for retail stores. You’re set up as a retail merchant — products, inventory, delivery, and orders."
     },
     "storeBasics": {
       "title": "Tell customers who you are",
@@ -336,7 +345,8 @@
       "googleMapsUrl": "Google Maps URL"
     },
     "common": {
-      "optional": "(Optional)"
+      "optional": "(Optional)",
+      "continue": "Continue"
     },
     "contact": {
       "title": "Add your store's contact info",
@@ -407,7 +417,11 @@
       "payments": "Payments",
       "storeSettings": "Store Settings",
       "subscription": "Subscription",
-      "logout": "Logout"
+      "logout": "Logout",
+      "businessInfo": "Business",
+      "branding": "Branding",
+      "contact": "Contact",
+      "delivery": "Delivery"
     },
     "profile": {
       "title": "Your profile",
@@ -1092,8 +1106,7 @@
       "outOfStock": "Out of stock",
       "totalRevenue": "Total revenue"
     }
-  }
-  ,
+  },
   "footer": {
     "brandName": "OnlineShop.rw",
     "brandTagline": "Marketplace",
@@ -1160,5 +1173,22 @@
       "copyright": "© {year} {store} · OnlineShop.rw"
     },
     "copyright": "© {year} OnlineShop.rw. All rights reserved."
+  },
+  "auth": {
+    "tabs": {
+      "login": "Log in",
+      "signup": "Sign up",
+      "forgot": "Forgot password",
+      "reset": "Reset password"
+    },
+    "brand": {
+      "title": "OnlineShop.rw",
+      "subtitle": "Launch a premium storefront, manage orders, and grow with tools built for Rwanda.",
+      "bullets": {
+        "products": "Products & inventory in one place",
+        "orders": "Orders, delivery zones & payments",
+        "marketplace": "Marketplace discovery for new customers"
+      }
+    }
   }
 }

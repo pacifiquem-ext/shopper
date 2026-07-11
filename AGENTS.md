@@ -14,7 +14,7 @@ letting them live only in chat history.
 ## 1. Where we are, where we're going
 
 **OnlineShop.rw** is a multi-tenant marketplace and store-operating platform for Rwanda: merchants
-launch online stores (and restaurant delivery gateways), manage products/inventory/orders/delivery
+launch online retail stores, manage products/inventory/orders/delivery
 zones, accept payments, and grow via Basic → Pro plan upgrades. Buyers browse the marketplace,
 shop storefronts, checkout, and track order status. Full product intent lives in [`README.md`](./README.md)
 (vision, pricing, journeys, modules, and explicit out-of-scope list).
@@ -205,9 +205,9 @@ than silently deviating**, and update this section when they do.
   one-line why.
 - **Frontend framework:** **Next.js** App Router (React Server Components by default; `'use client'`
   only when required). Fast refresh / SWC via Next's toolchain. `tsc --noEmit` for typecheck.
-- **UI:** Tailwind CSS + **shadcn/ui** (`client/src/components/ui/` — do not casually fork/modify
-  base primitives; compose them). Feature components under domain folders. Toasts via **sonner** /
-  shared toast helpers — not `window.alert` / `confirm` / `prompt`.
+- **UI:** Tailwind CSS v4 + **AlignUI v1.2** tokens (`globals.css`) and free base components under
+  `client/src/components/alignui/`. Legacy shadcn-compatible bridges in `client/src/components/ui/`
+  are restyled to AlignUI tokens. Icons: **Remix Icon**. Toasts via **sonner** — not `window.alert` / `confirm` / `prompt`. See `design-system/MASTER.md`.
 - **Client state:** **Zustand** for cross-component state; local `useState` for purely local UI.
 - **Client data access:** **Axios** instance in `client/src/lib/axios.ts` + domain services in
   `client/src/services/`. Do not scatter raw `fetch` / ad hoc Axios instances.
@@ -452,8 +452,8 @@ Full detail lives in the rule files; this section is the non-negotiable summary.
   feature filenames on the client; Nest module folder conventions on the server. Match neighbors.
 - **No speculative abstraction** — build the interface the current requirement needs; don't add
   config/flags/extension points for a hypothetical future case.
-- **shadcn/ui base components** — treat `client/src/components/ui/*` as shared primitives; prefer
-  composition over editing the primitive unless the change is intentional and system-wide.
+- **AlignUI components** — prefer `client/src/components/alignui/*` for new work; keep `ui/*` bridges
+  token-aligned. See `design-system/MASTER.md`.
 
 ### Client layer contracts (see client-coding-standards)
 
@@ -510,8 +510,6 @@ assuming** unless already implemented and documented:
 - **Email delivery** for transactional mail (order confirmations, password reset) — provider and
   templates.
 - **Custom domains (Enterprise)** and multi-branch — deferred until Enterprise scope is opened.
-- **Restaurant-specific engine** extensions (menu add-ons, opening hours, prep time) — productized
-  in README; implement as first-class domain, not bolted-on retail hacks, when prioritized.
 - **`packages/shared`** for Zod/DTO reuse across client and server — introduce only when duplication
   cost is proven; don't half-create it.
 

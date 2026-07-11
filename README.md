@@ -2,7 +2,7 @@
 
 > Building Africa's Biggest Marketplace Starting From Rwanda.
 
-OnlineShop.rw enables businesses in Rwanda to launch and operate online stores and delivery gateways without technical complexity.
+OnlineShop.rw enables retail businesses in Rwanda to launch and operate online stores and delivery without technical complexity.
 
 ## 1. Product Vision
 
@@ -98,25 +98,6 @@ _(Note: No live tracking currently available.)_
 
 ---
 
-## 5. Restaurant Delivery Gateway
-
-Restaurants require specialized extensions built into the core engine.
-
-**Restaurant-Specific Features (Basic and Pro):**
-
-- Menu management
-- Add-ons for meals
-- Opening hours
-- Accept or reject orders
-- Preparation time setting
-
-**Restaurant Pro Advantages:**
-
-- Meal-specific discounts & combo promotions
-- Loyalty points on food orders
-- Sales by time of day analytics
-- Most ordered meal analytics
-- Customer repeat order insights
 
 ---
 
@@ -130,16 +111,9 @@ Restaurants require specialized extensions built into the core engine.
 4. Store goes live → Receive first order
 5. Manage from dashboard _(Basic user sees a simple dashboard; Pro user sees analytics & growth tools)._
 
-### 6.2 Restaurant Owner Journey
-
-1. Register as restaurant → Choose plan
-2. Add menu → Set preparation times → Define delivery zones
-3. Start accepting orders → Track performance
-
 ### 6.3 Customer Journey
 
 - **Retail:** Browse marketplace → Search product → Add to cart → Checkout → Pay → Receive confirmation → Wait for delivery
-- **Restaurant:** Browse restaurant → Select meals → Add extras → Checkout → Pay → Track order status
 
 ---
 
@@ -174,7 +148,6 @@ The platform is built on the following core modules:
 - Order management & Notification system
 - Payment integration
 - Delivery configuration
-- Restaurant logic extension
 
 ---
 

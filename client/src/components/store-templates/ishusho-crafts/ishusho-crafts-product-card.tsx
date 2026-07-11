@@ -77,7 +77,7 @@ export function IshushoCraftsProductCard({
   )
 
   return (
-    <article className='group relative flex h-full flex-col overflow-hidden rounded-xl border border-[var(--ic-border)] bg-[var(--ic-surface)] shadow-[0_4px_24px_rgba(0,0,0,0.28)] transition-[transform,box-shadow,border-color] duration-300 hover:-translate-y-0.5 hover:border-[color-mix(in_srgb,var(--ic-secondary)_35%,transparent)] hover:shadow-[0_16px_48px_rgba(0,0,0,0.42)]'>
+    <article className='group relative flex h-full flex-col overflow-hidden rounded-20 border border-[var(--ic-border)] bg-[var(--ic-surface)] shadow-[0_4px_24px_rgba(0,0,0,0.28)] transition-[transform,box-shadow,border-color] duration-300 hover:-translate-y-0.5 hover:border-[color-mix(in_srgb,var(--ic-secondary)_35%,transparent)] hover:shadow-[0_16px_48px_rgba(0,0,0,0.42)]'>
       <div
         className='pointer-events-none absolute inset-x-0 top-0 h-0.5 scale-x-0 bg-gradient-to-r from-transparent via-[var(--ic-secondary)] to-transparent transition-transform duration-300 group-hover:scale-x-100'
         aria-hidden

@@ -5,7 +5,7 @@ import { toast } from 'sonner'
 import { storeOnboardingService, SubmitStoreDto } from '@/services/store-onboarding.service'
 import { useAuthStore } from '@/store/auth.store'
 
-export type StoreOnboardingBusinessType = 'retail' | 'restaurant'
+export type StoreOnboardingBusinessType = 'retail'
 
 export interface StoreOnboardingDraft {
   businessType: StoreOnboardingBusinessType | null
@@ -110,8 +110,8 @@ const initialDraft: StoreOnboardingDraft = {
   displayName: '',
   description: '',
   subdomain: '',
-  brandPrimaryColor: '#B76E5D',
-  brandSecondaryColor: '#EAE4DC',
+  brandPrimaryColor: '#1daf61',
+  brandSecondaryColor: '#171717',
   contactEmail: '',
   contactPhone: '',
   contactAddress: '',

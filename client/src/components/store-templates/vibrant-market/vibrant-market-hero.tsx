@@ -64,14 +64,14 @@ export function VibrantMarketHero({
           <div className='mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center'>
             <Link
               href='#products'
-              className='inline-flex h-12 items-center justify-center gap-2 rounded-full bg-[var(--vm-secondary)] px-6 text-sm font-bold text-[var(--vm-on-primary)] shadow-[0_8px_24px_color-mix(in_srgb,var(--vm-secondary)_35%,transparent)] transition-transform hover:-translate-y-0.5 hover:brightness-105 active:scale-[0.98] sm:h-[3.25rem] sm:px-7 sm:text-base'
+              className='inline-flex h-12 items-center justify-center gap-2 rounded-10 bg-[var(--vm-secondary)] px-6 text-sm font-bold text-[var(--vm-on-primary)] shadow-[0_8px_24px_color-mix(in_srgb,var(--vm-secondary)_35%,transparent)] transition-transform hover:-translate-y-0.5 hover:brightness-105 active:scale-[0.98] sm:h-[3.25rem] sm:px-7 sm:text-base'
             >
               {ctaStartShopping}
               <ArrowRight className='size-4 shrink-0' aria-hidden strokeWidth={2.5} />
             </Link>
             <Link
               href={trendingHref}
-              className='inline-flex h-12 items-center justify-center gap-2 rounded-full border-2 border-[var(--vm-border)] bg-[var(--vm-surface)] px-6 text-sm font-bold text-[var(--vm-primary)] transition-colors hover:border-[var(--vm-secondary)]/40 hover:bg-[var(--vm-primary-light)] active:scale-[0.98] sm:h-[3.25rem] sm:px-7 sm:text-base'
+              className='inline-flex h-12 items-center justify-center gap-2 rounded-10 border border-[var(--vm-border)] bg-[var(--vm-surface)] px-6 text-sm font-bold text-[var(--vm-primary)] transition-colors hover:border-[var(--vm-secondary)]/40 hover:bg-[var(--vm-primary-light)] active:scale-[0.98] sm:h-[3.25rem] sm:px-7 sm:text-base'
             >
               <TrendingUp className='size-4 shrink-0 text-[var(--vm-secondary)]' aria-hidden strokeWidth={2.25} />
               {ctaTrendingNow}

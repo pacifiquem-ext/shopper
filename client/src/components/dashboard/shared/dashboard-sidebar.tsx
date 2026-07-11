@@ -5,23 +5,26 @@ import { cn } from '@/lib/utils'
 import { useTranslations } from 'next-intl'
 import { useSearchParams } from 'next/navigation'
 import {
-  LayoutDashboard,
-  Package,
-  Layers,
-  Settings,
-  Boxes,
-  LogOut,
-  Store,
-  Building2,
-  Palette,
-  Mail,
-  Truck,
-  CreditCard,
-  ChevronDown,
-  ChevronRight,
-} from 'lucide-react'
+  RiDashboardLine,
+  RiBox3Line,
+  RiShoppingBag3Line,
+  RiSettings4Line,
+  RiStackLine,
+  RiLogoutBoxRLine,
+  RiStore2Line,
+  RiBuilding2Line,
+  RiPaletteLine,
+  RiMailLine,
+  RiTruckLine,
+  RiBankCardLine,
+  RiArrowRightSLine,
+  RiMenuFoldLine,
+  RiMenuUnfoldLine,
+  RiMoneyDollarCircleLine,
+} from '@remixicon/react'
 import { useAuthStore } from '@/store/auth.store'
 import { useState, useEffect } from 'react'
+import * as Button from '@/components/alignui/button'
 
 export function DashboardSidebar() {
   const t = useTranslations('dashboard')
@@ -32,9 +35,9 @@ export function DashboardSidebar() {
 
   const storeSettingsTab =
     pathname === '/dashboard/store-settings'
-      ? searchParams.get('tab') ?? 'business'
+      ? (searchParams.get('tab') ?? 'business')
       : null
-  
+
   const [isStoreSettingsOpen, setIsStoreSettingsOpen] = useState(true)
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
 
@@ -43,7 +46,6 @@ export function DashboardSidebar() {
     if (savedStoreSettingsState !== null) {
       setIsStoreSettingsOpen(savedStoreSettingsState === 'true')
     }
-
     const savedSidebarState = localStorage.getItem('sidebarCollapsed')
     if (savedSidebarState !== null) {
       setIsSidebarCollapsed(savedSidebarState === 'true')
@@ -68,131 +70,112 @@ export function DashboardSidebar() {
   }
 
   const mainNavItems = [
-    { href: '/dashboard', label: t('nav.dashboard'), icon: LayoutDashboard },
-    { href: '/dashboard/inventory', label: t('nav.inventory'), icon: Boxes },
-    { href: '/dashboard/products', label: t('nav.products'), icon: Package },
-    { href: '/dashboard/orders', label: t('nav.orders'), icon: Layers },
+    { href: '/dashboard', label: t('nav.dashboard'), icon: RiDashboardLine },
+    { href: '/dashboard/products', label: t('nav.products'), icon: RiShoppingBag3Line },
+    { href: '/dashboard/inventory', label: t('nav.inventory'), icon: RiBox3Line },
+    { href: '/dashboard/orders', label: t('nav.orders'), icon: RiStackLine },
+    { href: '/dashboard/payments', label: t('nav.payments'), icon: RiMoneyDollarCircleLine },
   ]
 
   const storeSettingsSubmenu = [
-    { href: '/dashboard/store-settings?tab=business', label: 'Business Info', icon: Building2, tab: 'business' },
-    { href: '/dashboard/store-settings?tab=branding', label: 'Branding', icon: Palette, tab: 'branding' },
-    { href: '/dashboard/store-settings?tab=contact', label: 'Contact & About', icon: Mail, tab: 'contact' },
-    { href: '/dashboard/store-settings?tab=delivery', label: 'Delivery Zones', icon: Truck, tab: 'delivery' },
-    { href: '/dashboard/store-settings?tab=subscription', label: 'Subscription', icon: CreditCard, tab: 'subscription' },
+    { href: '/dashboard/store-settings?tab=business', label: t('nav.businessInfo', { defaultValue: 'Business' }), icon: RiBuilding2Line, tab: 'business' },
+    { href: '/dashboard/store-settings?tab=branding', label: t('nav.branding', { defaultValue: 'Branding' }), icon: RiPaletteLine, tab: 'branding' },
+    { href: '/dashboard/store-settings?tab=contact', label: t('nav.contact', { defaultValue: 'Contact' }), icon: RiMailLine, tab: 'contact' },
+    { href: '/dashboard/store-settings?tab=delivery', label: t('nav.delivery', { defaultValue: 'Delivery' }), icon: RiTruckLine, tab: 'delivery' },
+    { href: '/dashboard/store-settings?tab=subscription', label: t('nav.subscription'), icon: RiBankCardLine, tab: 'subscription' },
   ]
 
   return (
-    <aside className={cn(
-      "relative hidden shrink-0 flex-col border-r border-gray-200 bg-white transition-all duration-300 md:flex",
-      isSidebarCollapsed ? "w-[72px]" : "w-[280px]"
-    )}>
+    <aside
+      className={cn(
+        'relative hidden shrink-0 flex-col border-r border-stroke-soft-200 bg-bg-white-0 transition-[width] duration-200 md:flex',
+        isSidebarCollapsed ? 'w-[72px]' : 'w-[260px]',
+      )}
+    >
       <div className="flex h-full flex-col">
-        <div className="flex items-center gap-3 px-6 pt-5 pb-4">
-          <div className="bg-brand-50 text-brand-900 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl">
-            <Store className="h-5 w-5" />
+        <div className={cn('flex items-center gap-3 px-4 pt-5 pb-4', isSidebarCollapsed && 'justify-center px-2')}>
+          <div className="flex size-10 shrink-0 items-center justify-center rounded-10 bg-primary-alpha-10 text-primary-base">
+            <RiStore2Line className="size-5" />
           </div>
           {!isSidebarCollapsed && (
-            <div className="leading-tight">
-              <div className="text-sm font-semibold text-gray-900">{t('sidebar.brand')}</div>
-              <div className="text-xs text-gray-500">{t('sidebar.subtitle')}</div>
+            <div className="min-w-0 leading-tight">
+              <div className="truncate text-label-sm text-text-strong-950">{t('sidebar.brand')}</div>
+              <div className="truncate text-paragraph-xs text-text-sub-600">{t('sidebar.subtitle')}</div>
             </div>
           )}
         </div>
 
-        <div className="flex flex-1 flex-col px-4 pt-6">
-          <button
+        <div className="px-3 pb-2">
+          <Button.Root
+            variant="neutral"
+            mode="stroke"
+            size="xsmall"
             type="button"
             onClick={toggleSidebar}
-            className="mb-4 flex items-center justify-center rounded-lg border border-gray-200 bg-white p-2 text-gray-500 transition-colors hover:bg-gray-50 hover:text-gray-900"
-            title={isSidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+            className="w-full"
+            title={isSidebarCollapsed ? 'Expand' : 'Collapse'}
           >
-            <ChevronRight className={cn(
-              "h-4 w-4 transition-transform duration-300",
-              !isSidebarCollapsed && "rotate-180"
-            )} />
-          </button>
+            <Button.Icon as={isSidebarCollapsed ? RiMenuUnfoldLine : RiMenuFoldLine} />
+            {!isSidebarCollapsed && <span>Collapse</span>}
+          </Button.Root>
+        </div>
 
-          <nav className="flex flex-col gap-1">
+        <nav className="flex flex-1 flex-col gap-0.5 overflow-y-auto px-3 pb-4">
           {mainNavItems.map((item) => {
             const isActive = pathname === item.href
-
             return (
               <Link
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  'group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors',
+                  'group flex items-center gap-2.5 rounded-10 px-2.5 py-2 text-label-sm transition duration-200',
                   isActive
-                    ? 'bg-brand-50 text-brand-900'
-                    : 'text-gray-700 hover:bg-brand-50 hover:text-brand-900',
-                  isSidebarCollapsed && 'justify-center'
+                    ? 'bg-primary-alpha-10 text-primary-base'
+                    : 'text-text-sub-600 hover:bg-bg-weak-50 hover:text-text-strong-950',
+                  isSidebarCollapsed && 'justify-center px-0',
                 )}
                 title={isSidebarCollapsed ? item.label : undefined}
               >
-                <span
-                  className={cn(
-                    'flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border',
-                    isActive
-                      ? 'border-brand-200 bg-white text-brand-900'
-                      : 'border-gray-200 bg-white text-gray-500 group-hover:text-brand-900'
-                  )}
-                >
-                  <item.icon className="h-4 w-4" />
-                </span>
+                <item.icon className={cn('size-5 shrink-0', isActive ? 'text-primary-base' : 'text-text-soft-400 group-hover:text-text-sub-600')} />
                 {!isSidebarCollapsed && <span className="truncate">{item.label}</span>}
               </Link>
             )
           })}
 
-          {/* Store Settings Submenu */}
           {!isSidebarCollapsed && (
-            <div className="mt-1">
+            <div className="mt-3">
               <button
                 type="button"
                 onClick={toggleStoreSettings}
                 className={cn(
-                  'group flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors',
+                  'flex w-full cursor-pointer items-center gap-2.5 rounded-10 px-2.5 py-2 text-label-sm transition duration-200',
                   pathname.startsWith('/dashboard/store-settings')
-                    ? 'bg-brand-50 text-brand-900'
-                    : 'text-gray-700 hover:bg-brand-50 hover:text-brand-900'
+                    ? 'bg-primary-alpha-10 text-primary-base'
+                    : 'text-text-sub-600 hover:bg-bg-weak-50 hover:text-text-strong-950',
                 )}
               >
-                <span
-                  className={cn(
-                    'flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border',
-                    pathname.startsWith('/dashboard/store-settings')
-                      ? 'border-brand-200 bg-white text-brand-900'
-                      : 'border-gray-200 bg-white text-gray-500 group-hover:text-brand-900'
-                  )}
-                >
-                  <Settings className="h-4 w-4" />
-                </span>
+                <RiSettings4Line className="size-5 shrink-0" />
                 <span className="flex-1 truncate text-left">{t('nav.storeSettings')}</span>
-                {isStoreSettingsOpen ? (
-                  <ChevronDown className="h-4 w-4" />
-                ) : (
-                  <ChevronRight className="h-4 w-4" />
-                )}
+                <RiArrowRightSLine
+                  className={cn('size-4 transition-transform', isStoreSettingsOpen && 'rotate-90')}
+                />
               </button>
-
               {isStoreSettingsOpen && (
-                <div className="ml-3 mt-1 space-y-1 border-l-2 border-gray-100 pl-3">
+                <div className="mt-0.5 ml-3 space-y-0.5 border-l border-stroke-soft-200 pl-2">
                   {storeSettingsSubmenu.map((item) => {
                     const isActive = storeSettingsTab === item.tab
-
                     return (
                       <Link
-                        key={item.href}
+                        key={item.tab}
                         href={item.href}
                         className={cn(
-                          'group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
+                          'flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-paragraph-sm transition duration-200',
                           isActive
-                            ? 'bg-brand-50 text-brand-900'
-                            : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                            ? 'bg-bg-weak-50 font-medium text-text-strong-950'
+                            : 'text-text-sub-600 hover:bg-bg-weak-50 hover:text-text-strong-950',
                         )}
                       >
-                        <item.icon className={cn('h-4 w-4', isActive ? 'text-brand-900' : 'text-gray-400')} />
+                        <item.icon className="size-4 shrink-0 text-text-soft-400" />
                         <span className="truncate">{item.label}</span>
                       </Link>
                     )
@@ -201,51 +184,25 @@ export function DashboardSidebar() {
               )}
             </div>
           )}
+        </nav>
 
-          {/* Collapsed Store Settings - Single Icon */}
-          {isSidebarCollapsed && (
-            <Link
-              href="/dashboard/store-settings?tab=business"
-              className={cn(
-                'group flex items-center justify-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors',
-                pathname.startsWith('/dashboard/store-settings')
-                  ? 'bg-brand-50 text-brand-900'
-                  : 'text-gray-700 hover:bg-brand-50 hover:text-brand-900'
-              )}
-              title={t('nav.storeSettings')}
-            >
-              <span
-                className={cn(
-                  'flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border',
-                  pathname.startsWith('/dashboard/store-settings')
-                    ? 'border-brand-200 bg-white text-brand-900'
-                    : 'border-gray-200 bg-white text-gray-500 group-hover:text-brand-900'
-                )}
-              >
-                <Settings className="h-4 w-4" />
-              </span>
-            </Link>
+        <div className="mt-auto border-t border-stroke-soft-200 p-3">
+          {!isSidebarCollapsed && user && (
+            <div className="mb-2 truncate px-1 text-paragraph-xs text-text-sub-600">
+              {user.fullName || user.phoneNumber}
+            </div>
           )}
-          </nav>
-        </div>
-
-        <div className="px-4 pb-6">
-          <div className="border-t border-gray-200 pt-4">
-            <button
-              type="button"
-              onClick={handleLogout}
-              className={cn(
-                "flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-medium text-gray-700 transition-colors hover:bg-brand-50 hover:text-brand-900",
-                isSidebarCollapsed && "justify-center"
-              )}
-              title={isSidebarCollapsed ? t('nav.logout') : undefined}
-            >
-              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-gray-200 bg-white text-gray-500">
-                <LogOut className="h-4 w-4" />
-              </span>
-              {!isSidebarCollapsed && <span>{t('nav.logout')}</span>}
-            </button>
-          </div>
+          <Button.Root
+            variant="neutral"
+            mode="ghost"
+            size="small"
+            type="button"
+            onClick={handleLogout}
+            className={cn('w-full', isSidebarCollapsed && 'px-0')}
+          >
+            <Button.Icon as={RiLogoutBoxRLine} />
+            {!isSidebarCollapsed && <span>{t('sidebar.logout')}</span>}
+          </Button.Root>
         </div>
       </div>
     </aside>

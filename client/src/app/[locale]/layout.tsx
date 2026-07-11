@@ -2,7 +2,7 @@ import { Toaster } from '@/components/ui/toaster'
 import { Toaster as SonnerToaster } from '@/components/ui/sonner'
 
 import type { Metadata } from 'next'
-import { Geist } from 'next/font/google'
+import { Inter } from 'next/font/google'
 import type React from 'react'
 import '../../styles/globals.css'
 
@@ -13,9 +13,10 @@ import { getMessages, getTimeZone } from 'next-intl/server'
 import { notFound } from 'next/navigation'
 import { RootWrapper } from './root-wrapper'
 
-const geistSans = Geist({
-  variable: '--font-geist-sans',
+const inter = Inter({
+  variable: '--font-inter',
   subsets: ['latin'],
+  display: 'swap',
 })
 
 export default async function RootLayout({
@@ -35,9 +36,7 @@ export default async function RootLayout({
 
   return (
     <html lang={locale} suppressHydrationWarning>
-      <body
-        className={`${geistSans.variable} ${geistSans.className} text-foreground bg-background font-sans antialiased`}
-      >
+      <body className={`${inter.variable} ${inter.className} font-sans antialiased`}>
         <RootWrapper locale={locale} messages={messages} timeZone={timeZone}>
           {children}
         </RootWrapper>

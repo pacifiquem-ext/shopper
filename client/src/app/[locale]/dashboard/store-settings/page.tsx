@@ -38,11 +38,10 @@ import { storeSettingsService } from '@/services/store-settings.service'
 import {
   parseStoreTemplateId,
   STORE_TEMPLATE_BRAND_PRESETS,
-  STORE_TEMPLATE_OPTIONS,
-  STORE_TEMPLATE_PICKER_UI,
   type BrandColorsWithTemplate,
   type StoreTemplateId,
 } from '@/lib/store-templates'
+import { StoreTemplatePicker } from '@/components/store-templates/shared/store-template-picker'
 import {
   deliveryZonesService,
   type DeliveryZoneApi,
@@ -110,8 +109,8 @@ export default function StoreSettingsPage() {
   })
 
   const [branding, setBranding] = useState({
-    primaryColor: MARKETPLACE_BRAND.primary,
-    secondaryColor: MARKETPLACE_BRAND.canvas,
+    primaryColor: MARKETPLACE_BRAND.primary as string,
+    secondaryColor: MARKETPLACE_BRAND.canvas as string,
     logoUrl: '/placeholder-logo.png',
     storeTemplate: 'DEFAULT' as StoreTemplateId,
   })
@@ -177,7 +176,7 @@ export default function StoreSettingsPage() {
           secondary: preset.secondary,
         }),
       })
-      const updated = (res as { data?: Record<string, unknown> })?.data ?? res
+      const updated = (res as unknown as { data?: Record<string, unknown> })?.data ?? res
       if (updated && typeof updated === 'object') {
         syncBrandingFromSettings(updated as Record<string, unknown>)
       }
@@ -275,7 +274,7 @@ export default function StoreSettingsPage() {
           logoUrl: branding.logoUrl !== '/placeholder-logo.png' ? branding.logoUrl : undefined,
           brandColors: buildBrandColorsPayload(),
         })
-        const updated = (res as { data?: Record<string, unknown> })?.data ?? res
+        const updated = (res as unknown as { data?: Record<string, unknown> })?.data ?? res
         if (updated && typeof updated === 'object') {
           syncBrandingFromSettings(updated as Record<string, unknown>)
         }
@@ -722,88 +721,12 @@ export default function StoreSettingsPage() {
 
                       <Separator />
 
-                      <div className="space-y-3">
-                        <Label className="text-sm font-semibold text-gray-700">
-                          {tTemplates('pickerTitle')}
-                        </Label>
-                        <p className="text-xs text-gray-500">{tTemplates('pickerHint')}</p>
-                        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                          {STORE_TEMPLATE_OPTIONS.map((option) => {
-                            const selected = branding.storeTemplate === option.id
-                            const isSavingTemplate = templateSavingId === option.id
-                            const ui = STORE_TEMPLATE_PICKER_UI[option.id]
-                            return (
-                              <button
-                                key={option.id}
-                                type="button"
-                                disabled={Boolean(templateSavingId) || isLoading}
-                                onClick={() => handleTemplateSelect(option.id)}
-                                aria-pressed={selected}
-                                className={cn(
-                                  'relative cursor-pointer rounded-xl border p-4 text-left transition-colors disabled:cursor-not-allowed disabled:opacity-60',
-                                  !selected && 'border-gray-200 bg-white hover:bg-gray-50',
-                                )}
-                                style={
-                                  selected
-                                    ? {
-                                        borderColor: ui.primary,
-                                        backgroundColor: ui.secondary,
-                                        boxShadow: `0 0 0 2px ${ui.primary}33`,
-                                      }
-                                    : undefined
-                                }
-                              >
-                                {selected ? (
-                                  <span
-                                    className="absolute right-3 top-3 inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white"
-                                    style={{ backgroundColor: ui.primary }}
-                                  >
-                                    <Check className="size-3" aria-hidden />
-                                    {tTemplates('templateActive')}
-                                  </span>
-                                ) : null}
-                                <span
-                                  className="mb-3 inline-block rounded-md px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide"
-                                  style={{
-                                    backgroundColor: `${ui.accent}55`,
-                                    color: ui.primary,
-                                  }}
-                                >
-                                  {tTemplates(option.tagKey)}
-                                </span>
-                                <div className="mb-3 flex gap-1.5" aria-hidden>
-                                  <span
-                                    className="h-6 flex-1 rounded-md border border-black/5"
-                                    style={{ backgroundColor: ui.primary }}
-                                  />
-                                  <span
-                                    className="h-6 flex-1 rounded-md border border-black/5"
-                                    style={{ backgroundColor: ui.secondary }}
-                                  />
-                                  <span
-                                    className="h-6 flex-1 rounded-md border border-black/5"
-                                    style={{ backgroundColor: ui.accent }}
-                                  />
-                                </div>
-                                <p className="text-sm font-semibold text-gray-900">
-                                  {tTemplates(option.labelKey)}
-                                </p>
-                                <p className="mt-1 text-xs leading-relaxed text-gray-500">
-                                  {tTemplates(option.descriptionKey)}
-                                </p>
-                                {isSavingTemplate ? (
-                                  <p
-                                    className="mt-2 text-xs font-medium"
-                                    style={{ color: ui.primary }}
-                                  >
-                                    {tTemplates('templateSaving')}
-                                  </p>
-                                ) : null}
-                              </button>
-                            )
-                          })}
-                        </div>
-                      </div>
+                      <StoreTemplatePicker
+                        value={branding.storeTemplate}
+                        savingId={templateSavingId}
+                        disabled={isLoading}
+                        onSelect={handleTemplateSelect}
+                      />
 
                       <Separator />
 

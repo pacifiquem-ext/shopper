@@ -11,6 +11,7 @@ import { CartIconButton } from '@/components/shop/cart-icon-button'
 import { ProductDetailsBody, ProductDetailsTopBar } from '@/components/shop/product-details-body'
 import { SiteFooter } from '@/components/shop/site-footer'
 import { StoreContextSync } from '@/components/shop/store-context-sync'
+import { ClassicMarketProductPage } from '@/components/store-templates/classic-market/classic-market-product-page'
 import { IshushoCraftsProductPage } from '@/components/store-templates/ishusho-crafts/ishusho-crafts-product-page'
 import { VibrantMarketProductPage } from '@/components/store-templates/vibrant-market/vibrant-market-product-page'
 import { extractSubdomain, isProductId, normalizeStoreSubdomain } from '@/lib/host'
@@ -142,22 +143,19 @@ export default async function ProductDetailsPage({
     )
   }
 
+  const tKc = await getTranslations('storeTemplates.classicMarket')
   return (
-    <div className='min-h-screen bg-[#F5F1EB] text-[#2B2B2B]'>
-      <StoreContextSync subdomain={data.store.subdomain} />
-      <CartIconButton />
-      <BecomeSellerShopButton label={tMarketplace('becomeSeller')} position='nearCart' />
-
-      <ProductDetailsTopBar
-        theme='default'
-        backLabel={t('backToShop')}
-        approvedLabel={t('approvedStore')}
-        backHref={shopHref}
-      />
-
-      <ProductDetailsBody product={data} theme='default' />
-
-      <SiteFooter store={storeFooter} />
-    </div>
+    <ClassicMarketProductPage
+      product={data}
+      marketplaceHref={marketplaceHref}
+      cartHref={cartHref}
+      shopHref={shopHref}
+      isSubdomainHost={Boolean(subdomain)}
+      texts={{
+        backToShop: t('backToShop'),
+        approvedStore: t('approvedStore'),
+        searchAria: tKc('searchAria'),
+      }}
+    />
   )
 }

@@ -21,6 +21,7 @@ import { buildSiteFooterStoreContext } from '@/lib/store-footer-context'
 import { cn } from '@/lib/utils'
 import { IshushoCraftsStorefront } from '@/components/store-templates/ishusho-crafts/ishusho-crafts-storefront'
 import { VibrantMarketStorefront } from '@/components/store-templates/vibrant-market/vibrant-market-storefront'
+import { ClassicMarketStorefront } from '@/components/store-templates/classic-market/classic-market-storefront'
 import {
   isIshushoCraftsTemplate,
   isVibrantMarketTemplate,
@@ -316,8 +317,46 @@ export async function ShopPage({
     )
   }
 
+  if (storeContext && catalogStore) {
+    const template = resolveStoreTemplate(catalogStore)
+    if (!isIshushoCraftsTemplate(template) && !isVibrantMarketTemplate(template)) {
+      const tKc = await getTranslations('storeTemplates.classicMarket')
+      const storeCartHref = storeCartPath(catalogStore.subdomain, false)
+      return (
+        <ClassicMarketStorefront
+          store={catalogStore}
+          categories={categories}
+          filters={catalogFilters}
+          filterLabels={filterLabels}
+          marketplaceHref={null}
+          cartHref={storeCartHref}
+          isSubdomainHost={false}
+          catalogSections={{
+            allProducts: {
+              title: tKc('productsTitle'),
+              emptyMessage: t('storeEmpty', { store: catalogStore.displayName }),
+              items: toCells(visibleProducts),
+            },
+          }}
+          texts={{
+            eyebrow: tKc('eyebrow'),
+            defaultTagline: tKc('defaultTagline'),
+            ctaShop: tKc('ctaShop'),
+            ctaBrowse: tKc('ctaBrowse'),
+            searchAria: tKc('searchAria'),
+            addToCart: tKc('addToCart'),
+            productsTitle: tKc('productsTitle'),
+            footerTagline: tKc('footerTagline', { store: catalogStore.displayName }),
+            poweredBy: tKc('poweredBy'),
+            marketplaceLabel: tKc('marketplaceLabel'),
+          }}
+        />
+      )
+    }
+  }
+
   return (
-    <div className='min-h-screen bg-[#F5F1EB] text-[#2B2B2B]'>
+    <div className='min-h-screen bg-bg-weak-50 text-text-strong-950'>
       {!(compactHero && !storeContext) ? <CartIconButton variant='fixed' /> : null}
       {!storeContext && !compactHero ? <BecomeSellerShopButton label={t('becomeSeller')} /> : null}
       {compactHero && !storeContext ? (
@@ -329,13 +368,13 @@ export async function ShopPage({
             )}
           >
             <div className='min-w-0 flex-1'>
-              <p className='mb-0.5 flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-[#7D8F69] sm:text-[11px]'>
+              <p className='mb-0.5 flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-primary-base sm:text-[11px]'>
                 <Sparkles className='size-3 shrink-0' aria-hidden />
                 <span className='truncate'>{t('heroEyebrow')}</span>
               </p>
-              <h1 className='text-xl font-black tracking-[-0.04em] text-[#2B2B2B] sm:text-2xl md:text-3xl'>
+              <h1 className='text-xl font-black tracking-[-0.04em] text-text-strong-950 sm:text-2xl md:text-3xl'>
                 {t('brandTitle')}
-                <span className='text-[#B76E5D]'>{t('brandSuffix')}</span>
+                <span className='text-primary-base'>{t('brandSuffix')}</span>
               </h1>
             </div>
             <div className='flex w-full shrink-0 items-center justify-end gap-1.5 sm:w-auto sm:gap-2'>
@@ -343,10 +382,10 @@ export async function ShopPage({
                 href='/login'
                 prefetch={false}
                 aria-label={t('login')}
-                className='group inline-flex h-9 shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-full border border-[rgba(43,43,43,0.14)] bg-white px-3 text-xs font-semibold leading-none text-[#2B2B2B] shadow-sm transition-colors hover:border-[#B76E5D]/45 hover:bg-[#FAF7F3] hover:text-[#2B2B2B] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B76E5D]/40 sm:h-10 sm:px-4 sm:text-sm'
+                className='group inline-flex h-9 shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-full border border-stroke-soft-200 bg-white px-3 text-xs font-semibold leading-none text-text-strong-950 shadow-sm transition-colors hover:border-primary-base/45 hover:bg-bg-weak-50 hover:text-text-strong-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-base/40 sm:h-10 sm:px-4 sm:text-sm'
               >
                 <LogIn
-                  className='size-3.5 shrink-0 text-[#2B2B2B] transition-colors group-hover:text-[#2B2B2B] sm:size-4'
+                  className='size-3.5 shrink-0 text-text-strong-950 transition-colors group-hover:text-text-strong-950 sm:size-4'
                   aria-hidden
                   strokeWidth={2.25}
                 />
@@ -356,7 +395,7 @@ export async function ShopPage({
                 href={merchantSignupHref() as '/signup'}
                 prefetch={false}
                 aria-label={t('becomeSeller')}
-                className='group inline-flex h-9 shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-full bg-[#B76E5D] px-3 text-xs font-semibold leading-none text-white shadow-[0_4px_18px_rgba(183,110,93,0.38)] transition-colors hover:bg-[#A66250] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B76E5D]/50 sm:h-10 sm:px-4 sm:text-sm'
+                className='group inline-flex h-9 shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-full bg-primary-base px-3 text-xs font-semibold leading-none text-white shadow-[0_4px_18px_color-mix(in_srgb,var(--color-primary-base)_38%,transparent)] transition-colors hover:bg-primary-darker hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-base/50 sm:h-10 sm:px-4 sm:text-sm'
               >
                 <StoreIcon
                   className='size-3.5 shrink-0 text-white transition-colors group-hover:text-white sm:size-4'
@@ -372,9 +411,9 @@ export async function ShopPage({
       ) : null}
 
       {!(compactHero && !storeContext) ? (
-      <section className='relative isolate overflow-hidden border-b border-[rgba(43,43,43,0.08)] bg-[#F5F1EB]'>
-        <div aria-hidden className='pointer-events-none absolute -left-32 top-12 size-[420px] rounded-full bg-[#B76E5D]/10 blur-3xl' />
-        <div aria-hidden className='pointer-events-none absolute -right-24 bottom-0 size-[460px] rounded-full bg-[#7D8F69]/12 blur-3xl' />
+      <section className='relative isolate overflow-hidden border-b border-stroke-soft-200 bg-bg-weak-50'>
+        <div aria-hidden className='pointer-events-none absolute -left-32 top-12 size-[420px] rounded-full bg-primary-base/10 blur-3xl' />
+        <div aria-hidden className='pointer-events-none absolute -right-24 bottom-0 size-[460px] rounded-full bg-primary-alpha-10 blur-3xl' />
 
         <div
           className={cn(
@@ -384,17 +423,17 @@ export async function ShopPage({
         >
           <div className='os-fade-up relative z-10 max-w-3xl'>
             {storeContext ? (
-              <span className='mb-5 inline-flex items-center gap-2 rounded-full border border-[#B76E5D]/30 bg-[#B76E5D]/10 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.08em] text-[#B76E5D] backdrop-blur-md'>
+              <span className='mb-5 inline-flex items-center gap-2 rounded-full border border-[#B76E5D]/30 bg-primary-base/10 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.08em] text-primary-base backdrop-blur-md'>
                 <StoreIcon className='size-3.5' aria-hidden strokeWidth={2.25} />
                 {t('storeEyebrow')}
               </span>
             ) : (
-              <span className='mb-5 inline-flex items-center gap-2 rounded-full border border-[rgba(43,43,43,0.08)] bg-white/60 px-3 py-1.5 text-xs font-medium text-[#2B2B2B] shadow-[0_2px_6px_rgba(43,43,43,0.04)] backdrop-blur-md'>
-                <Sparkles className='size-3.5 text-[#7D8F69]' aria-hidden />
+              <span className='mb-5 inline-flex items-center gap-2 rounded-full border border-stroke-soft-200 bg-white/60 px-3 py-1.5 text-xs font-medium text-text-strong-950 shadow-[0_2px_6px_rgba(43,43,43,0.04)] backdrop-blur-md'>
+                <Sparkles className='size-3.5 text-primary-base' aria-hidden />
                 {t('heroEyebrow')}
               </span>
             )}
-            <h1 className='max-w-4xl text-5xl font-black tracking-[-0.055em] text-[#2B2B2B] md:text-7xl'>
+            <h1 className='max-w-4xl text-5xl font-black tracking-[-0.055em] text-text-strong-950 md:text-7xl'>
               {storeContext ? storeContext.displayName : t('heroTitle')}
             </h1>
             <p className='mt-6 max-w-2xl text-base leading-8 text-[#6E6A66] md:text-lg'>
@@ -403,17 +442,17 @@ export async function ShopPage({
                 : t('heroSubtitle')}
             </p>
             <div className='mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap'>
-              <Button asChild size='lg' className='h-13 rounded-full bg-[#B76E5D] px-8 text-white shadow-[0_12px_32px_rgba(183,110,93,0.28)] transition-transform hover:-translate-y-0.5 hover:bg-[#A66250]'>
+              <Button asChild size='lg' className='h-13 rounded-full bg-primary-base px-8 text-white shadow-[0_12px_32px_rgba(183,110,93,0.28)] transition-transform hover:-translate-y-0.5 hover:bg-primary-darker'>
                 <a href='#products'>
                   {t('heroCta')}
                   <ArrowRight className='size-4' aria-hidden />
                 </a>
               </Button>
-              <Button asChild size='lg' variant='outline' className='h-13 rounded-full border-[rgba(43,43,43,0.08)] bg-white/60 px-8 text-[#2B2B2B] backdrop-blur-md hover:border-[#B76E5D]/30 hover:bg-white/80 hover:text-[#2B2B2B]'>
+              <Button asChild size='lg' variant='outline' className='h-13 rounded-full border-stroke-soft-200 bg-white/60 px-8 text-text-strong-950 backdrop-blur-md hover:border-[#B76E5D]/30 hover:bg-white/80 hover:text-text-strong-950'>
                 <a href='#new-arrivals'>{t('heroSecondaryCta')}</a>
               </Button>
               {!storeContext ? (
-                <Button asChild size='lg' variant='outline' className='h-13 rounded-full border-[#B76E5D]/35 bg-white/70 px-8 text-[#B76E5D] backdrop-blur-md hover:border-[#B76E5D]/50 hover:bg-white'>
+                <Button asChild size='lg' variant='outline' className='h-13 rounded-full border-[#B76E5D]/35 bg-white/70 px-8 text-primary-base backdrop-blur-md hover:border-[#B76E5D]/50 hover:bg-white'>
                   <Link href={merchantSignupHref() as '/signup'} prefetch={false}>
                     {t('becomeSeller')}
                   </Link>
@@ -421,16 +460,16 @@ export async function ShopPage({
               ) : null}
             </div>
             <div className='mt-8 grid max-w-xl grid-cols-3 gap-3 text-sm'>
-              <div className='rounded-2xl border border-[rgba(43,43,43,0.08)] bg-white/60 p-4 shadow-[0_1px_2px_rgba(43,43,43,0.03)] backdrop-blur-md'>
-                <p className='text-2xl font-bold text-[#2B2B2B]'>{products.length}</p>
+              <div className='rounded-2xl border border-stroke-soft-200 bg-white/60 p-4 shadow-[0_1px_2px_rgba(43,43,43,0.03)] backdrop-blur-md'>
+                <p className='text-2xl font-bold text-text-strong-950'>{products.length}</p>
                 <p className='text-[#6E6A66]'>{t('statProducts')}</p>
               </div>
-              <div className='rounded-2xl border border-[rgba(43,43,43,0.08)] bg-white/60 p-4 shadow-[0_1px_2px_rgba(43,43,43,0.03)] backdrop-blur-md'>
-                <p className='text-2xl font-bold text-[#2B2B2B]'>{categories.length}</p>
+              <div className='rounded-2xl border border-stroke-soft-200 bg-white/60 p-4 shadow-[0_1px_2px_rgba(43,43,43,0.03)] backdrop-blur-md'>
+                <p className='text-2xl font-bold text-text-strong-950'>{categories.length}</p>
                 <p className='text-[#6E6A66]'>{t('statCategories')}</p>
               </div>
-              <div className='rounded-2xl border border-[rgba(43,43,43,0.08)] bg-white/60 p-4 shadow-[0_1px_2px_rgba(43,43,43,0.03)] backdrop-blur-md'>
-                <p className='text-2xl font-bold text-[#2B2B2B]'>{products.reduce((sum, p) => sum + availableStock(p), 0)}</p>
+              <div className='rounded-2xl border border-stroke-soft-200 bg-white/60 p-4 shadow-[0_1px_2px_rgba(43,43,43,0.03)] backdrop-blur-md'>
+                <p className='text-2xl font-bold text-text-strong-950'>{products.reduce((sum, p) => sum + availableStock(p), 0)}</p>
                 <p className='text-[#6E6A66]'>{t('statStock')}</p>
               </div>
             </div>
@@ -448,7 +487,7 @@ export async function ShopPage({
                 <Link
                   href={`/shop/${product.id}`}
                   key={product.id}
-                  className={`absolute w-56 overflow-hidden rounded-[2rem] border border-[rgba(43,43,43,0.08)] bg-white/65 p-2 shadow-[0_24px_60px_rgba(43,43,43,0.12)] backdrop-blur-md transition-transform hover:scale-[1.025] hover:border-[#B76E5D]/40 ${positions[index]}`}
+                  className={`absolute w-56 overflow-hidden rounded-[2rem] border border-stroke-soft-200 bg-white/65 p-2 shadow-[0_24px_60px_rgba(43,43,43,0.12)] backdrop-blur-md transition-transform hover:scale-[1.025] hover:border-[#B76E5D]/40 ${positions[index]}`}
                 >
                   <div className='aspect-square overflow-hidden rounded-[1.45rem] bg-[#EAE4DC]'>
                     {img ? (
@@ -460,7 +499,7 @@ export async function ShopPage({
                     )}
                   </div>
                   <div className='px-2 py-3'>
-                    <p className='line-clamp-1 text-sm font-semibold text-[#2B2B2B]'>{product.name}</p>
+                    <p className='line-clamp-1 text-sm font-semibold text-text-strong-950'>{product.name}</p>
                     <p className='text-xs text-[#6E6A66]'>{formatRwf(product.priceFrom ?? 0)} RWF</p>
                   </div>
                 </Link>

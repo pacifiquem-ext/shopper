@@ -10,6 +10,7 @@ trigger: always_on
 - Zero prop-drilling; Zustand for cross-component state
 - All user-facing text must be translatable
 - No inline logic that belongs in services or stores
+- **Design system:** AlignUI v1.2 tokens + components — see `design-system/MASTER.md` and `client/src/components/alignui/`. Prefer AlignUI semantic colors (`bg-bg-weak-50`, `text-text-strong-950`, `primary-base`, `stroke-soft-200`) over ad-hoc hex or leftover terracotta/sage classes.
 
 ## Directory Structure
 
@@ -20,7 +21,8 @@ src/
 │   ├── (onboarding)/       # Route group: store setup flow
 │   └── dashboard/          # Protected merchant dashboard routes
 ├── components/
-│   ├── ui/                 # shadcn/ui base components — DO NOT modify
+│   ├── alignui/            # AlignUI free base components (Button, Input, Label, …)
+│   ├── ui/                 # Compatibility bridges restyled to AlignUI tokens
 │   ├── auth/               # Auth-specific components
 │   ├── dashboard/
 │   │   ├── shared/         # Reusable dashboard components (header, sidebar, filters)
