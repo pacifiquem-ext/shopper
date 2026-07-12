@@ -7,6 +7,10 @@ import { APP_ENVIRONMENT } from '../../app/enums/app.enum';
 import { DatabaseService } from '../../common/database/services/database.service';
 import { withDbRetry } from '../../common/database/utils/with-db-retry';
 
+// Marketplace grouped catalog still loads products in one query for category
+// grouping; hard cap prevents unbounded memory/IO as the catalog grows.
+const CATALOG_GROUPED_MAX_PRODUCTS = 2000;
+
 const catalogStoreSelect = {
     id: true,
     displayName: true,
@@ -148,6 +152,7 @@ export class CatalogService {
                 this.prisma.product.findMany({
                     where,
                     orderBy: [{ category: 'asc' }, { name: 'asc' }],
+                    take: CATALOG_GROUPED_MAX_PRODUCTS,
                     include: catalogProductInclude,
                 }),
             { label: 'catalog.getCatalogGrouped' }

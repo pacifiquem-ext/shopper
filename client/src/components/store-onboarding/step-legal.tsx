@@ -42,7 +42,7 @@ export function StepLegal() {
         </h3>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div className="relative space-y-0">
-            <Label className="text-sm font-semibold text-gray-700">
+            <Label htmlFor="onboarding-owner-full-name" className="text-sm font-semibold text-gray-700">
               {t('legal.fullName', { defaultValue: 'Full Name' })}
             </Label>
             <div
@@ -54,21 +54,23 @@ export function StepLegal() {
               )}
             >
               <Input
+                id="onboarding-owner-full-name"
                 value={draft.ownerFullName || ''}
                 onChange={(e) => setOwnerFullName(e.target.value)}
-                className="rounded-none border-0 bg-transparent px-0 pb-1 text-lg shadow-none focus:outline-none focus-visible:ring-0 focus-visible:ring-transparent focus-visible:ring-offset-0"
+                aria-invalid={ownerFullNameField.hasError || undefined}
+                className="rounded-none border-0 bg-transparent px-0 pb-1 text-lg shadow-none focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-base/40 focus-visible:ring-offset-0"
                 placeholder="John Doe"
               />
             </div>
             {ownerFullNameField.hasError && (
-              <div className="absolute bg-white pt-1 text-xs font-medium text-red-500">
+              <div className="absolute bg-white pt-1 text-xs font-medium text-red-500" role="alert">
                 {ownerFullNameField.errorMessage}
               </div>
             )}
           </div>
 
           <div className="relative space-y-0">
-            <Label className="text-sm font-semibold text-gray-700">
+            <Label htmlFor="onboarding-owner-nationality" className="text-sm font-semibold text-gray-700">
               {t('legal.nationality', { defaultValue: 'Nationality' })}
             </Label>
             <div
@@ -80,14 +82,16 @@ export function StepLegal() {
               )}
             >
               <Input
+                id="onboarding-owner-nationality"
                 value={draft.ownerNationality || ''}
                 onChange={(e) => setOwnerNationality(e.target.value)}
-                className="rounded-none border-0 bg-transparent px-0 pb-1 text-lg shadow-none focus:outline-none focus-visible:ring-0 focus-visible:ring-transparent focus-visible:ring-offset-0"
+                aria-invalid={ownerNationalityField.hasError || undefined}
+                className="rounded-none border-0 bg-transparent px-0 pb-1 text-lg shadow-none focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-base/40 focus-visible:ring-offset-0"
                 placeholder="Rwandan"
               />
             </div>
             {ownerNationalityField.hasError && (
-              <div className="absolute bg-white pt-1 text-xs font-medium text-red-500">
+              <div className="absolute bg-white pt-1 text-xs font-medium text-red-500" role="alert">
                 {ownerNationalityField.errorMessage}
               </div>
             )}
@@ -96,7 +100,7 @@ export function StepLegal() {
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div className="relative space-y-0">
-            <Label className="text-sm font-semibold text-gray-700">
+            <Label htmlFor="onboarding-owner-email" className="text-sm font-semibold text-gray-700">
               {t('legal.emailAddress', { defaultValue: 'Email Address' })}
             </Label>
             <div
@@ -108,22 +112,24 @@ export function StepLegal() {
               )}
             >
               <Input
+                id="onboarding-owner-email"
                 type="email"
                 value={draft.ownerEmail || ''}
                 onChange={(e) => setOwnerEmail(e.target.value)}
-                className="rounded-none border-0 bg-transparent px-0 pb-1 text-lg shadow-none focus:outline-none focus-visible:ring-0 focus-visible:ring-transparent focus-visible:ring-offset-0"
+                aria-invalid={ownerEmailField.hasError || undefined}
+                className="rounded-none border-0 bg-transparent px-0 pb-1 text-lg shadow-none focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-base/40 focus-visible:ring-offset-0"
                 placeholder="owner@domain.com"
               />
             </div>
             {ownerEmailField.hasError && (
-              <div className="absolute bg-white pt-1 text-xs font-medium text-red-500">
+              <div className="absolute bg-white pt-1 text-xs font-medium text-red-500" role="alert">
                 {ownerEmailField.errorMessage}
               </div>
             )}
           </div>
 
           <div className="relative space-y-0">
-            <Label className="text-sm font-semibold text-gray-700">
+            <Label htmlFor="onboarding-owner-phone" className="text-sm font-semibold text-gray-700">
               {t('legal.phoneNumber', { defaultValue: 'Phone Number' })}
             </Label>
             <div
@@ -135,15 +141,17 @@ export function StepLegal() {
               )}
             >
               <Input
+                id="onboarding-owner-phone"
                 type="tel"
                 value={draft.ownerPhoneNumber || ''}
                 onChange={(e) => setOwnerPhoneNumber(e.target.value)}
-                className="rounded-none border-0 bg-transparent px-0 pb-1 text-lg shadow-none focus:outline-none focus-visible:ring-0 focus-visible:ring-transparent focus-visible:ring-offset-0"
+                aria-invalid={ownerPhoneNumberField.hasError || undefined}
+                className="rounded-none border-0 bg-transparent px-0 pb-1 text-lg shadow-none focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-base/40 focus-visible:ring-offset-0"
                 placeholder="+250 780 000 000"
               />
             </div>
             {ownerPhoneNumberField.hasError && (
-              <div className="absolute bg-white pt-1 text-xs font-medium text-red-500">
+              <div className="absolute bg-white pt-1 text-xs font-medium text-red-500" role="alert">
                 {ownerPhoneNumberField.errorMessage}
               </div>
             )}
@@ -151,7 +159,7 @@ export function StepLegal() {
         </div>
 
         <div className="relative space-y-0">
-          <Label className="text-sm font-semibold text-gray-700">
+          <Label htmlFor="onboarding-country" className="text-sm font-semibold text-gray-700">
             {t('legal.registrationCountry', { defaultValue: 'Registration Country' })}
           </Label>
           <div
@@ -163,14 +171,16 @@ export function StepLegal() {
             )}
           >
             <Input
+              id="onboarding-country"
               value={draft.country || ''}
               onChange={(e) => setCountry(e.target.value)}
-              className="rounded-none border-0 bg-transparent px-0 pb-1 text-lg shadow-none focus:outline-none focus-visible:ring-0 focus-visible:ring-transparent focus-visible:ring-offset-0"
+              aria-invalid={countryField.hasError || undefined}
+              className="rounded-none border-0 bg-transparent px-0 pb-1 text-lg shadow-none focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-base/40 focus-visible:ring-offset-0"
               placeholder="RW"
             />
           </div>
           {countryField.hasError && (
-            <div className="absolute bg-white pt-1 text-xs font-medium text-red-500">
+            <div className="absolute bg-white pt-1 text-xs font-medium text-red-500" role="alert">
               {countryField.errorMessage}
             </div>
           )}

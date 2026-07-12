@@ -11,6 +11,7 @@ import {
   type DeliveryZoneApi,
 } from '@/services/delivery-zones.service'
 import { TurningZeroLoader } from '@/components/ui/turning-zero-loader'
+import { DeleteConfirmationDialog } from '@/components/dashboard/shared/delete-confirmation-dialog'
 
 interface DeliveryZoneLocal {
   id: string
@@ -21,9 +22,12 @@ interface DeliveryZoneLocal {
 
 export default function DeliverySettingsPage() {
   const t = useTranslations('dashboard')
+  const td = useTranslations('dashboard.deliveryZones')
   const [zones, setZones] = useState<DeliveryZoneLocal[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
+  const [zoneToDelete, setZoneToDelete] = useState<DeliveryZoneLocal | null>(null)
+  const [isDeleting, setIsDeleting] = useState(false)
 
   useEffect(() => {
     async function load() {
@@ -58,15 +62,21 @@ export default function DeliverySettingsPage() {
     setZones(zones.map((z) => (z.id === id ? { ...z, [field]: value } : z)))
   }
 
-  const removeZone = async (id: string) => {
-    if (!id.startsWith('temp_')) {
-      try {
+  const confirmRemoveZone = async () => {
+    if (!zoneToDelete) return
+    const id = zoneToDelete.id
+    setIsDeleting(true)
+    try {
+      if (!id.startsWith('temp_')) {
         await deliveryZonesService.delete(id)
-      } catch {
-        return
       }
+      setZones((prev) => prev.filter((z) => z.id !== id))
+      setZoneToDelete(null)
+    } catch {
+      // axios interceptor shows error toast
+    } finally {
+      setIsDeleting(false)
     }
-    setZones(zones.filter((z) => z.id !== id))
   }
 
   const handleSave = async () => {
@@ -119,7 +129,7 @@ export default function DeliverySettingsPage() {
           <h1 className="text-3xl font-bold tracking-tight text-text-strong-950">
             {t('nav.deliverySettings')}
           </h1>
-          <p className="mt-2 text-text-soft-400">Configure delivery zones manually.</p>
+          <p className="mt-2 text-text-soft-400">{td('subtitle')}</p>
         </div>
         <div className="flex gap-3">
           <Button
@@ -129,7 +139,7 @@ export default function DeliverySettingsPage() {
             className="h-10 rounded-lg border-stroke-soft-200 bg-white text-text-sub-600 hover:bg-primary-alpha-10 hover:text-primary-base"
           >
             <Plus className="mr-2 h-4 w-4" />
-            Add Zone
+            {td('addZone')}
           </Button>
           <Button
             type="button"
@@ -138,7 +148,7 @@ export default function DeliverySettingsPage() {
             className="h-10 rounded-lg bg-primary-base px-6 text-white hover:bg-primary-darker disabled:opacity-50"
           >
             <Save className="mr-2 h-4 w-4" />
-            {isSaving ? 'Saving...' : 'Save Changes'}
+            {isSaving ? td('saving') : td('saveChanges')}
           </Button>
         </div>
       </div>
@@ -156,10 +166,10 @@ export default function DeliverySettingsPage() {
                   <div className="flex items-center gap-2">
                     <Truck className="h-5 w-5 text-primary-base" />
                     <span className="text-sm font-semibold text-text-sub-600">
-                      Zone {index + 1}
+                      {td('zoneLabel', { index: index + 1 })}
                       {zone.id.startsWith('temp_') && (
                         <span className="ml-2 rounded-full bg-amber-100 px-2 py-0.5 text-xs text-amber-700">
-                          Unsaved
+                          {td('unsaved')}
                         </span>
                       )}
                     </span>
@@ -167,10 +177,10 @@ export default function DeliverySettingsPage() {
                   {zones.length > 1 && (
                     <Button
                       type="button"
-                      onClick={() => removeZone(zone.id)}
+                      onClick={() => setZoneToDelete(zone)}
                       variant="ghost"
                       size="sm"
-                      className="h-8 text-rose-600 hover:bg-rose-50 hover:text-rose-700"
+                      className="h-8 text-error-base hover:bg-error-alpha-10 hover:text-error-darker"
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
@@ -179,18 +189,18 @@ export default function DeliverySettingsPage() {
 
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
                   <div className="space-y-2">
-                    <Label className="text-xs font-semibold text-text-sub-600">Zone Name</Label>
+                    <Label className="text-xs font-semibold text-text-sub-600">{td('zoneName')}</Label>
                     <Input
                       value={zone.name}
                       onChange={(e) => updateZone(zone.id, 'name', e.target.value)}
-                      placeholder="e.g., Kigali City Center"
+                      placeholder={td('zoneNamePlaceholder')}
                       className="rounded-lg border-stroke-soft-200 bg-white"
                     />
                   </div>
 
                   <div className="space-y-2">
                     <Label className="text-xs font-semibold text-text-sub-600">
-                      Delivery Fee (RWF)
+                      {td('deliveryFee')}
                     </Label>
                     <Input
                       type="number"
@@ -202,7 +212,7 @@ export default function DeliverySettingsPage() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label className="text-xs font-semibold text-text-sub-600">ETA (Minutes)</Label>
+                    <Label className="text-xs font-semibold text-text-sub-600">{td('etaMinutes')}</Label>
                     <Input
                       type="number"
                       value={zone.etaMinutes}
@@ -220,10 +230,10 @@ export default function DeliverySettingsPage() {
                 <div className="text-center">
                   <Truck className="mx-auto h-12 w-12 text-gray-400" />
                   <p className="mt-2 text-sm font-medium text-text-sub-600">
-                    No delivery zones configured
+                    {td('emptyTitle')}
                   </p>
                   <p className="mt-1 text-xs text-text-soft-400">
-                    Click &quot;Add Zone&quot; to create your first delivery zone
+                    {td('emptyHint')}
                   </p>
                   <Button
                     type="button"
@@ -232,7 +242,7 @@ export default function DeliverySettingsPage() {
                     className="mt-4 h-9 rounded-lg border-stroke-soft-200 text-text-sub-600 hover:bg-primary-alpha-10 hover:text-primary-base"
                   >
                     <Plus className="mr-2 h-4 w-4" />
-                    Add First Zone
+                    {td('addFirstZone')}
                   </Button>
                 </div>
               </div>
@@ -240,6 +250,22 @@ export default function DeliverySettingsPage() {
           </div>
         )}
       </div>
+
+      <DeleteConfirmationDialog
+        open={!!zoneToDelete}
+        onOpenChange={(open) => {
+          if (!open) setZoneToDelete(null)
+        }}
+        onConfirm={confirmRemoveZone}
+        title={td('deleteTitle')}
+        description={td('deleteDescription')}
+        itemName={zoneToDelete?.name || td('unnamedZone')}
+        warningMessage={td('deleteWarning')}
+        permanentlyRemoveLabel={td('permanentlyRemove')}
+        confirmButtonText={td('deleteConfirm')}
+        cancelButtonText={td('cancel')}
+        isLoading={isDeleting}
+      />
     </div>
   )
 }

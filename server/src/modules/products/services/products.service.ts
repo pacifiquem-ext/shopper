@@ -1,91 +1,99 @@
 import { Injectable } from '@nestjs/common';
 import { ProductsRepository } from '../repositories/products.repository';
-import { ProductVariantsRepository } from '../repositories/product-variants.repository';
 import { DatabaseService } from '../../../common/database/services/database.service';
 import { CreateProductDto } from '../dtos/create-product.dto';
 import { UpdateProductDto } from '../dtos/update-product.dto';
 import { ProductFilterDto } from '../dtos/product-filter.dto';
-import {
-    ProductNotFoundException,
-    UnauthorizedStoreAccessException,
-} from '../../../common/exceptions/domain.exception';
+import { ProductNotFoundException } from '../../../common/exceptions/domain.exception';
 import { ProductStatus, StockStatus } from '../../../common/constants/status.constants';
-import { ProductStatus as PrismaProductStatus, StockStatus as PrismaStockStatus } from '@prisma/client';
+import {
+    ProductStatus as PrismaProductStatus,
+    StockStatus as PrismaStockStatus,
+} from '@prisma/client';
+
+const EXPORT_MAX_ROWS = 5000;
 
 @Injectable()
 export class ProductsService {
     constructor(
         private readonly productsRepository: ProductsRepository,
-        private readonly productVariantsRepository: ProductVariantsRepository,
         private readonly prisma: DatabaseService,
     ) {}
 
     async create(storeId: string, userId: string, dto: CreateProductDto) {
-        const product = await this.productsRepository.create({
-            name: dto.name,
-            description: dto.description,
-            vendor: dto.vendor,
-            category: dto.category,
-            status: (dto.status || ProductStatus.DRAFT) as PrismaProductStatus,
-            tags: dto.tags || [],
-            images: dto.images || [],
-            primaryImage: dto.primaryImage,
-            deliveryEnabled: dto.deliveryEnabled ?? true,
-            deliveryLocation: dto.deliveryLocation,
-            deliveryPrice: dto.deliveryPrice,
-            createdBy: userId,
-            updatedBy: userId,
-            store: {
-                connect: { id: storeId },
-            },
+        const productId = await this.prisma.$transaction(async tx => {
+            const product = await tx.product.create({
+                data: {
+                    name: dto.name,
+                    description: dto.description,
+                    vendor: dto.vendor,
+                    category: dto.category,
+                    status: (dto.status || ProductStatus.DRAFT) as PrismaProductStatus,
+                    tags: dto.tags || [],
+                    images: dto.images || [],
+                    primaryImage: dto.primaryImage,
+                    deliveryEnabled: dto.deliveryEnabled ?? true,
+                    deliveryLocation: dto.deliveryLocation,
+                    deliveryPrice: dto.deliveryPrice,
+                    createdBy: userId,
+                    updatedBy: userId,
+                    store: {
+                        connect: { id: storeId },
+                    },
+                },
+            });
+
+            for (let i = 0; i < dto.variants.length; i++) {
+                const variantData = dto.variants[i];
+                const sku = this.generateSku(dto.name, i);
+                const title = this.generateVariantTitle(variantData);
+
+                const variant = await tx.productVariant.create({
+                    data: {
+                        sku,
+                        title,
+                        colorName: variantData.colorName,
+                        colorHex: variantData.colorHex,
+                        size: variantData.size,
+                        model: variantData.model,
+                        price: variantData.price,
+                        compareAt: variantData.compareAt,
+                        cost: variantData.cost,
+                        product: {
+                            connect: { id: product.id },
+                        },
+                    },
+                });
+
+                const stockStatus = this.calculateStockStatus(variantData.stock, 10);
+
+                const inventoryRecord = await tx.inventoryRecord.create({
+                    data: {
+                        productVariantId: variant.id,
+                        onHand: variantData.stock,
+                        reserved: 0,
+                        available: variantData.stock,
+                        reorderPoint: 10,
+                        status: stockStatus as PrismaStockStatus,
+                        updatedBy: userId,
+                    },
+                });
+
+                await tx.inventoryEvent.create({
+                    data: {
+                        inventoryRecordId: inventoryRecord.id,
+                        type: 'CREATED',
+                        quantity: variantData.stock,
+                        reason: 'Initial stock',
+                        performedBy: userId,
+                    },
+                });
+            }
+
+            return product.id;
         });
 
-        for (let i = 0; i < dto.variants.length; i++) {
-            const variantData = dto.variants[i];
-            const sku = this.generateSku(dto.name, i);
-            const title = this.generateVariantTitle(variantData);
-
-            const variant = await this.productVariantsRepository.create({
-                sku,
-                title,
-                colorName: variantData.colorName,
-                colorHex: variantData.colorHex,
-                size: variantData.size,
-                model: variantData.model,
-                price: variantData.price,
-                compareAt: variantData.compareAt,
-                cost: variantData.cost,
-                product: {
-                    connect: { id: product.id },
-                },
-            });
-
-            const stockStatus = this.calculateStockStatus(variantData.stock, 10);
-
-            const inventoryRecord = await this.prisma.inventoryRecord.create({
-                data: {
-                    productVariantId: variant.id,
-                    onHand: variantData.stock,
-                    reserved: 0,
-                    available: variantData.stock,
-                    reorderPoint: 10,
-                    status: stockStatus as PrismaStockStatus,
-                    updatedBy: userId,
-                },
-            });
-
-            await this.prisma.inventoryEvent.create({
-                data: {
-                    inventoryRecordId: inventoryRecord.id,
-                    type: 'CREATED',
-                    quantity: variantData.stock,
-                    reason: 'Initial stock',
-                    performedBy: userId,
-                },
-            });
-        }
-
-        return this.findById(product.id, storeId);
+        return this.findById(productId, storeId);
     }
 
     async findAll(storeId: string, filters: ProductFilterDto) {
@@ -179,28 +187,22 @@ export class ProductsService {
             throw new ProductNotFoundException(id);
         }
 
-        const variantIds = product.variants.map((v) => v.id);
+        const variantIds = product.variants.map(v => v.id);
 
-        const orderLineItems = await this.prisma.orderLineItem.findMany({
-            where: {
-                productVariantId: { in: variantIds },
-            },
-            include: {
-                order: true,
-            },
-        });
+        const [totals, distinctOrders] = await Promise.all([
+            this.prisma.orderLineItem.aggregate({
+                where: { productVariantId: { in: variantIds } },
+                _sum: { total: true, quantity: true },
+            }),
+            this.prisma.orderLineItem.groupBy({
+                by: ['orderId'],
+                where: { productVariantId: { in: variantIds } },
+            }),
+        ]);
 
-        const totalRevenue = orderLineItems.reduce(
-            (sum, item) => sum + Number(item.total),
-            0,
-        );
-
-        const totalUnitsSold = orderLineItems.reduce(
-            (sum, item) => sum + item.quantity,
-            0,
-        );
-
-        const totalOrders = new Set(orderLineItems.map((item) => item.orderId)).size;
+        const totalRevenue = Number(totals._sum.total ?? 0);
+        const totalUnitsSold = totals._sum.quantity ?? 0;
+        const totalOrders = distinctOrders.length;
 
         return {
             productId: id,
@@ -212,14 +214,28 @@ export class ProductsService {
     }
 
     async exportCsv(storeId: string): Promise<string> {
+        // Cap rows for sync HTTP export; full/async export should use a background job later.
         const products = await this.productsRepository.findMany(storeId, {
+            take: EXPORT_MAX_ROWS,
             orderBy: { createdAt: 'desc' },
         });
 
-        const headers = ['ID', 'Name', 'Category', 'Vendor', 'Status', 'Min Price', 'Total Stock', 'Created At'];
-        const rows = products.map((p) => {
-            const totalStock = p.variants.reduce((sum, v) => sum + ((v as any).inventory?.onHand ?? 0), 0);
-            const prices = p.variants.map((v) => Number(v.price));
+        const headers = [
+            'ID',
+            'Name',
+            'Category',
+            'Vendor',
+            'Status',
+            'Min Price',
+            'Total Stock',
+            'Created At',
+        ];
+        const rows = products.map(p => {
+            const totalStock = p.variants.reduce(
+                (sum, v) => sum + ((v as any).inventory?.onHand ?? 0),
+                0,
+            );
+            const prices = p.variants.map(v => Number(v.price));
             const minPrice = prices.length > 0 ? Math.min(...prices) : 0;
             return [
                 p.id,
@@ -239,9 +255,13 @@ export class ProductsService {
     private toCsv(headers: string[], rows: any[][]): string {
         const esc = (v: any) => {
             const s = String(v ?? '');
-            return s.includes(',') || s.includes('"') || s.includes('\n') ? `"${s.replace(/"/g, '""')}"` : s;
+            return s.includes(',') || s.includes('"') || s.includes('\n')
+                ? `"${s.replace(/"/g, '""')}"`
+                : s;
         };
-        return [headers.join(','), ...rows.map((r) => r.map(esc).join(','))].join('\n');
+        return [headers.join(','), ...rows.map(r => r.map(esc).join(','))].join(
+            '\n',
+        );
     }
 
     private generateSku(productName: string, index: number): string {

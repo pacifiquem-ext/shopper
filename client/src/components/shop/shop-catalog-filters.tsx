@@ -178,6 +178,7 @@ export function ShopCatalogFilters({
           type='button'
           variant={!activeCategory ? 'default' : 'outline'}
           disabled={isPending}
+          aria-pressed={!activeCategory}
           onClick={() => navigate({ category: null })}
           className={cn(
             'shrink-0 rounded-full shadow-none',
@@ -196,6 +197,7 @@ export function ShopCatalogFilters({
               type='button'
               variant={isActive ? 'default' : 'outline'}
               disabled={isPending}
+              aria-pressed={isActive}
               onClick={() => navigate({ category: item.name })}
               className={cn(
                 'shrink-0 rounded-full shadow-none',

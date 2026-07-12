@@ -2,7 +2,7 @@
 
 import { AuthCard } from '@/components/auth/auth-card'
 import { Button } from '@/components/ui/button'
-import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form'
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { SignupInput, signupSchema } from '@/validations/auth'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -59,13 +59,14 @@ export default function SignupPage() {
             name="fullName"
             render={({ field }) => (
               <FormItem className="relative space-y-0">
+                <FormLabel className="sr-only">{t('fields.fullName')}</FormLabel>
                 <div className="focus-within:border-primary-base flex items-center border-b border-stroke-soft-200 py-2 transition-colors">
-                  <UserIcon className="mr-3 h-5 w-5 text-gray-400" />
+                  <UserIcon className="mr-3 h-5 w-5 text-gray-400" aria-hidden />
                   <FormControl>
                     <Input
                       autoComplete="name"
                       placeholder={t('fields.fullName')}
-                      className="rounded-none border-0 bg-transparent px-0 shadow-none focus:outline-none focus-visible:ring-0 focus-visible:ring-transparent focus-visible:ring-offset-0"
+                      className="rounded-none border-0 bg-transparent px-0 shadow-none focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-base/40 focus-visible:ring-offset-0"
                       {...field}
                     />
                   </FormControl>
@@ -80,14 +81,15 @@ export default function SignupPage() {
             name="phoneNumber"
             render={({ field }) => (
               <FormItem className="relative space-y-0 pt-3">
+                <FormLabel className="sr-only">{t('fields.phone')}</FormLabel>
                 <div className="focus-within:border-primary-base flex items-center border-b border-stroke-soft-200 py-2 transition-colors">
-                  <Phone className="mr-3 h-5 w-5 text-gray-400" />
+                  <Phone className="mr-3 h-5 w-5 text-gray-400" aria-hidden />
                   <FormControl>
                     <Input
                       type="tel"
                       autoComplete="tel"
                       placeholder={t('fields.phone')}
-                      className="rounded-none border-0 bg-transparent px-0 shadow-none focus:outline-none focus-visible:ring-0 focus-visible:ring-transparent focus-visible:ring-offset-0"
+                      className="rounded-none border-0 bg-transparent px-0 shadow-none focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-base/40 focus-visible:ring-offset-0"
                       {...field}
                     />
                   </FormControl>
@@ -103,15 +105,16 @@ export default function SignupPage() {
             name="email"
             render={({ field }) => (
               <FormItem className="relative space-y-0 pt-3">
+                <FormLabel className="sr-only">{t('fields.emailOptional')}</FormLabel>
                 <div className="focus-within:border-primary-base flex items-center border-b border-stroke-soft-200 py-2 transition-colors">
-                  <Mail className="mr-3 h-5 w-5 text-gray-400" />
+                  <Mail className="mr-3 h-5 w-5 text-gray-400" aria-hidden />
                   <FormControl>
                     <Input
                       type="email"
                       inputMode="email"
                       autoComplete="email"
                       placeholder={t('fields.emailOptional')}
-                      className="rounded-none border-0 bg-transparent px-0 shadow-none focus:outline-none focus-visible:ring-0 focus-visible:ring-transparent focus-visible:ring-offset-0"
+                      className="rounded-none border-0 bg-transparent px-0 shadow-none focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-base/40 focus-visible:ring-offset-0"
                       {...field}
                     />
                   </FormControl>
@@ -126,14 +129,15 @@ export default function SignupPage() {
             name="password"
             render={({ field }) => (
               <FormItem className="relative space-y-0 pt-3">
+                <FormLabel className="sr-only">{t('fields.password')}</FormLabel>
                 <div className="focus-within:border-primary-base flex items-center border-b border-stroke-soft-200 py-2 transition-colors">
-                  <Lock className="mr-3 h-5 w-5 text-gray-400" />
+                  <Lock className="mr-3 h-5 w-5 text-gray-400" aria-hidden />
                   <FormControl>
                     <Input
                       type="password"
                       autoComplete="new-password"
                       placeholder={t('fields.password')}
-                      className="rounded-none border-0 bg-transparent px-0 shadow-none focus:outline-none focus-visible:ring-0 focus-visible:ring-transparent focus-visible:ring-offset-0"
+                      className="rounded-none border-0 bg-transparent px-0 shadow-none focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-base/40 focus-visible:ring-offset-0"
                       {...field}
                     />
                   </FormControl>

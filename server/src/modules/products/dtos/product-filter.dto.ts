@@ -1,5 +1,5 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsOptional, IsString, IsEnum, IsInt, Min } from 'class-validator';
+import { IsOptional, IsString, IsEnum, IsInt, Min, Max } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ProductStatus } from '../../../common/constants/status.constants';
 
@@ -11,11 +11,12 @@ export class ProductFilterDto {
     @Min(1)
     page?: number = 1;
 
-    @ApiPropertyOptional({ example: 10 })
+    @ApiPropertyOptional({ example: 10, maximum: 100 })
     @IsOptional()
     @Type(() => Number)
     @IsInt()
     @Min(1)
+    @Max(100)
     limit?: number = 10;
 
     @ApiPropertyOptional({ example: 'ACTIVE', enum: ProductStatus })

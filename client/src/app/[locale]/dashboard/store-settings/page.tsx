@@ -46,6 +46,7 @@ import {
   deliveryZonesService,
   type DeliveryZoneApi,
 } from '@/services/delivery-zones.service'
+import { DeleteConfirmationDialog } from '@/components/dashboard/shared/delete-confirmation-dialog'
 
 interface DeliveryZoneLocal {
   id: string
@@ -78,6 +79,8 @@ export default function StoreSettingsPage() {
   }, [tabParam])
 
   const [isLoading, setIsLoading] = useState(true)
+  const [loadError, setLoadError] = useState(false)
+  const [reloadKey, setReloadKey] = useState(0)
   const [isSaving, setIsSaving] = useState(false)
   const [isLogoUploading, setIsLogoUploading] = useState(false)
   const [templateSavingId, setTemplateSavingId] = useState<StoreTemplateId | null>(null)
@@ -123,6 +126,9 @@ export default function StoreSettingsPage() {
   })
 
   const [deliveryZones, setDeliveryZones] = useState<DeliveryZoneLocal[]>([])
+  const [zoneToDelete, setZoneToDelete] = useState<DeliveryZoneLocal | null>(null)
+  const [isDeletingZone, setIsDeletingZone] = useState(false)
+  const td = useTranslations('dashboard.deliveryZones')
 
   const [subscription] = useState({
     plan: 'Professional',
@@ -156,7 +162,7 @@ export default function StoreSettingsPage() {
   )
 
   const handleTemplateSelect = async (templateId: StoreTemplateId) => {
-    if (templateSavingId || isLoading) return
+    if (templateSavingId || isLoading || loadError) return
 
     const previous = branding.storeTemplate
     const preset = STORE_TEMPLATE_BRAND_PRESETS[templateId]
@@ -199,6 +205,7 @@ export default function StoreSettingsPage() {
   useEffect(() => {
     async function load() {
       setIsLoading(true)
+      setLoadError(false)
       try {
         const [settingsRes, zonesRes] = await Promise.all([
           storeSettingsService.getSettings(),
@@ -250,15 +257,16 @@ export default function StoreSettingsPage() {
           )
         }
       } catch {
-        // silently fall back to empty defaults
+        setLoadError(true)
       } finally {
         setIsLoading(false)
       }
     }
     load()
-  }, [syncBrandingFromSettings])
+  }, [syncBrandingFromSettings, reloadKey])
 
   const handleSave = async () => {
+    if (loadError || isLoading) return
     setIsSaving(true)
     try {
       if (activeTab === 'business') {
@@ -341,15 +349,21 @@ export default function StoreSettingsPage() {
     )
   }
 
-  const removeDeliveryZone = async (id: string) => {
-    if (!id.startsWith('temp_')) {
-      try {
+  const confirmRemoveDeliveryZone = async () => {
+    if (!zoneToDelete) return
+    const id = zoneToDelete.id
+    setIsDeletingZone(true)
+    try {
+      if (!id.startsWith('temp_')) {
         await deliveryZonesService.delete(id)
-      } catch {
-        return
       }
+      setDeliveryZones((prev) => prev.filter((zone) => zone.id !== id))
+      setZoneToDelete(null)
+    } catch {
+      // axios interceptor shows error toast
+    } finally {
+      setIsDeletingZone(false)
     }
-    setDeliveryZones(deliveryZones.filter((zone) => zone.id !== id))
   }
 
   const handleLogoUpload = async (file: File | null) => {
@@ -400,7 +414,7 @@ export default function StoreSettingsPage() {
         <Button
           type="button"
           onClick={handleSave}
-          disabled={isSaving || isLoading || activeTab === 'subscription'}
+          disabled={isSaving || isLoading || loadError || activeTab === 'subscription'}
           className="h-10 w-full rounded-lg bg-primary-base px-6 text-white hover:bg-primary-darker disabled:opacity-50 sm:w-auto"
         >
           <Save className="mr-2 h-4 w-4" />
@@ -408,9 +422,27 @@ export default function StoreSettingsPage() {
         </Button>
       </div>
 
+      {loadError ? (
+        <div className="flex flex-col items-start gap-3 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-sm font-medium text-rose-800">{t('storeSettings.loadError')}</p>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => setReloadKey((k) => k + 1)}
+            className="h-9 rounded-lg border-rose-200 bg-white text-rose-800 hover:bg-rose-50"
+          >
+            {t('errors.retry')}
+          </Button>
+        </div>
+      ) : null}
+
       <div className="flex flex-col gap-6 lg:flex-row">
         <div className="w-full lg:w-64">
-          <nav className="flex gap-2 overflow-x-auto rounded-2xl border border-stroke-soft-200 bg-white p-2 shadow-sm [-ms-overflow-style:none] [scrollbar-width:none] lg:block lg:space-y-1 lg:overflow-visible [&::-webkit-scrollbar]:hidden">
+          <div
+            role="tablist"
+            aria-orientation="vertical"
+            className="flex gap-2 overflow-x-auto rounded-2xl border border-stroke-soft-200 bg-white p-2 shadow-sm [-ms-overflow-style:none] [scrollbar-width:none] lg:block lg:space-y-1 lg:overflow-visible [&::-webkit-scrollbar]:hidden"
+          >
             {tabs.map((tab) => {
               const Icon = tab.icon
               const isActive = activeTab === tab.key
@@ -418,6 +450,11 @@ export default function StoreSettingsPage() {
                 <button
                   key={tab.key}
                   type="button"
+                  role="tab"
+                  id={`store-settings-tab-${tab.key}`}
+                  aria-selected={isActive}
+                  aria-controls={`store-settings-panel-${tab.key}`}
+                  tabIndex={isActive ? 0 : -1}
                   onClick={() => setActiveTab(tab.key)}
                   className={cn(
                     'flex shrink-0 items-center gap-2 rounded-xl px-3 py-2.5 text-left text-sm font-medium transition-colors sm:gap-3 sm:px-4 sm:py-3 lg:w-full',
@@ -426,12 +463,12 @@ export default function StoreSettingsPage() {
                       : 'text-text-sub-600 hover:bg-bg-weak-50 hover:text-text-strong-950',
                   )}
                 >
-                  <Icon className={cn('h-5 w-5', isActive ? 'text-primary-base' : 'text-text-soft-400')} />
+                  <Icon className={cn('h-5 w-5', isActive ? 'text-primary-base' : 'text-text-soft-400')} aria-hidden />
                   {tab.label}
                 </button>
               )
             })}
-          </nav>
+          </div>
         </div>
 
         <div className="flex-1">
@@ -443,7 +480,12 @@ export default function StoreSettingsPage() {
             ) : (
               <>
                 {activeTab === 'business' && (
-                  <div className="p-6">
+                  <div
+                    role="tabpanel"
+                    id="store-settings-panel-business"
+                    aria-labelledby="store-settings-tab-business"
+                    className="p-6"
+                  >
                     <div className="mb-6">
                       <h2 className="text-lg font-semibold text-text-strong-950">Business Information</h2>
                       <p className="mt-1 text-sm text-text-soft-400">
@@ -673,7 +715,12 @@ export default function StoreSettingsPage() {
                 )}
 
                 {activeTab === 'branding' && (
-                  <div className="p-4 sm:p-6">
+                  <div
+                    role="tabpanel"
+                    id="store-settings-panel-branding"
+                    aria-labelledby="store-settings-tab-branding"
+                    className="p-4 sm:p-6"
+                  >
                     <div className="mb-6">
                       <h2 className="text-lg font-semibold text-text-strong-950">
                         Branding & Visual Identity
@@ -817,7 +864,12 @@ export default function StoreSettingsPage() {
                 )}
 
                 {activeTab === 'contact' && (
-                  <div className="p-6">
+                  <div
+                    role="tabpanel"
+                    id="store-settings-panel-contact"
+                    aria-labelledby="store-settings-tab-contact"
+                    className="p-6"
+                  >
                     <div className="mb-6">
                       <h2 className="text-lg font-semibold text-text-strong-950">
                         Contact Information & About
@@ -901,7 +953,12 @@ export default function StoreSettingsPage() {
                 )}
 
                 {activeTab === 'delivery' && (
-                  <div className="p-6">
+                  <div
+                    role="tabpanel"
+                    id="store-settings-panel-delivery"
+                    aria-labelledby="store-settings-tab-delivery"
+                    className="p-6"
+                  >
                     <div className="mb-6 flex items-start justify-between">
                       <div>
                         <h2 className="text-lg font-semibold text-text-strong-950">
@@ -943,10 +1000,10 @@ export default function StoreSettingsPage() {
                             {deliveryZones.length > 1 && (
                               <Button
                                 type="button"
-                                onClick={() => removeDeliveryZone(zone.id)}
+                                onClick={() => setZoneToDelete(zone)}
                                 variant="ghost"
                                 size="sm"
-                                className="h-8 text-rose-600 hover:bg-rose-50 hover:text-rose-700"
+                                className="h-8 text-error-base hover:bg-error-alpha-10 hover:text-error-darker"
                               >
                                 <Trash2 className="h-4 w-4" />
                               </Button>
@@ -1017,7 +1074,12 @@ export default function StoreSettingsPage() {
                 )}
 
                 {activeTab === 'subscription' && (
-                  <div className="p-6">
+                  <div
+                    role="tabpanel"
+                    id="store-settings-panel-subscription"
+                    aria-labelledby="store-settings-tab-subscription"
+                    className="p-6"
+                  >
                     <div className="mb-6">
                       <h2 className="text-lg font-semibold text-text-strong-950">
                         Subscription & Billing
@@ -1136,6 +1198,22 @@ export default function StoreSettingsPage() {
           </div>
         </div>
       </div>
+
+      <DeleteConfirmationDialog
+        open={!!zoneToDelete}
+        onOpenChange={(open) => {
+          if (!open) setZoneToDelete(null)
+        }}
+        onConfirm={confirmRemoveDeliveryZone}
+        title={td('deleteTitle')}
+        description={td('deleteDescription')}
+        itemName={zoneToDelete?.name || td('unnamedZone')}
+        warningMessage={td('deleteWarning')}
+        permanentlyRemoveLabel={td('permanentlyRemove')}
+        confirmButtonText={td('deleteConfirm')}
+        cancelButtonText={td('cancel')}
+        isLoading={isDeletingZone}
+      />
     </div>
   )
 }

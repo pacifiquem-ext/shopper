@@ -37,7 +37,7 @@ interface AuthState {
 
 export const useAuthStore = create<AuthState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       user: null,
       accessToken: null,
       refreshToken: null,
@@ -46,6 +46,7 @@ export const useAuthStore = create<AuthState>()(
       logout: () => set({ user: null, accessToken: null, refreshToken: null, isLoading: false }),
 
       login: async (data: LoginInput) => {
+        if (get().isLoading) return false
         set({ isLoading: true })
         try {
           const response = (await authService.login(data)) as any
@@ -70,6 +71,7 @@ export const useAuthStore = create<AuthState>()(
       },
 
       signup: async (data: SignupInput) => {
+        if (get().isLoading) return false
         set({ isLoading: true })
         try {
           const email = data.email?.trim()

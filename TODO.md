@@ -10,13 +10,13 @@ Rough readiness (maintain when large slices land):
 
 | Area | ~% | Notes |
 | ---- | -- | ----- |
-| Foundation (schema, auth, tenant, health, monorepo layout) | ~75% | Auth+OTP store works; SMS still dev-log only |
-| Merchant path (onboarding → products → inventory → orders → delivery → settings) | ~70% | Core CRUD wired client↔server; payments manual |
-| Marketplace / cart / guest checkout | ~55% | Catalog + cart UI real; payment processor not live |
-| Billing / Basic–Pro plans | ~10% | Subscription page presentational; no plan model or charges |
-| Pro growth features (discounts, loyalty, customer CRM, advanced analytics productization) | ~15% | Analytics endpoints exist; discount/loyalty/CRM not domain models |
-| AlignUI design system | ~55% | Tokens + core components + dashboard/auth shells; page-by-page migration ongoing |
-| Release hardening (SMS, email, storage driver, e2e coverage, server rw i18n) | ~25% | Partial tests; server `languages/rw` missing |
+| Foundation (schema, auth, tenant, health, monorepo layout) | ~85% | Auth hardened (JWT ACTIVE, hashed OTP/refresh, StoreGuard ownership, CORS fail-closed); SMS still dev-log only |
+| Merchant path (onboarding → products → inventory → orders → delivery → settings) | ~78% | Order/inventory transactions + state machines; list error/retry; mobile dashboard nav |
+| Marketplace / cart / guest checkout | ~65% | Atomic guest checkout + stock guards; payment processor not live |
+| Billing / Basic–Pro plans | ~12% | Subscription i18n + coming soon CTA; no plan model or charges |
+| Pro growth features (discounts, loyalty, customer CRM, advanced analytics productization) | ~18% | Analytics aggregates improved; discount/loyalty/CRM not domain models |
+| AlignUI design system | ~58% | Token aliases for shadcn muted/ring; page migration still ongoing |
+| Release hardening (SMS, email, storage driver, e2e coverage, server rw i18n) | ~35% | Audit fixes verified via API + Playwright; server `languages/rw` still missing |
 
 ---
 
@@ -41,8 +41,8 @@ _(empty — pick from Next up and move here with owner + date)_
 
 - [ ] Create `server/src/languages/rw/` mirroring every `en/*.json` file (`auth`, `common`, `http`, `user`, `validation`)
 - [ ] Fix client `en`/`rw` key drift (11 missing keys under `storeOnboarding.errors.*` in `rw.json`)
-- [ ] Replace hardcoded English on subscription page (`client/src/app/[locale]/dashboard/subscription/page.tsx`) with `useTranslations` + en/rw keys
-- [ ] **BUG-012** — Dashboard home KPI / welcome / quick-action copy still hardcoded English → `useTranslations('dashboard…')` + en/rw
+- [x] Replace hardcoded English on subscription page (`client/src/app/[locale]/dashboard/subscription/page.tsx`) with `useTranslations` + en/rw keys — done 2026-07-12
+- [x] **BUG-012** — Dashboard home KPI / welcome / quick-action copy → `useTranslations('dashboard.home…')` + en/rw — done 2026-07-12
 - [ ] Audit server exceptions/messages still returning raw English strings instead of i18n keys (`AuthService`, domain exceptions)
 - [ ] **BUG-018** — Nest i18n: switch `HeaderResolver` → `AcceptLanguageResolver` (RFC4647 warning in logs)
 
@@ -93,13 +93,13 @@ _(empty — pick from Next up and move here with owner + date)_
 
 ### §9 — Reliability, performance, release
 
-- [ ] **BUG-008** — Dashboard API latency (analytics/overview, products, inventory, orders often 5–14s locally): indexes, reduce N+1, cache overview aggregates, collapse orders page `limit=1` fan-out
+- [ ] **BUG-008** (remainder) — Dashboard API latency: add/confirm indexes, cache overview aggregates, collapse orders page `limit=1` fan-out (analytics path partially improved 2026-07-12)
 - [ ] **BUG-013** — Pseudo ratings on product cards/PDP: hide or label “coming soon” until real reviews exist
 - [ ] Server test suite with real contracts for each module controller (auth, products, inventory, orders, catalog, onboarding, delivery-zones, store-settings, analytics, admin)
 - [ ] Client integration + Playwright paths: onboarding, product CRUD, inventory adjust, order fulfill, public checkout
-- [ ] Redis/Bull: either use queues for exports/snapshots or remove dead queue surface; implement midnight metrics snapshot job
-- [ ] Production CORS, secrets, health checks, graceful shutdown verification checklist
-- [ ] Rate limiting review on auth and public catalog/order endpoints
+- [ ] Redis/Bull: either use queues for exports/snapshots or remove dead queue surface; implement midnight metrics snapshot job; full CSV export beyond 5k rows via jobs
+- [ ] Production secrets, health checks, graceful shutdown verification checklist (CORS fail-closed done 2026-07-12)
+- [ ] Rate limiting review on public catalog/order endpoints (auth `@Throttle` done 2026-07-12)
 
 ### §10 — Explicitly out of scope (do not start unless user reopens)
 
@@ -114,6 +114,15 @@ _(empty — pick from Next up and move here with owner + date)_
 ---
 
 ## Done
+
+### 2026-07-12 — Full audit remediation (verified API + Playwright)
+
+- [x] **Orders integrity** — transactional create/guest checkout; tenant variant check (blocks cross-store inventory); conditional stock reserve; fulfillment state machine + cancel releases reserve; payment transitions; order number uniqueness; tx timeout 30s
+- [x] **Auth security** — JWT rejects non-ACTIVE; password reset revokes refresh tokens; hashed OTP + refresh tokens; StoreGuard ownership; unified admin `AllowedRoles`; CORS fail-closed in production; 1mb body; validation errors always returned; Sentry body redaction; auth throttle
+- [x] **Inventory/products/analytics** — atomic adjustStock; product create transaction; analytics aggregates + parallel overview; list/export caps
+- [x] **Client reliability** — refresh persists both tokens; submit locks on payment/inventory/message modals; list loadError+retry; product form finally; place-order FormControl fix; axios 30s timeout
+- [x] **A11y** — mobile dashboard Sheet nav; skip link; auth/onboarding labels; ARIA on sidebar/table/admin/filters; reduced-motion expansion
+- [x] **UI/i18n** — dashboard RWF; subscription/home/payments/delivery i18n; zone delete confirm; theme aliases; pseudo ratings removed from Vibrant
 
 ### Foundation
 
@@ -170,6 +179,30 @@ _(empty — pick from Next up and move here with owner + date)_
 
 - [x] Client: Vitest integration sample, Playwright auth e2e sample, Storybook, ESLint/Prettier
 - [x] Server: Jest config, ESLint/Prettier, Swagger in non-production, commitlint
+
+### Reliability / race / pagination (2026-07-12)
+
+- [x] Inventory `adjustStock`: `$transaction` + conditional `increment` (no below-zero), `BadRequestException`, event in same tx
+- [x] Product create: product + variants + inventory + events in single `$transaction`
+- [x] Analytics: aggregates/groupBy instead of full-table loads; `Promise.all` in overview; period-filtered top products; inventory status aggregates + SQL stock value
+- [x] Catalog grouped findMany hard cap 2000; orders/products/inventory CSV export cap 5000
+- [x] `ProductFilterDto` / `OrderFilterDto` / `PaymentFilterDto` `@Max(100)` on `limit`; admin `getStores` take capped at 100
+
+### Security hardening (2026-07-12)
+
+- [x] JWT strategy rejects non-`ACTIVE` users (`UserStatus`)
+- [x] Password reset revokes all refresh tokens for user
+- [x] Refresh rotation: atomic `deleteMany` on hashed token + not revoked + not expired; store SHA-256 of refresh token
+- [x] Signup DTO role restricted with `@IsIn([CUSTOMER, STORE_OWNER])`
+- [x] `StoreGuard` verifies store ownership (`store.userId === userId`) instead of trusting JWT `storeId`
+- [x] Admin stores controller uses global `AllowedRoles` + `UserRole.PLATFORM_ADMIN` (no auth-module RolesGuard)
+- [x] OTP codes stored hashed (SHA-256); plain code still returned for SMS/dev log
+- [x] Production CORS fail-closed when origins empty or `*`
+- [x] Body parser limit reduced 50mb → 1mb
+- [x] Exception filter always returns validation messages; Sentry body redacts password/newPassword/otpCode/refreshToken/token
+- [x] `logDevOtp` skips when `NODE_ENV` or `APP_ENV` is production
+- [x] Stricter `@Throttle` on auth endpoints (login/signup/forgot/reset/verify/refresh)
+- [x] Suspended accounts blocked at JWT validation (no separate admin suspend endpoint required for enforcement)
 
 ### E2E QA bugfixes (2026-07-11) — see `BUGS.md`
 

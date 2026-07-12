@@ -4,9 +4,8 @@ import { Flame, ImageIcon, Package } from 'lucide-react'
 
 import { Link } from '@/i18n/navigation'
 import { QuickAddButton } from '@/components/shop/quick-add-button'
-import { StarRating } from '@/components/shop/star-rating'
 import type { ProductCardLabels } from '@/components/shop/product-card'
-import { discountPercent, formatRwf, pseudoRating } from '@/lib/product-display'
+import { discountPercent, formatRwf } from '@/lib/product-display'
 import type { CatalogProductPublic } from '@/services/catalog.service'
 import { cn } from '@/lib/utils'
 
@@ -37,7 +36,6 @@ export function VibrantMarketProductCard({
   const stock = availableStock(product)
   const off = discountPercent(product.priceFrom, product.compareAtFrom)
   const soldOut = stock <= 0
-  const { rating } = pseudoRating(product.id)
   const onSale = off != null
 
   const openQuickView = onOpenQuickView
@@ -115,13 +113,6 @@ export function VibrantMarketProductCard({
             </h3>
           </Link>
         )}
-
-        <StarRating
-          rating={rating}
-          ariaLabel={labels.ratingAriaLabel}
-          size={13}
-          filledClassName='text-[var(--vm-secondary)]'
-        />
 
         {product.priceFrom != null ? (
           <p className='text-lg font-black tabular-nums leading-none text-[var(--vm-primary)]'>

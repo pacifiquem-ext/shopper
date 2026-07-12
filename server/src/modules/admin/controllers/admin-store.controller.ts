@@ -5,7 +5,6 @@ import {
     ParseUUIDPipe,
     Post,
     Query,
-    UseGuards,
 } from '@nestjs/common';
 import {
     ApiBearerAuth,
@@ -14,16 +13,13 @@ import {
     ApiResponse,
     ApiTags,
 } from '@nestjs/swagger';
+import { StoreStatus, UserRole } from '@prisma/client';
 import { AdminStoreService } from '../services/admin-store.service';
-import { StoreStatus } from '@prisma/client';
-import { RolesGuard } from '../../auth/guards/roles.guard';
-import { Roles } from '../../auth/decorators/roles.decorator';
-import { UserRole } from '../../auth/constants/auth.enum';
+import { AllowedRoles } from '../../../common/request/decorators/request.role.decorator';
 
 @ApiTags('Admin / Stores')
 @ApiBearerAuth()
-@UseGuards(RolesGuard)
-@Roles(UserRole.PLATFORM_ADMIN) // Protect strictly for platform admins
+@AllowedRoles([UserRole.PLATFORM_ADMIN])
 @Controller({ path: 'admin/stores', version: '1' })
 export class AdminStoreController {
     constructor(private readonly adminStoreService: AdminStoreService) {}
@@ -51,10 +47,11 @@ export class AdminStoreController {
         @Query('skip') skip?: number,
         @Query('take') take?: number
     ) {
+        const parsedTake = take ? parseInt(String(take), 10) : 20;
         return this.adminStoreService.getStores(
             status as StoreStatus,
-            skip ? parseInt(skip as any) : 0,
-            take ? parseInt(take as any) : 20
+            skip ? parseInt(String(skip), 10) : 0,
+            Math.min(Number.isFinite(parsedTake) ? parsedTake : 20, 100)
         );
     }
 

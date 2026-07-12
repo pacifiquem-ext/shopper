@@ -143,6 +143,8 @@ export default function InventoryPage() {
   const [totalAssetValue, setTotalAssetValue] = useState<string>('—')
   const [isLoading, setIsLoading] = useState(true)
   const [hasLoadedOnce, setHasLoadedOnce] = useState(false)
+  const [loadError, setLoadError] = useState(false)
+  const [reloadKey, setReloadKey] = useState(0)
   const [detailLoading, setDetailLoading] = useState(false)
 
   const [detailsById, setDetailsById] = useState<Map<string, ProductDetails>>(new Map())
@@ -164,12 +166,13 @@ export default function InventoryPage() {
     return { ...base, status, stock: { ...base.stock, onHand, available } }
   }, [detailsById, rows, selectedProductId])
 
-  // Fetch inventory list + analytics on mount
+  // Fetch inventory list + analytics on mount / retry
   useEffect(() => {
     let cancelled = false
 
     const load = async () => {
       setIsLoading(true)
+      setLoadError(false)
       try {
         const [inventoryRes, summaryRes] = await Promise.all([
           inventoryService.getAll({ limit: 200 }),
@@ -181,10 +184,10 @@ export default function InventoryPage() {
         const items = extractPaginatedItems<InventoryRecordApi>(inventoryRes)
         setRows(items.map(apiToInventoryRow))
 
-        const summary = extractApiPayload<{
-          totalStockValue?: number
-        }>(summaryRes) ?? summaryRes
-        if (summary?.totalStockValue != null) {
+        const summary =
+          extractApiPayload<{ totalStockValue?: number }>(summaryRes) ??
+          (summaryRes as unknown as { totalStockValue?: number } | null)
+        if (summary && typeof summary === 'object' && summary.totalStockValue != null) {
           setTotalAssetValue(
             Number(summary.totalStockValue).toLocaleString(undefined, {
               style: 'currency',
@@ -194,7 +197,10 @@ export default function InventoryPage() {
           )
         }
       } catch {
-        if (!cancelled) setRows([])
+        if (!cancelled) {
+          setRows([])
+          setLoadError(true)
+        }
       } finally {
         if (!cancelled) {
           setIsLoading(false)
@@ -207,7 +213,7 @@ export default function InventoryPage() {
     return () => {
       cancelled = true
     }
-  }, [])
+  }, [reloadKey])
 
   // Lazy-load detail when a product is selected
   useEffect(() => {
@@ -274,9 +280,10 @@ export default function InventoryPage() {
           new Map(prev).set(selectedProductId, apiToInventoryDetails(updated)),
         )
       }
-    } catch {}
-
-    setAdjustOpen(false)
+      setAdjustOpen(false)
+    } catch {
+      // Axios interceptor surfaces the error toast; keep dialog open for retry
+    }
   }, [adjustMode, adjustQuantity, selectedProductId, rows])
 
   useEffect(() => {
@@ -894,6 +901,18 @@ export default function InventoryPage() {
         <div className="p-2 min-h-[280px]">
           {!hasLoadedOnce || isLoading ? (
             <LoaderPanel minHeightClassName="min-h-[280px]" label={t('inventory.loading')} />
+          ) : loadError ? (
+            <div className="flex min-h-[280px] flex-col items-center justify-center gap-3 px-4 text-center">
+              <p className="text-sm font-medium text-text-sub-600">{t('errors.loadFailed')}</p>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setReloadKey((k) => k + 1)}
+                className="h-9 rounded-lg border-stroke-soft-200 bg-white text-text-sub-600 hover:bg-primary-alpha-10 hover:text-primary-base"
+              >
+                {t('errors.retry')}
+              </Button>
+            </div>
           ) : (
             <DataTable
               data={filteredRows}

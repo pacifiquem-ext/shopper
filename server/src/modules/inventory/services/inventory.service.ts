@@ -1,16 +1,25 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InventoryRepository } from '../repositories/inventory.repository';
+import { DatabaseService } from '../../../common/database/services/database.service';
 import { InventoryNotFoundException } from '../../../common/exceptions/domain.exception';
 import { StockStatus, InventoryEventType } from '../../../common/constants/status.constants';
-import { StockStatus as PrismaStockStatus, InventoryEventType as PrismaInventoryEventType } from '@prisma/client';
+import {
+    StockStatus as PrismaStockStatus,
+    InventoryEventType as PrismaInventoryEventType,
+} from '@prisma/client';
+
+const EXPORT_MAX_ROWS = 5000;
 
 @Injectable()
 export class InventoryService {
-    constructor(private readonly inventoryRepository: InventoryRepository) {}
+    constructor(
+        private readonly inventoryRepository: InventoryRepository,
+        private readonly prisma: DatabaseService,
+    ) {}
 
     async findAll(storeId: string, filters: any) {
         const page = +(filters.page ?? 1);
-        const limit = +(filters.limit ?? 10);
+        const limit = Math.min(+(filters.limit ?? 10), 100);
         const { status, category, vendor, search } = filters;
         const skip = (page - 1) * limit;
 
@@ -77,52 +86,107 @@ export class InventoryService {
         quantity: number,
         reason: string,
     ) {
-        const inventory = await this.findByVariantId(variantId, storeId);
-
-        const newOnHand = inventory.onHand + quantity;
-        const newAvailable = newOnHand - inventory.reserved;
-
-        if (newOnHand < 0) {
-            throw new Error('Cannot reduce stock below zero');
+        if (!Number.isFinite(quantity) || quantity === 0) {
+            throw new BadRequestException('Quantity must be a non-zero number');
         }
 
-        const newStatus = this.calculateStockStatus(newOnHand, inventory.reorderPoint);
+        await this.prisma.$transaction(async tx => {
+            const inventory = await tx.inventoryRecord.findUnique({
+                where: { productVariantId: variantId },
+                include: {
+                    productVariant: {
+                        include: { product: true },
+                    },
+                },
+            });
 
-        const eventType = quantity > 0 ? InventoryEventType.RESTOCKED : InventoryEventType.ADJUSTED;
+            if (!inventory || inventory.productVariant.product.storeId !== storeId) {
+                throw new InventoryNotFoundException(variantId);
+            }
 
-        await this.inventoryRepository.update(variantId, {
-            onHand: newOnHand,
-            available: newAvailable,
-            status: newStatus as PrismaStockStatus,
-            lastRestockedAt: quantity > 0 ? new Date() : inventory.lastRestockedAt,
-            updatedBy: userId,
-        });
+            if (quantity < 0) {
+                const result = await tx.inventoryRecord.updateMany({
+                    where: {
+                        productVariantId: variantId,
+                        onHand: { gte: Math.abs(quantity) },
+                    },
+                    data: {
+                        onHand: { increment: quantity },
+                        updatedBy: userId,
+                    },
+                });
 
-        await this.inventoryRepository.createEvent({
-            type: eventType as PrismaInventoryEventType,
-            quantity: Math.abs(quantity),
-            reason,
-            performedBy: userId,
-            inventoryRecord: {
-                connect: { id: inventory.id },
-            },
+                if (result.count === 0) {
+                    throw new BadRequestException('Cannot reduce stock below zero');
+                }
+            } else {
+                await tx.inventoryRecord.update({
+                    where: { productVariantId: variantId },
+                    data: {
+                        onHand: { increment: quantity },
+                        lastRestockedAt: new Date(),
+                        updatedBy: userId,
+                    },
+                });
+            }
+
+            const updated = await tx.inventoryRecord.findUniqueOrThrow({
+                where: { productVariantId: variantId },
+            });
+
+            const available = updated.onHand - updated.reserved;
+            const status = this.calculateStockStatus(
+                updated.onHand,
+                updated.reorderPoint,
+            ) as PrismaStockStatus;
+
+            await tx.inventoryRecord.update({
+                where: { productVariantId: variantId },
+                data: { available, status },
+            });
+
+            const eventType =
+                quantity > 0
+                    ? InventoryEventType.RESTOCKED
+                    : InventoryEventType.ADJUSTED;
+
+            await tx.inventoryEvent.create({
+                data: {
+                    inventoryRecordId: inventory.id,
+                    type: eventType as PrismaInventoryEventType,
+                    quantity: Math.abs(quantity),
+                    reason,
+                    performedBy: userId,
+                },
+            });
         });
 
         return this.findByVariantId(variantId, storeId);
     }
 
     async getEvents(variantId: string, storeId: string) {
-        const inventory = await this.findByVariantId(variantId, storeId);
+        await this.findByVariantId(variantId, storeId);
         return this.inventoryRepository.getEvents(variantId);
     }
 
     async exportCsv(storeId: string): Promise<string> {
+        // Cap rows for sync HTTP export; full/async export should use a background job later.
         const items = await this.inventoryRepository.findManyByStoreId(storeId, {
+            take: EXPORT_MAX_ROWS,
             orderBy: { updatedAt: 'desc' },
         });
 
-        const headers = ['SKU', 'Product', 'Variant', 'On Hand', 'Reserved', 'Available', 'Status', 'Reorder Point'];
-        const rows = (items as any[]).map((i) => [
+        const headers = [
+            'SKU',
+            'Product',
+            'Variant',
+            'On Hand',
+            'Reserved',
+            'Available',
+            'Status',
+            'Reorder Point',
+        ];
+        const rows = (items as any[]).map(i => [
             i.productVariant.sku,
             i.productVariant.product.name,
             i.productVariant.title,
@@ -139,9 +203,13 @@ export class InventoryService {
     private toCsv(headers: string[], rows: any[][]): string {
         const esc = (v: any) => {
             const s = String(v ?? '');
-            return s.includes(',') || s.includes('"') || s.includes('\n') ? `"${s.replace(/"/g, '""')}"` : s;
+            return s.includes(',') || s.includes('"') || s.includes('\n')
+                ? `"${s.replace(/"/g, '""')}"`
+                : s;
         };
-        return [headers.join(','), ...rows.map((r) => r.map(esc).join(','))].join('\n');
+        return [headers.join(','), ...rows.map(r => r.map(esc).join(','))].join(
+            '\n',
+        );
     }
 
     private calculateStockStatus(stock: number, reorderPoint: number): string {

@@ -1,5 +1,6 @@
 import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { Throttle } from '@nestjs/throttler';
 
 import { AuthService } from '../services/auth.service';
 import { PublicRoute } from '../../../common/request/decorators/request.public.decorator';
@@ -11,13 +12,13 @@ import { ForgotPasswordDto } from '../dtos/auth.forgot-password.dto';
 import { ResetPasswordDto } from '../dtos/auth.reset-password.dto';
 import { AuthTokenResponseDto } from '../dtos/auth.response.dto';
 
-
 @ApiTags('Authentication')
 @Controller({ path: 'auth', version: '1' })
 export class AuthController {
     constructor(private readonly authService: AuthService) {}
 
     @PublicRoute()
+    @Throttle({ default: { limit: 5, ttl: 60000 } })
     @Post('signup')
     @ApiOperation({ summary: 'Register a new user' })
     @ApiResponse({
@@ -33,6 +34,7 @@ export class AuthController {
     }
 
     @PublicRoute()
+    @Throttle({ default: { limit: 10, ttl: 60000 } })
     @Post('verify-phone')
     @HttpCode(HttpStatus.OK)
     @ApiOperation({ summary: 'Verify phone number using OTP' })
@@ -50,6 +52,7 @@ export class AuthController {
     }
 
     @PublicRoute()
+    @Throttle({ default: { limit: 10, ttl: 60000 } })
     @Post('login')
     @HttpCode(HttpStatus.OK)
     @ApiOperation({ summary: 'Login user using phone number and password' })
@@ -71,6 +74,7 @@ export class AuthController {
     }
 
     @PublicRoute()
+    @Throttle({ default: { limit: 20, ttl: 60000 } })
     @Post('refresh')
     @HttpCode(HttpStatus.OK)
     @ApiOperation({ summary: 'Refresh access token' })
@@ -88,6 +92,7 @@ export class AuthController {
     }
 
     @PublicRoute()
+    @Throttle({ default: { limit: 5, ttl: 60000 } })
     @Post('forgot-password')
     @HttpCode(HttpStatus.OK)
     @ApiOperation({ summary: 'Request OTP for password reset' })
@@ -100,6 +105,7 @@ export class AuthController {
     }
 
     @PublicRoute()
+    @Throttle({ default: { limit: 5, ttl: 60000 } })
     @Post('reset-password')
     @HttpCode(HttpStatus.OK)
     @ApiOperation({ summary: 'Reset user password using OTP' })

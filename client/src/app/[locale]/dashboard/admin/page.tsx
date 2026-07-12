@@ -17,6 +17,7 @@ import { cn } from '@/lib/utils'
 import { TurningZeroLoader } from '@/components/ui/turning-zero-loader'
 import { adminService, type AdminStoreApi, type AdminStoreKycApi } from '@/services/admin.service'
 import { useAuthStore } from '@/store/auth.store'
+import { useTranslations } from 'next-intl'
 
 const STATUS_CONFIG: Record<string, { label: string; className: string }> = {
   SUBMITTED: { label: 'Submitted', className: 'border-blue-200 bg-blue-50 text-blue-700' },
@@ -37,6 +38,7 @@ function fmtDate(iso: string) {
 
 export default function AdminPage() {
   const { user } = useAuthStore()
+  const tA11y = useTranslations('common.a11y')
 
   const [stores, setStores] = useState<AdminStoreApi[]>([])
   const [total, setTotal] = useState(0)
@@ -266,12 +268,16 @@ export default function AdminPage() {
                       size="sm"
                       variant="ghost"
                       onClick={() => handleToggleExpand(store.id)}
+                      aria-expanded={isExpanded}
+                      aria-label={
+                        isExpanded ? tA11y('collapseDetails') : tA11y('expandDetails')
+                      }
                       className="h-8 w-8 rounded-lg p-0 text-text-soft-400 hover:bg-bg-weak-50"
                     >
                       {isExpanded ? (
-                        <ChevronUp className="h-4 w-4" />
+                        <ChevronUp className="h-4 w-4" aria-hidden />
                       ) : (
-                        <ChevronDown className="h-4 w-4" />
+                        <ChevronDown className="h-4 w-4" aria-hidden />
                       )}
                     </Button>
                   </div>

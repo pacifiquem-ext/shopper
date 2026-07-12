@@ -201,6 +201,7 @@ export async function placeGuestOrder(
       headers: {
         Accept: 'application/json',
         'Content-Type': 'application/json',
+        'Idempotency-Key': crypto.randomUUID(),
       },
       body: JSON.stringify(payload),
     })

@@ -139,6 +139,7 @@ export function DataTable<T>({
                   checked={allSelected ? true : someSelected ? 'indeterminate' : false}
                   onCheckedChange={(v) => toggleAll(Boolean(v))}
                   className="border-stroke-soft-200"
+                  aria-label={t('a11y.selectAllRows')}
                 />
               </TableHead>
             )}
@@ -191,6 +192,7 @@ export function DataTable<T>({
                         checked={isSelected}
                         onCheckedChange={(v) => toggleOne(id, Boolean(v))}
                         className="border-stroke-soft-200"
+                        aria-label={t('a11y.selectRow')}
                       />
                     </TableCell>
                   )}

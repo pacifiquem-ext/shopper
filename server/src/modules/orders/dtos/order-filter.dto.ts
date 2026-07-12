@@ -1,5 +1,5 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsOptional, IsString, IsEnum, IsInt, Min, IsDateString } from 'class-validator';
+import { IsOptional, IsString, IsEnum, IsInt, Min, Max, IsDateString } from 'class-validator';
 import { Type } from 'class-transformer';
 import { PaymentStatus, FulfillmentStatus } from '../../../common/constants/status.constants';
 
@@ -11,11 +11,12 @@ export class OrderFilterDto {
     @Min(1)
     page?: number = 1;
 
-    @ApiPropertyOptional({ example: 10 })
+    @ApiPropertyOptional({ example: 10, maximum: 100 })
     @IsOptional()
     @Type(() => Number)
     @IsInt()
     @Min(1)
+    @Max(100)
     limit?: number = 10;
 
     @ApiPropertyOptional({ example: '2024-01-01' })

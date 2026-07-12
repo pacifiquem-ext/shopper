@@ -5,6 +5,14 @@
       "rowsPerPage": "Rows per page",
       "previous": "Previous",
       "next": "Next"
+    },
+    "a11y": {
+      "skipToMain": "Skip to main content",
+      "selectAllRows": "Select all rows",
+      "selectRow": "Select row",
+      "expandDetails": "Expand details",
+      "collapseDetails": "Collapse details",
+      "loading": "Loading"
     }
   },
   "hero": {
@@ -454,9 +462,18 @@
       "subtitle": "Inventory",
       "role": "Store owner",
       "defaultUserName": "User",
-      "logout": "Log out"
+      "logout": "Log out",
+      "navAria": "Dashboard navigation",
+      "collapse": "Collapse",
+      "collapseAria": "Collapse sidebar",
+      "expandAria": "Expand sidebar"
+    },
+    "errors": {
+      "loadFailed": "We could not load this data.",
+      "retry": "Retry"
     },
     "storeSettings": {
+      "loadError": "We could not load store settings. Save is disabled until reload succeeds.",
       "branding": {
         "storeLogo": "Store Logo",
         "uploadLogo": "Upload New Logo",
@@ -474,6 +491,8 @@
       "appShort": "OS",
       "section": "Dashboard",
       "searchPlaceholder": "Search anything",
+      "searchAria": "Search dashboard",
+      "openMenuAria": "Open navigation menu",
       "monthToDate": "Month to date",
       "yearToDate": "Year to date",
       "custom": "Custom",
@@ -521,7 +540,8 @@
         "noteBody": "This is a UI-only demo. Later this will create an inventory movement record.",
         "cancel": "Cancel",
         "confirmRestock": "Restock",
-        "confirmAdjust": "Save"
+        "confirmAdjust": "Save",
+        "submitting": "Saving…"
       },
       "filters": {
         "title": "Filters",
@@ -929,7 +949,16 @@
         "emptyDescription": "Start the conversation with {customerName}",
         "placeholder": "Type your message to the customer...",
         "sendAria": "Send message",
+        "sending": "Sending…",
         "hint": "Press Enter to send, Shift+Enter for new line"
+      },
+      "paymentModal": {
+        "title": "Payment Verification",
+        "description": "Review and verify payment proof for order {orderId}",
+        "verifyTitle": "Verify this payment?",
+        "verifyBody": "Confirm if the payment proof is legitimate",
+        "reject": "Reject",
+        "confirm": "Confirm Payment"
       },
       "viewSheet": {
         "title": "Order details",
@@ -1109,6 +1138,129 @@
       "totalStock": "Total stock",
       "outOfStock": "Out of stock",
       "totalRevenue": "Total revenue"
+    },
+    "home": {
+      "welcome": "Welcome back! Here's what's happening with your store.",
+      "totalRevenue": "Total Revenue",
+      "totalRevenueHint": "Gross revenue this period",
+      "totalOrders": "Total Orders",
+      "pendingCount": "{count} pending",
+      "activeProducts": "Active Products",
+      "activeProductsHint": "Published products",
+      "totalCustomers": "Total Customers",
+      "totalCustomersHint": "Unique customers",
+      "quickActions": "Quick Actions",
+      "createProduct": "Create Product",
+      "viewOrders": "View Orders",
+      "manageInventory": "Manage Inventory",
+      "storeSettings": "Store Settings",
+      "ordersOverview": "Orders Overview",
+      "ordersOverviewSubtitle": "Current order status breakdown",
+      "pending": "Pending",
+      "awaitingAction": "Awaiting action",
+      "allOrders": "All orders",
+      "completed": "Completed",
+      "lowStock": "Low Stock",
+      "inventoryStatus": "Inventory Status",
+      "inventoryStatusSubtitle": "Stock levels and alerts",
+      "totalStockValue": "Total Stock Value",
+      "acrossAllProducts": "Across all products",
+      "inStock": "In Stock",
+      "units": "units",
+      "items": "items",
+      "outOfStock": "Out of Stock",
+      "totalOrdersPlaced": "Total orders placed",
+      "grossIncome": "Gross income",
+      "fulfilledOrders": "Fulfilled orders",
+      "topSellingProducts": "Top Selling Products",
+      "bestPerformers": "Best performers this {period}",
+      "viewAll": "View All",
+      "noSalesData": "No sales data yet for this period.",
+      "unitsSold": "{count} sold",
+      "productSummary": "Product Summary",
+      "completedOrders": "Completed Orders",
+      "recentActivity": "Recent Activity",
+      "recentActivitySubtitle": "Latest order events across your store",
+      "noRecentActivity": "No recent activity yet."
+    },
+    "subscriptionPage": {
+      "managingPlanFor": "Managing plan for {storeName}.",
+      "managePlan": "Manage your current plan.",
+      "current": "CURRENT",
+      "recommended": "RECOMMENDED",
+      "basic": "Basic",
+      "basicDesc": "Simple. Clean. Operational.",
+      "free": "Free",
+      "pro": "Pro",
+      "proDesc": "Everything you need to scale up your business footprint.",
+      "proPrice": "15,000 RWF",
+      "perMonth": "/ month",
+      "upgradeToPro": "Upgrade to Pro",
+      "comingSoon": "Coming soon",
+      "billingNotLive": "Billing is not live yet. Upgrade will be available soon.",
+      "features": {
+        "upTo50": "Up to 50 Products",
+        "orderManagement": "Order Management",
+        "deliveryZones": "Delivery Zones Setup",
+        "standardTheme": "Standard Theme",
+        "advancedAnalytics": "Advanced Analytics",
+        "customerManagement": "Customer Management",
+        "discounts": "Discounts & Promotions",
+        "loyalty": "Loyalty Programs",
+        "marketing": "Marketing Tools",
+        "customReports": "Custom Reports",
+        "rankingBoost": "Marketplace Ranking Boost",
+        "themeCustomization": "Store Theme Customization"
+      }
+    },
+    "deliveryZones": {
+      "subtitle": "Configure delivery zones manually.",
+      "addZone": "Add Zone",
+      "addFirstZone": "Add First Zone",
+      "saveChanges": "Save Changes",
+      "saving": "Saving…",
+      "zoneLabel": "Zone {index}",
+      "unsaved": "Unsaved",
+      "zoneName": "Zone Name",
+      "zoneNamePlaceholder": "e.g., Kigali City Center",
+      "deliveryFee": "Delivery Fee (RWF)",
+      "etaMinutes": "ETA (Minutes)",
+      "emptyTitle": "No delivery zones configured",
+      "emptyHint": "Click \"Add Zone\" to create your first delivery zone",
+      "unnamedZone": "Unnamed zone",
+      "deleteTitle": "Delete delivery zone",
+      "deleteDescription": "This action cannot be undone.",
+      "deleteWarning": "You are about to delete",
+      "permanentlyRemove": "This will permanently remove:",
+      "deleteConfirm": "Delete zone",
+      "cancel": "Cancel"
+    },
+    "paymentsPage": {
+      "subtitle": "Payment records for all orders.",
+      "searchPlaceholder": "Search by order # or customer name…",
+      "empty": "No payments found",
+      "showing": "Showing {shown} of {total} payments",
+      "status": {
+        "all": "All",
+        "paid": "Paid",
+        "pending": "Pending",
+        "failed": "Failed",
+        "refunded": "Refunded"
+      },
+      "methods": {
+        "cashOnDelivery": "Cash on Delivery",
+        "mobileMoney": "Mobile Money",
+        "bankTransfer": "Bank Transfer",
+        "card": "Card"
+      },
+      "columns": {
+        "order": "Order",
+        "customer": "Customer",
+        "amount": "Amount",
+        "method": "Method",
+        "status": "Status",
+        "date": "Date"
+      }
     }
   },
   "footer": {

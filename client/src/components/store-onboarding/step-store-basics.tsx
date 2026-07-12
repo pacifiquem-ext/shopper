@@ -29,7 +29,7 @@ export function StepStoreBasics() {
 
       <div className="space-y-6">
         <div className="relative space-y-0">
-          <Label className="text-sm font-semibold text-gray-700">
+          <Label htmlFor="onboarding-registered-name" className="text-sm font-semibold text-gray-700">
             {t('storeBasics.registeredNameLabel', {
               defaultValue: 'Registered Business Name',
             })}
@@ -43,21 +43,23 @@ export function StepStoreBasics() {
             )}
           >
             <Input
+              id="onboarding-registered-name"
               value={draft.registeredName || ''}
               onChange={(e) => setRegisteredName(e.target.value)}
-              className="rounded-none border-0 bg-transparent px-0 pb-1 text-lg shadow-none focus:outline-none focus-visible:ring-0 focus-visible:ring-transparent focus-visible:ring-offset-0"
+              aria-invalid={registeredNameField.hasError || undefined}
+              className="rounded-none border-0 bg-transparent px-0 pb-1 text-lg shadow-none focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-base/40 focus-visible:ring-offset-0"
               placeholder={t('storeBasics.registeredNamePlaceholder')}
             />
           </div>
           {registeredNameField.hasError && (
-            <div className="absolute bg-white pt-1 text-xs font-medium text-red-500">
+            <div className="absolute bg-white pt-1 text-xs font-medium text-red-500" role="alert">
               {registeredNameField.errorMessage}
             </div>
           )}
         </div>
 
         <div className="relative space-y-0 pt-4">
-          <Label className="text-sm font-semibold text-gray-700">
+          <Label htmlFor="onboarding-display-name" className="text-sm font-semibold text-gray-700">
             {t('storeBasics.displayNameLabel', {
               defaultValue: 'Store Display Name',
             })}
@@ -71,30 +73,33 @@ export function StepStoreBasics() {
             )}
           >
             <Input
+              id="onboarding-display-name"
               value={draft.displayName || ''}
               onChange={(e) => setDisplayName(e.target.value)}
-              className="rounded-none border-0 bg-transparent px-0 pb-1 text-lg shadow-none focus:outline-none focus-visible:ring-0 focus-visible:ring-transparent focus-visible:ring-offset-0"
+              aria-invalid={displayNameField.hasError || undefined}
+              className="rounded-none border-0 bg-transparent px-0 pb-1 text-lg shadow-none focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-base/40 focus-visible:ring-offset-0"
               placeholder={t('storeBasics.displayNamePlaceholder')}
             />
           </div>
           {displayNameField.hasError && (
-            <div className="absolute bg-white pt-1 text-xs font-medium text-red-500">
+            <div className="absolute bg-white pt-1 text-xs font-medium text-red-500" role="alert">
               {displayNameField.errorMessage}
             </div>
           )}
         </div>
 
         <div className="relative pt-4">
-          <Label className="text-sm font-semibold text-gray-700">
+          <Label htmlFor="onboarding-description" className="text-sm font-semibold text-gray-700">
             {t('storeBasics.descriptionLabel', {
               defaultValue: 'Store Description',
             })}
           </Label>
           <div className="focus-within:border-primary-base border-b border-stroke-soft-200 transition-colors">
             <Textarea
+              id="onboarding-description"
               value={draft.description || ''}
               onChange={(e) => setDescription(e.target.value)}
-              className="mt-2 min-h-[120px] resize-none rounded-none border-0 bg-transparent px-0 text-lg shadow-none focus:outline-none focus-visible:ring-0 focus-visible:ring-transparent focus-visible:ring-offset-0"
+              className="mt-2 min-h-[120px] resize-none rounded-none border-0 bg-transparent px-0 text-lg shadow-none focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-base/40 focus-visible:ring-offset-0"
               placeholder={t('storeBasics.descriptionPlaceholder')}
               maxLength={500}
             />

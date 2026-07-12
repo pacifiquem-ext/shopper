@@ -63,7 +63,10 @@ export function StepDelivery() {
 
               <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
                 <div className="relative space-y-0 md:col-span-2">
-                  <Label className="text-sm font-semibold text-gray-700">
+                  <Label
+                    htmlFor={`onboarding-zone-name-${idx}`}
+                    className="text-sm font-semibold text-gray-700"
+                  >
                     {t('delivery.zoneName', { defaultValue: 'Zone Name' })}
                   </Label>
                   <div
@@ -75,20 +78,25 @@ export function StepDelivery() {
                     )}
                   >
                     <Input
+                      id={`onboarding-zone-name-${idx}`}
                       value={zone.name}
                       onChange={(e) => updateDeliveryZone(idx, { name: e.target.value })}
-                      className="rounded-none border-0 bg-transparent px-0 text-base shadow-none focus:outline-none focus-visible:ring-0 focus-visible:ring-transparent focus-visible:ring-offset-0"
+                      aria-invalid={hasNameError || undefined}
+                      className="rounded-none border-0 bg-transparent px-0 text-base shadow-none focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-base/40 focus-visible:ring-offset-0"
                       placeholder="e.g. Kigali City Center"
                     />
                   </div>
                   {hasNameError && (
-                    <div className="absolute bg-white pt-1 text-xs font-medium text-red-500">
+                    <div className="absolute bg-white pt-1 text-xs font-medium text-red-500" role="alert">
                       {t(nameErrorKey as any)}
                     </div>
                   )}
                 </div>
                 <div className="relative space-y-0">
-                  <Label className="text-sm font-semibold text-gray-700">
+                  <Label
+                    htmlFor={`onboarding-zone-fee-${idx}`}
+                    className="text-sm font-semibold text-gray-700"
+                  >
                     {t('delivery.fee', { defaultValue: 'Delivery Fee (RWF)' })}
                   </Label>
                   <div
@@ -100,6 +108,7 @@ export function StepDelivery() {
                     )}
                   >
                     <Input
+                      id={`onboarding-zone-fee-${idx}`}
                       inputMode="numeric"
                       value={String(zone.feeRwf)}
                       onChange={(e) =>
@@ -107,18 +116,22 @@ export function StepDelivery() {
                           feeRwf: toSafeInt(e.target.value),
                         })
                       }
-                      className="rounded-none border-0 bg-transparent px-0 text-base shadow-none focus:outline-none focus-visible:ring-0 focus-visible:ring-transparent focus-visible:ring-offset-0"
+                      aria-invalid={hasFeeError || undefined}
+                      className="rounded-none border-0 bg-transparent px-0 text-base shadow-none focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-base/40 focus-visible:ring-offset-0"
                       placeholder="1000"
                     />
                   </div>
                   {hasFeeError && (
-                    <div className="absolute bg-white pt-1 text-xs font-medium text-red-500">
+                    <div className="absolute bg-white pt-1 text-xs font-medium text-red-500" role="alert">
                       {t(feeErrorKey as any)}
                     </div>
                   )}
                 </div>
                 <div className="relative space-y-0">
-                  <Label className="text-sm font-semibold text-gray-700">
+                  <Label
+                    htmlFor={`onboarding-zone-eta-${idx}`}
+                    className="text-sm font-semibold text-gray-700"
+                  >
                     {t('delivery.eta', { defaultValue: 'ETA (Minutes)' })}
                   </Label>
                   <div
@@ -130,6 +143,7 @@ export function StepDelivery() {
                     )}
                   >
                     <Input
+                      id={`onboarding-zone-eta-${idx}`}
                       inputMode="numeric"
                       value={String(zone.etaMinutes)}
                       onChange={(e) =>
@@ -137,12 +151,13 @@ export function StepDelivery() {
                           etaMinutes: toSafeInt(e.target.value),
                         })
                       }
-                      className="rounded-none border-0 bg-transparent px-0 text-base shadow-none focus:outline-none focus-visible:ring-0 focus-visible:ring-transparent focus-visible:ring-offset-0"
+                      aria-invalid={hasEtaError || undefined}
+                      className="rounded-none border-0 bg-transparent px-0 text-base shadow-none focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-base/40 focus-visible:ring-offset-0"
                       placeholder="45"
                     />
                   </div>
                   {hasEtaError && (
-                    <div className="absolute bg-white pt-1 text-xs font-medium text-red-500">
+                    <div className="absolute bg-white pt-1 text-xs font-medium text-red-500" role="alert">
                       {t(etaErrorKey as any)}
                     </div>
                   )}

@@ -155,7 +155,7 @@ export function ProductFormModal({
     setIsSubmitting(true)
     try {
       await onSubmit()
-    } catch {
+    } finally {
       setIsSubmitting(false)
     }
   }

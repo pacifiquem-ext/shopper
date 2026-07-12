@@ -2,7 +2,7 @@
 
 import { AuthCard } from '@/components/auth/auth-card'
 import { Button } from '@/components/ui/button'
-import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form'
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { VerifyPhoneSchemaType, verifyPhoneSchema } from '@/validations/auth'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -77,14 +77,15 @@ export default function VerifyPhonePage() {
             name="phoneNumber"
             render={({ field }) => (
               <FormItem className="relative space-y-0 pt-3">
+                <FormLabel className="sr-only">{t('fields.phone')}</FormLabel>
                 <div className="focus-within:border-primary-base flex items-center border-b border-stroke-soft-200 py-2 transition-colors">
-                  <Phone className="mr-3 h-5 w-5 text-gray-400" />
+                  <Phone className="mr-3 h-5 w-5 text-gray-400" aria-hidden />
                   <FormControl>
                     <Input
                       type="tel"
                       autoComplete="tel"
                       placeholder={t('fields.phone')}
-                      className="rounded-none border-0 bg-transparent px-0 shadow-none focus:outline-none focus-visible:ring-0 focus-visible:ring-transparent focus-visible:ring-offset-0"
+                      className="rounded-none border-0 bg-transparent px-0 shadow-none focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-base/40 focus-visible:ring-offset-0"
                       disabled={!!detectedPhone}
                       {...field}
                     />
@@ -100,15 +101,16 @@ export default function VerifyPhonePage() {
             name="otpCode"
             render={({ field }) => (
               <FormItem className="relative space-y-0 pt-3">
+                <FormLabel className="sr-only">{t('fields.otp')}</FormLabel>
                 <div className="focus-within:border-primary-base flex items-center border-b border-stroke-soft-200 py-2 transition-colors">
-                  <KeyRound className="mr-3 h-5 w-5 text-gray-400" />
+                  <KeyRound className="mr-3 h-5 w-5 text-gray-400" aria-hidden />
                   <FormControl>
                     <Input
                       inputMode="numeric"
                       autoComplete="one-time-code"
                       placeholder={t('fields.otp')}
                       maxLength={6}
-                      className="rounded-none border-0 bg-transparent px-0 tracking-widest shadow-none focus:outline-none focus-visible:ring-0 focus-visible:ring-transparent focus-visible:ring-offset-0"
+                      className="rounded-none border-0 bg-transparent px-0 tracking-widest shadow-none focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-base/40 focus-visible:ring-offset-0"
                       {...field}
                     />
                   </FormControl>

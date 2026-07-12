@@ -27,6 +27,7 @@ interface DeleteConfirmationDialogProps {
   impactTitle?: string
   impactMessage?: string
   deleteItems?: DeleteItem[]
+  permanentlyRemoveLabel?: string
   confirmButtonText?: string
   cancelButtonText?: string
   isLoading?: boolean
@@ -43,6 +44,7 @@ export function DeleteConfirmationDialog({
   impactTitle,
   impactMessage,
   deleteItems = [],
+  permanentlyRemoveLabel = 'This will permanently remove:',
   confirmButtonText = 'Delete',
   cancelButtonText = 'Cancel',
   isLoading = false,
@@ -53,8 +55,8 @@ export function DeleteConfirmationDialog({
         <div className="border-b border-stroke-soft-200 px-6 py-4">
           <DialogHeader>
             <div className="flex items-center gap-3">
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-rose-50">
-                <AlertTriangle className="h-6 w-6 text-rose-600" />
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-error-alpha-10">
+                <AlertTriangle className="h-6 w-6 text-error-base" />
               </div>
               <div>
                 <DialogTitle className="text-lg font-semibold text-text-strong-950">{title}</DialogTitle>
@@ -68,19 +70,19 @@ export function DeleteConfirmationDialog({
 
         <div className="px-6 py-4">
           <div className="space-y-4">
-            <div className="rounded-xl border border-rose-200 bg-rose-50 p-4">
-              <p className="text-sm font-medium text-rose-900">
+            <div className="rounded-xl border border-error-base/20 bg-error-alpha-10 p-4">
+              <p className="text-sm font-medium text-error-darker">
                 {warningMessage} <span className="font-bold">{itemName}</span>
               </p>
               {deleteItems.length > 0 && (
                 <>
-                  <p className="mt-2 text-sm text-rose-700">
-                    This will permanently remove:
+                  <p className="mt-2 text-sm text-error-darker">
+                    {permanentlyRemoveLabel}
                   </p>
-                  <ul className="mt-2 space-y-1 text-sm text-rose-700">
+                  <ul className="mt-2 space-y-1 text-sm text-error-darker">
                     {deleteItems.map((item, index) => (
                       <li key={index} className="flex items-start gap-2">
-                        <span className="mt-0.5 text-rose-500">•</span>
+                        <span className="mt-0.5 text-error-base">•</span>
                         <span>
                           {item.label}
                           {item.value !== undefined && ` (${item.value})`}
@@ -93,14 +95,14 @@ export function DeleteConfirmationDialog({
             </div>
 
             {impactTitle && impactMessage && (
-              <div className="rounded-xl border border-amber-200 bg-amber-50 p-4">
+              <div className="rounded-xl border border-warning-base/20 bg-warning-alpha-10 p-4">
                 <div className="flex gap-3">
-                  <AlertTriangle className="h-5 w-5 shrink-0 text-amber-600" />
+                  <AlertTriangle className="h-5 w-5 shrink-0 text-warning-base" />
                   <div>
-                    <p className="text-sm font-medium text-amber-900">
+                    <p className="text-sm font-medium text-warning-darker">
                       {impactTitle}
                     </p>
-                    <p className="mt-1 text-sm text-amber-700">
+                    <p className="mt-1 text-sm text-warning-darker">
                       {impactMessage}
                     </p>
                   </div>
@@ -125,7 +127,7 @@ export function DeleteConfirmationDialog({
               type="button"
               onClick={onConfirm}
               disabled={isLoading}
-              className="h-10 rounded-xl bg-rose-600 text-white hover:bg-rose-700"
+              className="h-10 rounded-xl bg-error-base text-static-white hover:bg-error-darker"
             >
               <Trash2 className="mr-2 h-4 w-4" />
               {confirmButtonText}

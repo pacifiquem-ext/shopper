@@ -52,7 +52,7 @@ export function StepSubdomain() {
 
       <div className="space-y-6">
         <div className="relative space-y-0">
-          <Label className="text-sm font-semibold text-gray-700">
+          <Label htmlFor="onboarding-subdomain" className="text-sm font-semibold text-gray-700">
             {t('subdomain.label', { defaultValue: 'Subdomain' })}
           </Label>
           <div
@@ -68,10 +68,12 @@ export function StepSubdomain() {
             )}
           >
             <input
+              id="onboarding-subdomain"
               type="text"
               value={draft.subdomain || ''}
               onChange={(e) => setSubdomain(e.target.value.toLowerCase())}
-              className="flex-1 bg-transparent pb-1 text-lg font-medium outline-none"
+              aria-invalid={subdomainField.hasError || availability === 'taken' || undefined}
+              className="flex-1 bg-transparent pb-1 text-lg font-medium outline-none focus-visible:ring-2 focus-visible:ring-primary-base/40"
               placeholder={t('subdomain.placeholder', {
                 defaultValue: 'my-store',
               })}
@@ -82,9 +84,8 @@ export function StepSubdomain() {
             <div className="pb-1 text-lg font-medium text-gray-500">.onlineshop.rw</div>
           </div>
 
-          {/* Validation error (from wizard) */}
           {subdomainField.hasError && (
-            <div className="absolute bg-white pt-1 text-xs font-medium text-red-500">
+            <div className="absolute bg-white pt-1 text-xs font-medium text-red-500" role="alert">
               {subdomainField.errorMessage}
             </div>
           )}

@@ -193,8 +193,10 @@ export default function OrdersPage() {
   const [kpiStats, setKpiStats] = useState<OrderKpiSnapshot | null>(null)
   const [kpiLoading, setKpiLoading] = useState(true)
   const [rowsLoading, setRowsLoading] = useState(true)
+  const [loadError, setLoadError] = useState(false)
   const [detailLoading, setDetailLoading] = useState(false)
   const [messagesLoading, setMessagesLoading] = useState(false)
+  const [reloadKey, setReloadKey] = useState(0)
 
   const kpiTrendLabel = useMemo(
     () => (change: string) => t('orders.stats.trendChange', { change }),
@@ -235,19 +237,38 @@ export default function OrdersPage() {
     if (range?.from) filters.dateFrom = range.from.toISOString().split('T')[0]
     if (range?.to) filters.dateTo = range.to.toISOString().split('T')[0]
 
+    let cancelled = false
     setRowsLoading(true)
-    ordersService.getAll(filters).then((res) => {
-      const list: any = res?.data
-      const orders: OrderApi[] = list?.data ?? []
-      const uuidMap: Record<string, string> = {}
-      const mapped = orders.map((o) => {
-        uuidMap[o.orderNumber] = o.id
-        return apiToOrderRow(o, t)
+    setLoadError(false)
+    ordersService
+      .getAll(filters)
+      .then((res) => {
+        if (cancelled) return
+        const list: any = res?.data
+        const orders: OrderApi[] = list?.data ?? []
+        const uuidMap: Record<string, string> = {}
+        const mapped = orders.map((o) => {
+          uuidMap[o.orderNumber] = o.id
+          return apiToOrderRow(o, t)
+        })
+        setRows(mapped)
+        setOrderUuidMap(uuidMap)
       })
-      setRows(mapped)
-      setOrderUuidMap(uuidMap)
-    }).finally(() => setRowsLoading(false))
-  }, [range, t])
+      .catch(() => {
+        if (!cancelled) {
+          setRows([])
+          setOrderUuidMap({})
+          setLoadError(true)
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setRowsLoading(false)
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [range, t, reloadKey])
 
   useEffect(() => {
     if (!range?.from) return
@@ -308,33 +329,27 @@ export default function OrdersPage() {
   const handleConfirmPayment = useCallback(async (orderId: string) => {
     const uuid = orderUuidMap[orderId]
     if (!uuid) return
-    try {
-      await ordersService.updatePayment(uuid, { status: 'SUCCESS' })
-      setRows((prev) => prev.map((r) => r.id === orderId ? { ...r, payment: 'success' as const } : r))
-      const res = await ordersService.getById(uuid)
-      const o: OrderApi | null = (res?.data as any)?.data ?? res?.data ?? null
-      if (o) setDetailsById((prev) => new Map(prev).set(orderId, apiToOrderDetails(o, t)))
-    } catch {}
+    await ordersService.updatePayment(uuid, { status: 'SUCCESS' })
+    setRows((prev) => prev.map((r) => (r.id === orderId ? { ...r, payment: 'success' as const } : r)))
+    const res = await ordersService.getById(uuid)
+    const o: OrderApi | null = (res?.data as any)?.data ?? res?.data ?? null
+    if (o) setDetailsById((prev) => new Map(prev).set(orderId, apiToOrderDetails(o, t)))
   }, [orderUuidMap, t])
 
   const handleRejectPayment = useCallback(async (orderId: string) => {
     const uuid = orderUuidMap[orderId]
     if (!uuid) return
-    try {
-      await ordersService.updatePayment(uuid, { status: 'FAILED' })
-      setRows((prev) => prev.map((r) => r.id === orderId ? { ...r, payment: 'pending' as const } : r))
-    } catch {}
+    await ordersService.updatePayment(uuid, { status: 'FAILED' })
+    setRows((prev) => prev.map((r) => (r.id === orderId ? { ...r, payment: 'pending' as const } : r)))
   }, [orderUuidMap])
 
   const handleSendMessage = useCallback(async (orderId: string, message: string) => {
     const uuid = orderUuidMap[orderId]
     if (!uuid) return
-    try {
-      await ordersService.sendMessage(uuid, { message, senderName: 'Store Admin' })
-      const res = await ordersService.getMessages(uuid)
-      const msgs: OrderMessageApi[] = (res?.data as any)?.data ?? res?.data ?? []
-      setOrderMessages((prev) => ({ ...prev, [orderId]: apiToMessages(msgs) }))
-    } catch {}
+    await ordersService.sendMessage(uuid, { message, senderName: 'Store Admin' })
+    const res = await ordersService.getMessages(uuid)
+    const msgs: OrderMessageApi[] = (res?.data as any)?.data ?? res?.data ?? []
+    setOrderMessages((prev) => ({ ...prev, [orderId]: apiToMessages(msgs) }))
   }, [orderUuidMap])
 
   const openCommunication = useCallback(async (orderId: string) => {
@@ -347,7 +362,9 @@ export default function OrdersPage() {
       const res = await ordersService.getMessages(uuid)
       const msgs: OrderMessageApi[] = (res?.data as any)?.data ?? res?.data ?? []
       setOrderMessages((prev) => ({ ...prev, [orderId]: apiToMessages(msgs) }))
-    } catch {} finally {
+    } catch {
+      setOrderMessages((prev) => ({ ...prev, [orderId]: prev[orderId] ?? [] }))
+    } finally {
       setMessagesLoading(false)
     }
   }, [orderUuidMap])
@@ -663,17 +680,31 @@ export default function OrdersPage() {
         </div>
 
         <div className="p-2">
-          <DataTable
-            data={filteredRows}
-            columns={columns}
-            getRowId={(r) => r.id}
-            enableSelection
-            enablePagination
-            defaultPageSize={10}
-            isLoading={rowsLoading}
-            emptyState={<span>{t('orders.empty')}</span>}
-            className="rounded-xl"
-          />
+          {loadError && !rowsLoading ? (
+            <div className="flex min-h-[280px] flex-col items-center justify-center gap-3 px-4 text-center">
+              <p className="text-sm font-medium text-text-sub-600">{t('errors.loadFailed')}</p>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setReloadKey((k) => k + 1)}
+                className="h-9 rounded-lg border-stroke-soft-200 bg-white text-text-sub-600 hover:bg-primary-alpha-10 hover:text-primary-base"
+              >
+                {t('errors.retry')}
+              </Button>
+            </div>
+          ) : (
+            <DataTable
+              data={filteredRows}
+              columns={columns}
+              getRowId={(r) => r.id}
+              enableSelection
+              enablePagination
+              defaultPageSize={10}
+              isLoading={rowsLoading}
+              emptyState={<span>{t('orders.empty')}</span>}
+              className="rounded-xl"
+            />
+          )}
         </div>
       </div>
 
@@ -690,8 +721,9 @@ export default function OrdersPage() {
         }
         messages={activeModalOrderId ? orderMessages[activeModalOrderId] || [] : []}
         isLoadingMessages={messagesLoading}
-        onSendMessage={(msg) => {
-          if (activeModalOrderId) handleSendMessage(activeModalOrderId, msg)
+        onSendMessage={async (msg) => {
+          if (!activeModalOrderId) return
+          await handleSendMessage(activeModalOrderId, msg)
         }}
       />
 
@@ -705,11 +737,13 @@ export default function OrdersPage() {
             : null
         }
         isConfirmed={activeModalOrderId ? paymentConfirmed[activeModalOrderId] ?? false : false}
-        onConfirm={() => {
-          if (activeModalOrderId) handleConfirmPayment(activeModalOrderId)
+        onConfirm={async () => {
+          if (!activeModalOrderId) return
+          await handleConfirmPayment(activeModalOrderId)
         }}
-        onReject={() => {
-          if (activeModalOrderId) handleRejectPayment(activeModalOrderId)
+        onReject={async () => {
+          if (!activeModalOrderId) return
+          await handleRejectPayment(activeModalOrderId)
         }}
       />
     </div>

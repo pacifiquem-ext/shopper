@@ -7,7 +7,7 @@ import { getPublicApiBaseUrl } from '@/lib/api-base-url'
 
 export const api = axios.create({
   baseURL: getPublicApiBaseUrl(),
-  timeout: 100000,
+  timeout: 30000,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -88,11 +88,16 @@ async function doRefresh(): Promise<string | null> {
       { refreshToken },
       { headers: { 'Content-Type': 'application/json' } },
     )
-    const newToken: string | undefined =
+    const newAccess: string | undefined =
       res.data?.data?.accessToken ?? res.data?.accessToken
-    if (!newToken) return null
-    useAuthStore.setState({ accessToken: newToken })
-    return newToken
+    const newRefresh: string | undefined =
+      res.data?.data?.refreshToken ?? res.data?.refreshToken
+    if (!newAccess) return null
+    useAuthStore.setState({
+      accessToken: newAccess,
+      ...(newRefresh ? { refreshToken: newRefresh } : {}),
+    })
+    return newAccess
   } catch {
     logout()
     return null
@@ -203,15 +208,21 @@ api.interceptors.response.use(
     const errorData = error.response?.data
     const status = error.response?.status
 
-    let title = 'An unexpected error occurred'
+    // Plain English map — next-intl is awkward outside React; keep titles short & stable.
+    const STATUS_TITLES: Record<number, string> = {
+      400: 'Bad request',
+      401: 'Please sign in again',
+      403: 'You do not have access',
+      404: 'Not found',
+      409: 'Conflict',
+      422: 'Invalid data',
+      429: 'Too many requests',
+    }
+    let title = 'Something went wrong'
     if (status) {
       if (status >= 200 && status < 300) title = 'Success'
-      else if (status === 400) title = 'Bad Request'
-      else if (status === 401) title = 'Unauthorized'
-      else if (status === 403) title = 'Forbidden'
-      else if (status === 404) title = 'Not Found'
-      else if (status === 409) title = 'Data Conflict'
-      else if (status >= 500) title = 'Server Error'
+      else if (STATUS_TITLES[status]) title = STATUS_TITLES[status]
+      else if (status >= 500) title = 'Server error'
     }
 
     let errorsList: string[] = []

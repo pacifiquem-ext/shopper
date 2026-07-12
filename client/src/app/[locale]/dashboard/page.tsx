@@ -12,7 +12,6 @@ import {
   ShoppingBag,
   Users,
   TrendingUp,
-  TrendingDown,
   ExternalLink,
   Plus,
   Edit,
@@ -32,17 +31,30 @@ import {
   SalesPurchaseChart,
 } from '@/components/dashboard/shared/dashboard-metrics'
 import { KpiStatCard } from '@/components/dashboard/shared/kpi-stat-card'
-import { Badge } from '@/components/ui/badge'
 import { useTranslations } from 'next-intl'
 import { Link } from '@/i18n/navigation'
 import { useState, useEffect, useMemo } from 'react'
 import { cn } from '@/lib/utils'
+import { formatRwf } from '@/lib/product-display'
 import { LoaderPanel } from '@/components/ui/turning-zero-loader'
+import { extractApiPayload } from '@/lib/api-response'
 import { analyticsService } from '@/services/analytics.service'
-import type { DashboardMetrics, TopProduct, InventorySummary, SalesTrendPoint, RecentActivityItem } from '@/services/analytics.service'
+import type {
+  DashboardMetrics,
+  DashboardOverview,
+  TopProduct,
+  InventorySummary,
+  SalesTrendPoint,
+  RecentActivityItem,
+} from '@/services/analytics.service'
+
+function money(n: number | undefined) {
+  return `${formatRwf(n ?? 0)} RWF`
+}
 
 export default function DashboardPage() {
   const t = useTranslations('dashboard')
+  const th = useTranslations('dashboard.home')
   const [selectedPeriod, setSelectedPeriod] = useState<'today' | 'week' | 'month' | 'year'>('month')
 
   const [dashboardMetrics, setDashboardMetrics] = useState<DashboardMetrics | null>(null)
@@ -51,12 +63,15 @@ export default function DashboardPage() {
   const [salesTrend, setSalesTrend] = useState<SalesTrendPoint[]>([])
   const [recentActivity, setRecentActivity] = useState<RecentActivityItem[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [loadError, setLoadError] = useState(false)
+  const [reloadKey, setReloadKey] = useState(0)
 
   useEffect(() => {
     let cancelled = false
 
     const fetchAll = async () => {
       setIsLoading(true)
+      setLoadError(false)
       try {
         const res = await analyticsService.getDashboardOverview(selectedPeriod, {
           topLimit: 3,
@@ -66,8 +81,8 @@ export default function DashboardPage() {
 
         if (cancelled) return
 
-        const overview = (res as { data?: typeof res })?.data ?? res
-        if (overview && typeof overview === 'object' && 'metrics' in overview) {
+        const overview = (extractApiPayload(res) ?? res) as unknown as DashboardOverview | null
+        if (overview?.metrics) {
           setDashboardMetrics(overview.metrics)
           setTopProducts(Array.isArray(overview.topProducts) ? overview.topProducts : [])
           setInventorySummary(overview.inventory ?? null)
@@ -77,13 +92,13 @@ export default function DashboardPage() {
           )
         }
       } catch {
-        // Axios interceptor shows toasts; keep dashboard usable with empty metrics
         if (!cancelled) {
           setDashboardMetrics(null)
           setTopProducts([])
           setInventorySummary(null)
           setSalesTrend([])
           setRecentActivity([])
+          setLoadError(true)
         }
       } finally {
         if (!cancelled) setIsLoading(false)
@@ -92,17 +107,17 @@ export default function DashboardPage() {
 
     fetchAll()
     return () => { cancelled = true }
-  }, [selectedPeriod])
+  }, [selectedPeriod, reloadKey])
 
   const quickLinks = useMemo(() => [
-    { label: 'Create Product', href: '/dashboard/products?action=create', icon: Plus, color: 'bg-primary-alpha-10 text-primary-base' },
-    { label: 'View Orders', href: '/dashboard/orders', icon: Layers, color: 'bg-sky-50 text-sky-900' },
-    { label: 'Manage Inventory', href: '/dashboard/inventory', icon: Boxes, color: 'bg-emerald-50 text-emerald-900' },
-    { label: 'Store Settings', href: '/dashboard/store-settings', icon: Edit, color: 'bg-violet-50 text-violet-900' },
-  ], [])
+    { label: th('createProduct'), href: '/dashboard/products?action=create', icon: Plus, color: 'bg-primary-alpha-10 text-primary-base' },
+    { label: th('viewOrders'), href: '/dashboard/orders', icon: Layers, color: 'bg-sky-50 text-sky-900' },
+    { label: th('manageInventory'), href: '/dashboard/inventory', icon: Boxes, color: 'bg-emerald-50 text-emerald-900' },
+    { label: th('storeSettings'), href: '/dashboard/store-settings', icon: Edit, color: 'bg-violet-50 text-violet-900' },
+  ], [th])
 
-  const fmt = (n: number | undefined) => (n ?? 0).toLocaleString()
-  const dash = (v: string | number | undefined) => isLoading ? '—' : String(v ?? 0)
+  const dash = (v: string | number | undefined) => (isLoading ? '—' : String(v ?? 0))
+  const moneyOrDash = (n: number | undefined) => (isLoading ? '—' : money(n))
 
   return (
     <div className="flex w-full flex-col gap-6">
@@ -114,7 +129,7 @@ export default function DashboardPage() {
             </div>
             <h1 className="text-xl font-semibold">{t('nav.dashboard')}</h1>
           </div>
-          <p className="mt-1 text-sm text-text-soft-400">Welcome back! Here's what's happening with your store.</p>
+          <p className="mt-1 text-sm text-text-soft-400">{th('welcome')}</p>
         </div>
 
         <div className="flex items-center gap-3">
@@ -129,30 +144,44 @@ export default function DashboardPage() {
         </div>
       </div>
 
+      {loadError && !isLoading ? (
+        <div className="flex flex-col items-start gap-3 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-sm font-medium text-rose-800">{t('errors.loadFailed')}</p>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => setReloadKey((k) => k + 1)}
+            className="h-9 rounded-lg border-rose-200 bg-white text-rose-800 hover:bg-rose-50"
+          >
+            {t('errors.retry')}
+          </Button>
+        </div>
+      ) : null}
+
       {/* KPI Cards */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <KpiStatCard
-          title="Total Revenue"
-          value={`$${fmt(dashboardMetrics?.totalRevenue)}`}
-          trendLabel="Gross revenue this period"
+          title={th('totalRevenue')}
+          value={money(dashboardMetrics?.totalRevenue)}
+          trendLabel={th('totalRevenueHint')}
           isLoading={isLoading}
         />
         <KpiStatCard
-          title="Total Orders"
+          title={th('totalOrders')}
           value={String(dashboardMetrics?.totalOrders ?? 0)}
-          trendLabel={`${dashboardMetrics?.pendingOrders ?? 0} pending`}
+          trendLabel={th('pendingCount', { count: dashboardMetrics?.pendingOrders ?? 0 })}
           isLoading={isLoading}
         />
         <KpiStatCard
-          title="Active Products"
+          title={th('activeProducts')}
           value={String(dashboardMetrics?.activeProducts ?? 0)}
-          trendLabel="Published products"
+          trendLabel={th('activeProductsHint')}
           isLoading={isLoading}
         />
         <KpiStatCard
-          title="Total Customers"
+          title={th('totalCustomers')}
           value={String(dashboardMetrics?.totalCustomers ?? 0)}
-          trendLabel="Unique customers"
+          trendLabel={th('totalCustomersHint')}
           isLoading={isLoading}
         />
       </div>
@@ -160,7 +189,7 @@ export default function DashboardPage() {
       {/* Quick Links */}
       <Card className="rounded-20 border border-stroke-soft-200 bg-bg-white-0 shadow-regular-xs">
         <CardHeader>
-          <CardTitle className="text-sm font-semibold text-text-strong-950">Quick Actions</CardTitle>
+          <CardTitle className="text-sm font-semibold text-text-strong-950">{th('quickActions')}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
@@ -185,8 +214,8 @@ export default function DashboardPage() {
         <Card className="rounded-20 border border-stroke-soft-200 bg-bg-white-0 shadow-regular-xs">
           <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-4">
             <div>
-              <CardTitle className="text-sm font-semibold text-text-strong-950">Orders Overview</CardTitle>
-              <div className="mt-1 text-xs text-text-soft-400">Current order status breakdown</div>
+              <CardTitle className="text-sm font-semibold text-text-strong-950">{th('ordersOverview')}</CardTitle>
+              <div className="mt-1 text-xs text-text-soft-400">{th('ordersOverviewSubtitle')}</div>
             </div>
             <Link href="/dashboard/orders">
               <Button
@@ -205,12 +234,12 @@ export default function DashboardPage() {
                   <Clock className="h-5 w-5 text-text-sub-600" />
                 </div>
                 <div>
-                  <div className="text-xs font-medium text-text-soft-400">Pending</div>
+                  <div className="text-xs font-medium text-text-soft-400">{th('pending')}</div>
                   <div className="text-2xl font-bold text-text-strong-950">{dash(dashboardMetrics?.pendingOrders)}</div>
                 </div>
               </div>
               <div className="text-right">
-                <div className="text-xs font-medium text-gray-400">Awaiting action</div>
+                <div className="text-xs font-medium text-gray-400">{th('awaitingAction')}</div>
               </div>
             </div>
 
@@ -220,12 +249,12 @@ export default function DashboardPage() {
                   <RotateCcw className="h-5 w-5 text-sky-700" />
                 </div>
                 <div>
-                  <div className="text-xs font-medium text-text-soft-400">Total Orders</div>
+                  <div className="text-xs font-medium text-text-soft-400">{th('totalOrders')}</div>
                   <div className="text-2xl font-bold text-text-strong-950">{dash(dashboardMetrics?.totalOrders)}</div>
                 </div>
               </div>
               <div className="text-right">
-                <div className="text-xs font-medium text-sky-600">All orders</div>
+                <div className="text-xs font-medium text-sky-600">{th('allOrders')}</div>
               </div>
             </div>
 
@@ -235,7 +264,7 @@ export default function DashboardPage() {
                   <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white shadow-sm">
                     <CheckCircle2 className="h-4 w-4 text-[--color-emerald-600]" />
                   </div>
-                  <div className="text-xs font-medium text-text-soft-400">Completed</div>
+                  <div className="text-xs font-medium text-text-soft-400">{th('completed')}</div>
                 </div>
                 <div className="mt-2 text-xl font-bold text-text-strong-950">{dash(dashboardMetrics?.completedOrders)}</div>
               </div>
@@ -244,7 +273,7 @@ export default function DashboardPage() {
                   <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white shadow-sm">
                     <AlertTriangle className="h-4 w-4 text-amber-500" />
                   </div>
-                  <div className="text-xs font-medium text-text-soft-400">Low Stock</div>
+                  <div className="text-xs font-medium text-text-soft-400">{th('lowStock')}</div>
                 </div>
                 <div className="mt-2 text-xl font-bold text-text-strong-950">{dash(inventorySummary?.lowStock)}</div>
               </div>
@@ -255,8 +284,8 @@ export default function DashboardPage() {
         <Card className="rounded-20 border border-stroke-soft-200 bg-bg-white-0 shadow-regular-xs">
           <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-4">
             <div>
-              <CardTitle className="text-sm font-semibold text-text-strong-950">Inventory Status</CardTitle>
-              <div className="mt-1 text-xs text-text-soft-400">Stock levels and alerts</div>
+              <CardTitle className="text-sm font-semibold text-text-strong-950">{th('inventoryStatus')}</CardTitle>
+              <div className="mt-1 text-xs text-text-soft-400">{th('inventoryStatusSubtitle')}</div>
             </div>
             <Link href="/dashboard/inventory">
               <Button
@@ -278,12 +307,12 @@ export default function DashboardPage() {
                   <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-white shadow-sm">
                     <Banknote className="h-4 w-4 text-[--color-emerald-600]" />
                   </div>
-                  <div className="text-xs font-medium text-text-soft-400">Total Stock Value</div>
+                  <div className="text-xs font-medium text-text-soft-400">{th('totalStockValue')}</div>
                 </div>
                 <div className="mt-3 text-3xl font-bold text-text-strong-950">
-                  {isLoading ? '—' : `$${fmt(inventorySummary?.totalStockValue)}`}
+                  {moneyOrDash(inventorySummary?.totalStockValue)}
                 </div>
-                <div className="mt-1 text-xs text-text-soft-400">Across all products</div>
+                <div className="mt-1 text-xs text-text-soft-400">{th('acrossAllProducts')}</div>
               </div>
             </div>
 
@@ -292,27 +321,27 @@ export default function DashboardPage() {
                 <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white shadow-sm transition-transform group-hover:scale-110">
                   <Box className="h-4 w-4 text-text-sub-600" />
                 </div>
-                <div className="mt-3 text-xs font-medium text-text-soft-400">In Stock</div>
+                <div className="mt-3 text-xs font-medium text-text-soft-400">{th('inStock')}</div>
                 <div className="mt-1 text-xl font-bold text-text-strong-950">{dash(inventorySummary?.totalStockQuantity)}</div>
-                <div className="mt-0.5 text-xs text-gray-400">units</div>
+                <div className="mt-0.5 text-xs text-gray-400">{th('units')}</div>
               </div>
 
               <div className="group rounded-xl bg-gradient-to-br from-slate-50 to-gray-100/50 p-4 transition-all hover:shadow-sm">
                 <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white shadow-sm transition-transform group-hover:scale-110">
                   <AlertTriangle className="h-4 w-4 text-text-sub-600" />
                 </div>
-                <div className="mt-3 text-xs font-medium text-text-soft-400">Low Stock</div>
+                <div className="mt-3 text-xs font-medium text-text-soft-400">{th('lowStock')}</div>
                 <div className="mt-1 text-xl font-bold text-text-strong-950">{dash(inventorySummary?.lowStock)}</div>
-                <div className="mt-0.5 text-xs text-gray-400">items</div>
+                <div className="mt-0.5 text-xs text-gray-400">{th('items')}</div>
               </div>
 
               <div className="group rounded-xl bg-gradient-to-br from-red-50/30 to-rose-50/20 p-4 transition-all hover:shadow-sm">
                 <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white shadow-sm transition-transform group-hover:scale-110">
                   <XCircle className="h-4 w-4 text-red-500" />
                 </div>
-                <div className="mt-3 text-xs font-medium text-text-soft-400">Out of Stock</div>
+                <div className="mt-3 text-xs font-medium text-text-soft-400">{th('outOfStock')}</div>
                 <div className="mt-1 text-xl font-bold text-text-strong-950">{dash(inventorySummary?.outOfStock)}</div>
-                <div className="mt-0.5 text-xs text-gray-400">items</div>
+                <div className="mt-0.5 text-xs text-gray-400">{th('items')}</div>
               </div>
             </div>
           </CardContent>
@@ -347,7 +376,7 @@ export default function DashboardPage() {
                   <div className="text-2xl font-bold text-text-strong-950">{dash(dashboardMetrics?.totalOrders)}</div>
                 </div>
               </div>
-              <div className="mt-2 text-xs text-gray-400">Total orders placed</div>
+              <div className="mt-2 text-xs text-gray-400">{th('totalOrdersPlaced')}</div>
             </div>
 
             <div className="group rounded-xl bg-gradient-to-br from-blue-50/40 to-sky-50/30 p-5 transition-all hover:shadow-sm">
@@ -358,11 +387,11 @@ export default function DashboardPage() {
                 <div>
                   <div className="text-xs font-medium text-text-soft-400">{t('cards.revenue')}</div>
                   <div className="text-2xl font-bold text-text-strong-950">
-                    {isLoading ? '—' : `$${fmt(dashboardMetrics?.totalRevenue)}`}
+                    {moneyOrDash(dashboardMetrics?.totalRevenue)}
                   </div>
                 </div>
               </div>
-              <div className="mt-2 text-xs text-gray-400">Gross income</div>
+              <div className="mt-2 text-xs text-gray-400">{th('grossIncome')}</div>
             </div>
 
             <div className="group rounded-xl bg-gradient-to-br from-slate-50 to-gray-100/50 p-5 transition-all hover:shadow-sm">
@@ -371,11 +400,11 @@ export default function DashboardPage() {
                   <ArrowDownRight className="h-5 w-5 text-text-sub-600" />
                 </div>
                 <div>
-                  <div className="text-xs font-medium text-text-soft-400">Completed</div>
+                  <div className="text-xs font-medium text-text-soft-400">{th('completed')}</div>
                   <div className="text-2xl font-bold text-text-strong-950">{dash(dashboardMetrics?.completedOrders)}</div>
                 </div>
               </div>
-              <div className="mt-2 text-xs text-gray-400">Fulfilled orders</div>
+              <div className="mt-2 text-xs text-gray-400">{th('fulfilledOrders')}</div>
             </div>
 
             <div className="group rounded-xl bg-gradient-to-br from-emerald-50/40 via-green-50/20 to-teal-50/30 p-5 transition-all hover:shadow-sm">
@@ -384,11 +413,11 @@ export default function DashboardPage() {
                   <Users className="h-5 w-5 text-[--color-emerald-600]" />
                 </div>
                 <div>
-                  <div className="text-xs font-medium text-text-soft-400">{t('cards.profit')}</div>
+                  <div className="text-xs font-medium text-text-soft-400">{th('totalCustomers')}</div>
                   <div className="text-2xl font-bold text-text-strong-950">{dash(dashboardMetrics?.totalCustomers)}</div>
                 </div>
               </div>
-              <div className="mt-2 text-xs text-gray-400">Unique customers</div>
+              <div className="mt-2 text-xs text-gray-400">{th('totalCustomersHint')}</div>
             </div>
           </div>
         </CardContent>
@@ -398,8 +427,8 @@ export default function DashboardPage() {
       <Card className="rounded-20 border border-stroke-soft-200 bg-bg-white-0 shadow-regular-xs">
         <CardHeader className="flex flex-row items-start justify-between space-y-0">
           <div>
-            <CardTitle className="text-sm font-semibold text-text-strong-950">Top Selling Products</CardTitle>
-            <div className="mt-1 text-xs text-text-soft-400">Best performers this {selectedPeriod}</div>
+            <CardTitle className="text-sm font-semibold text-text-strong-950">{th('topSellingProducts')}</CardTitle>
+            <div className="mt-1 text-xs text-text-soft-400">{th('bestPerformers', { period: selectedPeriod })}</div>
           </div>
           <Link href="/dashboard/products">
             <Button
@@ -408,7 +437,7 @@ export default function DashboardPage() {
               size="sm"
               className="h-8 rounded-lg text-xs text-primary-base hover:bg-primary-alpha-10"
             >
-              View All
+              {th('viewAll')}
               <ExternalLink className="ml-1 h-3 w-3" />
             </Button>
           </Link>
@@ -417,7 +446,7 @@ export default function DashboardPage() {
           {isLoading ? (
             <LoaderPanel minHeightClassName="min-h-[140px]" size="md" />
           ) : topProducts.length === 0 ? (
-            <div className="py-8 text-center text-sm text-gray-400">No sales data yet for this period.</div>
+            <div className="py-8 text-center text-sm text-gray-400">{th('noSalesData')}</div>
           ) : (
             <div className="space-y-3">
               {topProducts.map((product, idx) => (
@@ -428,11 +457,11 @@ export default function DashboardPage() {
                     </div>
                     <div>
                       <div className="text-sm font-semibold text-text-strong-950">{product.productName}</div>
-                      <div className="text-xs text-text-soft-400">{product.unitsSold} sold</div>
+                      <div className="text-xs text-text-soft-400">{th('unitsSold', { count: product.unitsSold })}</div>
                     </div>
                   </div>
                   <div className="text-right">
-                    <div className="text-sm font-bold text-text-strong-950">${fmt(product.revenue)}</div>
+                    <div className="text-sm font-bold text-text-strong-950">{money(product.revenue)}</div>
                   </div>
                 </div>
               ))}
@@ -445,7 +474,7 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <Card className="rounded-20 border border-stroke-soft-200 bg-bg-white-0 shadow-regular-xs">
           <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-0">
-            <CardTitle className="text-sm font-semibold text-text-strong-950">Product Summary</CardTitle>
+            <CardTitle className="text-sm font-semibold text-text-strong-950">{th('productSummary')}</CardTitle>
             <Link href="/dashboard/products">
               <Button
                 type="button"
@@ -460,13 +489,13 @@ export default function DashboardPage() {
             <MetricTile
               icon={<Package className="h-4 w-4" />}
               iconClassName="bg-primary-alpha-10 text-primary-base"
-              label="Active Products"
+              label={th('activeProducts')}
               value={dash(dashboardMetrics?.activeProducts)}
             />
             <MetricTile
               icon={<CheckCircle2 className="h-4 w-4" />}
               iconClassName="bg-emerald-50 text-[--color-emerald-600]"
-              label="Completed Orders"
+              label={th('completedOrders')}
               value={dash(dashboardMetrics?.completedOrders)}
             />
           </CardContent>
@@ -486,7 +515,7 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent className="space-y-4 pt-4">
             <KeyValueRow label={t('cards.lowStockItems')} value={String(inventorySummary?.lowStock ?? (isLoading ? '—' : '0')).padStart(2, '0')} />
-            <KeyValueRow label="Out of Stock" value={String(inventorySummary?.outOfStock ?? (isLoading ? '—' : '0')).padStart(2, '0')} />
+            <KeyValueRow label={th('outOfStock')} value={String(inventorySummary?.outOfStock ?? (isLoading ? '—' : '0')).padStart(2, '0')} />
             <KeyValueRow label={t('cards.noOfItems')} value={isLoading ? '—' : String(inventorySummary?.totalProducts ?? 0)} />
           </CardContent>
         </Card>
@@ -513,7 +542,7 @@ export default function DashboardPage() {
             <MetricTile
               icon={<ShoppingBag className="h-4 w-4" />}
               iconClassName="bg-sky-50 text-sky-600"
-              label="Total Orders"
+              label={th('totalOrders')}
               value={dash(dashboardMetrics?.totalOrders)}
             />
           </CardContent>
@@ -546,8 +575,8 @@ export default function DashboardPage() {
       <Card className="rounded-20 border border-stroke-soft-200 bg-bg-white-0 shadow-regular-xs">
         <CardHeader className="flex flex-row items-start justify-between space-y-0">
           <div>
-            <CardTitle className="text-sm font-semibold text-text-strong-950">Recent Activity</CardTitle>
-            <div className="mt-1 text-xs text-text-soft-400">Latest order events across your store</div>
+            <CardTitle className="text-sm font-semibold text-text-strong-950">{th('recentActivity')}</CardTitle>
+            <div className="mt-1 text-xs text-text-soft-400">{th('recentActivitySubtitle')}</div>
           </div>
           <Link href="/dashboard/orders">
             <Button
@@ -556,7 +585,7 @@ export default function DashboardPage() {
               size="sm"
               className="h-8 rounded-lg text-xs text-primary-base hover:bg-primary-alpha-10"
             >
-              View Orders
+              {th('viewOrders')}
               <ExternalLink className="ml-1 h-3 w-3" />
             </Button>
           </Link>
@@ -565,7 +594,7 @@ export default function DashboardPage() {
           {isLoading ? (
             <LoaderPanel minHeightClassName="min-h-[160px]" size="md" />
           ) : recentActivity.length === 0 ? (
-            <div className="py-8 text-center text-sm text-gray-400">No recent activity yet.</div>
+            <div className="py-8 text-center text-sm text-gray-400">{th('noRecentActivity')}</div>
           ) : (
             <div className="space-y-2">
               {recentActivity.map((item) => (

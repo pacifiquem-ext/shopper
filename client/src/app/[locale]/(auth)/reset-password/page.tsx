@@ -2,7 +2,7 @@
 
 import { AuthCard } from '@/components/auth/auth-card'
 import { Button } from '@/components/ui/button'
-import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form'
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Link } from '@/i18n/navigation'
 import { ResetPasswordInput, resetPasswordSchema } from '@/validations/auth'
@@ -54,14 +54,15 @@ export default function ResetPasswordPage() {
             name="phoneNumber"
             render={({ field }) => (
               <FormItem className="relative space-y-0">
+                <FormLabel className="sr-only">{t('fields.phone')}</FormLabel>
                 <div className="focus-within:border-primary-base flex items-center border-b border-stroke-soft-200 py-2 transition-colors">
-                  <Phone className="mr-3 h-5 w-5 text-gray-400" />
+                  <Phone className="mr-3 h-5 w-5 text-gray-400" aria-hidden />
                   <FormControl>
                     <Input
                       type="tel"
                       autoComplete="tel"
                       placeholder={t('fields.phone')}
-                      className="rounded-none border-0 bg-transparent px-0 shadow-none focus:outline-none focus-visible:ring-0 focus-visible:ring-transparent focus-visible:ring-offset-0"
+                      className="rounded-none border-0 bg-transparent px-0 shadow-none focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-base/40 focus-visible:ring-offset-0"
                       {...field}
                     />
                   </FormControl>
@@ -76,14 +77,15 @@ export default function ResetPasswordPage() {
             name="otpCode"
             render={({ field }) => (
               <FormItem className="relative space-y-0 pt-3">
+                <FormLabel className="sr-only">{t('fields.otpShort')}</FormLabel>
                 <div className="focus-within:border-primary-base flex items-center border-b border-stroke-soft-200 py-2 transition-colors">
-                  <KeyRound className="mr-3 h-5 w-5 text-gray-400" />
+                  <KeyRound className="mr-3 h-5 w-5 text-gray-400" aria-hidden />
                   <FormControl>
                     <Input
                       inputMode="numeric"
                       autoComplete="one-time-code"
                       placeholder={t('fields.otpShort')}
-                      className="rounded-none border-0 bg-transparent px-0 font-mono tracking-widest shadow-none focus:outline-none focus-visible:ring-0 focus-visible:ring-transparent focus-visible:ring-offset-0"
+                      className="rounded-none border-0 bg-transparent px-0 font-mono tracking-widest shadow-none focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-base/40 focus-visible:ring-offset-0"
                       maxLength={6}
                       {...field}
                     />
@@ -99,14 +101,15 @@ export default function ResetPasswordPage() {
             name="newPassword"
             render={({ field }) => (
               <FormItem className="relative space-y-0 pt-3">
+                <FormLabel className="sr-only">{t('fields.newPassword')}</FormLabel>
                 <div className="focus-within:border-primary-base flex items-center border-b border-stroke-soft-200 py-2 transition-colors">
-                  <Lock className="mr-3 h-5 w-5 text-gray-400" />
+                  <Lock className="mr-3 h-5 w-5 text-gray-400" aria-hidden />
                   <FormControl>
                     <Input
                       type="password"
                       autoComplete="new-password"
                       placeholder={t('fields.newPassword')}
-                      className="rounded-none border-0 bg-transparent px-0 shadow-none focus:outline-none focus-visible:ring-0 focus-visible:ring-transparent focus-visible:ring-offset-0"
+                      className="rounded-none border-0 bg-transparent px-0 shadow-none focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-base/40 focus-visible:ring-offset-0"
                       {...field}
                     />
                   </FormControl>

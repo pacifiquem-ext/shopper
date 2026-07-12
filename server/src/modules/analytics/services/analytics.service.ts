@@ -7,75 +7,92 @@ export class AnalyticsService {
 
     async getDashboardMetrics(storeId: string, period: string = 'today') {
         const dateRange = this.getDateRange(period);
-
-        const [orders, products, inventory] = await Promise.all([
-            this.prisma.order.findMany({
-                where: {
+        const orderWhere = {
+            storeId,
+            placedAt: {
+                gte: dateRange.start,
+                lte: dateRange.end,
+            },
+        };
+        const inventoryWhere = {
+            productVariant: {
+                product: {
                     storeId,
-                    placedAt: {
-                        gte: dateRange.start,
-                        lte: dateRange.end,
-                    },
                 },
-                include: {
-                    payment: true,
-                    fulfillment: true,
+            },
+        };
+
+        const [
+            revenueAgg,
+            totalOrders,
+            completedOrders,
+            pendingOrders,
+            customerGroups,
+            activeProducts,
+            inventoryByStatus,
+        ] = await Promise.all([
+            this.prisma.order.aggregate({
+                where: orderWhere,
+                _sum: { total: true },
+            }),
+            this.prisma.order.count({ where: orderWhere }),
+            this.prisma.order.count({
+                where: {
+                    ...orderWhere,
+                    fulfillment: { status: 'FULFILLED' },
                 },
+            }),
+            this.prisma.order.count({
+                where: {
+                    ...orderWhere,
+                    payment: { status: 'PENDING' },
+                },
+            }),
+            this.prisma.order.groupBy({
+                by: ['customerEmail'],
+                where: orderWhere,
             }),
             this.prisma.product.count({
                 where: { storeId, status: 'ACTIVE' },
             }),
-            this.prisma.inventoryRecord.findMany({
-                where: {
-                    productVariant: {
-                        product: {
-                            storeId,
-                        },
-                    },
-                },
+            this.prisma.inventoryRecord.groupBy({
+                by: ['status'],
+                where: inventoryWhere,
+                _count: { _all: true },
             }),
         ]);
 
-        const totalRevenue = orders.reduce((sum, order) => sum + Number(order.total), 0);
-        const totalOrders = orders.length;
-        const completedOrders = orders.filter(
-            (o) => o.fulfillment?.status === 'FULFILLED',
-        ).length;
-        const pendingOrders = orders.filter(
-            (o) => o.payment?.status === 'PENDING',
-        ).length;
-
-        const lowStockCount = inventory.filter((i) => i.status === 'LOW_STOCK').length;
-        const outOfStockCount = inventory.filter((i) => i.status === 'OUT_OF_STOCK').length;
-
-        const uniqueCustomers = new Set(orders.map((o) => o.customerEmail)).size;
+        const statusCount = (status: string) =>
+            inventoryByStatus.find(row => row.status === status)?._count._all ?? 0;
 
         return {
-            totalRevenue,
+            totalRevenue: Number(revenueAgg._sum.total ?? 0),
             totalOrders,
-            activeProducts: products,
-            totalCustomers: uniqueCustomers,
+            activeProducts,
+            totalCustomers: customerGroups.length,
             completedOrders,
             pendingOrders,
-            lowStockCount,
-            outOfStockCount,
+            lowStockCount: statusCount('LOW_STOCK'),
+            outOfStockCount: statusCount('OUT_OF_STOCK'),
         };
     }
 
     async getSalesTrends(storeId: string, days: number = 7) {
+        const safeDays = Math.min(Math.max(days, 1), 366);
         const snapshots = await this.prisma.dailyMetricsSnapshot.findMany({
             where: {
                 storeId,
                 snapshotDate: {
-                    gte: new Date(Date.now() - days * 24 * 60 * 60 * 1000),
+                    gte: new Date(Date.now() - safeDays * 24 * 60 * 60 * 1000),
                 },
             },
             orderBy: {
                 snapshotDate: 'asc',
             },
+            take: safeDays + 1,
         });
 
-        return snapshots.map((s) => ({
+        return snapshots.map(s => ({
             date: s.snapshotDate,
             revenue: Number(s.totalRevenue),
             cost: Number(s.totalCost),
@@ -84,88 +101,153 @@ export class AnalyticsService {
         }));
     }
 
-    async getTopProducts(storeId: string, limit: number = 10) {
-        const orderLineItems = await this.prisma.orderLineItem.findMany({
+    async getTopProducts(
+        storeId: string,
+        limit: number = 10,
+        period?: string,
+    ) {
+        const safeLimit = Math.min(Math.max(limit, 1), 50);
+        const dateRange = period ? this.getDateRange(period) : null;
+
+        const variantSales = await this.prisma.orderLineItem.groupBy({
+            by: ['productVariantId'],
             where: {
                 order: {
                     storeId,
+                    ...(dateRange
+                        ? {
+                              placedAt: {
+                                  gte: dateRange.start,
+                                  lte: dateRange.end,
+                              },
+                          }
+                        : {}),
                 },
             },
-            include: {
-                productVariant: {
-                    include: {
-                        product: true,
+            _sum: {
+                quantity: true,
+                total: true,
+            },
+            orderBy: {
+                _sum: {
+                    total: 'desc',
+                },
+            },
+            take: Math.min(safeLimit * 10, 200),
+        });
+
+        if (variantSales.length === 0) {
+            return [];
+        }
+
+        const variants = await this.prisma.productVariant.findMany({
+            where: {
+                id: { in: variantSales.map(row => row.productVariantId) },
+            },
+            select: {
+                id: true,
+                product: {
+                    select: {
+                        id: true,
+                        name: true,
                     },
                 },
             },
         });
 
-        const productSales = orderLineItems.reduce((acc: any, item) => {
-            const productId = item.productVariant.product.id;
-            if (!acc[productId]) {
-                acc[productId] = {
-                    productId,
-                    productName: item.productName,
-                    unitsSold: 0,
-                    revenue: 0,
-                };
-            }
-            acc[productId].unitsSold += item.quantity;
-            acc[productId].revenue += Number(item.total);
-            return acc;
-        }, {});
+        const variantById = new Map(variants.map(v => [v.id, v]));
+        const productSales = new Map<
+            string,
+            { productId: string; productName: string; unitsSold: number; revenue: number }
+        >();
 
-        return Object.values(productSales)
-            .sort((a: any, b: any) => b.revenue - a.revenue)
-            .slice(0, limit);
+        for (const row of variantSales) {
+            const variant = variantById.get(row.productVariantId);
+            if (!variant) continue;
+
+            const productId = variant.product.id;
+            const existing = productSales.get(productId);
+            const unitsSold = row._sum.quantity ?? 0;
+            const revenue = Number(row._sum.total ?? 0);
+
+            if (existing) {
+                existing.unitsSold += unitsSold;
+                existing.revenue += revenue;
+            } else {
+                productSales.set(productId, {
+                    productId,
+                    productName: variant.product.name,
+                    unitsSold,
+                    revenue,
+                });
+            }
+        }
+
+        return [...productSales.values()]
+            .sort((a, b) => b.revenue - a.revenue)
+            .slice(0, safeLimit);
     }
 
     async getInventorySummary(storeId: string) {
-        const inventory = await this.prisma.inventoryRecord.findMany({
-            where: {
-                productVariant: {
-                    product: {
-                        storeId,
-                    },
+        const inventoryWhere = {
+            productVariant: {
+                product: {
+                    storeId,
                 },
             },
-            include: {
-                productVariant: true,
-            },
-        });
+        };
 
-        const totalProducts = inventory.length;
-        const inStock = inventory.filter((i) => i.status === 'IN_STOCK').length;
-        const lowStock = inventory.filter((i) => i.status === 'LOW_STOCK').length;
-        const outOfStock = inventory.filter((i) => i.status === 'OUT_OF_STOCK').length;
+        const [statusGroups, valueRows] = await Promise.all([
+            this.prisma.inventoryRecord.groupBy({
+                by: ['status'],
+                where: inventoryWhere,
+                _count: { _all: true },
+                _sum: { onHand: true },
+            }),
+            this.prisma.$queryRaw<Array<{ totalValue: unknown }>>`
+                SELECT COALESCE(SUM(ir."onHand" * pv.price), 0) AS "totalValue"
+                FROM inventory_records ir
+                INNER JOIN product_variants pv ON pv.id = ir."productVariantId"
+                INNER JOIN products p ON p.id = pv."productId"
+                WHERE p."storeId" = ${storeId}
+            `,
+        ]);
 
-        const totalStockValue = inventory.reduce(
-            (sum, i) => sum + i.onHand * Number(i.productVariant.price),
+        const countFor = (status: string) =>
+            statusGroups.find(row => row.status === status)?._count._all ?? 0;
+
+        const totalProducts = statusGroups.reduce(
+            (sum, row) => sum + row._count._all,
             0,
         );
-        const totalStockQuantity = inventory.reduce((sum, i) => sum + i.onHand, 0);
+        const totalStockQuantity = statusGroups.reduce(
+            (sum, row) => sum + (row._sum.onHand ?? 0),
+            0,
+        );
+        const totalStockValue = Number(valueRows[0]?.totalValue ?? 0);
 
         return {
             totalProducts,
-            inStock,
-            lowStock,
-            outOfStock,
+            inStock: countFor('IN_STOCK'),
+            lowStock: countFor('LOW_STOCK'),
+            outOfStock: countFor('OUT_OF_STOCK'),
             totalStockValue,
             totalStockQuantity,
         };
     }
 
     async getRecentActivity(storeId: string, limit: number = 10) {
+        const safeLimit = Math.min(Math.max(limit, 1), 50);
         const events = await this.prisma.orderEvent.findMany({
             where: { order: { storeId } },
             include: {
                 order: { select: { orderNumber: true, customerName: true } },
             },
             orderBy: { createdAt: 'desc' },
-            take: limit,
+            take: safeLimit,
         });
 
-        return events.map((e) => ({
+        return events.map(e => ({
             id: e.id,
             type: e.type,
             title: e.title,
@@ -183,20 +265,20 @@ export class AnalyticsService {
             topLimit?: number;
             trendDays?: number;
             activityLimit?: number;
-        } = {}
+        } = {},
     ) {
         const topLimit = options.topLimit ?? 3;
         const trendDays = options.trendDays ?? 365;
         const activityLimit = options.activityLimit ?? 8;
 
-        const metrics = await this.getDashboardMetrics(storeId, period);
-        const topProducts = await this.getTopProducts(storeId, topLimit);
-        const inventory = await this.getInventorySummary(storeId);
-        const salesTrend = await this.getSalesTrends(storeId, trendDays);
-        const recentActivity = await this.getRecentActivity(
-            storeId,
-            activityLimit
-        );
+        const [metrics, topProducts, inventory, salesTrend, recentActivity] =
+            await Promise.all([
+                this.getDashboardMetrics(storeId, period),
+                this.getTopProducts(storeId, topLimit, period),
+                this.getInventorySummary(storeId),
+                this.getSalesTrends(storeId, trendDays),
+                this.getRecentActivity(storeId, activityLimit),
+            ]);
 
         return {
             metrics,
@@ -210,7 +292,7 @@ export class AnalyticsService {
     async getReport(storeId: string, period: string = 'month'): Promise<string> {
         const [dashboard, topProducts] = await Promise.all([
             this.getDashboardMetrics(storeId, period),
-            this.getTopProducts(storeId, 10),
+            this.getTopProducts(storeId, 10, period),
         ]);
 
         const lines: string[] = [
@@ -230,7 +312,9 @@ export class AnalyticsService {
             '',
             'TOP PRODUCTS',
             'Product Name,Units Sold,Revenue',
-            ...(topProducts as any[]).map((p) => `${p.productName},${p.unitsSold},${p.revenue}`),
+            ...(topProducts as any[]).map(
+                p => `${p.productName},${p.unitsSold},${p.revenue}`,
+            ),
         ];
 
         return lines.join('\n');

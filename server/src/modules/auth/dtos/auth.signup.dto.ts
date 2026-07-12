@@ -1,7 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
     IsEmail,
-    IsEnum,
+    IsIn,
     IsNotEmpty,
     IsOptional,
     IsPhoneNumber,
@@ -63,6 +63,6 @@ export class SignupDto {
         default: UserRole.CUSTOMER,
     })
     @IsOptional()
-    @IsEnum(UserRole)
+    @IsIn([UserRole.CUSTOMER, UserRole.STORE_OWNER])
     role?: UserRole;
 }

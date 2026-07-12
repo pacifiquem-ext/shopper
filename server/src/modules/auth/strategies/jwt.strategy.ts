@@ -1,7 +1,7 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
-import { UserRole } from '@prisma/client';
+import { UserRole, UserStatus } from '@prisma/client';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { DatabaseService } from '../../../common/database/services/database.service';
 import { withDbRetry } from '../../../common/database/utils/with-db-retry';
@@ -36,6 +36,12 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt-access') {
         );
 
         if (!user) {
+            throw new UnauthorizedException(
+                'User no longer exists or invalid token'
+            );
+        }
+
+        if (user.status !== UserStatus.ACTIVE) {
             throw new UnauthorizedException(
                 'User no longer exists or invalid token'
             );

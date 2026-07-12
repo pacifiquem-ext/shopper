@@ -131,12 +131,12 @@ export function PlaceOrderDialog({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>{t('placeOrderPhoneLabel')}</FormLabel>
-                  <FormControl>
-                    <div className='relative'>
-                      <Phone
-                        className='pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground'
-                        aria-hidden
-                      />
+                  <div className='relative'>
+                    <Phone
+                      className='pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground'
+                      aria-hidden
+                    />
+                    <FormControl>
                       <Input
                         {...field}
                         type='tel'
@@ -145,8 +145,8 @@ export function PlaceOrderDialog({
                         className='pl-9'
                         disabled={submitting}
                       />
-                    </div>
-                  </FormControl>
+                    </FormControl>
+                  </div>
                   <FormDescription>{t('placeOrderPhoneHint')}</FormDescription>
                   <FormMessage />
                 </FormItem>

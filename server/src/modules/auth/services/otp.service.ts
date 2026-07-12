@@ -1,9 +1,8 @@
 import { BadRequestException, GoneException, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { createHash, randomBytes } from 'crypto';
 import { DatabaseService } from '../../../common/database/services/database.service';
 import { OtpType } from '../constants/auth.enum';
-import { randomBytes } from 'crypto';
-
 
 @Injectable()
 export class OtpService {
@@ -25,9 +24,13 @@ export class OtpService {
     }
 
     generateCode(): string {
-      const buffer = randomBytes(4);
-      const code = buffer.readUInt32BE(0) % 1000000;
-      return code.toString().padStart(6, '0');
+        const buffer = randomBytes(4);
+        const code = buffer.readUInt32BE(0) % 1000000;
+        return code.toString().padStart(6, '0');
+    }
+
+    private hashCode(code: string): string {
+        return createHash('sha256').update(code).digest('hex');
     }
 
     async createOtp(phoneNumber: string, type: OtpType): Promise<string> {
@@ -42,7 +45,7 @@ export class OtpService {
         await this.prisma.otpCode.create({
             data: {
                 phoneNumber,
-                code,
+                code: this.hashCode(code),
                 type,
                 expiresAt,
             },
@@ -79,7 +82,7 @@ export class OtpService {
             );
         }
 
-        if (otpRecord.code !== code) {
+        if (otpRecord.code !== this.hashCode(code)) {
             await this.prisma.otpCode.update({
                 where: { id: otpRecord.id },
                 data: { attempts: { increment: 1 } },

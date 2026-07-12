@@ -11,12 +11,13 @@ export class AdminStoreService {
     constructor(private readonly prisma: DatabaseService) {}
 
     async getStores(status?: StoreStatus, skip = 0, take = 20) {
+        const cappedTake = Math.min(Math.max(take, 1), 100);
         const whereArgs = status ? { status } : {};
         const [stores, total] = await Promise.all([
             this.prisma.store.findMany({
                 where: whereArgs,
                 skip,
-                take,
+                take: cappedTake,
                 orderBy: { createdAt: 'desc' },
                 include: {
                     user: {
@@ -31,7 +32,7 @@ export class AdminStoreService {
             this.prisma.store.count({ where: whereArgs }),
         ]);
 
-        return { data: stores, total, skip, take };
+        return { data: stores, total, skip, take: cappedTake };
     }
 
     async getStoreKyc(storeId: string) {

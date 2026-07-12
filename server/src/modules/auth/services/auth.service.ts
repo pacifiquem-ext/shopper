@@ -9,7 +9,9 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcryptjs';
+import { createHash } from 'crypto';
 
+import { APP_ENVIRONMENT } from '../../../app/enums/app.enum';
 import { DatabaseService } from '../../../common/database/services/database.service';
 import { OtpService } from './otp.service';
 import { OtpType, UserRole, UserStatus } from '../constants/auth.enum';
@@ -63,7 +65,6 @@ export class AuthService {
             },
         });
 
-        // create & send OTP
         const otpCode = await this.otpService.createOtp(
             newUser.phoneNumber,
             OtpType.VERIFY_PHONE
@@ -148,32 +149,38 @@ export class AuthService {
                 'AUTH_REFRESH_TOKEN_SECRET'
             );
             const payload = this.jwtService.verify(refreshToken, { secret });
+            const tokenHash = this.hashToken(refreshToken);
 
-            const storedToken = await this.prisma.refreshToken.findUnique({
-                where: { token: refreshToken },
+            const deleted = await this.prisma.refreshToken.deleteMany({
+                where: {
+                    token: tokenHash,
+                    revoked: false,
+                    expiresAt: { gt: new Date() },
+                },
             });
 
-            if (!storedToken || storedToken.revoked) {
+            if (deleted.count === 0) {
                 throw new UnauthorizedException(
                     'Invalid or revoked refresh token'
                 );
             }
 
             const user = await this.prisma.user.findUnique({
-                where: { id: payload.sub || storedToken.userId },
+                where: { id: payload.sub },
             });
 
             if (!user || user.status !== UserStatus.ACTIVE) {
                 throw new ForbiddenException('User is not active');
             }
 
-            // Remove old token and issue new
-            await this.prisma.refreshToken.delete({
-                where: { token: refreshToken },
-            });
-
             return this.generateTokens(user);
-        } catch {
+        } catch (error) {
+            if (
+                error instanceof ForbiddenException ||
+                error instanceof UnauthorizedException
+            ) {
+                throw error;
+            }
             throw new UnauthorizedException('Invalid refresh token');
         }
     }
@@ -191,7 +198,6 @@ export class AuthService {
             this.logDevOtp(user.phoneNumber, OtpType.RESET_PASSWORD, otpCode);
         }
 
-        // Always return success to prevent user enumeration
         return {
             message:
                 'Password reset code has been sent securely to your phone number.',
@@ -205,6 +211,14 @@ export class AuthService {
             resetDto.otpCode
         );
 
+        const user = await this.prisma.user.findUnique({
+            where: { phoneNumber: resetDto.phoneNumber },
+        });
+
+        if (!user) {
+            throw new BadRequestException('User not found');
+        }
+
         const saltRoundsStr = this.configService.get<string | number>(
             'BCRYPT_SALT_ROUNDS',
             10
@@ -216,14 +230,22 @@ export class AuthService {
         );
 
         await this.prisma.user.update({
-            where: { phoneNumber: resetDto.phoneNumber },
+            where: { id: user.id },
             data: { passwordHash },
+        });
+
+        await this.prisma.refreshToken.deleteMany({
+            where: { userId: user.id },
         });
 
         return {
             message:
                 'Your password has been completely reset. You are ready to log in!',
         };
+    }
+
+    private hashToken(token: string): string {
+        return createHash('sha256').update(token).digest('hex');
     }
 
     private async generateTokens(user: any) {
@@ -249,14 +271,13 @@ export class AuthService {
             expiresIn: refreshTokenExp as any,
         });
 
-        // Store refresh token in the database
         const expiresAt = new Date();
-        expiresAt.setDate(expiresAt.getDate() + 7); // Default fallback mapping to 7d
+        expiresAt.setDate(expiresAt.getDate() + 7);
 
         await this.prisma.refreshToken.create({
             data: {
                 userId: user.id,
-                token: refreshToken,
+                token: this.hashToken(refreshToken),
                 expiresAt,
             },
         });
@@ -276,7 +297,15 @@ export class AuthService {
     }
 
     private logDevOtp(phoneNumber: string, type: OtpType, code: string): void {
-        if (this.configService.get<string>('NODE_ENV') === 'production') {
+        const nodeEnv = this.configService.get<string>('NODE_ENV');
+        const appEnv =
+            this.configService.get<string>('app.env') ??
+            this.configService.get<string>('APP_ENV');
+
+        if (
+            nodeEnv === 'production' ||
+            appEnv === APP_ENVIRONMENT.PRODUCTION
+        ) {
             return;
         }
 

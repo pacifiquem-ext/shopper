@@ -37,7 +37,7 @@ export function StepBusinessAddress() {
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
           <div className="relative space-y-0">
-            <Label className="text-sm font-semibold text-gray-700">
+            <Label htmlFor="onboarding-province" className="text-sm font-semibold text-gray-700">
               {t('businessAddress.province', { defaultValue: 'Province' })}
             </Label>
             <div
@@ -49,21 +49,23 @@ export function StepBusinessAddress() {
               )}
             >
               <Input
+                id="onboarding-province"
                 value={draft.businessAddress?.province || ''}
                 onChange={(e) => setBusinessAddress({ province: e.target.value })}
-                className="rounded-none border-0 bg-transparent px-0 pb-1 text-lg shadow-none focus:outline-none focus-visible:ring-0 focus-visible:ring-transparent focus-visible:ring-offset-0"
+                aria-invalid={provinceField.hasError || undefined}
+                className="rounded-none border-0 bg-transparent px-0 pb-1 text-lg shadow-none focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-base/40 focus-visible:ring-offset-0"
                 placeholder="Kigali"
               />
             </div>
             {provinceField.hasError && (
-              <div className="absolute bg-white pt-1 text-xs font-medium text-red-500">
+              <div className="absolute bg-white pt-1 text-xs font-medium text-red-500" role="alert">
                 {provinceField.errorMessage}
               </div>
             )}
           </div>
 
           <div className="relative space-y-0">
-            <Label className="text-sm font-semibold text-gray-700">
+            <Label htmlFor="onboarding-district" className="text-sm font-semibold text-gray-700">
               {t('businessAddress.district', { defaultValue: 'District' })}
             </Label>
             <div
@@ -75,21 +77,23 @@ export function StepBusinessAddress() {
               )}
             >
               <Input
+                id="onboarding-district"
                 value={draft.businessAddress?.district || ''}
                 onChange={(e) => setBusinessAddress({ district: e.target.value })}
-                className="rounded-none border-0 bg-transparent px-0 pb-1 text-lg shadow-none focus:outline-none focus-visible:ring-0 focus-visible:ring-transparent focus-visible:ring-offset-0"
+                aria-invalid={districtField.hasError || undefined}
+                className="rounded-none border-0 bg-transparent px-0 pb-1 text-lg shadow-none focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-base/40 focus-visible:ring-offset-0"
                 placeholder="Gasabo"
               />
             </div>
             {districtField.hasError && (
-              <div className="absolute bg-white pt-1 text-xs font-medium text-red-500">
+              <div className="absolute bg-white pt-1 text-xs font-medium text-red-500" role="alert">
                 {districtField.errorMessage}
               </div>
             )}
           </div>
 
           <div className="relative space-y-0">
-            <Label className="text-sm font-semibold text-gray-700">
+            <Label htmlFor="onboarding-sector" className="text-sm font-semibold text-gray-700">
               {t('businessAddress.sector', { defaultValue: 'Sector' })}
             </Label>
             <div
@@ -101,14 +105,16 @@ export function StepBusinessAddress() {
               )}
             >
               <Input
+                id="onboarding-sector"
                 value={draft.businessAddress?.sector || ''}
                 onChange={(e) => setBusinessAddress({ sector: e.target.value })}
-                className="rounded-none border-0 bg-transparent px-0 pb-1 text-lg shadow-none focus:outline-none focus-visible:ring-0 focus-visible:ring-transparent focus-visible:ring-offset-0"
+                aria-invalid={sectorField.hasError || undefined}
+                className="rounded-none border-0 bg-transparent px-0 pb-1 text-lg shadow-none focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-base/40 focus-visible:ring-offset-0"
                 placeholder="Remera"
               />
             </div>
             {sectorField.hasError && (
-              <div className="absolute bg-white pt-1 text-xs font-medium text-red-500">
+              <div className="absolute bg-white pt-1 text-xs font-medium text-red-500" role="alert">
                 {sectorField.errorMessage}
               </div>
             )}
@@ -116,7 +122,7 @@ export function StepBusinessAddress() {
         </div>
 
         <div className="relative space-y-0">
-          <Label className="text-sm font-semibold text-gray-700">
+          <Label htmlFor="onboarding-physical-address" className="text-sm font-semibold text-gray-700">
             {t('businessAddress.physicalDetails', {
               defaultValue: 'Physical Address details',
             })}
@@ -130,21 +136,23 @@ export function StepBusinessAddress() {
             )}
           >
             <Input
+              id="onboarding-physical-address"
               value={draft.businessAddress?.physicalAddress || ''}
               onChange={(e) => setBusinessAddress({ physicalAddress: e.target.value })}
-              className="rounded-none border-0 bg-transparent px-0 pb-1 text-lg shadow-none focus:outline-none focus-visible:ring-0 focus-visible:ring-transparent focus-visible:ring-offset-0"
+              aria-invalid={physicalAddressField.hasError || undefined}
+              className="rounded-none border-0 bg-transparent px-0 pb-1 text-lg shadow-none focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-base/40 focus-visible:ring-offset-0"
               placeholder="KG 11 Ave, 123 Building"
             />
           </div>
           {physicalAddressField.hasError && (
-            <div className="absolute bg-white pt-1 text-xs font-medium text-red-500">
+            <div className="absolute bg-white pt-1 text-xs font-medium text-red-500" role="alert">
               {physicalAddressField.errorMessage}
             </div>
           )}
         </div>
 
         <div className="relative space-y-0 pt-4">
-          <Label className="text-sm font-semibold text-gray-700">
+          <Label htmlFor="onboarding-maps-url" className="text-sm font-semibold text-gray-700">
             {t('businessAddress.googleMapsUrl', { defaultValue: 'Google Maps URL' })}{' '}
             <span className="text-xs font-normal text-gray-500">
               {t('common.optional', { defaultValue: '(Optional)' })}
@@ -152,9 +160,10 @@ export function StepBusinessAddress() {
           </Label>
           <div className="focus-within:border-primary-base flex items-center border-b border-stroke-soft-200 py-2 transition-colors">
             <Input
+              id="onboarding-maps-url"
               value={draft.businessAddress?.googleMapsUrl || ''}
               onChange={(e) => setBusinessAddress({ googleMapsUrl: e.target.value })}
-              className="rounded-none border-0 bg-transparent px-0 pb-1 text-lg shadow-none focus-visible:ring-0 focus-visible:ring-transparent focus-visible:ring-offset-0"
+              className="rounded-none border-0 bg-transparent px-0 pb-1 text-lg shadow-none focus-visible:ring-2 focus-visible:ring-primary-base/40 focus-visible:ring-offset-0"
               placeholder="https://maps.google.com/..."
             />
           </div>

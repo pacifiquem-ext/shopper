@@ -15,16 +15,16 @@ type TurningZeroLoaderProps = {
   label?: string
 }
 
-/** Spinning ring loader (turning zero) — brand default across dashboard. */
 export function TurningZeroLoader({
   size = 'md',
   className,
-  label = 'Loading',
+  label,
 }: TurningZeroLoaderProps) {
   return (
     <span
       role="status"
-      aria-label={label}
+      aria-busy="true"
+      aria-label={label || undefined}
       className={cn(
         'inline-block shrink-0 animate-spin rounded-full border-primary-base border-t-transparent',
         sizeClasses[size],

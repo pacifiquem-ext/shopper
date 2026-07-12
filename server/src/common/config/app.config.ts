@@ -7,16 +7,19 @@ function stripQuotes(value: string): string {
     return value.trim().replace(/^['"]|['"]$/g, '');
 }
 
-function parseCorsOrigins(raw: string | undefined): string[] | true {
+function parseCorsOrigins(
+    raw: string | undefined,
+    isProduction: boolean
+): string[] | true {
     if (!raw || !raw.trim()) {
-        return true;
+        return isProduction ? [] : true;
     }
     const parts = raw
         .split(',')
         .map(part => stripQuotes(part))
         .filter(Boolean);
     if (parts.length === 0 || parts.includes('*')) {
-        return true;
+        return isProduction ? [] : true;
     }
     return parts;
 }
@@ -43,12 +46,17 @@ function isLocalDevOrigin(origin: string): boolean {
 
 export default registerAs('app', (): Record<string, any> => {
     const env = process.env.APP_ENV ?? APP_ENVIRONMENT.LOCAL;
+    const isProduction = env === APP_ENVIRONMENT.PRODUCTION;
     const isLocal =
-        env === APP_ENVIRONMENT.LOCAL ||
-        env === APP_ENVIRONMENT.DEVELOPMENT ||
-        process.env.NODE_ENV !== 'production';
+        !isProduction &&
+        (env === APP_ENVIRONMENT.LOCAL ||
+            env === APP_ENVIRONMENT.DEVELOPMENT ||
+            process.env.NODE_ENV !== 'production');
 
-    const configuredOrigins = parseCorsOrigins(process.env.APP_CORS_ORIGINS);
+    const configuredOrigins = parseCorsOrigins(
+        process.env.APP_CORS_ORIGINS,
+        isProduction
+    );
 
     const corsConfig: CorsOptions = {
         origin: (origin, callback) => {

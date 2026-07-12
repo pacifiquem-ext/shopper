@@ -1,3 +1,5 @@
+'use client'
+
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -6,8 +8,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import { cn } from '@/lib/utils'
-import { Check, X, Download, AlertCircle, ZoomIn } from 'lucide-react'
+import { Check, X, Download, AlertCircle, ZoomIn, Loader2 } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { useState } from 'react'
 
 type PaymentVerificationModalProps = {
@@ -16,8 +18,8 @@ type PaymentVerificationModalProps = {
   orderId: string
   imageUrl: string | null
   isConfirmed: boolean
-  onConfirm: () => void
-  onReject: () => void
+  onConfirm: () => void | Promise<void>
+  onReject: () => void | Promise<void>
 }
 
 export function PaymentVerificationModal({
@@ -29,26 +31,49 @@ export function PaymentVerificationModal({
   onConfirm,
   onReject,
 }: PaymentVerificationModalProps) {
+  const t = useTranslations('dashboard')
   const [zoomOpen, setZoomOpen] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
-  const handleConfirm = () => {
-    onConfirm()
-    onOpenChange(false)
+  const handleOpenChange = (next: boolean) => {
+    if (!next && isSubmitting) return
+    onOpenChange(next)
   }
 
-  const handleReject = () => {
-    onReject()
-    onOpenChange(false)
+  const handleConfirm = async () => {
+    if (isSubmitting) return
+    setIsSubmitting(true)
+    try {
+      await onConfirm()
+      onOpenChange(false)
+    } catch {
+      // axios interceptor toasts; keep modal open
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleReject = async () => {
+    if (isSubmitting) return
+    setIsSubmitting(true)
+    try {
+      await onReject()
+      onOpenChange(false)
+    } catch {
+      // axios interceptor toasts; keep modal open
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
     <>
-      <Dialog open={open} onOpenChange={onOpenChange}>
+      <Dialog open={open} onOpenChange={handleOpenChange}>
         <DialogContent className="max-w-2xl border-stroke-soft-200 bg-white">
           <DialogHeader>
-            <DialogTitle className="text-text-strong-950">Payment Verification</DialogTitle>
+            <DialogTitle className="text-text-strong-950">{t('orders.paymentModal.title')}</DialogTitle>
             <DialogDescription className="text-text-sub-600">
-              Review and verify payment proof for order {orderId}
+              {t('orders.paymentModal.description', { orderId })}
             </DialogDescription>
           </DialogHeader>
 
@@ -114,28 +139,38 @@ export function PaymentVerificationModal({
                 {!isConfirmed && (
                   <div className="flex items-center gap-3 rounded-lg border border-stroke-soft-200 bg-bg-weak-50 p-4">
                     <div className="flex-1">
-                      <p className="text-sm font-semibold text-text-strong-950">Verify this payment?</p>
+                      <p className="text-sm font-semibold text-text-strong-950">{t('orders.paymentModal.verifyTitle')}</p>
                       <p className="mt-0.5 text-xs text-text-sub-600">
-                        Confirm if the payment proof is legitimate
+                        {t('orders.paymentModal.verifyBody')}
                       </p>
                     </div>
                     <div className="flex items-center gap-2">
                       <Button
                         type="button"
-                        onClick={handleReject}
+                        onClick={() => void handleReject()}
+                        disabled={isSubmitting}
                         variant="outline"
-                        className="h-9 rounded-lg border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100"
+                        className="h-9 rounded-lg border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100 disabled:opacity-50"
                       >
-                        <X className="mr-2 h-4 w-4" />
-                        Reject
+                        {isSubmitting ? (
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        ) : (
+                          <X className="mr-2 h-4 w-4" />
+                        )}
+                        {t('orders.paymentModal.reject')}
                       </Button>
                       <Button
                         type="button"
-                        onClick={handleConfirm}
-                        className="h-9 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700"
+                        onClick={() => void handleConfirm()}
+                        disabled={isSubmitting}
+                        className="h-9 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-50"
                       >
-                        <Check className="mr-2 h-4 w-4" />
-                        Confirm Payment
+                        {isSubmitting ? (
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        ) : (
+                          <Check className="mr-2 h-4 w-4" />
+                        )}
+                        {t('orders.paymentModal.confirm')}
                       </Button>
                     </div>
                   </div>

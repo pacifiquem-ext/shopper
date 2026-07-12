@@ -59,6 +59,7 @@ export function AuthCard({ children, activeTab, returnUrl }: AuthCardProps) {
             <div className="mb-8 flex rounded-10 bg-bg-weak-50 p-1 ring-1 ring-inset ring-stroke-soft-200">
               <Link
                 href={loginHref}
+                aria-current={activeTab === 'login' ? 'page' : undefined}
                 className={cn(
                   'flex-1 rounded-lg py-2 text-center text-label-sm transition duration-200',
                   activeTab === 'login'
@@ -70,6 +71,7 @@ export function AuthCard({ children, activeTab, returnUrl }: AuthCardProps) {
               </Link>
               <Link
                 href={signupHref}
+                aria-current={activeTab === 'signup' ? 'page' : undefined}
                 className={cn(
                   'flex-1 rounded-lg py-2 text-center text-label-sm transition duration-200',
                   activeTab === 'signup'

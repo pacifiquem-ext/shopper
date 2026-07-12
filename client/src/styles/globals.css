@@ -248,6 +248,11 @@
   --color-stable-alpha-24: #22d3bb3d;
   --color-stable-alpha-16: #22d3bb29;
   --color-stable-alpha-10: #22d3bb1a;
+  /* shadcn / legacy utility aliases → AlignUI tokens */
+  --color-background: var(--color-bg-white-0);
+  --color-muted: var(--color-bg-weak-50);
+  --color-muted-foreground: var(--color-text-sub-600);
+  --color-ring: var(--color-primary-base);
   --color-brand-50: #e3f7ec;
   --color-brand-100: #d6f5e8;
   --color-brand-200: #c2f5da;
@@ -370,5 +375,23 @@ body {
 .os-fade-up { animation: os-fade-up 420ms cubic-bezier(0.2, 0.8, 0.2, 1) both; }
 
 @media (prefers-reduced-motion: reduce) {
-  .os-fade-up { animation: none; }
+  .os-fade-up {
+    animation: none;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .animate-spin,
+  .animate-pulse,
+  .animate-bounce,
+  .animate-ping {
+    animation: none !important;
+  }
 }

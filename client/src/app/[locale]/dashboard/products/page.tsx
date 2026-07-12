@@ -10,7 +10,7 @@ import { SalesPerformanceChart, type SalesChartPoint, type SalesSummaryPoint } f
 import { TrendingProductsChart } from '@/components/dashboard/products/trending-products-chart'
 import { ProductFormModal } from '@/components/dashboard/products/product-form-modal'
 import { LoaderPanel } from '@/components/ui/turning-zero-loader'
-import { extractEntity, extractPaginatedItems } from '@/lib/api-response'
+import { extractApiPayload, extractEntity, extractPaginatedItems } from '@/lib/api-response'
 import { Button } from '@/components/ui/button'
 import { DataTable, type DataTableColumn } from '@/components/ui/data-table'
 import {
@@ -259,6 +259,8 @@ export default function ProductsPage() {
   const [rows, setRows] = useState<ProductRow[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [hasLoadedOnce, setHasLoadedOnce] = useState(false)
+  const [loadError, setLoadError] = useState(false)
+  const [reloadKey, setReloadKey] = useState(0)
   const [editLoading, setEditLoading] = useState(false)
   const [analyticsLoading, setAnalyticsLoading] = useState(true)
   const [dashboardMetrics, setDashboardMetrics] = useState<DashboardMetrics | null>(null)
@@ -295,6 +297,7 @@ export default function ProductsPage() {
   useEffect(() => {
     let cancelled = false
     setIsLoading(true)
+    setLoadError(false)
 
     productsService
       .getAll({ limit: 100 })
@@ -304,7 +307,10 @@ export default function ProductsPage() {
         setRows(products.map(apiToProductRow))
       })
       .catch(() => {
-        if (!cancelled) setRows([])
+        if (!cancelled) {
+          setRows([])
+          setLoadError(true)
+        }
       })
       .finally(() => {
         if (!cancelled) {
@@ -316,7 +322,7 @@ export default function ProductsPage() {
     return () => {
       cancelled = true
     }
-  }, [])
+  }, [reloadKey])
 
   useEffect(() => {
     let cancelled = false
@@ -326,8 +332,8 @@ export default function ProductsPage() {
       .getDashboardOverview('month', { topLimit: 5, trendDays: 60 })
       .then((res) => {
         if (cancelled) return
-        const overview = (res as { data?: typeof res })?.data ?? res
-        if (overview && typeof overview === 'object' && 'metrics' in overview) {
+        const overview = (extractApiPayload(res) ?? res) as unknown as import('@/services/analytics.service').DashboardOverview | null
+        if (overview?.metrics) {
           setDashboardMetrics(overview.metrics)
           setTopProducts(Array.isArray(overview.topProducts) ? overview.topProducts : [])
           setInventorySummary(overview.inventory ?? null)
@@ -437,9 +443,11 @@ export default function ProductsPage() {
     try {
       await productsService.delete(productToDelete.id)
       setRows((prev) => prev.filter((r) => r.id !== productToDelete.id))
-    } catch {}
-    setDeleteOpen(false)
-    setProductToDelete(null)
+      setDeleteOpen(false)
+      setProductToDelete(null)
+    } catch {
+      // axios interceptor toasts; leave confirmation dialog open
+    }
   }, [productToDelete])
 
   const vendors = useMemo(() => {
@@ -1156,6 +1164,18 @@ export default function ProductsPage() {
           <div className="p-2 min-h-[280px]">
             {!hasLoadedOnce || isLoading ? (
               <LoaderPanel minHeightClassName="min-h-[280px]" label={t('products.preview.loading')} />
+            ) : loadError ? (
+              <div className="flex min-h-[280px] flex-col items-center justify-center gap-3 px-4 text-center">
+                <p className="text-sm font-medium text-text-sub-600">{t('errors.loadFailed')}</p>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setReloadKey((k) => k + 1)}
+                  className="h-9 rounded-lg border-stroke-soft-200 bg-white text-text-sub-600 hover:bg-primary-alpha-10 hover:text-primary-base"
+                >
+                  {t('errors.retry')}
+                </Button>
+              </div>
             ) : (
               <DataTable
                 data={filteredRows}

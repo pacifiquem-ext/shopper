@@ -28,7 +28,7 @@ type OrderCommunicationModalProps = {
   orderId: string
   customerName: string
   messages: Message[]
-  onSendMessage: (message: string) => void
+  onSendMessage: (message: string) => void | Promise<void>
   isLoadingMessages?: boolean
 }
 
@@ -43,18 +43,26 @@ export function OrderCommunicationModal({
 }: OrderCommunicationModalProps) {
   const t = useTranslations('dashboard')
   const [newMessage, setNewMessage] = useState('')
+  const [isSending, setIsSending] = useState(false)
 
-  const handleSend = () => {
-    if (newMessage.trim()) {
-      onSendMessage(newMessage.trim())
+  const handleSend = async () => {
+    const trimmed = newMessage.trim()
+    if (!trimmed || isSending) return
+    setIsSending(true)
+    try {
+      await onSendMessage(trimmed)
       setNewMessage('')
+    } catch {
+      // axios interceptor toasts; keep draft message
+    } finally {
+      setIsSending(false)
     }
   }
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault()
-      handleSend()
+      void handleSend()
     }
   }
 
@@ -147,16 +155,19 @@ export function OrderCommunicationModal({
                 onChange={(e) => setNewMessage(e.target.value)}
                 onKeyDown={handleKeyDown}
                 placeholder={t('orders.communication.placeholder')}
-                className="min-h-[100px] resize-none rounded-xl border-stroke-soft-200 bg-white text-sm focus-visible:ring-primary-base"
+                disabled={isSending}
+                className="min-h-[100px] resize-none rounded-xl border-stroke-soft-200 bg-white text-sm focus-visible:ring-primary-base disabled:opacity-50"
               />
               <Button
                 type="button"
-                onClick={handleSend}
-                disabled={!newMessage.trim()}
+                onClick={() => void handleSend()}
+                disabled={!newMessage.trim() || isSending}
                 className="h-auto shrink-0 rounded-xl bg-primary-base px-5 text-white hover:bg-primary-darker disabled:opacity-50"
               >
                 <Send className="h-4 w-4" />
-                <span className="sr-only">{t('orders.communication.sendAria')}</span>
+                <span className="sr-only">
+                  {isSending ? t('orders.communication.sending') : t('orders.communication.sendAria')}
+                </span>
               </Button>
             </div>
             <p className="mt-2 text-xs text-text-soft-400">{t('orders.communication.hint')}</p>

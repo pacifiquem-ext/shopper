@@ -110,7 +110,7 @@ export function StepBrand() {
 
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
           <div className="relative space-y-0">
-            <Label className="text-sm font-semibold text-gray-700">
+            <Label htmlFor="onboarding-brand-primary" className="text-sm font-semibold text-gray-700">
               {t('brand.primaryColor', { defaultValue: 'Primary Color' })}
             </Label>
             <div
@@ -122,9 +122,11 @@ export function StepBrand() {
               )}
             >
               <input
+                id="onboarding-brand-primary"
                 type="color"
                 value={draft.brandPrimaryColor}
                 onChange={(e) => setBrandPrimaryColor(e.target.value)}
+                aria-invalid={brandPrimaryColorField.hasError || undefined}
                 className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
               />
               <div
@@ -136,13 +138,13 @@ export function StepBrand() {
               </div>
             </div>
             {brandPrimaryColorField.hasError && (
-              <div className="absolute bg-white pt-1 text-xs font-medium text-red-500">
+              <div className="absolute bg-white pt-1 text-xs font-medium text-red-500" role="alert">
                 {brandPrimaryColorField.errorMessage}
               </div>
             )}
           </div>
           <div className="relative space-y-0">
-            <Label className="text-sm font-semibold text-gray-700">
+            <Label htmlFor="onboarding-brand-secondary" className="text-sm font-semibold text-gray-700">
               {t('brand.secondaryColor', { defaultValue: 'Secondary Color' })}
             </Label>
             <div
@@ -154,9 +156,11 @@ export function StepBrand() {
               )}
             >
               <input
+                id="onboarding-brand-secondary"
                 type="color"
                 value={draft.brandSecondaryColor}
                 onChange={(e) => setBrandSecondaryColor(e.target.value)}
+                aria-invalid={brandSecondaryColorField.hasError || undefined}
                 className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
               />
               <div
@@ -168,7 +172,7 @@ export function StepBrand() {
               </div>
             </div>
             {brandSecondaryColorField.hasError && (
-              <div className="absolute bg-white pt-1 text-xs font-medium text-red-500">
+              <div className="absolute bg-white pt-1 text-xs font-medium text-red-500" role="alert">
                 {brandSecondaryColorField.errorMessage}
               </div>
             )}

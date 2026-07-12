@@ -18,13 +18,11 @@ import { IApiErrorResponse } from '../interfaces/response.interface';
 @Catch()
 export class ResponseExceptionFilter implements ExceptionFilter {
     private readonly logger = new Logger(ResponseExceptionFilter.name);
-    private readonly isDebug: boolean;
 
     constructor(
         private readonly messageService: MessageService,
         private readonly configService: ConfigService
     ) {
-        this.isDebug = this.configService.get<boolean>('app.debug');
         this.initializeSentry();
     }
 
@@ -85,20 +83,16 @@ export class ResponseExceptionFilter implements ExceptionFilter {
             timestamp: new Date().toISOString(),
         };
 
-        if (this.isDebug) {
-            if (validationMessages) {
-                errorResponse.error = validationMessages;
-            }
+        if (validationMessages) {
+            errorResponse.error = validationMessages;
         }
 
-        // Log errors
         if (statusCode >= HttpStatus.INTERNAL_SERVER_ERROR) {
             this.logger.error(
                 `${request.method} ${request.url} - ${statusCode}: ${message}`,
                 exception instanceof Error ? exception.stack : undefined
             );
 
-            // Capture in Sentry for production errors
             this.captureSentryException(exception, request, errorResponse);
         } else if (statusCode >= HttpStatus.BAD_REQUEST) {
             this.logger.warn(
@@ -109,23 +103,14 @@ export class ResponseExceptionFilter implements ExceptionFilter {
         response.status(statusCode).json(errorResponse);
     }
 
-    /**
-     * Translate validation error messages
-     * Supports format: "key|{json_params}"
-     *
-     * @param messages - Array of validation messages
-     * @returns Array of translated messages
-     */
     private translateValidationMessages(messages: string[]): string[] {
         return messages.map(msg => {
             try {
-                // Support format: "validation.key|{\"param\":\"value\"}"
                 const [key, paramsString] = msg.split('|');
                 const args = paramsString ? JSON.parse(paramsString) : {};
 
                 return this.messageService.translate(key, { args });
             } catch {
-                // If parsing fails, try translating as-is
                 return this.messageService.translate(msg, {
                     defaultValue: msg,
                 });
@@ -153,7 +138,7 @@ export class ResponseExceptionFilter implements ExceptionFilter {
             scope.setExtra('requestUrl', request.url);
             scope.setExtra('method', request.method);
             scope.setExtra('timestamp', errorResponse.timestamp);
-            scope.setExtra('body', request.body);
+            scope.setExtra('body', this.redactSensitiveBody(request.body));
             scope.setExtra('query', request.query);
             scope.setExtra('params', request.params);
             scope.setExtra('headers', this.sanitizeHeaders(request.headers));
@@ -164,6 +149,30 @@ export class ResponseExceptionFilter implements ExceptionFilter {
                 Sentry.captureMessage(errorResponse.message);
             }
         });
+    }
+
+    private redactSensitiveBody(body: unknown): unknown {
+        if (!body || typeof body !== 'object' || Array.isArray(body)) {
+            return body;
+        }
+
+        const sensitiveKeys = new Set([
+            'password',
+            'newPassword',
+            'otpCode',
+            'refreshToken',
+            'token',
+        ]);
+
+        const redacted: Record<string, unknown> = {
+            ...(body as Record<string, unknown>),
+        };
+        for (const key of Object.keys(redacted)) {
+            if (sensitiveKeys.has(key)) {
+                redacted[key] = '[REDACTED]';
+            }
+        }
+        return redacted;
     }
 
     private sanitizeHeaders(headers: any): any {
