@@ -11,9 +11,15 @@ coverage
 .turbo
 packages/shared/dist
 
-# Local E2E / audit screenshots (do not commit)
-e2e-audit/screens/
-audit*.png
-final__*.png
-soft-ui-*.png
+# Local E2E / Playwright visual dumps (AGENTS.md §8) — never commit image binaries
+e2e-audit/screens/**
+!e2e-audit/screens/README.md
 .playwright-mcp/
+
+# Legacy patterns if anything lands in the repo root by mistake
+/audit*.png
+/final__*.png
+/soft-ui-*.png
+/*-home.png
+/*-login.png
+/*-dashboard*.png

@@ -3,7 +3,7 @@
 **Date:** 2026-07-11  
 **Environment:** local (`http://127.0.0.1:3000` client, `http://127.0.0.1:3001` API)  
 **Method:** Playwright full-path crawl + API probes + targeted deep dives  
-**Artifacts:** `e2e-audit/results.json`, `e2e-audit/screens/`, `e2e-audit/run-e2e.mjs`  
+**Artifacts:** `e2e-audit/results.json`, `e2e-audit/run-e2e.mjs` (screenshots under `e2e-audit/screens/` only — local, gitignored; see `AGENTS.md` §8)  
 **Automated summary:** **108 pass · 1 hard fail · 10 warnings** (119 checks) — *manual review elevates several “warns” to real product bugs below.*
 
 **Test merchant (password reset for QA only):** `+250791761286` / `TestE2E123!` (STORE_OWNER, store `storeas` / Kigali Fashion)

@@ -138,6 +138,12 @@ These override convenience, speed of typing, or "I think this is probably fine."
 ├── README.md                      ← product vision, pricing, journeys, modules, exclusions
 ├── TODO.md                        ← living task ledger (§14) — full backlog, not a stub
 ├── ENV.md                         ← env var ledger (§7) — full inventory, not a stub
+├── BUGS.md                        ← E2E QA findings (when present)
+├── e2e-audit/                     ← Playwright/E2E scripts + local screenshots (§8) — never scatter PNGs
+│   ├── run-e2e.mjs
+│   ├── results.json               ← optional machine-readable results (no images required)
+│   └── screens/                   ← **only** place for E2E/Playwright screenshots (gitignored images)
+├── .playwright-mcp/               ← Playwright MCP session dumps (gitignored; local only)
 ├── client/.env.example            ← copy → client/.env.local
 ├── server/.env.example            ← copy → server/.env
 ├── CONTEXT.md                     ← domain glossary (ubiquitous language; create via domain-modeling when missing)
@@ -370,6 +376,35 @@ Prefer MCP tools over ad hoc scripts wherever one is configured for the job — 
 GitHub operations, filesystem, browser automation (Playwright MCP), etc. If you notice yourself
 writing the same raw script against an external system more than once, tell the user — that's a
 signal an MCP server should be added rather than re-solving it by hand each time.
+
+### Browser / visual QA artifacts (mandatory — no exceptions)
+
+When using **Playwright MCP**, headless Playwright, or any browser automation that writes images
+(screenshots, full-page captures, visual diffs):
+
+1. **Never** write PNG/JPEG/WebP (or other capture files) into:
+   - the **repository root**
+   - `client/src/`, `server/src/`, `packages/`, `docs/`, or any other source tree
+   - random ad-hoc names at the workspace root (`audit_*.png`, `final__*.png`, `soft-ui-*.png`, …)
+
+2. **Always** put captures under one of these directories (create if missing):
+   | Directory | Purpose |
+   | --------- | ------- |
+   | `e2e-audit/screens/` | Intentional E2E / visual audit screenshots (`e2e-audit/run-e2e.mjs`, manual audit runs) |
+   | `.playwright-mcp/` | Playwright MCP tool session output (snapshots, transient screenshots, console dumps) |
+
+3. Prefer **named subfolders by run** when dumping many files, e.g.
+   `e2e-audit/screens/2026-07-12-home/` or let MCP use `.playwright-mcp/` defaults — still never the root.
+
+4. **Do not commit** screenshot binaries. They are gitignored. Commit scripts/docs that *produce*
+   them (`e2e-audit/run-e2e.mjs`, `BUGS.md` prose), not the images themselves. Legitimate product
+   assets stay under `client/public/` (placeholders, branding) — those are not Playwright dumps.
+
+5. If a tool defaults to CWD/root for `filename`, **pass an explicit path** under
+   `e2e-audit/screens/` or `.playwright-mcp/` before capturing.
+
+Violating this scatters noise across the monorepo and risks accidental commits of huge binary
+files. Clean up any root-level audit PNGs you find before finishing a session.
 
 ---
 

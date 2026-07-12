@@ -11,6 +11,7 @@ const API = process.env.E2E_API || 'http://127.0.0.1:3001/v1'
 const MERCHANT_PHONE = process.env.E2E_PHONE || '+250791761286'
 const MERCHANT_PASS = process.env.E2E_PASS || 'TestE2E123!'
 const OUT = path.resolve('e2e-audit/results.json')
+/** AGENTS.md §8 — screenshots ONLY under e2e-audit/screens (never repo root). */
 const SCREEN_DIR = path.resolve('e2e-audit/screens')
 
 fs.mkdirSync(SCREEN_DIR, { recursive: true })
