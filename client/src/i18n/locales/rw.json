@@ -98,7 +98,17 @@
       "close": "Funga",
       "openFullPage": "Fungura urupapuro rwuzuye",
       "photoThumbAria": "Erekana ifoto {index}"
-    }
+    },
+    "homeTopRatedEyebrow": "Byagenze neza",
+    "homeTopRatedTitle": "Ibicuruzwa byagenze neza",
+    "homeNewArrivalsEyebrow": "Bishya",
+    "homeNewArrivalsTitle": "Bishya byinjiye",
+    "homeRisingStoresEyebrow": "Amaduka akura",
+    "homeRisingStoresTitle": "Amaduka ari kwiyongera",
+    "homeOnPromotionEyebrow": "Ku giciro cyihariye",
+    "homeOnPromotionTitle": "Amafaranga y’igiciro cyihariye",
+    "homeCtaTitle": "Reba isoko ryose",
+    "homeCtaSubtitle": "Shungura ukurikije icyiciro, igiciro, cyangwa sura iduka."
   },
   "storeTemplates": {
     "pickerTitle": "Hitamo imiterere y’iduka",
@@ -224,7 +234,11 @@
     "checkoutComingSoon": "Checkout izahuzwa mu ntambwe ikurikira.",
     "emptyTitle": "Igikapu cyawe kirimo ubusa",
     "emptyBody": "Ongeramo ibicuruzwa bivuye muri shop, bizahita bigaragara hano.",
-    "startShopping": "Tangira guhaha"
+    "startShopping": "Tangira guhaha",
+    "successTitle": "Icyemezo cyoherejwe",
+    "successPaymentHint": "Wishyure hanze ukoresheje amabwiriza y’iduka, hanyuma wohereze ikimenyetso cy’ubwishyu ku rupapuro rw’icyemezo.",
+    "successOrderLine": "Icyemezo {orderNumber} · {store}",
+    "successViewOrder": "Reba icyemezo & ohereza ikimenyetso"
   },
   "storeOnboarding": {
     "header": {
@@ -421,6 +435,21 @@
       "missingPhysicalAddress": "Aderesi y’ahantu irakenewe",
       "missingProvince": "Intara irakenewe",
       "missingSector": "Umurenge urakenewe"
+    },
+    "slug": {
+      "title": "Hitamo izina rito ry’iduka",
+      "subtitle": "Abaguzi bakubona kuri /stores/izina-ryawe kuri OnlineShop.rw — si urubuga rwisanzwe.",
+      "label": "Izina rito ry’iduka",
+      "placeholder": "iduka-ryanje",
+      "checking": "Turareba niba rihari…",
+      "available": "✓ Rirahari",
+      "taken": "✗ Ryarafashwe — hitamo irindi",
+      "checkError": "Ntibishoboye kureba niba rihari",
+      "rulesTitle": "Amabwiriza y’izina rito",
+      "rule1": "Inyuguti, imibare n’akanyo gusa",
+      "rule2": "Ntiryatangira cyangwa kurangira n’akanyo",
+      "rule3": "Hagati y’inyuguti 2 na 63",
+      "rule4": "Rikoreshwa gusa kuri /stores/{slug} mu isoko"
     }
   },
   "dashboard": {
@@ -437,7 +466,9 @@
       "businessInfo": "Ubucuruzi",
       "branding": "Ikimenyetso",
       "contact": "Aho bahamagara",
-      "delivery": "Gutanga"
+      "delivery": "Gutanga",
+      "promotions": "Promo",
+      "platformAdmin": "Ubuyobozi bw’urubuga"
     },
     "profile": {
       "title": "Umwirondoro wawe",
@@ -477,7 +508,6 @@
       "loadFailed": "Ntitwashoboye gupakira aya makuru.",
       "retry": "Ongera ugerageze"
     },
-
     "storeSettings": {
       "loadError": "Ntitwashoboye gupakira imiterere y'iduka. Kubika ntibishoboka kugeza bipakiye neza.",
       "branding": {
@@ -491,7 +521,8 @@
           "tooSmall": "Ifoto ntoya cyane ({width}×{height}px). Nibura ni 400×500px.",
           "loadFailed": "Ntitwashoboye gusoma iyo foto. Gerageza indi."
         }
-      }
+      },
+      "saved": "Igenamiterere ryabitswe"
     },
     "header": {
       "appShort": "OS",
@@ -842,7 +873,8 @@
           "remove": "Kuraho",
           "empty": "Nta foto zirimo.",
           "zoom": "Zoom",
-          "defaultAlt": "Igicuruzwa"
+          "defaultAlt": "Igicuruzwa",
+          "imageInvalid": "Ishusho ntiyemewe: {reason}"
         },
         "variants": {
           "colors": "Amabara",
@@ -855,7 +887,8 @@
           "pickColor": "Hitamo",
           "sizes": "Sizes",
           "sizesHint": "Kanda size kugirango uyikureho.",
-          "modelsPlaceholder": "Models (koma), urugero: Regular, Oversized"
+          "modelsPlaceholder": "Models (koma), urugero: Regular, Oversized",
+          "colorImagePlaceholder": "URL y’ishusho y’ibara (bitari ngombwa)"
         },
         "pricing": {
           "price": "Igiciro",
@@ -964,7 +997,8 @@
         "verifyTitle": "Wemeze ubu bwishyu?",
         "verifyBody": "Emeza niba icyemezo cy'ubwishyu ari cyo",
         "reject": "Wange",
-        "confirm": "Emeza ubwishyu"
+        "confirm": "Emeza ubwishyu",
+        "rejectReasonPlaceholder": "Impamvu yo kwanga (bitari ngombwa)"
       },
       "viewSheet": {
         "title": "Ibisobanuro by'order",
@@ -1267,6 +1301,31 @@
         "status": "Imiterere",
         "date": "Itariki"
       }
+    },
+    "promotionsPage": {
+      "title": "Kode za promo",
+      "subtitle": "Kora kode z’igabanyirizwa abaguzi bakoresha iyo bishoboka.",
+      "createTitle": "Kora kode ya promo",
+      "code": "Kode",
+      "codePlaceholder": "SAVE10",
+      "name": "Izina",
+      "namePlaceholder": "Igurisha ryo mu mpera z'icyumweru",
+      "discountType": "Ubwoko bw’igabanyirizwa",
+      "typePercent": "Ijanisha",
+      "typeFixed": "Amafaranga (RWF)",
+      "discountValue": "Agaciro",
+      "create": "Kora kode",
+      "saving": "Birimo kubikwa…",
+      "listTitle": "Kode zawe",
+      "empty": "Nta kode za promo zihari.",
+      "created": "Kode ya promo yaremwe",
+      "deactivated": "Kode ya promo yahagaritswe",
+      "deactivate": "Hagarika",
+      "active": "Ikora",
+      "inactive": "Ntikora",
+      "percentOff": "Kugabanywa {value}%",
+      "fixedOff": "Kugabanywa {value} RWF",
+      "validation": "Andika kode, izina, n’agaciro k’igabanyirizwa."
     }
   },
   "footer": {
@@ -1392,5 +1451,71 @@
       "submit": "Emeza",
       "submitting": "Turimo kwemeza…"
     }
+  },
+  "orders": {
+    "eyebrow": "Imiterere y’icyemezo",
+    "title": "Icyemezo {orderNumber}",
+    "statusLine": "Imiterere y’ubwishyu: {status}",
+    "summaryTitle": "Incamake y’icyemezo",
+    "total": "Igiteranyo",
+    "customer": "Umuguzi",
+    "payTitle": "Wishyure hanze + ikimenyetso",
+    "payInstructions": "Ohereza igiteranyo ukoresheje Mobile Money cyangwa banki y’iduka, hanyuma wiyandikire URL y’ishusho y’ikimenyetso cy’ubwishyu.",
+    "proofUrl": "URL y’ishusho y’ikimenyetso",
+    "reference": "Referansi y’ubwishyu",
+    "referencePlaceholder": "Nomero y’ubucuruzi (bitari ngombwa)",
+    "uploadProof": "Ohereza ikimenyetso",
+    "uploading": "Birimo koherezwa…",
+    "proofRequired": "Ongeraho URL y’ishusho y’ikimenyetso",
+    "proofImageInvalid": "Ntibishoboye kwemeza ishusho. Koresha URL y’ishusho rusange (byibuze 400×400).",
+    "proofUploaded": "Ikimenyetso cyoherejwe",
+    "proofSubmitted": "Ikimenyetso cyakiriwe — gutegereza isuzuma ry’umucuruzi",
+    "proofAlt": "Ikimenyetso cy’ubwishyu",
+    "notFoundTitle": "Icyemezo nticyabonetse",
+    "notFoundBody": "Ntibishoboye gushaka iki cyemezo. Gerageza nanone ukoresheje numero yakoreshejwe.",
+    "phoneLookup": "Numero yakoreshejwe",
+    "retryLookup": "Shakisha icyemezo",
+    "backToShop": "Subira mu isoko"
+  },
+  "admin": {
+    "title": "Ubuyobozi bw’urubuga",
+    "subtitle": "Imikorere y’isoko",
+    "navAria": "Iyobora ry’ubuyobozi",
+    "gateChecking": "Turareba uburenganzira…",
+    "backToDashboard": "Ikibaho cy’umucuruzi",
+    "nav": {
+      "overview": "Incamake",
+      "stores": "Amaduka",
+      "promotions": "Promo",
+      "reviews": "Ibisubizo",
+      "categories": "Ibyiciro"
+    },
+    "overviewTitle": "Incamake",
+    "overviewSubtitle": "Isuku ry’urubuga mu ncamake.",
+    "overviewUnavailable": "Imibare ntabwo ihari. Genzura amaduka mu gice cy’amaduka.",
+    "metrics": {
+      "storesTotal": "Amaduka",
+      "storesPending": "Ategereje kwemezwa",
+      "productsTotal": "Ibicuruzwa",
+      "ordersTotal": "Ibyemezo"
+    },
+    "storesTitle": "Amaduka",
+    "storesSubtitle": "Amaduka {count}",
+    "searchStores": "Shakisha amaduka",
+    "allStatuses": "Imiterere yose",
+    "noStores": "Nta maduka yabonetse",
+    "approve": "Emera",
+    "reject": "Anga",
+    "rejectReason": "Impamvu yo kwanga",
+    "confirmReject": "Emeza kwanga",
+    "cancel": "Hagarika",
+    "promotionsTitle": "Promo",
+    "promotionsSubtitle": "Kode za promo z’urubuga n’amaduka.",
+    "reviewsTitle": "Ibisubizo",
+    "reviewsSubtitle": "Ibisubizo ku bicuruzwa n’amaduka.",
+    "categoriesTitle": "Ibyiciro",
+    "categoriesSubtitle": "Ibyiciro n’ibiranga.",
+    "tableUnavailable": "Ntibishoboye gupakira iyi mbonerahamwe. API ishobora kuba itarateguwe.",
+    "emptyTable": "Nta mirongo ihari."
   }
 }

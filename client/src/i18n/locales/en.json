@@ -98,7 +98,17 @@
       "close": "Close",
       "openFullPage": "Open full page",
       "photoThumbAria": "Show photo {index}"
-    }
+    },
+    "homeTopRatedEyebrow": "Top rated",
+    "homeTopRatedTitle": "Highest rated products",
+    "homeNewArrivalsEyebrow": "Just in",
+    "homeNewArrivalsTitle": "New arrivals",
+    "homeRisingStoresEyebrow": "Rising shops",
+    "homeRisingStoresTitle": "Stores gaining momentum",
+    "homeOnPromotionEyebrow": "On promotion",
+    "homeOnPromotionTitle": "Deals you will love",
+    "homeCtaTitle": "Explore the full marketplace",
+    "homeCtaSubtitle": "Filter by category, sort by price, or visit a store profile."
   },
   "storeTemplates": {
     "pickerTitle": "Choose your storefront",
@@ -224,7 +234,11 @@
     "checkoutComingSoon": "Checkout will be connected next.",
     "emptyTitle": "Your cart is empty",
     "emptyBody": "Add products from the shop and they will appear here instantly.",
-    "startShopping": "Start shopping"
+    "startShopping": "Start shopping",
+    "successTitle": "Order placed",
+    "successPaymentHint": "Pay offline using the store instructions, then upload your payment proof on the order page.",
+    "successOrderLine": "Order {orderNumber} · {store}",
+    "successViewOrder": "View order & upload proof"
   },
   "storeOnboarding": {
     "header": {
@@ -421,6 +435,21 @@
       "missingDeliveryZoneName": "Add a name for each delivery zone to continue.",
       "missingDeliveryFee": "Add a delivery fee for each zone to continue.",
       "missingDeliveryEta": "Add an ETA for each zone to continue."
+    },
+    "slug": {
+      "title": "Choose your store slug",
+      "subtitle": "Buyers find you at /stores/your-slug on OnlineShop.rw — not a separate website.",
+      "label": "Store slug",
+      "placeholder": "my-store",
+      "checking": "Checking availability…",
+      "available": "✓ Available",
+      "taken": "✗ Already taken — choose a different name",
+      "checkError": "Could not check availability",
+      "rulesTitle": "Slug requirements",
+      "rule1": "Letters, numbers, and hyphens only",
+      "rule2": "Cannot start or end with a hyphen",
+      "rule3": "Must be between 2 and 63 characters",
+      "rule4": "Used only for /stores/{slug} marketplace profiles"
     }
   },
   "dashboard": {
@@ -437,7 +466,9 @@
       "businessInfo": "Business",
       "branding": "Branding",
       "contact": "Contact",
-      "delivery": "Delivery"
+      "delivery": "Delivery",
+      "promotions": "Promotions",
+      "platformAdmin": "Platform admin"
     },
     "profile": {
       "title": "Your profile",
@@ -490,7 +521,8 @@
           "tooSmall": "Image is too small ({width}×{height}px). Minimum is 400×500px.",
           "loadFailed": "Could not read that image. Try another file."
         }
-      }
+      },
+      "saved": "Settings saved"
     },
     "header": {
       "appShort": "OS",
@@ -841,7 +873,8 @@
           "remove": "Remove",
           "empty": "No images added yet.",
           "zoom": "Zoom",
-          "defaultAlt": "Product"
+          "defaultAlt": "Product",
+          "imageInvalid": "Image not accepted: {reason}"
         },
         "variants": {
           "colors": "Colors",
@@ -854,7 +887,8 @@
           "pickColor": "Pick",
           "sizes": "Sizes",
           "sizesHint": "Click a size to remove it.",
-          "modelsPlaceholder": "Models (comma-separated), e.g. Regular, Oversized"
+          "modelsPlaceholder": "Models (comma-separated), e.g. Regular, Oversized",
+          "colorImagePlaceholder": "Optional color image URL"
         },
         "pricing": {
           "price": "Price",
@@ -963,7 +997,8 @@
         "verifyTitle": "Verify this payment?",
         "verifyBody": "Confirm if the payment proof is legitimate",
         "reject": "Reject",
-        "confirm": "Confirm Payment"
+        "confirm": "Confirm Payment",
+        "rejectReasonPlaceholder": "Reason for rejection (optional)"
       },
       "viewSheet": {
         "title": "Order details",
@@ -1266,6 +1301,31 @@
         "status": "Status",
         "date": "Date"
       }
+    },
+    "promotionsPage": {
+      "title": "Promo codes",
+      "subtitle": "Create discount codes buyers can apply at checkout when supported.",
+      "createTitle": "Create promo code",
+      "code": "Code",
+      "codePlaceholder": "SAVE10",
+      "name": "Name",
+      "namePlaceholder": "Weekend sale",
+      "discountType": "Discount type",
+      "typePercent": "Percent off",
+      "typeFixed": "Fixed amount (RWF)",
+      "discountValue": "Value",
+      "create": "Create code",
+      "saving": "Saving…",
+      "listTitle": "Your codes",
+      "empty": "No promo codes yet.",
+      "created": "Promo code created",
+      "deactivated": "Promo code deactivated",
+      "deactivate": "Deactivate",
+      "active": "Active",
+      "inactive": "Inactive",
+      "percentOff": "{value}% off",
+      "fixedOff": "{value} RWF off",
+      "validation": "Enter a code, name, and a positive discount value."
     }
   },
   "footer": {
@@ -1391,5 +1451,71 @@
       "submit": "Verify",
       "submitting": "Verifying…"
     }
+  },
+  "orders": {
+    "eyebrow": "Order status",
+    "title": "Order {orderNumber}",
+    "statusLine": "Payment status: {status}",
+    "summaryTitle": "Order summary",
+    "total": "Total",
+    "customer": "Customer",
+    "payTitle": "Pay offline + proof",
+    "payInstructions": "Transfer the total using the store’s Mobile Money or bank details, then paste a public image URL of your payment screenshot.",
+    "proofUrl": "Payment proof image URL",
+    "reference": "Payment reference",
+    "referencePlaceholder": "Transaction ID (optional)",
+    "uploadProof": "Submit payment proof",
+    "uploading": "Submitting…",
+    "proofRequired": "Add a payment proof image URL",
+    "proofImageInvalid": "Could not validate that image. Use a public image URL (min 400×400).",
+    "proofUploaded": "Payment proof submitted",
+    "proofSubmitted": "Proof received — waiting for merchant review",
+    "proofAlt": "Payment proof",
+    "notFoundTitle": "Order not found",
+    "notFoundBody": "We could not load this order. Try again with the phone number used at checkout.",
+    "phoneLookup": "Phone used at checkout",
+    "retryLookup": "Look up order",
+    "backToShop": "Back to shop"
+  },
+  "admin": {
+    "title": "Platform admin",
+    "subtitle": "Marketplace operations",
+    "navAria": "Admin navigation",
+    "gateChecking": "Checking access…",
+    "backToDashboard": "Merchant dashboard",
+    "nav": {
+      "overview": "Overview",
+      "stores": "Stores",
+      "promotions": "Promotions",
+      "reviews": "Reviews",
+      "categories": "Categories"
+    },
+    "overviewTitle": "Overview",
+    "overviewSubtitle": "Platform health at a glance.",
+    "overviewUnavailable": "Overview metrics are not available yet. Manage stores from the stores tab.",
+    "metrics": {
+      "storesTotal": "Stores",
+      "storesPending": "Pending approval",
+      "productsTotal": "Products",
+      "ordersTotal": "Orders"
+    },
+    "storesTitle": "Stores",
+    "storesSubtitle": "{count} stores",
+    "searchStores": "Search stores",
+    "allStatuses": "All statuses",
+    "noStores": "No stores found",
+    "approve": "Approve",
+    "reject": "Reject",
+    "rejectReason": "Rejection reason",
+    "confirmReject": "Confirm reject",
+    "cancel": "Cancel",
+    "promotionsTitle": "Promotions",
+    "promotionsSubtitle": "Platform-wide and store promo codes.",
+    "reviewsTitle": "Reviews",
+    "reviewsSubtitle": "Product and store reviews.",
+    "categoriesTitle": "Categories",
+    "categoriesSubtitle": "Catalog categories and attributes.",
+    "tableUnavailable": "Could not load this table. The API endpoint may not be ready yet.",
+    "emptyTable": "No rows yet."
   }
 }

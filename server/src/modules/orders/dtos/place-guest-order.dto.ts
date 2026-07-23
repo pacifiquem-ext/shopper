@@ -2,6 +2,7 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
     ArrayMinSize,
     IsArray,
+    IsEnum,
     IsNumber,
     IsOptional,
     IsString,
@@ -11,6 +12,7 @@ import {
     ValidateNested,
 } from 'class-validator';
 import { Type } from 'class-transformer';
+import { PaymentMethod } from '../../../common/constants/status.constants';
 
 class GuestOrderLineItemDto {
     @ApiProperty({ example: 'uuid-of-variant' })
@@ -42,4 +44,14 @@ export class PlaceGuestOrderDto {
     @ValidateNested({ each: true })
     @Type(() => GuestOrderLineItemDto)
     items: GuestOrderLineItemDto[];
+
+    @ApiPropertyOptional({
+        enum: PaymentMethod,
+        default: PaymentMethod.MOBILE_MONEY,
+        description:
+            'Offline payment method. Use MOBILE_MONEY or BANK_TRANSFER for proof upload; COD skips proof.',
+    })
+    @IsOptional()
+    @IsEnum(PaymentMethod)
+    paymentMethod?: string;
 }

@@ -19,7 +19,7 @@ type PaymentVerificationModalProps = {
   imageUrl: string | null
   isConfirmed: boolean
   onConfirm: () => void | Promise<void>
-  onReject: () => void | Promise<void>
+  onReject: (reason?: string) => void | Promise<void>
 }
 
 export function PaymentVerificationModal({
@@ -34,6 +34,8 @@ export function PaymentVerificationModal({
   const t = useTranslations('dashboard')
   const [zoomOpen, setZoomOpen] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [rejectReason, setRejectReason] = useState('')
+  const [showRejectReason, setShowRejectReason] = useState(false)
 
   const handleOpenChange = (next: boolean) => {
     if (!next && isSubmitting) return
@@ -55,10 +57,16 @@ export function PaymentVerificationModal({
 
   const handleReject = async () => {
     if (isSubmitting) return
+    if (!showRejectReason) {
+      setShowRejectReason(true)
+      return
+    }
     setIsSubmitting(true)
     try {
-      await onReject()
+      await onReject(rejectReason.trim() || undefined)
       onOpenChange(false)
+      setShowRejectReason(false)
+      setRejectReason('')
     } catch {
       // axios interceptor toasts; keep modal open
     } finally {
@@ -137,12 +145,20 @@ export function PaymentVerificationModal({
                 </div>
 
                 {!isConfirmed && (
-                  <div className="flex items-center gap-3 rounded-lg border border-stroke-soft-200 bg-bg-weak-50 p-4">
+                  <div className="flex flex-col gap-3 rounded-lg border border-stroke-soft-200 bg-bg-weak-50 p-4 sm:flex-row sm:items-center">
                     <div className="flex-1">
                       <p className="text-sm font-semibold text-text-strong-950">{t('orders.paymentModal.verifyTitle')}</p>
                       <p className="mt-0.5 text-xs text-text-sub-600">
                         {t('orders.paymentModal.verifyBody')}
                       </p>
+                      {showRejectReason ? (
+                        <input
+                          value={rejectReason}
+                          onChange={(e) => setRejectReason(e.target.value)}
+                          placeholder={t('orders.paymentModal.rejectReasonPlaceholder')}
+                          className="mt-2 h-9 w-full rounded-lg border border-stroke-soft-200 bg-white px-3 text-sm"
+                        />
+                      ) : null}
                     </div>
                     <div className="flex items-center gap-2">
                       <Button

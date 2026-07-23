@@ -1,3 +1,4 @@
+import { MarketplaceHome } from '@/components/shop/marketplace-home'
 import { ShopPage } from './shop/shop-catalog'
 
 export const dynamic = 'force-dynamic'
@@ -10,7 +11,14 @@ export default async function HomePage({
   params: Promise<{ locale: string }>
   searchParams: Promise<{ q?: string; category?: string; sort?: string; store?: string }>
 }) {
-  return (
-    <ShopPage params={params} searchParams={searchParams} compactHero catalogBasePath='/' />
-  )
+  const query = await searchParams
+  const hasFilters = Boolean(query.q || query.category || query.sort || query.store)
+
+  if (hasFilters) {
+    return (
+      <ShopPage params={params} searchParams={searchParams} compactHero catalogBasePath='/' />
+    )
+  }
+
+  return <MarketplaceHome />
 }

@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsEnum, IsOptional, IsString } from 'class-validator';
+import { IsEnum, IsOptional, IsString, MaxLength } from 'class-validator';
 import { PaymentStatus } from '../../../common/constants/status.constants';
 
 export class UpdatePaymentDto {
@@ -16,4 +16,10 @@ export class UpdatePaymentDto {
     @IsOptional()
     @IsString()
     paymentProofUrl?: string;
+
+    @ApiPropertyOptional({ description: 'Reason when rejecting payment proof' })
+    @IsOptional()
+    @IsString()
+    @MaxLength(500)
+    rejectionReason?: string;
 }

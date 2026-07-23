@@ -206,6 +206,7 @@ export const useStoreOnboardingStore = create<StoreOnboardingState>()((set, get)
       const draft = get().draft
 
       const payload: SubmitStoreDto = {
+        slug: draft.subdomain,
         subdomain: draft.subdomain,
         registeredName: draft.registeredName,
         displayName: draft.displayName,

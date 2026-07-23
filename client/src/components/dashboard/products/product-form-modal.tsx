@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useId, useMemo, useState } from 'react'
+import { useCallback, useEffect, useId, useMemo, useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { Button } from '@/components/ui/button'
 import {
@@ -29,6 +29,10 @@ import {
   ZoomIn,
 } from 'lucide-react'
 import { TurningZeroLoader } from '@/components/ui/turning-zero-loader'
+import { toast } from 'sonner'
+import { validateImageUrl, DEFAULT_PRODUCT_IMAGE_LIMITS } from '@/lib/image-validation'
+import { getPublicApiBaseUrl } from '@/lib/api-base-url'
+
 
 type ProductStatus = 'ACTIVE' | 'DRAFT' | 'ARCHIVED'
 
@@ -43,7 +47,7 @@ interface DraftProduct {
   images: string[]
   newImageUrl: string
   variantsSectionEnabled: boolean
-  colors: Array<{ name: string; hex: string }>
+  colors: Array<{ name: string; hex: string; imageUrl?: string }>
   sizes: string[]
   models: string[]
   price: string
@@ -54,6 +58,7 @@ interface DraftProduct {
   deliveryLocation: string
   deliveryPrice: string
   internalNote: string
+  attributes?: Record<string, string>
 }
 
 interface ProductFormModalProps {
@@ -86,6 +91,85 @@ export function ProductFormModal({
 
   const [createStep, setCreateStep] = useState(0)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [categoryOptions, setCategoryOptions] = useState<string[]>([])
+  const [categoryAttributes, setCategoryAttributes] = useState<
+    Array<{ key: string; label: string; type?: string }>
+  >([])
+  const [imageValidating, setImageValidating] = useState(false)
+
+  useEffect(() => {
+    if (!open) return
+    let cancelled = false
+    ;(async () => {
+      try {
+        const root = getPublicApiBaseUrl().replace(/\/+$/, '')
+        const res = await fetch(`${root}/catalog/categories`, {
+          headers: { Accept: 'application/json' },
+          cache: 'no-store',
+        })
+        if (!res.ok) return
+        const body = await res.json()
+        const data = body?.data ?? body
+        const names: string[] = Array.isArray(data)
+          ? data.map((c: { name?: string; category?: string } | string) =>
+              typeof c === 'string' ? c : c.name || c.category || '',
+            ).filter(Boolean)
+          : Array.isArray(data?.categories)
+            ? data.categories.map((c: { name?: string } | string) =>
+                typeof c === 'string' ? c : c.name || '',
+              ).filter(Boolean)
+            : []
+        if (!cancelled) setCategoryOptions(Array.from(new Set(names)).sort())
+      } catch {
+        // non-blocking
+      }
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [open])
+
+  useEffect(() => {
+    if (!open || !draftProduct.category.trim()) {
+      setCategoryAttributes([])
+      return
+    }
+    let cancelled = false
+    ;(async () => {
+      try {
+        const root = getPublicApiBaseUrl().replace(/\/+$/, '')
+        const res = await fetch(
+          `${root}/catalog/categories/${encodeURIComponent(draftProduct.category)}/attributes`,
+          { headers: { Accept: 'application/json' }, cache: 'no-store' },
+        )
+        if (res.status === 404 || !res.ok) {
+          if (!cancelled) setCategoryAttributes([])
+          return
+        }
+        const body = await res.json()
+        const data = body?.data ?? body
+        const attrs = Array.isArray(data)
+          ? data
+          : Array.isArray(data?.attributes)
+            ? data.attributes
+            : []
+        if (!cancelled) {
+          setCategoryAttributes(
+            attrs.map((a: { key?: string; name?: string; label?: string; type?: string }) => ({
+              key: a.key || a.name || '',
+              label: a.label || a.name || a.key || '',
+              type: a.type,
+            })).filter((a: { key: string }) => a.key),
+          )
+        }
+      } catch {
+        if (!cancelled) setCategoryAttributes([])
+      }
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [open, draftProduct.category])
 
   const createSteps = useMemo(
     () => [
@@ -312,13 +396,55 @@ export function ProductFormModal({
                       </div>
                       <div className="space-y-2">
                         <Label className="text-sm font-semibold text-text-sub-600">{t('products.create.fields.category')}</Label>
-                        <Input
-                          value={draftProduct.category}
-                          onChange={(e) => setDraftProduct((p) => ({ ...p, category: e.target.value }))}
-                          placeholder={t('products.create.fields.categoryPlaceholder')}
-                          className="h-10 rounded-xl border-primary-base/20 bg-white"
-                        />
+                        {categoryOptions.length > 0 ? (
+                          <Select
+                            value={draftProduct.category || undefined}
+                            onValueChange={(value) =>
+                              setDraftProduct((p) => ({ ...p, category: value, attributes: {} }))
+                            }
+                          >
+                            <SelectTrigger className="h-10 rounded-xl border-primary-base/20 bg-white">
+                              <SelectValue placeholder={t('products.create.fields.categoryPlaceholder')} />
+                            </SelectTrigger>
+                            <SelectContent className="border-primary-base/20 bg-white text-text-strong-950">
+                              {categoryOptions.map((name) => (
+                                <SelectItem key={name} value={name}>
+                                  {name}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        ) : (
+                          <Input
+                            value={draftProduct.category}
+                            onChange={(e) => setDraftProduct((p) => ({ ...p, category: e.target.value }))}
+                            placeholder={t('products.create.fields.categoryPlaceholder')}
+                            className="h-10 rounded-xl border-primary-base/20 bg-white"
+                          />
+                        )}
                       </div>
+                      {categoryAttributes.length > 0 ? (
+                        <div className="col-span-full grid grid-cols-1 gap-4 sm:grid-cols-2">
+                          {categoryAttributes.map((attr) => (
+                            <div key={attr.key} className="space-y-2">
+                              <Label className="text-sm font-semibold text-text-sub-600">{attr.label}</Label>
+                              <Input
+                                value={draftProduct.attributes?.[attr.key] ?? ''}
+                                onChange={(e) =>
+                                  setDraftProduct((p) => ({
+                                    ...p,
+                                    attributes: {
+                                      ...(p.attributes ?? {}),
+                                      [attr.key]: e.target.value,
+                                    },
+                                  }))
+                                }
+                                className="h-10 rounded-xl border-primary-base/20 bg-white"
+                              />
+                            </div>
+                          ))}
+                        </div>
+                      ) : null}
                       <div className="space-y-2">
                         <Label className="text-sm font-semibold text-text-sub-600">{t('products.create.fields.status')}</Label>
                         <Select
@@ -434,11 +560,21 @@ export function ProductFormModal({
                           />
                           <Button
                             type="button"
-                            onClick={() => {
+                            onClick={async () => {
                               const url = draftProduct.newImageUrl.trim()
                               if (!url) return
-                              addImages([url])
-                              setDraftProduct((p) => ({ ...p, newImageUrl: '' }))
+                              setImageValidating(true)
+                              try {
+                                const result = await validateImageUrl(url, DEFAULT_PRODUCT_IMAGE_LIMITS)
+                                if (!result.ok) {
+                                  toast.error(t('products.create.media.imageInvalid', { reason: result.message }))
+                                  return
+                                }
+                                addImages([url])
+                                setDraftProduct((p) => ({ ...p, newImageUrl: '' }))
+                              } finally {
+                                setImageValidating(false)
+                              }
                             }}
                             className="h-10 rounded-xl bg-primary-base text-white hover:bg-primary-darker"
                           >
@@ -523,61 +659,78 @@ export function ProductFormModal({
                           <div className="mt-1 text-xs font-medium text-text-soft-400">{t('products.create.variants.colorsHint')}</div>
                           <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
                             {draftProduct.colors.map((c, idx) => (
-                              <div key={`${c.name}-${idx}`} className="flex items-center gap-3 rounded-xl border border-primary-base/20 bg-white p-3">
-                                <label
-                                  htmlFor={`products-create-color-${idx}`}
-                                  className="inline-flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-xl border border-primary-base/20 bg-white"
-                                  title={t('products.create.variants.colorPickerAria')}
-                                >
-                                  <span className="h-7 w-7 rounded-lg" style={{ backgroundColor: c.hex }} />
-                                </label>
-                                <input
-                                  id={`products-create-color-${idx}`}
-                                  type="color"
-                                  value={c.hex}
-                                  onChange={(e) =>
-                                    setDraftProduct((p) => {
-                                      const nextHex = e.target.value
-                                      const next = [...p.colors]
-                                      const prevName = next[idx]?.name ?? ''
-                                      next[idx] = {
-                                        ...next[idx],
-                                        hex: nextHex,
-                                        name: prevName.trim().length > 0 ? prevName : '',
-                                      }
-                                      return { ...p, colors: next }
-                                    })
-                                  }
-                                  aria-label={t('products.create.variants.colorPickerAria')}
-                                  className="h-0 w-0 overflow-hidden opacity-0"
-                                />
+                              <div
+                                key={`${c.name}-${idx}`}
+                                className="space-y-2 rounded-xl border border-primary-base/20 bg-white p-3"
+                              >
+                                <div className="flex items-center gap-3">
+                                  <label
+                                    htmlFor={`products-create-color-${idx}`}
+                                    className="inline-flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-xl border border-primary-base/20 bg-white"
+                                    title={t('products.create.variants.colorPickerAria')}
+                                  >
+                                    <span className="h-7 w-7 rounded-lg" style={{ backgroundColor: c.hex }} />
+                                  </label>
+                                  <input
+                                    id={`products-create-color-${idx}`}
+                                    type="color"
+                                    value={c.hex}
+                                    onChange={(e) =>
+                                      setDraftProduct((p) => {
+                                        const nextHex = e.target.value
+                                        const next = [...p.colors]
+                                        const prevName = next[idx]?.name ?? ''
+                                        next[idx] = {
+                                          ...next[idx],
+                                          hex: nextHex,
+                                          name: prevName.trim().length > 0 ? prevName : '',
+                                        }
+                                        return { ...p, colors: next }
+                                      })
+                                    }
+                                    aria-label={t('products.create.variants.colorPickerAria')}
+                                    className="h-0 w-0 overflow-hidden opacity-0"
+                                  />
+                                  <Input
+                                    value={c.name}
+                                    onChange={(e) =>
+                                      setDraftProduct((p) => {
+                                        const next = [...p.colors]
+                                        next[idx] = { ...next[idx], name: e.target.value }
+                                        return { ...p, colors: next }
+                                      })
+                                    }
+                                    className="h-9 flex-1 rounded-lg border-primary-base/20 bg-white"
+                                    placeholder={t('products.create.variants.colorNamePlaceholder')}
+                                  />
+                                  <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={() =>
+                                      setDraftProduct((p) => ({
+                                        ...p,
+                                        colors: p.colors.filter((_, i) => i !== idx),
+                                      }))
+                                    }
+                                    className="h-9 w-9 rounded-lg text-text-sub-600 hover:bg-primary-alpha-10 hover:text-primary-base"
+                                    aria-label={t('products.create.variants.removeColorAria')}
+                                  >
+                                    <X className="h-4 w-4" />
+                                  </Button>
+                                </div>
                                 <Input
-                                  value={c.name}
+                                  value={c.imageUrl ?? ''}
                                   onChange={(e) =>
                                     setDraftProduct((p) => {
                                       const next = [...p.colors]
-                                      next[idx] = { ...next[idx], name: e.target.value }
+                                      next[idx] = { ...next[idx], imageUrl: e.target.value }
                                       return { ...p, colors: next }
                                     })
                                   }
-                                  className="h-9 flex-1 rounded-lg border-primary-base/20 bg-white"
-                                  placeholder={t('products.create.variants.colorNamePlaceholder')}
+                                  className="h-9 rounded-lg border-primary-base/20 bg-white"
+                                  placeholder={t('products.create.variants.colorImagePlaceholder')}
                                 />
-                                <Button
-                                  type="button"
-                                  variant="ghost"
-                                  size="icon"
-                                  onClick={() =>
-                                    setDraftProduct((p) => ({
-                                      ...p,
-                                      colors: p.colors.filter((_, i) => i !== idx),
-                                    }))
-                                  }
-                                  className="h-9 w-9 rounded-lg text-text-sub-600 hover:bg-primary-alpha-10 hover:text-primary-base"
-                                  aria-label={t('products.create.variants.removeColorAria')}
-                                >
-                                  <X className="h-4 w-4" />
-                                </Button>
                               </div>
                             ))}
                           </div>
@@ -588,7 +741,7 @@ export function ProductFormModal({
                               onClick={() =>
                                 setDraftProduct((p) => ({
                                   ...p,
-                                  colors: [...p.colors, { name: '', hex: '#111827' }],
+                                  colors: [...p.colors, { name: '', hex: '#111827', imageUrl: '' }],
                                 }))
                               }
                               className="h-9 rounded-lg border-primary-base/20 bg-white text-text-sub-600 hover:bg-primary-alpha-10 hover:text-primary-base"

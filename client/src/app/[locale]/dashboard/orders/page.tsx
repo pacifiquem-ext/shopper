@@ -329,17 +329,23 @@ export default function OrdersPage() {
   const handleConfirmPayment = useCallback(async (orderId: string) => {
     const uuid = orderUuidMap[orderId]
     if (!uuid) return
-    await ordersService.updatePayment(uuid, { status: 'SUCCESS' })
+    await ordersService.reviewPayment(uuid, { action: 'APPROVE' }).catch(async () => {
+      await ordersService.updatePayment(uuid, { status: 'SUCCESS' })
+    })
     setRows((prev) => prev.map((r) => (r.id === orderId ? { ...r, payment: 'success' as const } : r)))
     const res = await ordersService.getById(uuid)
     const o: OrderApi | null = (res?.data as any)?.data ?? res?.data ?? null
     if (o) setDetailsById((prev) => new Map(prev).set(orderId, apiToOrderDetails(o, t)))
   }, [orderUuidMap, t])
 
-  const handleRejectPayment = useCallback(async (orderId: string) => {
+  const handleRejectPayment = useCallback(async (orderId: string, reason?: string) => {
     const uuid = orderUuidMap[orderId]
     if (!uuid) return
-    await ordersService.updatePayment(uuid, { status: 'FAILED' })
+    await ordersService
+      .reviewPayment(uuid, { action: 'REJECT', rejectionReason: reason })
+      .catch(async () => {
+        await ordersService.updatePayment(uuid, { status: 'FAILED' })
+      })
     setRows((prev) => prev.map((r) => (r.id === orderId ? { ...r, payment: 'pending' as const } : r)))
   }, [orderUuidMap])
 
@@ -741,9 +747,9 @@ export default function OrdersPage() {
           if (!activeModalOrderId) return
           await handleConfirmPayment(activeModalOrderId)
         }}
-        onReject={async () => {
+        onReject={async (reason) => {
           if (!activeModalOrderId) return
-          await handleRejectPayment(activeModalOrderId)
+          await handleRejectPayment(activeModalOrderId, reason)
         }}
       />
     </div>

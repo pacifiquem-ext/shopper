@@ -203,7 +203,99 @@ const categories = {
     OTHER: [{ code: 'MISCELLANEOUS', name: 'Miscellaneous' }],
 };
 
-async function seedDashboardData() {
+
+async function seedMarketplaceTaxonomy() {
+    console.log('Seeding product categories & attribute defs...');
+
+    const taxonomy = [
+        {
+            slug: 'fashion',
+            nameEn: 'Fashion',
+            nameRw: 'Imyenda',
+            sortOrder: 1,
+            attributes: [
+                { key: 'material', labelEn: 'Material', labelRw: 'Ibikoresho', type: 'STRING' as const, appliesTo: 'PRODUCT' as const },
+                { key: 'size', labelEn: 'Size', labelRw: 'Ingano', type: 'SELECT' as const, appliesTo: 'VARIANT' as const, options: ['XS', 'S', 'M', 'L', 'XL'] },
+                { key: 'color', labelEn: 'Color', labelRw: 'Ibara', type: 'STRING' as const, appliesTo: 'VARIANT' as const },
+            ],
+        },
+        {
+            slug: 'electronics',
+            nameEn: 'Electronics',
+            nameRw: 'Ibikoresho by\'ikoranabuhanga',
+            sortOrder: 2,
+            attributes: [
+                { key: 'brand', labelEn: 'Brand', labelRw: 'Ikirango', type: 'STRING' as const, appliesTo: 'PRODUCT' as const },
+                { key: 'storage_gb', labelEn: 'Storage (GB)', labelRw: 'Ububiko (GB)', type: 'NUMBER' as const, appliesTo: 'VARIANT' as const },
+                { key: 'warranty_months', labelEn: 'Warranty (months)', labelRw: 'Garanti (amezi)', type: 'NUMBER' as const, appliesTo: 'PRODUCT' as const },
+            ],
+        },
+        {
+            slug: 'groceries',
+            nameEn: 'Groceries',
+            nameRw: 'Ibiribwa',
+            sortOrder: 3,
+            attributes: [
+                { key: 'weight', labelEn: 'Weight', labelRw: 'Uburemere', type: 'STRING' as const, appliesTo: 'VARIANT' as const },
+                { key: 'organic', labelEn: 'Organic', labelRw: 'Kamere', type: 'BOOLEAN' as const, appliesTo: 'PRODUCT' as const },
+            ],
+        },
+        {
+            slug: 'general',
+            nameEn: 'General',
+            nameRw: 'Ibindi',
+            sortOrder: 4,
+            attributes: [
+                { key: 'condition', labelEn: 'Condition', labelRw: 'Imiterere', type: 'SELECT' as const, appliesTo: 'PRODUCT' as const, options: ['New', 'Used'] },
+            ],
+        },
+    ];
+
+    const bySlug: Record<string, string> = {};
+
+    for (const cat of taxonomy) {
+        const row = await prisma.productCategory.upsert({
+            where: { slug: cat.slug },
+            update: {
+                nameEn: cat.nameEn,
+                nameRw: cat.nameRw,
+                sortOrder: cat.sortOrder,
+                isActive: true,
+            },
+            create: {
+                slug: cat.slug,
+                nameEn: cat.nameEn,
+                nameRw: cat.nameRw,
+                sortOrder: cat.sortOrder,
+                isActive: true,
+            },
+        });
+        bySlug[cat.slug] = row.id;
+
+        await prisma.categoryAttributeDef.deleteMany({ where: { categoryId: row.id } });
+        for (let i = 0; i < cat.attributes.length; i++) {
+            const a = cat.attributes[i];
+            await prisma.categoryAttributeDef.create({
+                data: {
+                    categoryId: row.id,
+                    key: a.key,
+                    labelEn: a.labelEn,
+                    labelRw: a.labelRw,
+                    type: a.type,
+                    required: false,
+                    options: 'options' in a ? a.options : undefined,
+                    appliesTo: a.appliesTo,
+                    sortOrder: i,
+                },
+            });
+        }
+        console.log(`  Category: ${cat.slug}`);
+    }
+
+    return bySlug;
+}
+
+async function seedDashboardData(categoryIds: Record<string, string> = {}) {
     console.log('Seeding dashboard data...');
 
     const existingStore = await prisma.store.findFirst({
@@ -223,6 +315,8 @@ async function seedDashboardData() {
             description: 'High-quality cotton t-shirt with modern fit',
             vendor: 'Fashion Co.',
             category: 'Clothing',
+            categorySlug: 'fashion',
+            attributes: { material: 'Cotton' },
             tags: ['fashion', 'casual', 'cotton'],
             images: ['/products/tshirt-1.jpg', '/products/tshirt-2.jpg'],
             primaryImage: '/products/tshirt-1.jpg',
@@ -240,6 +334,8 @@ async function seedDashboardData() {
             description: 'Premium sound quality with noise cancellation',
             vendor: 'Tech Supplies Ltd',
             category: 'Electronics',
+            categorySlug: 'electronics',
+            attributes: { brand: 'AudioMax', warranty_months: 12 },
             tags: ['audio', 'wireless', 'bluetooth'],
             images: ['/products/headphones-1.jpg'],
             primaryImage: '/products/headphones-1.jpg',
@@ -253,6 +349,8 @@ async function seedDashboardData() {
             description: 'Premium arabica coffee beans, freshly roasted',
             vendor: 'Rwanda Coffee Co.',
             category: 'Food & Beverage',
+            categorySlug: 'groceries',
+            attributes: { organic: true },
             tags: ['coffee', 'organic', 'premium'],
             images: ['/products/coffee-1.jpg'],
             primaryImage: '/products/coffee-1.jpg',
@@ -267,6 +365,8 @@ async function seedDashboardData() {
             description: 'Genuine leather wallet with RFID protection',
             vendor: 'Leather Goods Inc',
             category: 'Accessories',
+            categorySlug: 'fashion',
+            attributes: { material: 'Leather' },
             tags: ['leather', 'wallet', 'accessories'],
             images: ['/products/wallet-1.jpg', '/products/wallet-2.jpg'],
             primaryImage: '/products/wallet-1.jpg',
@@ -280,6 +380,8 @@ async function seedDashboardData() {
             description: 'Non-slip premium yoga mat with carrying strap',
             vendor: 'Fitness World',
             category: 'Sports & Fitness',
+            categorySlug: 'general',
+            attributes: { condition: 'New' },
             tags: ['yoga', 'fitness', 'exercise'],
             images: ['/products/yoga-mat-1.jpg'],
             primaryImage: '/products/yoga-mat-1.jpg',
@@ -300,6 +402,10 @@ async function seedDashboardData() {
                 description: productData.description,
                 vendor: productData.vendor,
                 category: productData.category,
+                categoryId: productData.categorySlug
+                    ? categoryIds[productData.categorySlug]
+                    : undefined,
+                attributes: (productData as any).attributes ?? {},
                 status: 'ACTIVE',
                 tags: productData.tags,
                 images: productData.images,
@@ -553,6 +659,133 @@ async function seedDevMerchant() {
     console.log(`Dev merchant seeded — phone: ${phoneNumber}`);
 }
 
+
+async function seedMarketplaceExtras(categoryIds: Record<string, string>) {
+    console.log('Seeding sample reviews & promotions...');
+
+    const store = await prisma.store.findFirst({
+        where: { status: 'APPROVED' },
+        include: {
+            products: {
+                where: { status: 'ACTIVE' },
+                take: 5,
+                orderBy: { createdAt: 'asc' },
+            },
+        },
+    });
+
+    if (!store || store.products.length === 0) {
+        console.log('No store/products for marketplace extras.');
+        return;
+    }
+
+    // approvedAt backfill
+    if (!store.approvedAt) {
+        await prisma.store.update({
+            where: { id: store.id },
+            data: { approvedAt: store.createdAt },
+        });
+    }
+
+    let ratingSum = 0;
+    let ratingCount = 0;
+
+    for (let i = 0; i < Math.min(3, store.products.length); i++) {
+        const product = store.products[i];
+        const rating = 4 + (i % 2);
+        const existing = await prisma.productReview.findFirst({
+            where: { productId: product.id, title: 'Seeded review' },
+        });
+        if (existing) continue;
+
+        await prisma.productReview.create({
+            data: {
+                productId: product.id,
+                storeId: store.id,
+                rating,
+                title: 'Seeded review',
+                body: 'Great product from marketplace seed.',
+                status: 'APPROVED',
+                moderatedAt: new Date(),
+                moderatedBy: 'seed',
+            },
+        });
+
+        await prisma.product.update({
+            where: { id: product.id },
+            data: {
+                ratingAvg: rating,
+                ratingCount: 1,
+            },
+        });
+        ratingSum += rating;
+        ratingCount += 1;
+    }
+
+    if (ratingCount > 0) {
+        await prisma.store.update({
+            where: { id: store.id },
+            data: {
+                ratingAvg: ratingSum / ratingCount,
+                ratingCount,
+            },
+        });
+    }
+
+    const promoCode = 'WELCOME10';
+    const existingPromo = await prisma.promotion.findFirst({
+        where: { code: promoCode, storeId: store.id },
+    });
+    if (!existingPromo) {
+        await prisma.promotion.create({
+            data: {
+                scope: 'STORE',
+                storeId: store.id,
+                code: promoCode,
+                name: 'Welcome 10% off',
+                type: 'PERCENT',
+                value: 10,
+                minOrderAmount: 5000,
+                startsAt: new Date(Date.now() - 24 * 60 * 60 * 1000),
+                endsAt: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000),
+                status: 'ACTIVE',
+                targets: store.products[0]
+                    ? {
+                          create: [{ productId: store.products[0].id }],
+                      }
+                    : undefined,
+            },
+        });
+        console.log(`  Store promo: ${promoCode}`);
+    }
+
+    const platformCode = 'MARKET5';
+    const existingPlatform = await prisma.promotion.findFirst({
+        where: { code: platformCode, storeId: null, scope: 'PLATFORM' },
+    });
+    if (!existingPlatform) {
+        await prisma.promotion.create({
+            data: {
+                scope: 'PLATFORM',
+                storeId: null,
+                code: platformCode,
+                name: 'Marketplace 5% off',
+                type: 'PERCENT',
+                value: 5,
+                startsAt: new Date(Date.now() - 24 * 60 * 60 * 1000),
+                endsAt: new Date(Date.now() + 180 * 24 * 60 * 60 * 1000),
+                status: 'ACTIVE',
+                targets: categoryIds.fashion
+                    ? { create: [{ categoryId: categoryIds.fashion }] }
+                    : undefined,
+            },
+        });
+        console.log(`  Platform promo: ${platformCode}`);
+    }
+
+    console.log('Marketplace extras seeded.');
+}
+
 async function main() {
     console.log('Start seeding...');
 
@@ -595,7 +828,9 @@ async function main() {
         }
 
         await seedDevMerchant();
-        await seedDashboardData();
+        const categoryIds = await seedMarketplaceTaxonomy();
+        await seedDashboardData(categoryIds);
+        await seedMarketplaceExtras(categoryIds);
 
         console.log('Seeding finished.');
     } catch (error) {

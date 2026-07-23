@@ -1,6 +1,9 @@
 import type { SiteFooterStoreContext } from '@/components/shop/site-footer'
-import { resolveStoreTemplate } from '@/lib/store-templates'
 import type { CatalogStoreSummary } from '@/services/catalog.service'
+
+function storeSlug(store: CatalogStoreSummary): string {
+  return store.slug ?? store.subdomain
+}
 
 export function buildSiteFooterStoreContext(input: {
   store: CatalogStoreSummary
@@ -12,12 +15,12 @@ export function buildSiteFooterStoreContext(input: {
 
   return {
     displayName: store.displayName,
-    subdomain: store.subdomain,
+    subdomain: storeSlug(store),
+    slug: storeSlug(store),
     logoUrl: store.logoUrl,
     description: store.description,
     contactEmail: store.contactEmail,
     contactPhone: store.contactPhone,
-    template: resolveStoreTemplate(store),
     brandColors: store.brandColors,
     ...rest,
   }

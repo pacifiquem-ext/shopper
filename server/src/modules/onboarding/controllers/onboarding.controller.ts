@@ -4,7 +4,6 @@ import {
     Get,
     Put,
     Query,
-    UseGuards,
     Request,
 } from '@nestjs/common';
 import {
@@ -18,7 +17,6 @@ import { PublicRoute } from '../../../common/request/decorators/request.public.d
 import { OnboardingService } from '../services/onboarding.service';
 import { UpdateDraftDto } from '../dtos/draft.dto';
 import { SubmitStoreDto } from '../dtos/submit-store.dto';
-
 
 @ApiTags('Store Onboarding')
 @ApiBearerAuth()
@@ -44,29 +42,58 @@ export class OnboardingController {
     @ApiResponse({ status: 200, description: 'Store Draft saved' })
     async updateDraft(
         @Request() req: any,
-        @Body() updateDraftDto: UpdateDraftDto
+        @Body() updateDraftDto: UpdateDraftDto,
     ) {
         return this.onboardingService.updateDraft(req.user.id, updateDraftDto);
     }
 
     @PublicRoute()
-    @Get('check-subdomain')
+    @Get('check-slug')
     @ApiOperation({
-        summary:
-            'Real-time check for subdomain availability and constraint validations',
+        summary: 'Real-time check for store slug availability',
     })
     @ApiQuery({
-        name: 'subdomain',
+        name: 'slug',
         required: true,
         type: String,
-        description: 'Requested subdomain string',
+        description: 'Requested store slug',
     })
     @ApiResponse({
         status: 200,
         description: 'Availability status returned correctly',
     })
-    async checkSubdomainAvailability(@Query('subdomain') subdomain: string) {
-        return this.onboardingService.checkSubdomainAvailability(subdomain);
+    async checkSlugAvailability(@Query('slug') slug: string) {
+        return this.onboardingService.checkSlugAvailability(slug);
+    }
+
+    /** @deprecated Prefer check-slug */
+    @PublicRoute()
+    @Get('check-subdomain')
+    @ApiOperation({
+        summary: 'Deprecated alias for check-slug',
+        deprecated: true,
+    })
+    @ApiQuery({
+        name: 'subdomain',
+        required: false,
+        type: String,
+    })
+    @ApiQuery({
+        name: 'slug',
+        required: false,
+        type: String,
+    })
+    @ApiResponse({
+        status: 200,
+        description: 'Availability status returned correctly',
+    })
+    async checkSubdomainAvailability(
+        @Query('subdomain') subdomain?: string,
+        @Query('slug') slug?: string,
+    ) {
+        return this.onboardingService.checkSlugAvailability(
+            slug || subdomain || '',
+        );
     }
 
     @Put('submit')
@@ -74,7 +101,7 @@ export class OnboardingController {
     @ApiResponse({ status: 201, description: 'Store successfully submitted' })
     async submitStore(
         @Request() req: any,
-        @Body() submitStoreDto: SubmitStoreDto
+        @Body() submitStoreDto: SubmitStoreDto,
     ) {
         return this.onboardingService.submitStore(req.user.id, submitStoreDto);
     }

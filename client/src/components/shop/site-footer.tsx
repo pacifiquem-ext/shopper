@@ -7,18 +7,18 @@ import { Button } from '@/components/ui/button'
 import { Link } from '@/i18n/navigation'
 import { merchantSignupHref } from '@/lib/auth-return-url'
 import { resolveFooterTheme } from '@/lib/footer-theme'
-import type { BrandColorsWithTemplate, StoreTemplateId } from '@/lib/store-templates'
+import type { BrandColors } from '@/lib/store-templates'
 import { cn } from '@/lib/utils'
 
 export type SiteFooterStoreContext = {
   displayName: string
   subdomain: string
+  slug?: string
   logoUrl: string | null
   description?: string | null
   contactEmail?: string | null
   contactPhone?: string | null
-  template?: StoreTemplateId
-  brandColors?: BrandColorsWithTemplate | null
+  brandColors?: BrandColors | null
   /** True when the site is opened on the store’s subdomain host. */
   isSubdomainHost: boolean
   /** Absolute URL to marketplace /shop on the apex host (only when `isSubdomainHost`). */
@@ -49,7 +49,7 @@ export function SiteFooter({ className, store }: SiteFooterProps) {
 
   if (store) {
     const listing = store.listingSearch
-    const theme = resolveFooterTheme(store.template ?? 'DEFAULT')
+    const theme = resolveFooterTheme()
     const aboutText =
       store.description?.trim() || ts('about', { store: store.displayName })
     const contactEmail = store.contactEmail?.trim() || t('contact.email')

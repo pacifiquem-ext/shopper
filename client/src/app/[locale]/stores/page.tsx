@@ -3,12 +3,12 @@ import type { Metadata } from 'next'
 import { RiStore2Line } from '@remixicon/react'
 
 import { Link } from '@/i18n/navigation'
-import { fetchCatalogGroups } from '@/services/catalog.service'
+import { fetchStores, storePublicSlug } from '@/services/catalog.service'
 import * as Button from '@/components/alignui/button'
 import { Card } from '@/components/alignui/card'
 import { SiteFooter } from '@/components/shop/site-footer'
 import { CartIconButton } from '@/components/shop/cart-icon-button'
-import { buildTopStoresFromProducts, withTopStoreProductCountLabels } from '@/lib/catalog-stores'
+import { withTopStoreProductCountLabels } from '@/lib/catalog-stores'
 
 export const dynamic = 'force-dynamic'
 export const fetchCache = 'force-no-store'
@@ -33,7 +33,7 @@ export default async function StoresDirectoryPage({
 }) {
   const { locale: _locale } = await params
   const t = await getTranslations('marketplace')
-  const { data, devHint } = await fetchCatalogGroups({ cache: 'no-store' })
+  const { data, devHint } = await fetchStores({ cache: 'no-store' })
 
   if (!data) {
     return (
@@ -53,14 +53,11 @@ export default async function StoresDirectoryPage({
     )
   }
 
-  const products = data.groups.flatMap((g) => g.products)
   const stores = withTopStoreProductCountLabels(
-    data.stores?.length
-      ? data.stores.map((entry) => ({
-          store: entry.store,
-          productCount: entry.productCount,
-        }))
-      : buildTopStoresFromProducts(products, 48),
+    data.stores.map((entry) => ({
+      store: entry.store,
+      productCount: entry.productCount,
+    })),
     (count) => t('topStoresProductCount', { count }),
   )
 
@@ -102,7 +99,7 @@ export default async function StoresDirectoryPage({
             {stores.map(({ store, productCountLabel }) => (
               <li key={store.id}>
                 <Link
-                  href={`/stores/${encodeURIComponent(store.subdomain)}`}
+                  href={`/stores/${encodeURIComponent(storePublicSlug(store))}`}
                   prefetch={false}
                   className='block h-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-base/40'
                 >

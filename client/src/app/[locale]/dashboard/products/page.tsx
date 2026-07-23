@@ -221,7 +221,7 @@ export default function ProductsPage() {
     images: string[]
     newImageUrl: string
     variantsSectionEnabled: boolean
-    colors: Array<{ name: string; hex: string }>
+    colors: Array<{ name: string; hex: string; imageUrl?: string }>
     sizes: string[]
     models: string[]
     price: string
@@ -232,6 +232,7 @@ export default function ProductsPage() {
     deliveryLocation: string
     deliveryPrice: string
     internalNote: string
+    attributes?: Record<string, string>
   }>({
     name: '',
     vendor: '',

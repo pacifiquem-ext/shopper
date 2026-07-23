@@ -58,10 +58,10 @@ export class OnboardingService {
         });
     }
 
-    async checkSubdomainAvailability(subdomain: string) {
-        const subdomainRegex = /^[a-z0-9][a-z0-9-]{1,61}[a-z0-9]$/;
-        if (!subdomainRegex.test(subdomain)) {
-            throw new BadRequestException('Invalid subdomain format');
+    async checkSlugAvailability(slug: string) {
+        const slugRegex = /^[a-z0-9][a-z0-9-]{1,61}[a-z0-9]$/;
+        if (!slugRegex.test(slug)) {
+            throw new BadRequestException('Invalid slug format');
         }
 
         const reservedKeywords = [
@@ -73,6 +73,7 @@ export class OnboardingService {
             'ftp',
             'shop',
             'store',
+            'stores',
             'checkout',
             'dashboard',
             'support',
@@ -92,29 +93,40 @@ export class OnboardingService {
             'secure',
             'billing',
             'pay',
+            'catalog',
+            'products',
+            'marketplace',
         ];
 
-        if (reservedKeywords.includes(subdomain.toLowerCase())) {
-            return { available: false, message: 'Subdomain is reserved' };
+        if (reservedKeywords.includes(slug.toLowerCase())) {
+            return { available: false, message: 'Slug is reserved' };
         }
 
         const existingStore = await this.prisma.store.findUnique({
-            where: { subdomain },
+            where: { slug },
         });
 
         if (existingStore) {
-            return { available: false, message: 'Subdomain is already taken' };
+            return { available: false, message: 'Slug is already taken' };
         }
 
-        return { available: true, message: 'Subdomain is available' };
+        return { available: true, message: 'Slug is available' };
+    }
+
+    /** @deprecated Prefer checkSlugAvailability */
+    async checkSubdomainAvailability(subdomain: string) {
+        return this.checkSlugAvailability(subdomain);
     }
 
     async submitStore(userId: string, dto: SubmitStoreDto) {
-        const subdomainCheck = await this.checkSubdomainAvailability(
-            dto.subdomain
-        );
-        if (!subdomainCheck.available) {
-            throw new BadRequestException(subdomainCheck.message);
+        const resolvedSlug = (dto.slug || dto.subdomain || '').trim().toLowerCase();
+        if (!resolvedSlug) {
+            throw new BadRequestException('Slug is required');
+        }
+
+        const slugCheck = await this.checkSlugAvailability(resolvedSlug);
+        if (!slugCheck.available) {
+            throw new BadRequestException(slugCheck.message);
         }
 
         const category = await this.prisma.businessCategory.findUnique({
@@ -123,24 +135,28 @@ export class OnboardingService {
 
         if (!category || category.industrySectorId !== dto.industrySectorId) {
             throw new BadRequestException(
-                'Invalid business category or mismatched industry sector'
+                'Invalid business category or mismatched industry sector',
             );
         }
 
+        const status = this.initialStoreStatus();
+
         return this.prisma.$transaction(
-            async tx => {
+            async (tx) => {
                 const store = await tx.store.create({
                     data: {
                         userId,
-                        subdomain: dto.subdomain,
+                        slug: resolvedSlug,
                         registeredName: dto.registeredName,
                         displayName: dto.displayName,
                         description: dto.description,
-                        status: this.initialStoreStatus(),
+                        status,
+                        approvedAt:
+                            status === StoreStatus.APPROVED ? new Date() : null,
                         brandColors: {
                             primary: dto.brandPrimaryColor?.trim() || '#B76E5D',
-                            secondary: dto.brandSecondaryColor?.trim() || '#EAE4DC',
-                            template: 'DEFAULT',
+                            secondary:
+                                dto.brandSecondaryColor?.trim() || '#EAE4DC',
                         },
                         logoUrl: dto.logoDataUrl || undefined,
                         aboutUs: dto.aboutUs || undefined,
@@ -152,7 +168,7 @@ export class OnboardingService {
 
                 if (dto.deliveryZones && dto.deliveryZones.length > 0) {
                     await tx.deliveryZone.createMany({
-                        data: dto.deliveryZones.map(zone => ({
+                        data: dto.deliveryZones.map((zone) => ({
                             storeId: store.id,
                             name: zone.name,
                             feeRwf: zone.feeRwf,
@@ -203,7 +219,7 @@ export class OnboardingService {
 
                 return store;
             },
-            { timeout: 20000, maxWait: 10000 }
+            { timeout: 20000, maxWait: 10000 },
         );
     }
 }

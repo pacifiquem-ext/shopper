@@ -1,10 +1,8 @@
 import { api } from '@/lib/axios'
 import type { ApiResponse } from '@onlineshop/shared'
-import type { BrandColorsWithTemplate, StoreTemplateId } from '@/lib/store-templates'
+import type { BrandColors } from '@/lib/store-templates'
 
-export type { StoreTemplateId }
-
-export type BrandColorsApi = BrandColorsWithTemplate
+export type BrandColorsApi = BrandColors
 
 export interface BusinessAddressApi {
   province: string
@@ -28,6 +26,7 @@ export interface StoreKycApi {
 export interface StoreSettingsApi {
   id: string
   subdomain: string
+  slug?: string
   registeredName: string
   displayName: string
   description: string | null

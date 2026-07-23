@@ -16,11 +16,12 @@ import {
   RiPaletteLine,
   RiMailLine,
   RiTruckLine,
-  RiBankCardLine,
   RiArrowRightSLine,
   RiMenuFoldLine,
   RiMenuUnfoldLine,
   RiMoneyDollarCircleLine,
+  RiCoupon3Line,
+  RiShieldUserLine,
 } from '@remixicon/react'
 import { useAuthStore } from '@/store/auth.store'
 import { useState, useEffect } from 'react'
@@ -87,12 +88,18 @@ export function DashboardNavContent({
     onNavigate?.()
   }
 
+  const isPlatformAdmin = user?.role === 'PLATFORM_ADMIN'
+
   const mainNavItems = [
     { href: '/dashboard', label: t('nav.dashboard'), icon: RiDashboardLine },
     { href: '/dashboard/products', label: t('nav.products'), icon: RiShoppingBag3Line },
     { href: '/dashboard/inventory', label: t('nav.inventory'), icon: RiBox3Line },
     { href: '/dashboard/orders', label: t('nav.orders'), icon: RiStackLine },
     { href: '/dashboard/payments', label: t('nav.payments'), icon: RiMoneyDollarCircleLine },
+    { href: '/dashboard/promotions', label: t('nav.promotions'), icon: RiCoupon3Line },
+    ...(isPlatformAdmin
+      ? [{ href: '/admin', label: t('nav.platformAdmin'), icon: RiShieldUserLine }]
+      : []),
   ]
 
   const storeSettingsSubmenu = [
@@ -119,12 +126,6 @@ export function DashboardNavContent({
       label: t('nav.delivery'),
       icon: RiTruckLine,
       tab: 'delivery',
-    },
-    {
-      href: '/dashboard/store-settings?tab=subscription',
-      label: t('nav.subscription'),
-      icon: RiBankCardLine,
-      tab: 'subscription',
     },
   ]
 

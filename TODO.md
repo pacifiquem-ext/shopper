@@ -24,8 +24,7 @@ Rough readiness (maintain when large slices land):
 
 ## In progress
 
-- [ ] **Single marketplace initiative** (ADR 001) — @agent, started 2026-07-23  
-  Plan: session `plan.md` (phases A–I). Amendments: AlignUI 100%, image quality rules, payment proof path, no billing/Pro, `/stores` browse.
+_(empty — initiative largely landed 2026-07-23; polish items under Next up)_
 
 ---
 
@@ -34,21 +33,15 @@ Rough readiness (maintain when large slices land):
 ### §Initiative — Single marketplace refactor (ordered)
 
 - [x] **Phase A** — ADR 001, README/AGENTS/CONTEXT/design-system, TODO initiative ledger — 2026-07-23
-- [ ] **Phase B** — Remove public multi-storefront/templates/Host tenancy; add `/stores` + `/stores/[slug]`; slug rename path; keep merchant `StoreGuard`
-  - [x] Marketplace UI only in `shop-catalog` (storefront template branches removed)
-  - [x] `/stores` directory + `/stores/[slug]` profile; legacy `/shop/store/:x` redirects
-  - [x] Top store cards link to `/stores/{slug}`; pseudo ratings removed from product cards
-  - [ ] Delete `components/store-templates/**` + shared template package IDs when no remaining imports
-  - [ ] Nest Host storefront middleware no-op; onboarding subdomain → slug rename (API + UI)
-  - [ ] Product/cart pages still may reference templates — purge
-- [ ] **Phase C** — Schema: slug, categories + attribute defs, reviews, promotions, ranking fields; catalog home API
-- [ ] **Phase D** — Design research (Playwright) + AlignUI kit expansion + shell redesign (auth, onboarding, marketplace, dashboard, admin)
-- [ ] **Phase E** — Marketplace home sections, browse, category-aware PDP, store directory/profile, cart (AlignUI)
-- [ ] **Phase F** — Dynamic product form by category; multi-image + dimension/MIME enforcement; variant images
-- [ ] **Phase G** — Merchant + platform promos CRUD; checkout apply; home “On promotion”
-- [ ] **Phase G2** — Payment proof: message → offline pay → upload → merchant approve/reject; **remove** subscription/billing UI
-- [ ] **Phase H** — Full platform admin console (`/admin`)
-- [ ] **Phase I** — i18n parity, e2e, Integration Critic + UI Expert + Progress Validator + code review gates
+- [x] **Phase B** — Templates deleted; Host middleware no-op; `/stores` + slug; cart/PDP single chrome — 2026-07-23
+- [x] **Phase C** — Schema migration applied; categories/reviews/promotions; catalog home/stores APIs — 2026-07-23
+- [x] **Phase D/E** — Marketplace home sections, stores, cart/PDP redesign (AlignUI partial); design research still light — 2026-07-23
+- [x] **Phase F** — Category attributes on product form + image URL dimension validation — 2026-07-23
+- [x] **Phase G** — Merchant/admin promos APIs + dashboard/admin UI — 2026-07-23
+- [x] **Phase G2** — Payment proof upload + merchant review; subscription page redirected — 2026-07-23
+- [x] **Phase H** — Platform admin under `/admin` — 2026-07-23
+- [ ] **Phase I polish** — AlignUI 100% migration of residual `ui/*` call sites; Playwright design research doc; promo apply at checkout cart; real file storage upload; auth shell full restyle; UI Expert live browser pass
+- [ ] Seed demo data for reviews/promos after migrate (`pnpm prisma db seed`)
 
 ### §0 — Agent / repo hygiene
 

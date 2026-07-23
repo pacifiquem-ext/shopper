@@ -284,7 +284,9 @@ export class OrdersService {
                         tax: 0,
                         total: subtotal,
                         customerNote: `Customer phone for vendor follow-up: ${customerPhone}`,
-                        paymentMethod: PaymentMethod.CASH_ON_DELIVERY,
+                        paymentMethod:
+                            (dto as { paymentMethod?: string }).paymentMethod ||
+                            PaymentMethod.MOBILE_MONEY,
                         deliveryMethod: 'Phone order',
                         lines: bucket.lines,
                         initialMessage: `New order placed. Contact customer at ${customerPhone}.`,
@@ -439,6 +441,9 @@ export class OrdersService {
                     status: next as PrismaPaymentStatus,
                     reference: dto.reference,
                     paymentProofUrl: dto.paymentProofUrl,
+                    rejectionReason: dto.rejectionReason,
+                    reviewedBy: userId,
+                    reviewedAt: new Date(),
                     paidAt:
                         next === PaymentStatus.SUCCESS
                             ? new Date()
@@ -808,6 +813,8 @@ export class OrdersService {
             deliveryMethod: string;
             lines: ResolvedLine[];
             initialMessage: string;
+            promoCode?: string | null;
+            promoDiscount?: number;
         },
     ): Promise<string> {
         const orderNumber = await this.generateOrderNumber(tx, input.storeId);
@@ -825,6 +832,8 @@ export class OrdersService {
                 discount: input.discount,
                 tax: input.tax,
                 total: input.total,
+                promoCode: input.promoCode ?? null,
+                promoDiscount: input.promoDiscount ?? 0,
                 customerNote: input.customerNote,
                 createdBy: input.userId,
                 store: { connect: { id: input.storeId } },
@@ -881,7 +890,234 @@ export class OrdersService {
             },
         });
 
+        if (input.paymentMethod !== PaymentMethod.CASH_ON_DELIVERY) {
+            const store = await tx.store.findUnique({
+                where: { id: input.storeId },
+                select: {
+                    displayName: true,
+                    contactPhone: true,
+                    contactEmail: true,
+                },
+            });
+            const payHint =
+                input.paymentMethod === PaymentMethod.MOBILE_MONEY
+                    ? 'Mobile Money'
+                    : input.paymentMethod === PaymentMethod.BANK_TRANSFER
+                      ? 'Bank Transfer'
+                      : input.paymentMethod;
+            const contact =
+                store?.contactPhone ||
+                store?.contactEmail ||
+                'the seller';
+            await tx.orderMessage.create({
+                data: {
+                    sender: MessageSender.ADMIN as PrismaMessageSender,
+                    senderName: store?.displayName || 'Store',
+                    message: `Payment instructions: Please pay ${input.total} RWF via ${payHint} and upload your payment proof on the order page. Contact ${contact} if you need account details.`,
+                    order: { connect: { id: order.id } },
+                },
+            });
+        }
+
         return order.id;
+    }
+
+
+    async getPublicOrderByPhone(orderId: string, customerPhone: string) {
+        if (!customerPhone?.trim()) {
+            throw new OrderNotFoundException(orderId);
+        }
+        const order = await this.prisma.order.findFirst({
+            where: {
+                id: orderId,
+                customerPhone: customerPhone.trim(),
+            },
+            include: {
+                payment: true,
+                fulfillment: true,
+                lineItems: true,
+                messages: { orderBy: { createdAt: 'asc' } },
+                store: {
+                    select: {
+                        id: true,
+                        displayName: true,
+                        slug: true,
+                        contactPhone: true,
+                        contactEmail: true,
+                        logoUrl: true,
+                    },
+                },
+            },
+        });
+        if (!order) {
+            throw new OrderNotFoundException(orderId);
+        }
+        return order;
+    }
+
+    async uploadPaymentProof(
+        orderId: string,
+        customerPhone: string,
+        dto: { paymentProofUrl: string; reference?: string },
+    ) {
+        const phone = customerPhone?.trim();
+        if (!phone) {
+            throw new BadRequestException(
+                'Phone is required to upload payment proof',
+            );
+        }
+
+        const order = await this.prisma.order.findFirst({
+            where: {
+                id: orderId,
+                customerPhone: phone,
+            },
+            include: { payment: true, store: { select: { displayName: true } } },
+        });
+
+        if (!order || !order.payment) {
+            throw new OrderNotFoundException(orderId);
+        }
+
+        if (order.payment.status === PaymentStatus.SUCCESS) {
+            throw new InvalidPaymentStatusException(
+                'Payment already confirmed',
+            );
+        }
+
+        if (order.payment.method === PaymentMethod.CASH_ON_DELIVERY) {
+            throw new BadRequestException(
+                'Payment proof is not required for cash on delivery',
+            );
+        }
+
+        await this.prisma.orderPayment.update({
+            where: { orderId },
+            data: {
+                paymentProofUrl: dto.paymentProofUrl,
+                reference: dto.reference ?? order.payment.reference,
+                status: PaymentStatus.PENDING as PrismaPaymentStatus,
+                rejectionReason: null,
+                reviewedAt: null,
+                reviewedBy: null,
+            },
+        });
+
+        await this.prisma.orderMessage.create({
+            data: {
+                orderId,
+                sender: MessageSender.CUSTOMER as PrismaMessageSender,
+                senderName: order.customerName || 'Customer',
+                message: 'Payment proof uploaded. Awaiting merchant review.',
+            },
+        });
+
+        return this.prisma.order.findUnique({
+            where: { id: orderId },
+            include: { payment: true },
+        });
+    }
+
+    async reviewPaymentProof(
+        orderId: string,
+        storeId: string,
+        userId: string,
+        dto: {
+            action: 'APPROVE' | 'REJECT';
+            rejectionReason?: string;
+            reference?: string;
+        },
+    ) {
+        return this.prisma.$transaction(async (tx) => {
+            const order = await tx.order.findFirst({
+                where: { id: orderId, storeId },
+                include: { payment: true },
+            });
+
+            if (!order || !order.payment) {
+                throw new OrderNotFoundException(orderId);
+            }
+
+            if (!order.payment.paymentProofUrl && dto.action === 'APPROVE') {
+                throw new BadRequestException(
+                    'Cannot approve payment without a payment proof',
+                );
+            }
+
+            if (dto.action === 'APPROVE') {
+                const current = order.payment.status as string;
+                const allowed = PAYMENT_TRANSITIONS[current] ?? [];
+                if (
+                    current !== PaymentStatus.SUCCESS &&
+                    !allowed.includes(PaymentStatus.SUCCESS)
+                ) {
+                    throw new InvalidPaymentStatusException(
+                        `Cannot approve payment in status ${current}`,
+                    );
+                }
+
+                await tx.orderPayment.update({
+                    where: { orderId },
+                    data: {
+                        status: PaymentStatus.SUCCESS as PrismaPaymentStatus,
+                        paidAt: new Date(),
+                        reviewedBy: userId,
+                        reviewedAt: new Date(),
+                        rejectionReason: null,
+                        reference: dto.reference ?? order.payment.reference,
+                    },
+                });
+
+                if (current !== PaymentStatus.SUCCESS) {
+                    await tx.orderEvent.create({
+                        data: {
+                            type: OrderEventType.PAID as PrismaOrderEventType,
+                            title: 'Payment Confirmed',
+                            description: 'Payment proof approved by merchant',
+                            performedBy: userId,
+                            order: { connect: { id: orderId } },
+                        },
+                    });
+                }
+
+                await tx.orderMessage.create({
+                    data: {
+                        orderId,
+                        sender: MessageSender.ADMIN as PrismaMessageSender,
+                        senderName: 'Store',
+                        message: 'Your payment proof was approved. Thank you!',
+                    },
+                });
+            } else {
+                if (!dto.rejectionReason?.trim()) {
+                    throw new BadRequestException(
+                        'Rejection reason is required',
+                    );
+                }
+
+                await tx.orderPayment.update({
+                    where: { orderId },
+                    data: {
+                        status: PaymentStatus.PENDING as PrismaPaymentStatus,
+                        rejectionReason: dto.rejectionReason.trim(),
+                        reviewedBy: userId,
+                        reviewedAt: new Date(),
+                        paidAt: null,
+                    },
+                });
+
+                await tx.orderMessage.create({
+                    data: {
+                        orderId,
+                        sender: MessageSender.ADMIN as PrismaMessageSender,
+                        senderName: 'Store',
+                        message: `Payment proof rejected: ${dto.rejectionReason.trim()}. Please upload a new proof.`,
+                    },
+                });
+            }
+
+            return this.findById(orderId, storeId);
+        });
     }
 
     private async generateOrderNumber(tx: Tx, storeId: string): Promise<string> {

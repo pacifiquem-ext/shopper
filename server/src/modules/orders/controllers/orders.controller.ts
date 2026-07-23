@@ -28,6 +28,7 @@ import { OrderFilterDto } from '../dtos/order-filter.dto';
 import { UpdatePaymentDto } from '../dtos/update-payment.dto';
 import { UpdateFulfillmentDto } from '../dtos/update-fulfillment.dto';
 import { SendMessageDto } from '../dtos/send-message.dto';
+import { ReviewPaymentDto } from '../dtos/review-payment.dto';
 import { IsArray, IsString } from 'class-validator';
 
 class MarkNotificationsReadDto {
@@ -120,6 +121,21 @@ export class OrdersController {
         @Body() dto: UpdatePaymentDto,
     ) {
         return this.ordersService.updatePayment(id, storeId, userId, dto);
+    }
+
+    @Post(':id/payment/review')
+    @ApiOperation({
+        summary: 'Approve or reject customer payment proof (merchant)',
+    })
+    @ApiParam({ name: 'id', description: 'Order ID' })
+    @ApiResponse({ status: HttpStatus.OK, description: 'Payment review applied' })
+    async reviewPaymentProof(
+        @Param('id') id: string,
+        @StoreId() storeId: string,
+        @AuthUser('userId') userId: string,
+        @Body() dto: ReviewPaymentDto,
+    ) {
+        return this.ordersService.reviewPaymentProof(id, storeId, userId, dto);
     }
 
     @Put(':id/fulfillment')

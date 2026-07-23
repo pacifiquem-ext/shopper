@@ -55,16 +55,26 @@ export class DeliveryZoneDto {
 }
 
 export class SubmitStoreDto {
-    // ------------------------------------
-    // Store Configuration
-    // ------------------------------------
-    @ApiProperty({ description: 'Desired subdomain slug', example: 'mystore' })
+    @ApiProperty({
+        description: 'Desired store slug (URL path identity)',
+        example: 'mystore',
+    })
     @IsString()
     @IsNotEmpty()
     @Matches(/^[a-z0-9][a-z0-9-]{1,61}[a-z0-9]$/, {
-        message: 'Invalid subdomain format',
+        message: 'Invalid slug format',
     })
-    subdomain: string;
+    slug: string;
+
+    /** @deprecated Use slug. Accepted for one-release client back-compat. */
+    @ApiProperty({
+        description: 'Deprecated alias for slug',
+        required: false,
+        deprecated: true,
+    })
+    @IsString()
+    @IsOptional()
+    subdomain?: string;
 
     @ApiProperty({ description: 'Legal registered business name' })
     @IsString()
@@ -130,9 +140,6 @@ export class SubmitStoreDto {
     @IsOptional()
     deliveryZones?: DeliveryZoneDto[];
 
-    // ------------------------------------
-    // KYC Legal Identity
-    // ------------------------------------
     @ApiProperty({ description: 'UUID of the Industry Sector' })
     @IsUUID()
     @IsNotEmpty()
@@ -148,9 +155,6 @@ export class SubmitStoreDto {
     @IsNotEmpty()
     country: string;
 
-    // ------------------------------------
-    // KYC Owner Details
-    // ------------------------------------
     @ApiProperty({ description: 'Full names of the owner' })
     @IsString()
     @IsNotEmpty()
@@ -174,9 +178,6 @@ export class SubmitStoreDto {
     })
     ownerPhoneNumber: string;
 
-    // ------------------------------------
-    // Addresses
-    // ------------------------------------
     @ApiProperty({ description: 'Primary business address' })
     @ValidateNested()
     @Type(() => AddressDto)

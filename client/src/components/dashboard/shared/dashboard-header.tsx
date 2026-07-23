@@ -30,8 +30,8 @@ export function DashboardHeader() {
             ? t('nav.payments')
             : pathname.startsWith('/dashboard/store-settings')
               ? t('nav.storeSettings')
-              : pathname.startsWith('/dashboard/subscription')
-                ? t('nav.subscription')
+              : pathname.startsWith('/dashboard/promotions')
+                ? t('nav.promotions')
                 : t('nav.dashboard')
 
   const searchPlaceholder = t('header.searchPlaceholder')

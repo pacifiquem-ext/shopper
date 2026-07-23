@@ -1,31 +1,51 @@
 import { getInternalApiBaseUrl, getPublicApiBaseUrl } from '@/lib/api-base-url'
 import type { ApiResponse } from '@onlineshop/shared'
+import type { BrandColors } from '@/lib/store-templates'
 
 function isServer(): boolean {
   return typeof window === 'undefined'
 }
 
-
 function resolveCatalogApiRoot(): string {
   return isServer() ? getInternalApiBaseUrl() : getPublicApiBaseUrl()
 }
 
-import type { BrandColorsWithTemplate, StoreTemplateId } from '@/lib/store-templates'
-
-export type { StoreTemplateId }
+async function parseEnvelope<T>(
+  url: string,
+  res: Response,
+): Promise<{ data: T | null; devHint?: string }> {
+  if (!res.ok) {
+    return { data: null, devHint: `${url} — HTTP ${res.status}` }
+  }
+  let body: unknown
+  try {
+    body = await res.json()
+  } catch {
+    return { data: null, devHint: `${url} — response was not JSON` }
+  }
+  const envelope = body as ApiResponse<T> & { data?: T }
+  return { data: (envelope.data ?? null) as T | null }
+}
 
 export interface CatalogStoreSummary {
   id: string
   displayName: string
   logoUrl: string | null
+  /** Preferred public store path segment */
+  slug?: string
+  /** Legacy field — use `slug ?? subdomain` */
   subdomain: string
-  /** Computed from brandColors.template when served by the API. */
-  storeTemplate?: StoreTemplateId
-  brandColors: BrandColorsWithTemplate | null
+  brandColors: BrandColors | null
   description: string | null
   currency: string
   contactEmail: string | null
   contactPhone: string | null
+  averageRating?: number | null
+  reviewCount?: number | null
+}
+
+export function storePublicSlug(store: Pick<CatalogStoreSummary, 'slug' | 'subdomain'>): string {
+  return store.slug ?? store.subdomain
 }
 
 export interface CatalogVariantSummary {
@@ -41,6 +61,12 @@ export interface CatalogVariantSummary {
     available: number
     status: string
   }
+}
+
+export interface CatalogProductAttribute {
+  key: string
+  label: string
+  value: string
 }
 
 export interface CatalogProductPublic {
@@ -60,6 +86,9 @@ export interface CatalogProductPublic {
   createdAt: string
   store: CatalogStoreSummary
   variants: CatalogVariantSummary[]
+  averageRating?: number | null
+  reviewCount?: number | null
+  attributes?: CatalogProductAttribute[]
 }
 
 export interface CatalogGroup {
@@ -81,14 +110,236 @@ export interface CatalogGroupsPayload {
 
 export type CatalogFetchResult = {
   data: CatalogGroupsPayload | null
-  /** Technical detail for local debugging (only shown in development). */
   devHint?: string
 }
 
 export interface CatalogQueryOptions {
   search?: string
+  /** @deprecated Prefer storeSlug */
   subdomain?: string | null
+  storeSlug?: string | null
   cache?: RequestCache
+}
+
+export interface CatalogHomeSectionProduct {
+  product: CatalogProductPublic
+}
+
+export interface CatalogHomeSectionStore {
+  store: CatalogStoreSummary
+  productCount?: number
+  averageRating?: number | null
+}
+
+export interface CatalogHomePayload {
+  topRated: CatalogProductPublic[]
+  newArrivals: CatalogProductPublic[]
+  risingStores: CatalogStoreWithProductCount[]
+  onPromotion: CatalogProductPublic[]
+}
+
+export type CatalogHomeFetchResult = {
+  data: CatalogHomePayload | null
+  devHint?: string
+}
+
+export interface CatalogStoresPayload {
+  stores: CatalogStoreWithProductCount[]
+  total?: number
+}
+
+export type CatalogStoresFetchResult = {
+  data: CatalogStoresPayload | null
+  devHint?: string
+}
+
+export type CatalogStoreFetchResult = {
+  data: CatalogStoreSummary | null
+  devHint?: string
+}
+
+export interface PromoValidationResult {
+  valid: boolean
+  code: string
+  discountType?: 'PERCENT' | 'FIXED'
+  discountValue?: number
+  message?: string
+}
+
+/** Server-side fetch for marketplace home sections. Falls back to groups if /home is missing. */
+export async function fetchCatalogHome(
+  options: { cache?: RequestCache } = {},
+): Promise<CatalogHomeFetchResult> {
+  const root = resolveCatalogApiRoot()
+  const url = `${root}/catalog/home`
+
+  let res: Response
+  try {
+    res = await fetch(url, {
+      cache: options.cache ?? 'no-store',
+      headers: { Accept: 'application/json' },
+    })
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : 'Network error'
+    return buildHomeFallbackFromGroups(options.cache, `${url} — ${msg}`)
+  }
+
+  if (res.status === 404) {
+    return buildHomeFallbackFromGroups(options.cache, `${url} — HTTP 404 (using groups fallback)`)
+  }
+
+  const parsed = await parseEnvelope<CatalogHomePayload>(url, res)
+  if (!parsed.data) {
+    return buildHomeFallbackFromGroups(options.cache, parsed.devHint)
+  }
+
+  return {
+    data: {
+      topRated: parsed.data.topRated ?? [],
+      newArrivals: parsed.data.newArrivals ?? [],
+      risingStores: parsed.data.risingStores ?? [],
+      onPromotion: parsed.data.onPromotion ?? [],
+    },
+  }
+}
+
+async function buildHomeFallbackFromGroups(
+  cache?: RequestCache,
+  devHint?: string,
+): Promise<CatalogHomeFetchResult> {
+  const groups = await fetchCatalogGroups({ cache })
+  if (!groups.data) {
+    return { data: null, devHint: devHint ?? groups.devHint }
+  }
+
+  const products = groups.data.groups.flatMap((g) => g.products)
+  const byNewest = [...products].sort(
+    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+  )
+  const byRating = [...products].sort(
+    (a, b) => (b.averageRating ?? 0) - (a.averageRating ?? 0),
+  )
+  const onPromo = products.filter(
+    (p) =>
+      p.compareAtFrom != null &&
+      p.priceFrom != null &&
+      p.compareAtFrom > p.priceFrom,
+  )
+
+  const risingStores =
+    groups.data.stores?.slice(0, 8) ??
+    []
+
+  return {
+    data: {
+      topRated: byRating.slice(0, 8),
+      newArrivals: byNewest.slice(0, 8),
+      risingStores,
+      onPromotion: onPromo.slice(0, 8),
+    },
+    devHint,
+  }
+}
+
+export async function fetchStores(
+  options: { search?: string; cache?: RequestCache } = {},
+): Promise<CatalogStoresFetchResult> {
+  const root = resolveCatalogApiRoot()
+  const url = new URL(`${root}/catalog/stores`)
+  if (options.search?.trim()) {
+    url.searchParams.set('search', options.search.trim())
+  }
+
+  let res: Response
+  try {
+    res = await fetch(url.toString(), {
+      cache: options.cache ?? 'no-store',
+      headers: { Accept: 'application/json' },
+    })
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : 'Network error'
+    return storesFallbackFromGroups(options.cache, `${url.toString()} — ${msg}`)
+  }
+
+  if (res.status === 404) {
+    return storesFallbackFromGroups(options.cache, `${url.toString()} — HTTP 404`)
+  }
+
+  const parsed = await parseEnvelope<CatalogStoresPayload | CatalogStoreWithProductCount[]>(
+    url.toString(),
+    res,
+  )
+  if (!parsed.data) {
+    return storesFallbackFromGroups(options.cache, parsed.devHint)
+  }
+
+  if (Array.isArray(parsed.data)) {
+    return { data: { stores: parsed.data, total: parsed.data.length } }
+  }
+
+  return {
+    data: {
+      stores: parsed.data.stores ?? [],
+      total: parsed.data.total,
+    },
+  }
+}
+
+async function storesFallbackFromGroups(
+  cache?: RequestCache,
+  devHint?: string,
+): Promise<CatalogStoresFetchResult> {
+  const groups = await fetchCatalogGroups({ cache })
+  if (!groups.data) {
+    return { data: null, devHint: devHint ?? groups.devHint }
+  }
+  if (groups.data.stores?.length) {
+    return {
+      data: { stores: groups.data.stores, total: groups.data.stores.length },
+      devHint,
+    }
+  }
+  return { data: { stores: [], total: 0 }, devHint }
+}
+
+export async function fetchStoreBySlug(
+  slug: string,
+  options: { cache?: RequestCache } = {},
+): Promise<CatalogStoreFetchResult> {
+  const root = resolveCatalogApiRoot()
+  const url = `${root}/catalog/stores/${encodeURIComponent(slug)}`
+
+  let res: Response
+  try {
+    res = await fetch(url, {
+      cache: options.cache ?? 'no-store',
+      headers: { Accept: 'application/json' },
+    })
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : 'Network error'
+    return storeFallbackFromGroups(slug, options.cache, `${url} — ${msg}`)
+  }
+
+  if (res.status === 404) {
+    return storeFallbackFromGroups(slug, options.cache, `${url} — HTTP 404`)
+  }
+
+  const parsed = await parseEnvelope<CatalogStoreSummary>(url, res)
+  if (parsed.data) return { data: parsed.data }
+
+  return storeFallbackFromGroups(slug, options.cache, parsed.devHint)
+}
+
+async function storeFallbackFromGroups(
+  slug: string,
+  cache?: RequestCache,
+  devHint?: string,
+): Promise<CatalogStoreFetchResult> {
+  const groups = await fetchCatalogGroups({ storeSlug: slug, cache })
+  if (groups.data?.store) {
+    return { data: groups.data.store, devHint }
+  }
+  return { data: null, devHint: devHint ?? groups.devHint }
 }
 
 /** Server-side fetch for the public catalog (no auth). */
@@ -105,8 +356,11 @@ export async function fetchCatalogGroups(
   if (options.search?.trim()) {
     url.searchParams.set('search', options.search.trim())
   }
-  if (options.subdomain?.trim()) {
-    url.searchParams.set('subdomain', options.subdomain.trim())
+  const slug = options.storeSlug?.trim() || options.subdomain?.trim()
+  if (slug) {
+    url.searchParams.set('storeSlug', slug)
+    // Back-compat for older API
+    url.searchParams.set('subdomain', slug)
   }
 
   let res: Response
@@ -172,6 +426,8 @@ export type GuestOrderSummary = {
   storeId: string
   storeName: string
   total: number
+  paymentInstructions?: string | null
+  paymentMethods?: string[]
 }
 
 export type PlaceGuestOrderPayload = {
@@ -181,6 +437,9 @@ export type PlaceGuestOrderPayload = {
     productVariantId: string
     quantity: number
   }>
+  promoCode?: string
+  /** Offline pay default: MOBILE_MONEY so payment proof flow works */
+  paymentMethod?: 'MOBILE_MONEY' | 'BANK_TRANSFER' | 'CASH_ON_DELIVERY' | 'CARD'
 }
 
 export type PlaceGuestOrderResult = {
@@ -234,14 +493,85 @@ export async function placeGuestOrder(
   return { orders: data.orders }
 }
 
+export async function validatePromo(
+  code: string,
+  options: {
+    storeId?: string
+    subtotal?: number
+    lineItems?: Array<{
+      productId: string
+      productVariantId?: string
+      unitPrice: number
+      quantity: number
+    }>
+    customerPhone?: string
+  } = {},
+): Promise<PromoValidationResult> {
+  const root = resolveCatalogApiRoot()
+  const url = `${root}/catalog/promo/validate`
+  const subtotal = options.subtotal ?? 0
+  const lineItems =
+    options.lineItems && options.lineItems.length > 0
+      ? options.lineItems
+      : [
+          {
+            productId: '00000000-0000-0000-0000-000000000000',
+            unitPrice: subtotal,
+            quantity: 1,
+          },
+        ]
+
+  let res: Response
+  try {
+    res = await fetch(url, {
+      method: 'POST',
+      cache: 'no-store',
+      headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        code: code.trim(),
+        storeId: options.storeId,
+        subtotal,
+        lineItems,
+        customerPhone: options.customerPhone,
+      }),
+    })
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : 'Network error'
+    throw new Error(msg)
+  }
+
+  let body: unknown
+  try {
+    body = await res.json()
+  } catch {
+    throw new Error(`HTTP ${res.status}`)
+  }
+
+  if (!res.ok) {
+    const envelope = body as { message?: string | string[] }
+    const raw = envelope.message
+    const message = Array.isArray(raw) ? raw.join(', ') : raw
+    return { valid: false, code: code.trim(), message: message || `HTTP ${res.status}` }
+  }
+
+  const envelope = body as ApiResponse<PromoValidationResult> & PromoValidationResult
+  const data = envelope.data ?? (typeof envelope.valid === 'boolean' ? envelope : null)
+  if (!data) {
+    return { valid: false, code: code.trim(), message: 'Unexpected response' }
+  }
+  return data
+}
+
 export async function fetchCatalogProductById(
   id: string,
   options: CatalogQueryOptions = {},
 ): Promise<CatalogProductFetchResult> {
   const root = resolveCatalogApiRoot()
   const url = new URL(`${root}/catalog/products/${id}`)
-  if (options.subdomain?.trim()) {
-    url.searchParams.set('subdomain', options.subdomain.trim())
+  const slug = options.storeSlug?.trim() || options.subdomain?.trim()
+  if (slug) {
+    url.searchParams.set('storeSlug', slug)
+    url.searchParams.set('subdomain', slug)
   }
 
   let res: Response

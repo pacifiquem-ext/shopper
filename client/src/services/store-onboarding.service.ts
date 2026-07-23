@@ -16,7 +16,8 @@ export interface DeliveryZoneDto {
 }
 
 export interface SubmitStoreDto {
-  subdomain: string
+  slug?: string
+  subdomain?: string
   registeredName: string
   displayName: string
   description?: string
@@ -57,24 +58,41 @@ export const storeOnboardingService = {
     return (await api.put('/onboarding/submit', data)) as ApiResponse<any>
   },
 
+  async checkSlug(
+    slug: string,
+  ): Promise<ApiResponse<{ available: boolean; message: string }>> {
+    const base = getPublicApiBaseUrl().replace(/\/+$/, '')
+    const candidates = [
+      `${base}/onboarding/check-slug?slug=${encodeURIComponent(slug)}`,
+      `${base}/onboarding/check-subdomain?subdomain=${encodeURIComponent(slug)}`,
+    ]
+
+    let lastError: Error | null = null
+    for (const url of candidates) {
+      try {
+        const res = await fetch(url, { headers: { Accept: 'application/json' } })
+        if (res.status === 404) continue
+        if (!res.ok) {
+          lastError = new Error(`Slug check failed (${res.status})`)
+          continue
+        }
+        const body = (await res.json()) as ApiResponse<{ available: boolean; message: string }>
+        return (body.data ? body : { ...body, data: body }) as ApiResponse<{
+          available: boolean
+          message: string
+        }>
+      } catch (err) {
+        lastError = err instanceof Error ? err : new Error('Slug check failed')
+      }
+    }
+
+    throw lastError ?? new Error('Slug check failed')
+  },
+
+  /** @deprecated Prefer checkSlug */
   async checkSubdomain(
     subdomain: string,
   ): Promise<ApiResponse<{ available: boolean; message: string }>> {
-    const base = (getPublicApiBaseUrl()).replace(
-      /\/+$/,
-      '',
-    )
-    const url = `${base}/onboarding/check-subdomain?subdomain=${encodeURIComponent(subdomain)}`
-    const res = await fetch(url, { headers: { Accept: 'application/json' } })
-
-    if (!res.ok) {
-      throw new Error(`Subdomain check failed (${res.status})`)
-    }
-
-    const body = (await res.json()) as ApiResponse<{ available: boolean; message: string }>
-    return (body.data ? body : { ...body, data: body }) as ApiResponse<{
-      available: boolean
-      message: string
-    }>
+    return this.checkSlug(subdomain)
   },
 }

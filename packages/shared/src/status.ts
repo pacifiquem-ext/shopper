@@ -73,6 +73,41 @@ export const StoreStatus = {
   DELETED: 'DELETED',
 } as const
 
+export const ReviewStatus = {
+  PENDING: 'PENDING',
+  APPROVED: 'APPROVED',
+  REJECTED: 'REJECTED',
+} as const
+
+export const PromotionScope = {
+  PLATFORM: 'PLATFORM',
+  STORE: 'STORE',
+} as const
+
+export const PromotionType = {
+  PERCENT: 'PERCENT',
+  FIXED: 'FIXED',
+} as const
+
+export const PromotionStatus = {
+  ACTIVE: 'ACTIVE',
+  DISABLED: 'DISABLED',
+  EXPIRED: 'EXPIRED',
+} as const
+
+export const AttributeFieldType = {
+  STRING: 'STRING',
+  NUMBER: 'NUMBER',
+  BOOLEAN: 'BOOLEAN',
+  SELECT: 'SELECT',
+  MULTISELECT: 'MULTISELECT',
+} as const
+
+export const AttributeAppliesTo = {
+  PRODUCT: 'PRODUCT',
+  VARIANT: 'VARIANT',
+} as const
+
 export type ProductStatusType = (typeof ProductStatus)[keyof typeof ProductStatus]
 export type StockStatusType = (typeof StockStatus)[keyof typeof StockStatus]
 export type InventoryEventTypeType =
@@ -85,3 +120,12 @@ export type OrderEventTypeType = (typeof OrderEventType)[keyof typeof OrderEvent
 export type MessageSenderType = (typeof MessageSender)[keyof typeof MessageSender]
 export type UserRoleType = (typeof UserRole)[keyof typeof UserRole]
 export type StoreStatusType = (typeof StoreStatus)[keyof typeof StoreStatus]
+export type ReviewStatusType = (typeof ReviewStatus)[keyof typeof ReviewStatus]
+export type PromotionScopeType = (typeof PromotionScope)[keyof typeof PromotionScope]
+export type PromotionTypeType = (typeof PromotionType)[keyof typeof PromotionType]
+export type PromotionStatusType =
+  (typeof PromotionStatus)[keyof typeof PromotionStatus]
+export type AttributeFieldTypeType =
+  (typeof AttributeFieldType)[keyof typeof AttributeFieldType]
+export type AttributeAppliesToType =
+  (typeof AttributeAppliesTo)[keyof typeof AttributeAppliesTo]

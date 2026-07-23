@@ -40,7 +40,10 @@ type PlaceOrderDialogProps = {
   open: boolean
   onOpenChange: (open: boolean) => void
   items: CartItem[]
-  onSuccess: () => void
+  onSuccess: (
+    orders: Array<{ id: string; orderNumber: string; storeName: string; total: number }>,
+    customerPhone: string,
+  ) => void
 }
 
 export function PlaceOrderDialog({
@@ -84,6 +87,7 @@ export function PlaceOrderDialog({
     try {
       const result = await placeGuestOrder({
         customerPhone: values.customerPhone.trim(),
+        paymentMethod: 'MOBILE_MONEY',
         items: items.map((item) => ({
           productVariantId: item.variantId,
           quantity: item.quantity,
@@ -98,7 +102,15 @@ export function PlaceOrderDialog({
       )
       form.reset()
       onOpenChange(false)
-      onSuccess()
+      onSuccess(
+        result.orders.map((o) => ({
+          id: o.id,
+          orderNumber: o.orderNumber,
+          storeName: o.storeName,
+          total: o.total,
+        })),
+        values.customerPhone.trim(),
+      )
     } catch (error: unknown) {
       const raw =
         error instanceof Error && error.message ? error.message : t('placeOrderError')

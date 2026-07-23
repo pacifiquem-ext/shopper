@@ -3,13 +3,7 @@ import { Request, Response, NextFunction } from 'express';
 
 @Injectable()
 export class TenantMiddleware implements NestMiddleware {
-    use(req: Request, res: Response, next: NextFunction) {
-        const user = (req as any).user;
-        
-        if (user && user.storeId) {
-            (req as any).storeId = user.storeId;
-        }
-        
+    use(_req: Request, _res: Response, next: NextFunction) {
         next();
     }
 }

@@ -94,6 +94,41 @@ enum MessageSender {
   CUSTOMER
 }
 
+enum AttributeFieldType {
+  STRING
+  NUMBER
+  BOOLEAN
+  SELECT
+  MULTISELECT
+}
+
+enum AttributeAppliesTo {
+  PRODUCT
+  VARIANT
+}
+
+enum ReviewStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum PromotionScope {
+  PLATFORM
+  STORE
+}
+
+enum PromotionType {
+  PERCENT
+  FIXED
+}
+
+enum PromotionStatus {
+  ACTIVE
+  DISABLED
+  EXPIRED
+}
+
 model User {
   id           String     @id @default(uuid())
   storeId      String?
@@ -106,10 +141,11 @@ model User {
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
 
-  refreshTokens RefreshToken[]
-  otpCodes      OtpCode[]
-  stores        Store[]
-  storeDraft    StoreDraft?
+  refreshTokens  RefreshToken[]
+  otpCodes       OtpCode[]
+  stores         Store[]
+  storeDraft     StoreDraft?
+  productReviews ProductReview[]
 
   @@index([phoneNumber])
   @@map("users")
@@ -174,10 +210,10 @@ model BusinessCategory {
 }
 
 model Store {
-  id        String      @id @default(uuid())
-  userId    String
-  subdomain String      @unique
-  status    StoreStatus @default(SUBMITTED)
+  id     String      @id @default(uuid())
+  userId String
+  slug   String      @unique @map("subdomain")
+  status StoreStatus @default(SUBMITTED)
 
   registeredName String
   displayName    String
@@ -185,32 +221,38 @@ model Store {
   currency       String  @default("RWF")
 
   logoUrl     String?
-  brandColors Json? // {"primary": "#xxxxxx", "secondary": "#xxxxxx", "template": "VIBRANT_MARKET"|"ISHUSHO_CRAFTS"}
-  
-  aboutUs      String?
+  brandColors Json?
+
+  aboutUs        String?
   contactEmail   String?
   contactPhone   String?
   contactAddress String?
 
-  returnPolicy         String?
-  privacyPolicy        String?
-  termsAndConditions   String?
+  returnPolicy       String?
+  privacyPolicy      String?
+  termsAndConditions String?
+
+  ratingAvg   Decimal  @default(0) @db.Decimal(4, 2)
+  ratingCount Int      @default(0)
+  approvedAt  DateTime?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   rejectionReason String?
 
-  user     User            @relation(fields: [userId], references: [id], onDelete: Cascade)
-  kyc      StoreKyc?
-  delivery DeliveryZone[]
-  products Product[]
-  orders   Order[]
+  user                      User                         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  kyc                       StoreKyc?
+  delivery                  DeliveryZone[]
+  products                  Product[]
+  orders                    Order[]
   dailyMetricsSnapshots     DailyMetricsSnapshot[]
   productPerformanceSnapshots ProductPerformanceSnapshot[]
+  reviews                   ProductReview[]
+  promotions                Promotion[]
 
   @@index([userId])
-  @@index([subdomain])
+  @@index([slug])
   @@index([status])
   @@map("stores")
 }
@@ -263,12 +305,12 @@ model Address {
   physicalAddress String
   googleMapsUrl   String?
 
-  businessKycId  String? @unique
+  businessKycId String? @unique
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  businessKyc  StoreKyc? @relation("BusinessAddress", fields: [businessKycId], references: [id], onDelete: Cascade)
+  businessKyc StoreKyc? @relation("BusinessAddress", fields: [businessKycId], references: [id], onDelete: Cascade)
 
   @@map("addresses")
 }
@@ -287,6 +329,45 @@ model StoreDraft {
   @@map("store_drafts")
 }
 
+model ProductCategory {
+  id        String   @id @default(uuid())
+  slug      String   @unique
+  nameEn    String
+  nameRw    String
+  sortOrder Int      @default(0)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  attributeDefs CategoryAttributeDef[]
+  products      Product[]
+  promoTargets  PromotionTarget[]
+
+  @@index([isActive, sortOrder])
+  @@map("product_categories")
+}
+
+model CategoryAttributeDef {
+  id         String              @id @default(uuid())
+  categoryId String
+  key        String
+  labelEn    String
+  labelRw    String
+  type       AttributeFieldType
+  required   Boolean             @default(false)
+  options    Json?
+  appliesTo  AttributeAppliesTo  @default(PRODUCT)
+  sortOrder  Int                 @default(0)
+  createdAt  DateTime            @default(now())
+  updatedAt  DateTime            @updatedAt
+
+  category ProductCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@unique([categoryId, key])
+  @@index([categoryId, sortOrder])
+  @@map("category_attribute_defs")
+}
+
 model Product {
   id          String        @id @default(uuid())
   storeId     String
@@ -294,76 +375,175 @@ model Product {
   description String?
   vendor      String
   category    String
+  categoryId  String?
   status      ProductStatus @default(DRAFT)
   tags        String[]
   images      String[]
   primaryImage String?
-  
+
+  attributes  Json    @default("{}")
+  ratingAvg   Decimal @default(0) @db.Decimal(4, 2)
+  ratingCount Int     @default(0)
+
   deliveryEnabled  Boolean  @default(true)
   deliveryLocation String?
   deliveryPrice    Decimal?
-  
+
   createdBy String
   updatedBy String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  
-  store    Store            @relation(fields: [storeId], references: [id], onDelete: Cascade)
-  variants ProductVariant[]
-  
+
+  store        Store             @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  productCategory ProductCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  variants     ProductVariant[]
+  reviews      ProductReview[]
+  promoTargets PromotionTarget[]
+
   @@index([storeId, status])
   @@index([storeId, category])
   @@index([storeId, vendor])
+  @@index([categoryId])
+  @@index([status, ratingAvg, ratingCount])
+  @@index([createdAt])
   @@map("products")
 }
 
 model ProductVariant {
   id        String @id @default(uuid())
   productId String
-  
-  sku       String @unique
-  title     String
-  
+
+  sku   String @unique
+  title String
+
   colorName String?
   colorHex  String?
   size      String?
   model     String?
-  
+
   price     Decimal
   compareAt Decimal?
   cost      Decimal?
-  
+
+  attributes Json     @default("{}")
+  images     String[] @default([])
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  
+
   product              Product                      @relation(fields: [productId], references: [id], onDelete: Cascade)
   inventory            InventoryRecord?
   orderLineItems       OrderLineItem[]
   performanceSnapshots ProductPerformanceSnapshot[]
-  
+
   @@index([productId])
   @@index([sku])
   @@map("product_variants")
 }
 
+model ProductReview {
+  id          String       @id @default(uuid())
+  productId   String
+  storeId     String
+  userId      String?
+  orderId     String?
+  rating      Int
+  title       String?
+  body        String?
+  status      ReviewStatus @default(PENDING)
+  createdAt   DateTime     @default(now())
+  moderatedAt DateTime?
+  moderatedBy String?
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  store   Store   @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  user    User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+  order   Order?  @relation(fields: [orderId], references: [id], onDelete: SetNull)
+
+  @@index([productId, status])
+  @@index([storeId, status])
+  @@index([userId])
+  @@map("product_reviews")
+}
+
+model Promotion {
+  id              String          @id @default(uuid())
+  scope           PromotionScope
+  storeId         String?
+  code            String
+  name            String
+  type            PromotionType
+  value           Decimal
+  minOrderAmount  Decimal?
+  maxRedemptions  Int?
+  perUserLimit    Int?
+  startsAt        DateTime
+  endsAt          DateTime?
+  status          PromotionStatus @default(ACTIVE)
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  store       Store?                @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  targets     PromotionTarget[]
+  redemptions PromotionRedemption[]
+
+  @@unique([code, storeId])
+  @@index([scope, status])
+  @@index([storeId, status])
+  @@index([startsAt, endsAt])
+  @@map("promotions")
+}
+
+model PromotionTarget {
+  id          String  @id @default(uuid())
+  promotionId String
+  productId   String?
+  categoryId  String?
+
+  promotion Promotion        @relation(fields: [promotionId], references: [id], onDelete: Cascade)
+  product   Product?         @relation(fields: [productId], references: [id], onDelete: Cascade)
+  category  ProductCategory? @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@index([promotionId])
+  @@index([productId])
+  @@index([categoryId])
+  @@map("promotion_targets")
+}
+
+model PromotionRedemption {
+  id            String   @id @default(uuid())
+  promotionId   String
+  orderId       String
+  amount        Decimal
+  customerPhone String?
+  createdAt     DateTime @default(now())
+
+  promotion Promotion @relation(fields: [promotionId], references: [id], onDelete: Cascade)
+  order     Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([promotionId])
+  @@index([orderId])
+  @@map("promotion_redemptions")
+}
+
 model InventoryRecord {
   id               String @id @default(uuid())
   productVariantId String @unique
-  
+
   onHand       Int         @default(0)
   reserved     Int         @default(0)
   available    Int         @default(0)
   reorderPoint Int         @default(10)
   status       StockStatus @default(IN_STOCK)
-  
+
   lastRestockedAt DateTime?
   lastSoldAt      DateTime?
   updatedBy       String?
   updatedAt       DateTime  @updatedAt
-  
+
   productVariant ProductVariant   @relation(fields: [productVariantId], references: [id], onDelete: Cascade)
   events         InventoryEvent[]
-  
+
   @@index([productVariantId])
   @@index([status])
   @@map("inventory_records")
@@ -377,9 +557,9 @@ model InventoryEvent {
   reason            String?
   performedBy       String
   createdAt         DateTime           @default(now())
-  
+
   inventoryRecord InventoryRecord @relation(fields: [inventoryRecordId], references: [id], onDelete: Cascade)
-  
+
   @@index([inventoryRecordId])
   @@index([createdAt])
   @@map("inventory_events")
@@ -389,34 +569,38 @@ model Order {
   id          String @id @default(uuid())
   storeId     String
   orderNumber String @unique
-  
+
   customerName  String
   customerPhone String
   customerEmail String
-  
+
   shippingAddress String
   billingAddress  String
-  
-  subtotal    Decimal
-  deliveryFee Decimal @default(0)
-  discount    Decimal @default(0)
-  tax         Decimal @default(0)
-  total       Decimal
-  
+
+  subtotal      Decimal
+  deliveryFee   Decimal @default(0)
+  discount      Decimal @default(0)
+  tax           Decimal @default(0)
+  total         Decimal
+  promoCode     String?
+  promoDiscount Decimal @default(0)
+
   customerNote String?
   internalNote String?
-  
+
   placedAt  DateTime @default(now())
   createdBy String
   updatedAt DateTime @updatedAt
-  
-  store       Store              @relation(fields: [storeId], references: [id], onDelete: Cascade)
+
+  store       Store                 @relation(fields: [storeId], references: [id], onDelete: Cascade)
   lineItems   OrderLineItem[]
   payment     OrderPayment?
   fulfillment OrderFulfillment?
   events      OrderEvent[]
   messages    OrderMessage[]
-  
+  reviews     ProductReview[]
+  promoRedemptions PromotionRedemption[]
+
   @@index([storeId, placedAt])
   @@index([storeId, orderNumber])
   @@index([customerEmail])
@@ -427,19 +611,19 @@ model OrderLineItem {
   id               String @id @default(uuid())
   orderId          String
   productVariantId String
-  
+
   productName String
   sku         String
-  
+
   quantity  Int
   unitPrice Decimal
   total     Decimal
-  
+
   createdAt DateTime @default(now())
-  
+
   order          Order          @relation(fields: [orderId], references: [id], onDelete: Cascade)
   productVariant ProductVariant @relation(fields: [productVariantId], references: [id])
-  
+
   @@index([orderId])
   @@index([productVariantId])
   @@map("order_line_items")
@@ -448,19 +632,22 @@ model OrderLineItem {
 model OrderPayment {
   id      String @id @default(uuid())
   orderId String @unique
-  
+
   status          PaymentStatus @default(PENDING)
   method          PaymentMethod
   reference       String?
   amount          Decimal
   paymentProofUrl String?
-  
+  rejectionReason String?
+  reviewedBy      String?
+  reviewedAt      DateTime?
+
   paidAt    DateTime?
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
-  
+
   order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  
+
   @@index([orderId])
   @@index([status])
   @@map("order_payments")
@@ -469,26 +656,26 @@ model OrderPayment {
 model OrderFulfillment {
   id      String @id @default(uuid())
   orderId String @unique
-  
+
   status         FulfillmentStatus @default(UNFULFILLED)
   deliveryMethod String
   deliveryZoneId String?
-  
+
   courierName    String?
   driverName     String?
   trackingNumber String?
-  
+
   packedBy    String?
   deliveredBy String?
-  
+
   assignedAt  DateTime?
   deliveredAt DateTime?
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
-  
+
   order        Order         @relation(fields: [orderId], references: [id], onDelete: Cascade)
   deliveryZone DeliveryZone? @relation(fields: [deliveryZoneId], references: [id])
-  
+
   @@index([orderId])
   @@index([status])
   @@map("order_fulfillments")
@@ -498,14 +685,14 @@ model OrderEvent {
   id      String         @id @default(uuid())
   orderId String
   type    OrderEventType
-  
+
   title       String
   description String?
   performedBy String?
   createdAt   DateTime @default(now())
-  
+
   order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  
+
   @@index([orderId, createdAt])
   @@map("order_events")
 }
@@ -514,14 +701,14 @@ model OrderMessage {
   id      String        @id @default(uuid())
   orderId String
   sender  MessageSender
-  
+
   senderName String
   message    String
   isRead     Boolean  @default(false)
   createdAt  DateTime @default(now())
-  
+
   order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  
+
   @@index([orderId, createdAt])
   @@map("order_messages")
 }
@@ -530,32 +717,32 @@ model DailyMetricsSnapshot {
   id           String   @id @default(uuid())
   storeId      String
   snapshotDate DateTime @db.Date
-  
+
   totalSales   Int
   totalRevenue Decimal
   totalCost    Decimal
   totalProfit  Decimal
-  
+
   totalOrders     Int
   pendingOrders   Int
   completedOrders Int
   cancelledOrders Int
-  
+
   activeProducts  Int
   lowStockCount   Int
   outOfStockCount Int
-  
+
   totalCustomers  Int
   newCustomers    Int
   activeCustomers Int
-  
+
   totalStockValue    Decimal
   totalStockQuantity Int
-  
+
   createdAt DateTime @default(now())
-  
+
   store Store @relation(fields: [storeId], references: [id], onDelete: Cascade)
-  
+
   @@unique([storeId, snapshotDate])
   @@index([storeId, snapshotDate])
   @@map("daily_metrics_snapshots")
@@ -566,16 +753,16 @@ model ProductPerformanceSnapshot {
   storeId          String
   productVariantId String
   snapshotDate     DateTime @db.Date
-  
+
   unitsSold    Int
   revenue      Decimal
   trendPercent Decimal?
-  
+
   createdAt DateTime @default(now())
-  
+
   store          Store          @relation(fields: [storeId], references: [id], onDelete: Cascade)
   productVariant ProductVariant @relation(fields: [productVariantId], references: [id], onDelete: Cascade)
-  
+
   @@unique([storeId, productVariantId, snapshotDate])
   @@index([storeId, snapshotDate])
   @@map("product_performance_snapshots")

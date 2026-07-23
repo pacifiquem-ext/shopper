@@ -163,4 +163,32 @@ export const ordersService = {
   async exportCsv(): Promise<Blob> {
     return (await api.get('/orders/export', { responseType: 'blob' })) as unknown as Blob
   },
+
+  async uploadProof(
+    id: string,
+    payload: { paymentProofUrl: string; reference?: string; phone: string },
+  ): Promise<ApiResponse<OrderApi>> {
+    const phone = encodeURIComponent(payload.phone)
+    return (await api.post(`/catalog/orders/${id}/payment-proof?phone=${phone}`, {
+      paymentProofUrl: payload.paymentProofUrl,
+      reference: payload.reference,
+    })) as ApiResponse<OrderApi>
+  },
+
+  async reviewPayment(
+    id: string,
+    dto: { action: 'APPROVE' | 'REJECT'; rejectionReason?: string; reference?: string },
+  ): Promise<ApiResponse<OrderApi>> {
+    return (await api.post(`/orders/${id}/payment/review`, dto)) as ApiResponse<OrderApi>
+  },
+
+  async getPublicOrder(
+    id: string,
+    phone?: string,
+  ): Promise<ApiResponse<OrderApi>> {
+    const params = new URLSearchParams()
+    if (phone) params.set('phone', phone)
+    const qs = params.toString()
+    return (await api.get(`/catalog/orders/${id}${qs ? `?${qs}` : ''}`)) as ApiResponse<OrderApi>
+  },
 }

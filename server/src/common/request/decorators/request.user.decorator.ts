@@ -9,7 +9,7 @@ export const AuthUser = createParamDecorator(
 
         // Allow selecting a field, e.g. @AuthUser('userId')
         if (typeof data === 'string' && user && typeof user === 'object') {
-            return (user as Record<string, unknown>)[data];
+            return (user as unknown as Record<string, unknown>)[data];
         }
 
         return user;

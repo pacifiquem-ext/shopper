@@ -13,15 +13,11 @@ import {
   Phone,
   MapPin,
   Truck,
-  CreditCard,
   Save,
   Upload,
   Globe,
   User,
-  Calendar,
-  CheckCircle2,
   Check,
-  Clock,
   Plus,
   Trash2,
   Info,
@@ -35,13 +31,6 @@ import { cn } from '@/lib/utils'
 import { TurningZeroLoader } from '@/components/ui/turning-zero-loader'
 import { useSearchParams } from 'next/navigation'
 import { storeSettingsService } from '@/services/store-settings.service'
-import {
-  parseStoreTemplateId,
-  STORE_TEMPLATE_BRAND_PRESETS,
-  type BrandColorsWithTemplate,
-  type StoreTemplateId,
-} from '@/lib/store-templates'
-import { StoreTemplatePicker } from '@/components/store-templates/shared/store-template-picker'
 import {
   deliveryZonesService,
   type DeliveryZoneApi,
@@ -58,22 +47,20 @@ interface DeliveryZoneLocal {
 export default function StoreSettingsPage() {
   const t = useTranslations('dashboard')
   const tBranding = useTranslations('dashboard.storeSettings.branding')
-  const tTemplates = useTranslations('storeTemplates')
   const searchParams = useSearchParams()
   const tabParam = searchParams.get('tab') as
     | 'business'
     | 'branding'
     | 'contact'
     | 'delivery'
-    | 'subscription'
     | null
 
   const [activeTab, setActiveTab] = useState<
-    'business' | 'branding' | 'contact' | 'delivery' | 'subscription'
-  >(tabParam || 'business')
+    'business' | 'branding' | 'contact' | 'delivery'
+  >(tabParam && ['business', 'branding', 'contact', 'delivery'].includes(tabParam) ? tabParam : 'business')
 
   useEffect(() => {
-    if (tabParam && ['business', 'branding', 'contact', 'delivery', 'subscription'].includes(tabParam)) {
+    if (tabParam && ['business', 'branding', 'contact', 'delivery'].includes(tabParam)) {
       setActiveTab(tabParam)
     }
   }, [tabParam])
@@ -83,7 +70,6 @@ export default function StoreSettingsPage() {
   const [reloadKey, setReloadKey] = useState(0)
   const [isSaving, setIsSaving] = useState(false)
   const [isLogoUploading, setIsLogoUploading] = useState(false)
-  const [templateSavingId, setTemplateSavingId] = useState<StoreTemplateId | null>(null)
   const logoInputRef = useRef<HTMLInputElement | null>(null)
 
   const [businessInfo, setBusinessInfo] = useState({
@@ -115,7 +101,6 @@ export default function StoreSettingsPage() {
     primaryColor: MARKETPLACE_BRAND.primary as string,
     secondaryColor: MARKETPLACE_BRAND.canvas as string,
     logoUrl: '/placeholder-logo.png',
-    storeTemplate: 'DEFAULT' as StoreTemplateId,
   })
 
   const [contact, setContact] = useState({
@@ -130,77 +115,22 @@ export default function StoreSettingsPage() {
   const [isDeletingZone, setIsDeletingZone] = useState(false)
   const td = useTranslations('dashboard.deliveryZones')
 
-  const [subscription] = useState({
-    plan: 'Professional',
-    status: 'active',
-    nextPaymentDate: '2026-04-22',
-    monthlyFee: 50000,
-    paymentHistory: [
-      { id: '1', date: '2026-03-22', amount: 50000, status: 'paid', method: 'Mobile Money' },
-      { id: '2', date: '2026-02-22', amount: 50000, status: 'paid', method: 'Mobile Money' },
-      { id: '3', date: '2026-01-22', amount: 50000, status: 'paid', method: 'Bank Transfer' },
-    ],
-  })
-
   const syncBrandingFromSettings = useCallback((s: Record<string, unknown>) => {
-    const colors = s.brandColors as BrandColorsWithTemplate | null
+    const colors = s.brandColors as { primary?: string; secondary?: string } | null
     setBranding({
       primaryColor: colors?.primary ?? MARKETPLACE_BRAND.primary,
       secondaryColor: colors?.secondary ?? MARKETPLACE_BRAND.canvas,
       logoUrl: (s.logoUrl as string) ?? '/placeholder-logo.png',
-      storeTemplate: parseStoreTemplateId(colors?.template),
     })
   }, [])
 
   const buildBrandColorsPayload = useCallback(
-    (overrides?: Partial<BrandColorsWithTemplate>) => ({
+    (overrides?: { primary?: string; secondary?: string }) => ({
       primary: overrides?.primary ?? branding.primaryColor,
       secondary: overrides?.secondary ?? branding.secondaryColor,
-      template: parseStoreTemplateId(overrides?.template ?? branding.storeTemplate),
     }),
-    [branding.primaryColor, branding.secondaryColor, branding.storeTemplate],
+    [branding.primaryColor, branding.secondaryColor],
   )
-
-  const handleTemplateSelect = async (templateId: StoreTemplateId) => {
-    if (templateSavingId || isLoading || loadError) return
-
-    const previous = branding.storeTemplate
-    const preset = STORE_TEMPLATE_BRAND_PRESETS[templateId]
-    setBranding((current) => ({
-      ...current,
-      storeTemplate: templateId,
-      primaryColor: preset.primary,
-      secondaryColor: preset.secondary,
-    }))
-    setTemplateSavingId(templateId)
-
-    try {
-      const res = await storeSettingsService.updateSettings({
-        brandColors: buildBrandColorsPayload({
-          template: templateId,
-          primary: preset.primary,
-          secondary: preset.secondary,
-        }),
-      })
-      const updated = (res as unknown as { data?: Record<string, unknown> })?.data ?? res
-      if (updated && typeof updated === 'object') {
-        syncBrandingFromSettings(updated as Record<string, unknown>)
-      }
-      const templateLabelKey =
-        templateId === 'VIBRANT_MARKET'
-          ? 'vibrantMarketTemplate'
-          : templateId === 'ISHUSHO_CRAFTS'
-            ? 'ishushoCraftsTemplate'
-            : 'defaultTemplate'
-      toast.success(tTemplates('templateSaved'), {
-        description: tTemplates(templateLabelKey),
-      })
-    } catch {
-      setBranding((current) => ({ ...current, storeTemplate: previous }))
-    } finally {
-      setTemplateSavingId(null)
-    }
-  }
 
   useEffect(() => {
     async function load() {
@@ -286,7 +216,7 @@ export default function StoreSettingsPage() {
         if (updated && typeof updated === 'object') {
           syncBrandingFromSettings(updated as Record<string, unknown>)
         }
-        toast.success(tTemplates('templateSaved'))
+        toast.success(t('storeSettings.saved'))
       } else if (activeTab === 'contact') {
         await storeSettingsService.updateSettings({
           contactEmail: contact.email,
@@ -399,7 +329,6 @@ export default function StoreSettingsPage() {
     { key: 'branding' as const, label: 'Branding', icon: Palette },
     { key: 'contact' as const, label: 'Contact & About', icon: Mail },
     { key: 'delivery' as const, label: 'Delivery Zones', icon: Truck },
-    { key: 'subscription' as const, label: 'Subscription', icon: CreditCard },
   ]
 
   return (
@@ -414,7 +343,7 @@ export default function StoreSettingsPage() {
         <Button
           type="button"
           onClick={handleSave}
-          disabled={isSaving || isLoading || loadError || activeTab === 'subscription'}
+          disabled={isSaving || isLoading || loadError}
           className="h-10 w-full rounded-lg bg-primary-base px-6 text-white hover:bg-primary-darker disabled:opacity-50 sm:w-auto"
         >
           <Save className="mr-2 h-4 w-4" />
@@ -768,15 +697,6 @@ export default function StoreSettingsPage() {
 
                       <Separator />
 
-                      <StoreTemplatePicker
-                        value={branding.storeTemplate}
-                        savingId={templateSavingId}
-                        disabled={isLoading}
-                        onSelect={handleTemplateSelect}
-                      />
-
-                      <Separator />
-
                       <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                         <div className="space-y-2">
                           <Label
@@ -1073,126 +993,6 @@ export default function StoreSettingsPage() {
                   </div>
                 )}
 
-                {activeTab === 'subscription' && (
-                  <div
-                    role="tabpanel"
-                    id="store-settings-panel-subscription"
-                    aria-labelledby="store-settings-tab-subscription"
-                    className="p-6"
-                  >
-                    <div className="mb-6">
-                      <h2 className="text-lg font-semibold text-text-strong-950">
-                        Subscription & Billing
-                      </h2>
-                      <p className="mt-1 text-sm text-text-soft-400">
-                        View your subscription status and payment history
-                      </p>
-                    </div>
-
-                    <div className="space-y-6">
-                      <div className="rounded-xl border-2 border-primary-base/20 bg-primary-alpha-10 p-6">
-                        <div className="flex items-start justify-between">
-                          <div>
-                            <div className="flex items-center gap-2">
-                              <h3 className="text-xl font-bold text-text-strong-950">
-                                {subscription.plan} Plan
-                              </h3>
-                              <Badge className="rounded-full border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-50">
-                                <CheckCircle2 className="mr-1 h-3 w-3" />
-                                {subscription.status === 'active' ? 'Active' : subscription.status}
-                              </Badge>
-                            </div>
-                            <p className="mt-2 text-sm text-text-sub-600">
-                              Your subscription is managed by our team. Contact support for changes.
-                            </p>
-                          </div>
-                          <div className="text-right">
-                            <div className="text-2xl font-bold text-primary-base">
-                              {subscription.monthlyFee.toLocaleString()} RWF
-                            </div>
-                            <div className="text-xs text-text-sub-600">per month</div>
-                          </div>
-                        </div>
-
-                        <Separator className="my-4" />
-
-                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                          <div className="flex items-center gap-3 rounded-lg bg-white p-3">
-                            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary-alpha-10">
-                              <Calendar className="h-5 w-5 text-primary-base" />
-                            </div>
-                            <div>
-                              <div className="text-xs font-medium text-text-soft-400">
-                                Next Payment Date
-                              </div>
-                              <div className="text-sm font-semibold text-text-strong-950">
-                                {subscription.nextPaymentDate}
-                              </div>
-                            </div>
-                          </div>
-
-                          <div className="flex items-center gap-3 rounded-lg bg-white p-3">
-                            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-100">
-                              <Clock className="h-5 w-5 text-emerald-700" />
-                            </div>
-                            <div>
-                              <div className="text-xs font-medium text-text-soft-400">
-                                Days Until Renewal
-                              </div>
-                              <div className="text-sm font-semibold text-text-strong-950">31 days</div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div>
-                        <h3 className="mb-4 text-base font-semibold text-text-strong-950">
-                          Payment History
-                        </h3>
-                        <div className="space-y-3">
-                          {subscription.paymentHistory.map((payment) => (
-                            <div
-                              key={payment.id}
-                              className="flex items-center justify-between rounded-xl border border-stroke-soft-200 bg-white p-4"
-                            >
-                              <div className="flex items-center gap-4">
-                                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-50">
-                                  <CheckCircle2 className="h-5 w-5 text-emerald-600" />
-                                </div>
-                                <div>
-                                  <div className="text-sm font-semibold text-text-strong-950">
-                                    {payment.amount.toLocaleString()} RWF
-                                  </div>
-                                  <div className="text-xs text-text-soft-400">
-                                    {payment.date} • {payment.method}
-                                  </div>
-                                </div>
-                              </div>
-                              <Badge className="rounded-full border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-50">
-                                {payment.status}
-                              </Badge>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-
-                      <div className="rounded-xl border border-blue-200 bg-blue-50 p-4">
-                        <div className="flex gap-3">
-                          <Info className="h-5 w-5 shrink-0 text-blue-600" />
-                          <div>
-                            <p className="text-sm font-medium text-blue-900">
-                              Need to upgrade or modify your subscription?
-                            </p>
-                            <p className="mt-1 text-xs text-blue-700">
-                              Contact our support team at support@onlineshop.rw or call +250 788
-                              000 000
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
               </>
             )}
           </div>
