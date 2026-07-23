@@ -7,6 +7,7 @@ import { DatabaseModule } from './database/database.module';
 import { CustomLoggerModule } from './logger/logger.module';
 import { RequestModule } from './request/request.module';
 import { ResponseModule } from './response/response.module';
+import { StorageModule } from './storage/storage.module';
 
 @Module({
     imports: [
@@ -21,6 +22,7 @@ import { ResponseModule } from './response/response.module';
 
         // Core Infrastructure
         DatabaseModule,
+        StorageModule,
 
         // Cross-cutting Concerns
         CustomLoggerModule,
@@ -28,6 +30,6 @@ import { ResponseModule } from './response/response.module';
         ResponseModule,
         CacheModule,
     ],
-    exports: [DatabaseModule, CacheModule],
+    exports: [DatabaseModule, CacheModule, StorageModule],
 })
 export class CommonModule {}

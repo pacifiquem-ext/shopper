@@ -17,6 +17,7 @@ import { DeliveryZonesModule } from 'src/modules/delivery-zones/delivery-zones.m
 import { CatalogModule } from 'src/modules/catalog/catalog.module';
 import { CategoriesModule } from 'src/modules/categories/categories.module';
 import { PromotionsModule } from 'src/modules/promotions/promotions.module';
+import { MediaModule } from 'src/modules/media/media.module';
 
 import { HealthController } from './controllers/health.controller';
 import { RootController } from './controllers/root.controller';
@@ -32,6 +33,7 @@ import { RootController } from './controllers/root.controller';
         ReferencesModule,
         AdminModule,
         OnboardingModule,
+        MediaModule,
 
         // Dashboard Modules
         ProductsModule,

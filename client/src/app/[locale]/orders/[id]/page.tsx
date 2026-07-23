@@ -12,6 +12,7 @@ import { Label } from '@/components/ui/label'
 import { TurningZeroLoader } from '@/components/ui/turning-zero-loader'
 import { ordersService, type OrderApi } from '@/services/orders.service'
 import { validateImageUrl } from '@/lib/image-validation'
+import { mediaService } from '@/services/media.service'
 
 export default function PublicOrderStatusPage() {
   const t = useTranslations('orders')
@@ -20,6 +21,7 @@ export default function PublicOrderStatusPage() {
   const [order, setOrder] = useState<OrderApi | null>(null)
   const [loading, setLoading] = useState(true)
   const [proofUrl, setProofUrl] = useState('')
+  const [uploadingFile, setUploadingFile] = useState(false)
   const [reference, setReference] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [phone, setPhone] = useState('')
@@ -198,21 +200,47 @@ export default function PublicOrderStatusPage() {
                   placeholder={t('referencePlaceholder')}
                 />
               </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="proof-file">{t('proofFileLabel')}</Label>
+                <Input
+                  id="proof-file"
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  onChange={async (e) => {
+                    const file = e.target.files?.[0]
+                    if (!file) return
+                    setUploadingFile(true)
+                    try {
+                      const uploaded = await mediaService.uploadPublicProof(file)
+                      setProofUrl(uploaded.url)
+                      toast.success(t('proofFileUploaded'))
+                    } catch (err) {
+                      toast.error(err instanceof Error ? err.message : t('proofImageInvalid'))
+                    } finally {
+                      setUploadingFile(false)
+                    }
+                  }}
+                />
+              </div>
               <Button.Root
                 type="button"
                 variant="primary"
                 disabled={submitting}
                 onClick={handleUpload}
               >
-                {submitting ? t('uploading') : t('uploadProof')}
+                {submitting || uploadingFile ? t('uploading') : t('uploadProof')}
               </Button.Root>
             </div>
           )}
         </Card>
 
-        <Button.Root asChild variant="neutral" mode="stroke">
-          <Link href="/shop">{t('backToShop')}</Link>
-        </Button.Root>
+        <Link
+          href="/shop"
+          className="inline-flex h-10 items-center justify-center rounded-10 bg-bg-white-0 px-3.5 text-label-sm text-text-sub-600 shadow-regular-xs ring-1 ring-inset ring-stroke-soft-200"
+        >
+          {t('backToShop')}
+        </Link>
       </div>
     </div>
   )

@@ -1478,7 +1478,9 @@
     "notFoundBody": "We could not load this order. Try again with the phone number used at checkout.",
     "phoneLookup": "Phone used at checkout",
     "retryLookup": "Look up order",
-    "backToShop": "Back to shop"
+    "backToShop": "Back to shop",
+    "proofFileLabel": "Or upload a screenshot",
+    "proofFileUploaded": "Screenshot uploaded — submit to attach it to the order"
   },
   "admin": {
     "title": "Platform admin",

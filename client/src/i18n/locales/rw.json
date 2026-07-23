@@ -1478,7 +1478,9 @@
     "notFoundBody": "Ntibishoboye gushaka iki cyemezo. Gerageza nanone ukoresheje numero yakoreshejwe.",
     "phoneLookup": "Numero yakoreshejwe",
     "retryLookup": "Shakisha icyemezo",
-    "backToShop": "Subira mu isoko"
+    "backToShop": "Subira mu isoko",
+    "proofFileLabel": "Cyangwa ohereza ifoto y’igishushanyo",
+    "proofFileUploaded": "Ifoto yoherejwe — kanda wohereze kugira ngo yinjire ku gura"
   },
   "admin": {
     "title": "Ubuyobozi bw’urubuga",

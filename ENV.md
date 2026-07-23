@@ -143,7 +143,11 @@ lands, move the row into §1 or §2 with status **required/optional** and implem
 | ------------------- | ------- | ----- |
 | `SMS_PROVIDER` / provider API keys | Real OTP delivery | Today OTP is generated and **logged in non-production** (`AuthService.logDevOtp`); no SMS gateway |
 | `EMAIL_*` / Resend/SES keys | Transactional email | `EMAIL` queue enum exists; no production mailer wired |
-| `STORAGE_DRIVER` / S3 credentials | Product / logo / **payment proof** images | Enforce MIME, max size, min/max dimensions; no upload driver module yet |
+| `STORAGE_DRIVER` | `local` (default) or `s3` | Image uploads for product/logo/payment proof |
+| `STORAGE_LOCAL_DIR` | Local filesystem root (default `uploads`) | Used when `STORAGE_DRIVER=local` |
+| `STORAGE_PUBLIC_BASE_URL` | Public base URL for local files | Default `http://127.0.0.1:3001/v1/media/files` |
+| `STORAGE_MAX_BYTES_*` / min/max dims | Image quality gates | Product 5MB, proof 3MB, logo 2MB; min 400×400 (proof looser) |
+| `S3_BUCKET` / `S3_REGION` / `S3_ENDPOINT` / `S3_ACCESS_KEY_ID` / `S3_SECRET_ACCESS_KEY` / `S3_FORCE_PATH_STYLE` / `S3_PUBLIC_BASE_URL` | S3-compatible (R2/S3) | Required only when `STORAGE_DRIVER=s3` |
 | ~~`PAYMENT_*` auto-capture keys~~ | **Out of scope** | Payments are offline + proof upload + merchant approve (no processor) |
 | ~~`SUBSCRIPTION_*` / billing keys~~ | **Out of scope** | Billing/Pro handled off-website; remove subscription UI (Phase G2) |
 
