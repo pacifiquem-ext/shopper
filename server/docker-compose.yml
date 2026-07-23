@@ -40,10 +40,12 @@ services:
 
     server:
         build:
-            context: .
-            dockerfile: Dockerfile
+            # Monorepo root so workspace package @onlineshop/shared is available
+            context: ..
+            dockerfile: server/Dockerfile
             cache_from:
                 - nestjs-app:latest
+        image: nestjs-app:latest
         container_name: nestjs-app
         restart: unless-stopped
         ports:
@@ -53,11 +55,11 @@ services:
         environment:
             DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-master123}@postgres:5432/${POSTGRES_DB:-postgres}
             REDIS_URL: redis://redis:6379
+            HTTP_HOST: 0.0.0.0
+            HTTP_PORT: 3001
+            NODE_ENV: production
         networks:
             - app-network
-        volumes:
-            - .:/app
-            - /app/node_modules
         depends_on:
             postgres:
                 condition: service_healthy

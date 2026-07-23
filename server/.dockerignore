@@ -1,85 +1,27 @@
-# Dependencies
-node_modules
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-.yarn/cache
-.pnp.*
+# Prefer building with monorepo root context (see docker-compose.yml).
+# This file applies only when context is the server directory.
 
-# Build outputs
+node_modules
 dist
-build
 coverage
 *.tsbuildinfo
 
-# Environment files
 .env
 .env.local
 .env.*.local
-!.env.docker
 
-# Development files
+.git
+.github
 .vscode
 .idea
-*.swp
-*.swo
-*~
 
-# Version control
-.git
-.gitignore
-.github
-
-# CI/CD
-ci/Dockerfile.prod
-
-# Documentation
-README.md
-CHANGELOG.md
-docs/
-
-# Testing
 test
-coverage
-*.test.js
-*.spec.js
-jest.config.js
+**/*.test.ts
+**/*.spec.ts
 
-# Linting
-.eslintrc.js
-.eslintignore
-.prettierrc
-.prettierignore
-
-# Husky
-.husky
-
-# Docker
-Dockerfile*
-docker-compose*
-.dockerignore
-
-# Kubernetes
-k8s/
-
-# Database
-prisma/migrations
-prisma/migration_lock.toml
-
-# Logs
 logs
 *.log
-lcov-report
-
-# Temporary files
-tmp
-temp
-
-# OS generated files
 .DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
+
+# Local lockfile is not used by the monorepo-root Dockerfile
+pnpm-lock.yaml
