@@ -143,9 +143,9 @@ lands, move the row into §1 or §2 with status **required/optional** and implem
 | ------------------- | ------- | ----- |
 | `SMS_PROVIDER` / provider API keys | Real OTP delivery | Today OTP is generated and **logged in non-production** (`AuthService.logDevOtp`); no SMS gateway |
 | `EMAIL_*` / Resend/SES keys | Transactional email | `EMAIL` queue enum exists; no production mailer wired |
-| `STORAGE_DRIVER` / S3 credentials | Product image storage | Products accept `images: string[]` URLs; no upload driver module yet |
-| `PAYMENT_*` provider keys | Online payments | Order payments are manual/status + proof URL; no MoMo/card processor |
-| `SUBSCRIPTION_*` / billing keys | Basic/Pro billing | Subscription UI is presentational; no plan entity or charges |
+| `STORAGE_DRIVER` / S3 credentials | Product / logo / **payment proof** images | Enforce MIME, max size, min/max dimensions; no upload driver module yet |
+| ~~`PAYMENT_*` auto-capture keys~~ | **Out of scope** | Payments are offline + proof upload + merchant approve (no processor) |
+| ~~`SUBSCRIPTION_*` / billing keys~~ | **Out of scope** | Billing/Pro handled off-website; remove subscription UI (Phase G2) |
 
 ---
 

@@ -6,12 +6,10 @@ import {
   discountPercent,
   formatRwf,
   isNewListing,
-  pseudoRating,
 } from '@/lib/product-display'
 import type { CatalogProductPublic } from '@/services/catalog.service'
 
 import { QuickAddButton } from './quick-add-button'
-import { StarRating } from './star-rating'
 import { WishlistButton } from './wishlist-button'
 
 export interface ProductCardLabels {
@@ -131,7 +129,6 @@ export function ProductCard({
   const stock = availableStock(product)
   const variant = firstInStockVariant(product) ?? primaryVariant(product)
   const hasPrice = product.priceFrom != null
-  const { rating } = pseudoRating(product.id)
 
   const stockTone: 'sold' | 'low' | 'ok' = stock <= 0 ? 'sold' : stock <= 5 ? 'low' : 'ok'
   const stockPill = { text: labels.stockTagText, tone: stockTone }
@@ -139,7 +136,7 @@ export function ProductCard({
   const openSheet = onOpenQuickView ? () => onOpenQuickView(product, labels) : undefined
   const hasVariantOptions = product.variants.length > 1
   const mediaClass =
-    'relative mx-1.5 block overflow-hidden rounded-xl bg-[#ebebeb] text-left ring-offset-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1daf61]/50 sm:mx-2 sm:rounded-[1.25rem]'
+    'relative mx-1.5 block overflow-hidden rounded-xl bg-bg-soft-200 text-left ring-offset-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-base/50 sm:mx-2 sm:rounded-[1.25rem]'
 
   return (
     <article
@@ -188,12 +185,7 @@ export function ProductCard({
       </div>
 
       <div className='flex flex-1 flex-col gap-2 px-3 pb-4 pt-1 sm:gap-3 sm:px-5 sm:pb-5'>
-        <div className='flex items-center justify-between gap-2'>
-          <StarRating
-            rating={rating}
-            ariaLabel={labels.ratingAriaLabel}
-            size={13}
-          />
+        <div className='flex items-center justify-end gap-2'>
           <span
             className={cn(
               'inline-flex shrink-0 items-center whitespace-nowrap rounded-full border px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] tabular-nums',

@@ -14,22 +14,11 @@ import type { ProductCardLabels } from '@/components/shop/product-card'
 import { ShopProductGridsWithQuickView } from '@/components/shop/shop-product-grids-with-quick-view'
 import { buildCatalogQueryString, catalogFiltersActive } from '@/lib/catalog-query'
 import { normalizeStoreSubdomain } from '@/lib/host'
-import { marketplaceShopAbsoluteUrl } from '@/lib/marketplace-url'
-import { discountPercent, formatRwf, pseudoRating } from '@/lib/product-display'
+import { discountPercent, formatRwf } from '@/lib/product-display'
 import { merchantSignupHref } from '@/lib/auth-return-url'
-import { buildSiteFooterStoreContext } from '@/lib/store-footer-context'
 import { cn } from '@/lib/utils'
-import { IshushoCraftsStorefront } from '@/components/store-templates/ishusho-crafts/ishusho-crafts-storefront'
-import { VibrantMarketStorefront } from '@/components/store-templates/vibrant-market/vibrant-market-storefront'
-import { ClassicMarketStorefront } from '@/components/store-templates/classic-market/classic-market-storefront'
-import {
-  isIshushoCraftsTemplate,
-  isVibrantMarketTemplate,
-  resolveStoreTemplate,
-} from '@/lib/store-templates'
 import { hasCatalogSectionItems, hasTopStoresSectionItems } from '@/lib/catalog-grid'
 import { buildTopStoresFromProducts, withTopStoreProductCountLabels } from '@/lib/catalog-stores'
-import { storeCartPath } from '@/lib/store-navigation'
 
 export async function generateMetadata({
   params,
@@ -76,7 +65,6 @@ function buildProductCardLabels(
 ): ProductCardLabels {
   const stock = availableStock(product)
   const off = discountPercent(product.priceFrom, product.compareAtFrom)
-  const { rating } = pseudoRating(product.id)
 
   const stockTagText =
     stock <= 0
@@ -95,7 +83,7 @@ function buildProductCardLabels(
     wishlistRemovedToast: t('removedFromWishlist'),
     newBadge: t('newBadge'),
     discountBadge: off != null ? t('offBadge', { percent: off }) : null,
-    ratingAriaLabel: t('ratingValue', { rating: rating.toFixed(1) }),
+    ratingAriaLabel: t('ratingValue', { rating: '—' }),
     stockTagText,
     deliveryAvailable: t('deliveryAvailable'),
   }
@@ -178,16 +166,6 @@ export async function ShopPage({
       }
     : null
 
-  const storeFooter =
-    storeContext != null && catalogStore
-      ? buildSiteFooterStoreContext({
-          store: catalogStore,
-          isSubdomainHost: false,
-          marketplaceShopAbsoluteHref: null,
-          listingSearch: `store=${encodeURIComponent(storeContext.subdomain)}`,
-        })
-      : undefined
-
   const toCells = (list: CatalogProductPublic[]) =>
     list.map((p) => ({ product: p, labels: buildProductCardLabels(t, p) }))
 
@@ -214,163 +192,6 @@ export async function ShopPage({
     sortPriceHigh: t('sortPriceHigh'),
     applyFilters: t('applyFilters'),
     allCategories: t('allCategories'),
-  }
-
-  if (
-    storeContext &&
-    catalogStore &&
-    isIshushoCraftsTemplate(resolveStoreTemplate(catalogStore))
-  ) {
-    const tIc = await getTranslations('storeTemplates.ishushoCrafts')
-    return (
-      <IshushoCraftsStorefront
-        store={catalogStore}
-        categories={categories}
-        filters={catalogFilters}
-        filterLabels={filterLabels}
-        marketplaceHref={null}
-        catalogSections={{
-          allProducts: {
-            title: tIc('productsTitle'),
-            emptyMessage: t('storeEmpty', { store: catalogStore.displayName }),
-            items: toCells(visibleProducts),
-          },
-        }}
-        texts={{
-          heroFallback: tIc('heroFallback', { store: catalogStore.displayName }),
-          heroStorefrontLabel: tIc('heroStorefrontLabel'),
-          heroBrowse: tIc('heroBrowse'),
-          ctaShop: tIc('ctaShop'),
-          searchAria: tIc('searchAria'),
-          navShopLabel: tIc('navShopLabel'),
-          addToCart: tIc('addToCart'),
-          productsTitle: tIc('productsTitle'),
-          productsSubtitle: tIc('productsSubtitle'),
-          chipFilterAria: tIc('chipFilterAria'),
-          chipAll: t('allCategories'),
-          itemsCountLabel: tIc('itemsAvailable', { count: visibleProducts.length }),
-          promoMessages: [tIc('promo1'), tIc('promo2')],
-          tickerAria: tIc('tickerAria'),
-          footerTagline: tIc('footerTagline', { store: catalogStore.displayName }),
-          poweredBy: tIc('poweredBy'),
-          marketplaceLabel: tIc('marketplaceLabel'),
-          contactLabel: tIc('contactLabel'),
-        }}
-      />
-    )
-  }
-
-  if (
-    storeContext &&
-    catalogStore &&
-    isVibrantMarketTemplate(resolveStoreTemplate(catalogStore))
-  ) {
-    const tVm = await getTranslations('storeTemplates.vibrantMarket')
-    const vmFiltersActive = catalogFiltersActive(catalogFilters)
-    const vmTopStores =
-      !vmFiltersActive && !storeContext
-        ? withTopStoreProductCountLabels(
-            data.stores?.length
-              ? data.stores.map((entry) => ({
-                  store: entry.store,
-                  productCount: entry.productCount,
-                }))
-              : buildTopStoresFromProducts(products),
-            (count) => t('topStoresProductCount', { count }),
-          )
-        : []
-
-    const storeCartHref = storeCartPath(catalogStore.subdomain, false)
-    return (
-      <VibrantMarketStorefront
-        store={catalogStore}
-        items={toCells(visibleProducts)}
-        categories={categories}
-        filters={catalogFilters}
-        filterLabels={filterLabels}
-        marketplaceHref={null}
-        cartHref={storeCartHref}
-        catalogSections={{
-          newArrivals:
-            vmFiltersActive || !hasCatalogSectionItems(newProducts.length)
-              ? undefined
-              : {
-                  title: t('newArrivalTitle'),
-                  eyebrow: t('newArrivalEyebrow'),
-                  items: toCells(newProducts),
-                },
-          topStores: hasTopStoresSectionItems(vmTopStores.length)
-            ? {
-                eyebrow: t('topStoresEyebrow'),
-                title: t('topStoresTitle'),
-                visitStoreLabel: t('topStoresVisitLabel'),
-                stores: vmTopStores,
-              }
-            : undefined,
-          allProducts: {
-            title: tVm('productsTitle'),
-            subtitle: t('allProductsSubtitle'),
-            emptyMessage: t('storeEmpty', { store: catalogStore.displayName }),
-            items: toCells(visibleProducts),
-          },
-        }}
-        texts={{
-          eyebrow: tVm('eyebrow'),
-          promoMessages: [tVm('promo2'), tVm('promo3')],
-          productsTitle: tVm('productsTitle'),
-          categoriesLabel: tVm('categoriesLabel'),
-          emptyMessage: t('storeEmpty', { store: catalogStore.displayName }),
-          searchAria: tVm('searchAria'),
-          defaultTagline: tVm('defaultTagline'),
-          ctaStartShopping: tVm('ctaStartShopping'),
-          ctaTrendingNow: tVm('ctaTrendingNow'),
-          tickerAria: tVm('tickerAria'),
-          flashSaleBadge: tVm('flashSaleBadge'),
-          addToCart: tVm('addToCart'),
-          footerTagline: tVm('footerTagline'),
-          poweredBy: tVm('poweredBy'),
-          marketplaceLabel: tVm('marketplaceLabel'),
-        }}
-      />
-    )
-  }
-
-  if (storeContext && catalogStore) {
-    const template = resolveStoreTemplate(catalogStore)
-    if (!isIshushoCraftsTemplate(template) && !isVibrantMarketTemplate(template)) {
-      const tKc = await getTranslations('storeTemplates.classicMarket')
-      const storeCartHref = storeCartPath(catalogStore.subdomain, false)
-      return (
-        <ClassicMarketStorefront
-          store={catalogStore}
-          categories={categories}
-          filters={catalogFilters}
-          filterLabels={filterLabels}
-          marketplaceHref={null}
-          cartHref={storeCartHref}
-          isSubdomainHost={false}
-          catalogSections={{
-            allProducts: {
-              title: tKc('productsTitle'),
-              emptyMessage: t('storeEmpty', { store: catalogStore.displayName }),
-              items: toCells(visibleProducts),
-            },
-          }}
-          texts={{
-            eyebrow: tKc('eyebrow'),
-            defaultTagline: tKc('defaultTagline'),
-            ctaShop: tKc('ctaShop'),
-            ctaBrowse: tKc('ctaBrowse'),
-            searchAria: tKc('searchAria'),
-            addToCart: tKc('addToCart'),
-            productsTitle: tKc('productsTitle'),
-            footerTagline: tKc('footerTagline', { store: catalogStore.displayName }),
-            poweredBy: tKc('poweredBy'),
-            marketplaceLabel: tKc('marketplaceLabel'),
-          }}
-        />
-      )
-    }
   }
 
   return (
@@ -587,7 +408,7 @@ export async function ShopPage({
         />
       </main>
 
-      <SiteFooter store={storeFooter} />
+      <SiteFooter />
     </div>
   )
 }

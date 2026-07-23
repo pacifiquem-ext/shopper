@@ -2,158 +2,105 @@
 
 > Building Africa's Biggest Marketplace Starting From Rwanda.
 
-OnlineShop.rw enables retail businesses in Rwanda to launch and operate online stores and delivery without technical complexity.
+OnlineShop.rw is a **single marketplace** where buyers browse products and stores, and merchants operate their shops from a **dashboard** — not from separate subdomain websites.
 
 ## 1. Product Vision
 
-The platform is focused on:
+- One modern marketplace website (products + stores)
+- Fast merchant onboarding and product management
+- Category-aware products (fashion vs electronics vs general)
+- Inventory, delivery zones, and order handling
+- **Manual payments**: order → pay instructions → payment proof upload → merchant approval
+- Marketplace ranking (ratings, new arrivals, rising stores, promotions)
+- Platform admin console for KYC, categories, promos, and moderation
 
-- Fast store launch
-- Simple product management
-- Online payments
-- Basic delivery configuration
-- Order handling
+Commercial packaging and any off-platform billing are **handled outside this website** — there is **no in-app Basic/Pro subscription ladder**.
 
-_Note: Everything else is designed to push users toward the Pro plan. There is no free tier._
-
----
-
-## 2. Positioning Strategy
-
-- **Basic:** Get online. Must feel usable but intentionally limited.
-- **Pro:** Grow and optimize. The real business engine.
+Architecture decision: [`docs/adr/001-single-marketplace.md`](./docs/adr/001-single-marketplace.md).  
+Domain language: [`CONTEXT.md`](./CONTEXT.md).
 
 ---
 
-## 3. Pricing Structure
+## 2. Positioning
 
-### Basic Plan
-
-**25,000 RWF setup | 12,000 RWF per month**  
-_Designed for small shops testing online sales._
-
-**Includes:**
-
-- Subdomain: `yourstore.onlineshop.rw`
-- Default platform theme only
-- Upload products & basic inventory tracking
-- Accept online payments
-- Set delivery zones and delivery fees
-- View incoming orders & manual order status update
-- Basic revenue total (single number)
-- OnlineShop branding visible on store
-
-**Limitations:**
-
-- No analytics dashboard, discount system, promo codes, or loyalty system
-- No customer data insights
-- No priority listing in marketplace
-- Limited email support only
-- Limited product categories
-- No customization options
-  _(Basic is intentionally operational, not powerful.)_
-
-### Pro Plan
-
-**50,000 RWF setup | 25,000 RWF per month**  
-_Designed for serious businesses. Pro becomes the growth engine._
-
-**Includes everything in Basic plus:**
-
-- **Growth Tools:** Advanced analytics dashboard, sales trends over time, best selling products, revenue by category, conversion rate tracking.
-- **Discount System:** Create discount codes (percentage or fixed). Apply to single products, categories, or the entire store. Set expiration dates and usage limits.
-- **Customer System:** Customer profiles, purchase history per customer, repeat customer identification, and basic segmentation (high spenders, frequent buyers, inactive customers).
-- **Loyalty System:** Points per purchase, redeem points for discounts, points expiration rules.
-- **Store Enhancements:** Remove OnlineShop branding, theme customization options, homepage banner control, featured products section.
-- **Marketplace Boost:** Priority ranking in search results, featured store placement rotation.
-- **Support:** Priority support & live chat support.
-
-### Enterprise Plan
-
-**Custom pricing**
-
-**Includes everything in Pro plus:**
-
-- Custom domain
-- Fully custom website design
-- Multi-branch management
-- API access
-- Dedicated onboarding & account manager
-- Custom integrations
+- **Buyers** use one AlignUI-designed marketplace: home algorithms, browse, store profiles, cart, order status.
+- **Merchants** manage one store each via `/dashboard` (products, inventory, orders, payment proofs, delivery, settings).
+- **Platform admins** operate the network via `/admin` (stores/KYC, categories, platform promos, reviews).
 
 ---
 
-## 4. Delivery Gateway Strategy
+## 3. Commercial terms
 
-Delivery is kept simple and self-managed.
+Pricing and contracts for merchants are **managed off the website** (sales/ops). The application does not implement plan checkout, subscription renewals, or paywalled feature tiers.
 
-**Delivery Mode: Self-Managed**
-Businesses define:
+---
 
-- Delivery zones and delivery fee per zone
+## 4. Delivery
+
+Delivery is self-managed by each store:
+
+- Delivery zones and fee per zone
 - Estimated delivery time
-- Order status updates: Pending, Confirmed, Dispatched, Delivered
-
-_(Note: No live tracking currently available.)_
+- Order status: pending → confirmed → dispatched → delivered (no live map tracking)
 
 ---
 
+## 5. Payments (proof-based)
+
+1. Buyer places an order.
+2. Buyer is messaged with payment instructions (store methods: Mobile Money, bank transfer, etc.).
+3. Buyer pays offline.
+4. Buyer uploads a **payment screenshot** (validated image: type, size, dimensions).
+5. Store owner/worker reviews the proof and **approves** or **rejects** it.
+6. Fulfillment continues according to store process once payment is confirmed.
+
+There is no automated card/MoMo capture processor in product scope.
 
 ---
 
-## 6. User Journeys
+## 6. User journeys
 
-### 6.1 Retail Business Owner Journey
+### Merchant
 
-1. Visit homepage → View pricing comparison → Select plan
-2. Pay setup fee → Create store
-3. Add products → Configure delivery
-4. Store goes live → Receive first order
-5. Manage from dashboard _(Basic user sees a simple dashboard; Pro user sees analytics & growth tools)._
+1. Sign up → verify phone → complete store onboarding (no subdomain claim).
+2. Platform admin approves store (KYC).
+3. Add products (category-specific fields) → set inventory & delivery.
+4. Receive orders → message buyer → verify payment proof → fulfill.
 
-### 6.3 Customer Journey
+### Buyer
 
-- **Retail:** Browse marketplace → Search product → Add to cart → Checkout → Pay → Receive confirmation → Wait for delivery
-
----
-
-## 7. User Stories
-
-**Basic Plan User Stories**
-
-- As a small shop owner, I want to quickly create an online store.
-- As a shop owner, I want to upload products.
-- As a shop owner, I want to accept payments.
-- As a shop owner, I want to set delivery fees.
-- As a shop owner, I want to manage orders.
-
-**Pro Plan User Stories**
-
-- As a growing business, I want to see which products sell most.
-- As a business owner, I want to create discount codes.
-- As a business owner, I want to reward repeat customers.
-- As a business owner, I want to identify my high-spending customers.
-- As a business owner, I want to boost my store visibility.
+1. Browse marketplace home (ranked sections) or shop/stores.
+2. Open a product or visit a store profile (`/stores/{slug}`) — same site chrome.
+3. Add to cart → checkout → receive pay instructions → upload proof → track status.
 
 ---
 
-## 8. Core Modules
+## 7. User stories
 
-The platform is built on the following core modules:
+- As a shop owner, I create a store and manage products without building a separate website.
+- As a shop owner, I approve payment proofs when money arrives.
+- As a shop owner, I create promo codes for my products.
+- As a buyer, I discover products ranked by rating, recency, and promotions.
+- As a buyer, I browse stores and open a store to see only that shop’s products.
+- As a platform admin, I approve stores, manage categories, and moderate reviews/promos.
 
-- Authentication & Platform Admin
-- Subscription system
-- Store engine
-- Product & Menu management
-- Order management & Notification system
-- Payment integration
+---
+
+## 8. Core modules
+
+- Authentication & platform admin
+- Store onboarding & KYC
+- Product catalog (categories, attributes, variants, media rules)
+- Inventory
+- Orders, order messages, payment proofs
+- Promotions (merchant + platform)
+- Reviews & marketplace ranking
 - Delivery configuration
+- Analytics (merchant dashboard)
 
 ---
 
-## 9. Excluded Features
-
-To maintain project focus, the following features are strictly excluded from the platform scope:
+## 9. Excluded features
 
 - Rider marketplace
 - Live tracking maps
@@ -162,13 +109,17 @@ To maintain project focus, the following features are strictly excluded from the
 - Social integrations
 - Mobile apps
 - Advanced marketing automation
+- Per-store subdomain websites / storefront templates
+- In-app subscription billing / Pro plan paywalls
+- Automated payment processor capture
 
 ---
 
-## 10. Strategic Structure
+## 10. Design
 
-Basic must feel functional but limited. Pro must feel necessary for real growth. The core product strategy is to demonstrate that analytics and discounts increase revenue even slightly, to encourage businesses to upgrade. The overall goal is to create dependency on Pro capabilities.
-
+- **AlignUI v1.2** is mandatory for all product UI (`design-system/MASTER.md`).
+- Target: **100% AlignUI** on redesigned surfaces.
+- Image uploads enforce quality rules (MIME, file size, dimensions).
 
 ---
 
@@ -186,7 +137,7 @@ Packages:
 
 | Package | Path | Role |
 | ------- | ---- | ---- |
-| `@onlineshop/shared` | `packages/shared` | API envelope, statuses, template IDs |
+| `@onlineshop/shared` | `packages/shared` | API envelope, statuses, shared constants |
 | `@onlineshop/server` | `server` | NestJS API |
 | `@onlineshop/client` | `client` | Next.js app |
 

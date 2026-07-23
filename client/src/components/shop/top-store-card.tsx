@@ -19,8 +19,8 @@ export function TopStoreCard({
   className,
 }: TopStoreCardProps) {
   const { store, productCountLabel } = entry
-  // Path-based storefront URL (locale Link prefixes /en|/rw). Avoids query-string soft-nav issues.
-  const href = `/shop/store/${encodeURIComponent(store.subdomain)}`
+  // Marketplace store profile (same site chrome — not a subdomain tenant website).
+  const href = `/stores/${encodeURIComponent(store.subdomain)}`
 
   return (
     <article

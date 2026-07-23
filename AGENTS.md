@@ -13,11 +13,12 @@ letting them live only in chat history.
 
 ## 1. Where we are, where we're going
 
-**OnlineShop.rw** is a multi-tenant marketplace and store-operating platform for Rwanda: merchants
-launch online retail stores, manage products/inventory/orders/delivery
-zones, accept payments, and grow via Basic → Pro plan upgrades. Buyers browse the marketplace,
-shop storefronts, checkout, and track order status. Full product intent lives in [`README.md`](./README.md)
-(vision, pricing, journeys, modules, and explicit out-of-scope list).
+**OnlineShop.rw** is a **single-origin marketplace** and store-operating platform for Rwanda:
+merchants onboard a store and manage products/inventory/orders/delivery zones and **payment proofs**
+from a dashboard; buyers browse one marketplace (products + stores), checkout, pay offline with
+screenshot proof, and track order status. There are **no per-store subdomain websites** and **no
+in-app Basic/Pro billing** (commercial terms are off-website). Full product intent lives in
+[`README.md`](./README.md) and [`docs/adr/001-single-marketplace.md`](./docs/adr/001-single-marketplace.md).
 
 The repository is a **pnpm monorepo** (`client/` + `server/` + `packages/shared`) in active build-out:
 
@@ -33,13 +34,12 @@ the one that picks the work back up) is responsible for wiring it all the way th
 frontend. A backend endpoint with no caller, or a frontend still reading mock/local-only data next
 to a real endpoint it should call instead, is unfinished work, not two separate tasks.
 
-**Functional does not mean it's allowed to look or feel worse.** The existing UI (shadcn/ui base,
-dashboard chrome, storefront templates, loading/error/empty patterns in the design system) was
-built to a consistent, premium standard, and that standard is a **requirement**. Every real
-loading/error/empty/success state introduced while wiring up the backend must match that polish —
-a working feature with a raw browser spinner, an unstyled error string, or an inconsistent empty
-state is not "done." If a new state doesn't have an obvious design-system answer, treat that as a
-"stop and ask" case (§15), not a license to improvise something inconsistent.
+**Functional does not mean it's allowed to look or feel worse.** Product UI is **AlignUI**
+(`design-system/MASTER.md`, `client/src/components/alignui/*`). Dashboard chrome, marketplace,
+auth, onboarding, and admin must stay consistent and premium. Every loading/error/empty/success
+state must match that polish — a raw browser spinner, unstyled error string, or non-AlignUI
+one-off is not "done." Expand AlignUI when a primitive is missing; do not grow a parallel kit.
+If a new state has no design-system answer, treat that as a "stop and ask" case (§15).
 
 **Coding standards are mandatory, not optional.** Before writing or changing code:
 
@@ -48,6 +48,7 @@ state is not "done." If a new state doesn't have an obvious design-system answer
 | Frontend (`client/`) | [`.agents/rules/client-coding-standards.md`](./.agents/rules/client-coding-standards.md) |
 | Backend (`server/`) | [`.agents/rules/server-coding-standards.md`](./.agents/rules/server-coding-standards.md) |
 | Any user-visible text | [`.agents/rules/i18n-standards.md`](./.agents/rules/i18n-standards.md) |
+| UI components | **AlignUI only** on product surfaces — `client/src/components/alignui/*` + tokens; expand the kit rather than adding non-AlignUI libraries or raw one-offs |
 
 Do not assume architecture, styling, layer contracts, or i18n conventions without those documents.
 
@@ -212,9 +213,11 @@ than silently deviating**, and update this section when they do.
   one-line why.
 - **Frontend framework:** **Next.js** App Router (React Server Components by default; `'use client'`
   only when required). Fast refresh / SWC via Next's toolchain. `tsc --noEmit` for typecheck.
-- **UI:** Tailwind CSS v4 + **AlignUI v1.2** tokens (`globals.css`) and free base components under
-  `client/src/components/alignui/`. Legacy shadcn-compatible bridges in `client/src/components/ui/`
-  are restyled to AlignUI tokens. Icons: **Remix Icon**. Toasts via **sonner** — not `window.alert` / `confirm` / `prompt`. See `design-system/MASTER.md`.
+- **UI:** Tailwind CSS v4 + **AlignUI v1.2** only for product surfaces: tokens in `globals.css` and
+  components under `client/src/components/alignui/`. Initiative target is **100% AlignUI** usage on
+  redesigned routes. Legacy `client/src/components/ui/` bridges may temporarily re-export AlignUI
+  wrappers during migration, then leave call sites. Icons: **Remix Icon**. Toasts via **sonner** —
+  not `window.alert` / `confirm` / `prompt`. See `design-system/MASTER.md`.
 - **Client state:** **Zustand** for cross-component state; local `useState` for purely local UI.
 - **Client data access:** **Axios** instance in `client/src/lib/axios.ts` + domain services in
   `client/src/services/`. Do not scatter raw `fetch` / ad hoc Axios instances.
@@ -231,8 +234,9 @@ than silently deviating**, and update this section when they do.
 - **Cache / queues:** **Redis** (`REDIS_URL`) + **Bull** (`@nestjs/bull`) for background work that
   must not block the request cycle. Local Redis via Compose.
 - **Auth:** JWT access + refresh (`AUTH_ACCESS_TOKEN_*`, `AUTH_REFRESH_TOKEN_*`), Passport strategies,
-  argon2/bcrypt password hashing as already used in auth module. Tenant/store scoping via common
-  tenant helpers — never trust client-supplied store ownership without server checks.
+  argon2/bcrypt password hashing as already used in auth module. Merchant **store ownership** via
+  `StoreGuard` / `@StoreId` — never trust client-supplied store ownership without server checks.
+  Public Host-based multi-storefront tenancy is **removed** (ADR 001).
 - **Validation (server):** **class-validator** + **class-transformer** DTOs on every controller
   input; global `ValidationPipe` (whitelist + forbid non-whitelisted). Do not accept raw `body: any`.
 - **API docs:** Swagger/OpenAPI for non-production (`server/src/swagger.ts`).
@@ -254,8 +258,10 @@ it to this section once decided.
 ### Explicitly out of product scope (do not build unless the user reopens)
 
 From product strategy (`README.md` §9): rider marketplace, live tracking maps, AI forecasting,
-multi-currency, social integrations, mobile apps, advanced marketing automation. If a task drifts
-into these, surface it and confirm before investing work.
+multi-currency, social integrations, mobile apps, advanced marketing automation, **per-store
+subdomain websites / storefront templates**, **in-app subscription billing / Pro plan paywalls**,
+**automated payment processor capture** (product uses payment-proof upload instead). If a task
+drifts into these, surface it and confirm before investing work.
 
 ---
 
@@ -488,8 +494,9 @@ Full detail lives in the rule files; this section is the non-negotiable summary.
   feature filenames on the client; Nest module folder conventions on the server. Match neighbors.
 - **No speculative abstraction** — build the interface the current requirement needs; don't add
   config/flags/extension points for a hypothetical future case.
-- **AlignUI components** — prefer `client/src/components/alignui/*` for new work; keep `ui/*` bridges
-  token-aligned. See `design-system/MASTER.md`.
+- **AlignUI components** — **required** for product UI (`client/src/components/alignui/*`). Expand
+  the kit when primitives are missing; do not introduce parallel component libraries. See
+  `design-system/MASTER.md`.
 
 ### Client layer contracts (see client-coding-standards)
 
@@ -536,16 +543,16 @@ Apply this before calling anything "done":
 Record resolved decisions in `docs/adr/` and reflect them in §4. Still treat as **ask before
 assuming** unless already implemented and documented:
 
-- **Payment provider(s)** for Rwanda (Mobile Money, card, bank transfer) — product enums exist;
-  production processor choice, webhooks, and reconciliation must be explicit before charging money.
-- **Subscription billing** for Basic/Pro setup + monthly fees (pricing in `README.md`) — how plans
-  are purchased, renewed, gated in API, and what happens on failure/grace.
-- **File/image storage** for product images and store assets (local vs S3-compatible vs CDN) — pick
-  one interface and stick to it; don't scatter vendor SDKs in feature modules.
+- **Resolved — single marketplace** — ADR 001: no multi-host storefronts; slug + `/stores/{slug}`.
+- **Resolved — payments** — offline pay + **payment proof image** + merchant approve/reject (not
+  auto-capture processor). Still need storage for proof files.
+- **Resolved — billing** — no in-app Basic/Pro; commercial terms off-website.
+- **File/image storage** for product images, logos, and payment proofs (local vs S3-compatible) —
+  pick one interface; always enforce MIME, max size, and min/max dimensions.
 - **SMS/OTP delivery** for phone verification — provider and cost controls.
 - **Email delivery** for transactional mail (order confirmations, password reset) — provider and
   templates.
-- **Custom domains (Enterprise)** and multi-branch — deferred until Enterprise scope is opened.
+- **Custom domains / multi-branch** — out of current scope.
 - **`packages/shared`** for Zod/DTO reuse across client and server — introduce only when duplication
   cost is proven; don't half-create it.
 
@@ -674,5 +681,5 @@ Otherwise: use this file, the skills, the coding-standards rules, and good judgm
 
 ---
 
-_By following this constitution, agents keep OnlineShop.rw robust, bilingual, multi-tenant-safe,
-and true to its architectural and product vision._
+_By following this constitution, agents keep OnlineShop.rw robust, bilingual, merchant-tenant-safe
+on the API, single-marketplace on the public web, AlignUI-consistent, and true to product vision._

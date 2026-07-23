@@ -10,31 +10,53 @@ Rough readiness (maintain when large slices land):
 
 | Area | ~% | Notes |
 | ---- | -- | ----- |
-| Foundation (schema, auth, tenant, health, monorepo layout) | ~85% | Auth hardened (JWT ACTIVE, hashed OTP/refresh, StoreGuard ownership, CORS fail-closed); SMS still dev-log only |
-| Merchant path (onboarding → products → inventory → orders → delivery → settings) | ~78% | Order/inventory transactions + state machines; list error/retry; mobile dashboard nav |
-| Marketplace / cart / guest checkout | ~65% | Atomic guest checkout + stock guards; payment processor not live |
-| Billing / Basic–Pro plans | ~12% | Subscription i18n + coming soon CTA; no plan model or charges |
-| Pro growth features (discounts, loyalty, customer CRM, advanced analytics productization) | ~18% | Analytics aggregates improved; discount/loyalty/CRM not domain models |
-| AlignUI design system | ~58% | Token aliases for shadcn muted/ring; page migration still ongoing |
-| Release hardening (SMS, email, storage driver, e2e coverage, server rw i18n) | ~35% | Audit fixes verified via API + Playwright; server `languages/rw` still missing |
+| Foundation (schema, auth, store ownership, health, monorepo) | ~85% | JWT + StoreGuard; Host storefront tenancy being removed (ADR 001) |
+| Merchant path (onboarding → products → inventory → orders → delivery → settings) | ~78% | Payment proof flow incomplete; category attrs pending |
+| Marketplace (single site, ranking, stores browse) | ~40% | Teardown multi-storefront + ranking + redesign in flight |
+| Payment proof (upload + merchant approve) | ~25% | `paymentProofUrl` field exists; full flow + image rules pending |
+| Promos + reviews + ranking algorithms | ~10% | Not domain-modeled yet |
+| Platform admin console | ~20% | Approve/reject only; expand under `/admin` |
+| AlignUI design system | ~58% → **target 100%** | Kit incomplete; full migration required |
+| Billing / Basic–Pro | **removed** | Off-website; delete subscription UI/gates |
+| Release hardening (SMS, email, storage, e2e, server rw i18n) | ~35% | Storage needed for images/proofs |
 
 ---
 
 ## In progress
 
-_(empty — pick from Next up and move here with owner + date)_
+- [ ] **Single marketplace initiative** (ADR 001) — @agent, started 2026-07-23  
+  Plan: session `plan.md` (phases A–I). Amendments: AlignUI 100%, image quality rules, payment proof path, no billing/Pro, `/stores` browse.
 
 ---
 
 ## Next up
 
+### §Initiative — Single marketplace refactor (ordered)
+
+- [x] **Phase A** — ADR 001, README/AGENTS/CONTEXT/design-system, TODO initiative ledger — 2026-07-23
+- [ ] **Phase B** — Remove public multi-storefront/templates/Host tenancy; add `/stores` + `/stores/[slug]`; slug rename path; keep merchant `StoreGuard`
+  - [x] Marketplace UI only in `shop-catalog` (storefront template branches removed)
+  - [x] `/stores` directory + `/stores/[slug]` profile; legacy `/shop/store/:x` redirects
+  - [x] Top store cards link to `/stores/{slug}`; pseudo ratings removed from product cards
+  - [ ] Delete `components/store-templates/**` + shared template package IDs when no remaining imports
+  - [ ] Nest Host storefront middleware no-op; onboarding subdomain → slug rename (API + UI)
+  - [ ] Product/cart pages still may reference templates — purge
+- [ ] **Phase C** — Schema: slug, categories + attribute defs, reviews, promotions, ranking fields; catalog home API
+- [ ] **Phase D** — Design research (Playwright) + AlignUI kit expansion + shell redesign (auth, onboarding, marketplace, dashboard, admin)
+- [ ] **Phase E** — Marketplace home sections, browse, category-aware PDP, store directory/profile, cart (AlignUI)
+- [ ] **Phase F** — Dynamic product form by category; multi-image + dimension/MIME enforcement; variant images
+- [ ] **Phase G** — Merchant + platform promos CRUD; checkout apply; home “On promotion”
+- [ ] **Phase G2** — Payment proof: message → offline pay → upload → merchant approve/reject; **remove** subscription/billing UI
+- [ ] **Phase H** — Full platform admin console (`/admin`)
+- [ ] **Phase I** — i18n parity, e2e, Integration Critic + UI Expert + Progress Validator + code review gates
+
 ### §0 — Agent / repo hygiene
 
-- [ ] Continue AlignUI page migration: dashboard home/products/orders/inventory tables, onboarding wizard chrome, shop catalog hero/cards, cart checkout UI — replace residual gray-*/ad-hoc hex with AlignUI tokens and alignui components where touch surfaces
-- [ ] Visual QA with Playwright/MCP across auth, dashboard, marketplace, storefront templates (re-run `e2e-audit/run-e2e.mjs` after major UI slices)
+- [ ] AlignUI kit expansion to 100% coverage on product surfaces (Dialog, Select, Table, Sheet, Tabs, Skeleton, Empty, …)
+- [ ] Visual QA with Playwright/MCP across auth, dashboard, marketplace, admin (re-run `e2e-audit/run-e2e.mjs` after major UI slices)
 - [ ] Keep `TODO.md` + `ENV.md` updated every implementation session (`AGENTS.md` §7, §14)
-- [ ] Add `CONTEXT.md` domain glossary via `domain-modeling` skill (users, stores, orders, payments, plans)
-- [ ] Record ADRs under `docs/adr/` when §13 decisions in `AGENTS.md` are resolved
+- [x] Add `CONTEXT.md` domain glossary — 2026-07-23
+- [x] ADR 001 single marketplace — 2026-07-23
 - [ ] **BUG-017** — Resolve dual lockfile / workspace root warning (`client/pnpm-lock.yaml` vs root); set `outputFileTracingRoot` if needed
 
 ### §1 — i18n parity (mandatory)
@@ -61,26 +83,25 @@ _(empty — pick from Next up and move here with owner + date)_
 ### §4 — Orders, payments, checkout
 
 - [ ] Guest/cart checkout: ensure `POST /v1/catalog/orders` (and client cart) covers full path — delivery zone fee, stock reservation, clear error/empty states
-- [ ] **BUG-015** — Enrich guest place-order beyond phone-only (address / delivery zone selection when payments ready)
-- [ ] Payment processor integration for Rwanda (Mobile Money / card / bank) — webhooks, reconciliation, idempotency
-- [ ] Cash-on-delivery and manual proof flows: document merchant SOP in UI copy (i18n) and enforce status transitions
-- [ ] Buyer-facing order status tracking page (no live map — status only, per product scope)
+- [ ] **BUG-015** — Enrich guest place-order beyond phone-only (address / delivery zone selection)
+- [ ] **Payment proof path** — after order: message buyer → offline pay → upload proof (validated image) → merchant approve/reject → status transitions
+- [ ] Buyer-facing order status page (pay instructions + proof upload + status; no live map)
+- [ ] Cash-on-delivery path remains valid without proof when method is COD
 
-### §5 — Subscriptions & plan gating
+### §5 — Subscriptions & plan gating — CANCELLED (off-website)
 
-- [ ] Domain model: Plan / Subscription / invoices (Basic setup+monthly, Pro setup+monthly per `README.md` pricing)
-- [ ] API enforcement of plan limits (e.g. product caps, analytics access, branding removal)
-- [ ] Replace presentational subscription page with real current plan, upgrade checkout, and billing history
-- [ ] Align pricing UI with README (Basic 25k setup / 12k mo; Pro 50k setup / 25k mo) — current page hardcodes “Free” / “15,000 RWF”
+- [x] **Do not build** Plan/Subscription domain, in-app upgrade, or plan API gates — commercial terms off-website (2026-07-23)
+- [ ] **Remove** subscription page, plan CTAs, store-settings subscription tab, Pro framing from UI/docs (Phase G2)
 
-### §6 — Pro growth features (product roadmap)
+### §6 — Growth features (no plan gate)
 
-- [ ] Discount codes (%, fixed; product/category/store scope; expiry; usage limits)
-- [ ] Customer profiles + purchase history + basic segmentation
-- [ ] Loyalty points (earn/redeem/expiry rules)
-- [ ] Marketplace ranking boost / featured store rotation
-- [ ] Store theme customization + remove OnlineShop branding (Pro)
-- [ ] Analytics productization: ensure Basic vs Pro dashboard surfaces match plan gates; snapshot jobs (midnight scheduler is still a stub)
+- [ ] Discount / promo codes (merchant + platform; %, fixed; scope; expiry; usage limits)
+- [ ] Marketplace ranking (rating, new, rising stores, on-promotion) — server-side home sections
+- [ ] Product reviews + aggregates (replace pseudo ratings)
+- [ ] Category attribute schemas + dynamic product forms / PDPs
+- [ ] Customer profiles + purchase history + basic segmentation (later)
+- [ ] Loyalty points (later / not requested in current initiative)
+- [ ] Analytics productization + snapshot jobs (midnight scheduler still a stub)
 
 ### §7 — Restaurant (removed from scope)
 
@@ -88,8 +109,9 @@ _(empty — pick from Next up and move here with owner + date)_
 
 ### §8 — Admin & platform
 
-- [ ] Platform admin console completeness (store queue, KYC review UX, reject reasons, audit log)
+- [ ] Platform admin console under `/admin` (overview, stores/KYC, categories, promos, reviews, audit log)
 - [ ] Seed data scripts documented for demo marketplace (non-production)
+- [ ] Seed `PLATFORM_ADMIN` credentials documented for local only
 
 ### §9 — Reliability, performance, release
 
