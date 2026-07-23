@@ -1,8 +1,7 @@
 import { getTranslations } from 'next-intl/server'
-import { ArrowRight, Sparkles, Store as StoreIcon, Tag, Trophy } from 'lucide-react'
+import { ArrowRight, Sparkles, Store as StoreIcon } from 'lucide-react'
 
 import { Link } from '@/i18n/navigation'
-import * as Button from '@/components/alignui/button'
 import { Card } from '@/components/alignui/card'
 import { SiteFooter } from '@/components/shop/site-footer'
 import { CartIconButton } from '@/components/shop/cart-icon-button'
@@ -16,6 +15,36 @@ import {
 } from '@/services/catalog.service'
 import { discountPercent } from '@/lib/product-display'
 import { merchantSignupHref } from '@/lib/auth-return-url'
+import { cn } from '@/lib/utils'
+
+function btnClass(
+  opts: {
+    variant?: 'primary' | 'neutral' | 'error'
+    mode?: 'filled' | 'stroke' | 'lighter' | 'ghost'
+    size?: 'medium' | 'small' | 'xsmall' | 'xxsmall'
+  } = {},
+  className?: string,
+) {
+  const size =
+    opts.size === 'small'
+      ? 'h-9 gap-3 rounded-lg px-3 text-label-sm'
+      : 'h-10 gap-3 rounded-10 px-3.5 text-label-sm'
+  const base =
+    'group relative inline-flex items-center justify-center whitespace-nowrap outline-none transition duration-200 ease-out'
+  if ((opts.variant ?? 'primary') === 'primary' && (opts.mode ?? 'filled') === 'filled') {
+    return cn(base, size, 'bg-primary-base text-static-white shadow-regular-xs hover:bg-primary-darker', className)
+  }
+  if (opts.mode === 'lighter') {
+    return cn(base, size, 'bg-bg-weak-50 text-text-sub-600 ring-1 ring-inset ring-transparent hover:bg-bg-white-0 hover:text-text-strong-950', className)
+  }
+  // neutral stroke default
+  return cn(
+    base,
+    size,
+    'bg-bg-white-0 text-text-sub-600 shadow-regular-xs ring-1 ring-inset ring-stroke-soft-200 hover:bg-bg-weak-50 hover:text-text-strong-950',
+    className,
+  )
+}
 
 function availableStock(product: CatalogProductPublic): number {
   return product.variants.reduce((sum, variant) => sum + (variant.inventory?.available ?? 0), 0)
@@ -91,9 +120,12 @@ function StoreMiniCard({
           <p className='text-paragraph-xs text-text-sub-600'>{productCountLabel}</p>
         </div>
       </div>
-      <Button.Root asChild variant='neutral' mode='stroke' size='small' className='w-full'>
-        <Link href={`/stores/${encodeURIComponent(slug)}`}>{visitLabel}</Link>
-      </Button.Root>
+      <Link
+        href={`/stores/${encodeURIComponent(slug)}`}
+        className={cn(btnClass({ variant: 'neutral', mode: 'stroke', size: 'small' }), 'w-full')}
+      >
+        {visitLabel}
+      </Link>
     </Card>
   )
 }
@@ -112,9 +144,9 @@ export async function MarketplaceHome() {
           </pre>
         ) : null}
         <div className='mt-6 flex justify-center gap-3'>
-          <Button.Root asChild variant='primary'>
-            <Link href='/shop'>{t('browseAllProducts')}</Link>
-          </Button.Root>
+          <Link href='/shop' className={btnClass({ variant: 'primary' })}>
+            {t('browseAllProducts')}
+          </Link>
         </div>
       </div>
     )
@@ -146,18 +178,25 @@ export async function MarketplaceHome() {
             <h1 className='text-title-h3 text-text-strong-950 sm:text-title-h2'>{t('heroTitle')}</h1>
             <p className='text-paragraph-md text-text-sub-600 sm:text-paragraph-lg'>{t('heroSubtitle')}</p>
             <div className='flex flex-wrap items-center gap-3'>
-              <Button.Root asChild variant='primary' size='medium'>
-                <Link href='/shop' className='inline-flex items-center gap-2'>
-                  {t('heroCta')}
-                  <ArrowRight className='size-4' aria-hidden />
-                </Link>
-              </Button.Root>
-              <Button.Root asChild variant='neutral' mode='stroke' size='medium'>
-                <Link href='/stores'>{t('storesDirectoryTitle')}</Link>
-              </Button.Root>
-              <Button.Root asChild variant='neutral' mode='stroke' size='medium'>
-                <Link href={merchantSignupHref() as '/signup'}>{t('becomeSeller')}</Link>
-              </Button.Root>
+              <Link
+                href='/shop'
+                className={cn(btnClass({ variant: 'primary', size: 'medium' }), 'inline-flex items-center gap-2')}
+              >
+                {t('heroCta')}
+                <ArrowRight className='size-4' aria-hidden />
+              </Link>
+              <Link
+                href='/stores'
+                className={btnClass({ variant: 'neutral', mode: 'stroke', size: 'medium' })}
+              >
+                {t('storesDirectoryTitle')}
+              </Link>
+              <Link
+                href={merchantSignupHref() as '/signup'}
+                className={btnClass({ variant: 'neutral', mode: 'stroke', size: 'medium' })}
+              >
+                {t('becomeSeller')}
+              </Link>
             </div>
           </div>
           <div className='grid w-full max-w-md grid-cols-2 gap-3'>
@@ -182,9 +221,12 @@ export async function MarketplaceHome() {
       {topRated.length ? (
         <section className='mx-auto w-full max-w-screen-2xl px-4 py-12 sm:px-5 lg:px-6'>
           <div className='mb-2 flex justify-end'>
-            <Button.Root asChild variant='neutral' mode='lighter' size='small'>
-              <Link href='/shop?sort=trending'>{t('viewAll')}</Link>
-            </Button.Root>
+            <Link
+              href='/shop?sort=trending'
+              className={btnClass({ variant: 'neutral', mode: 'lighter', size: 'small' })}
+            >
+              {t('viewAll')}
+            </Link>
           </div>
           <ShopProductGridsWithQuickView
             quickViewEnabled
@@ -200,9 +242,12 @@ export async function MarketplaceHome() {
       {newArrivals.length ? (
         <section className='mx-auto w-full max-w-screen-2xl border-t border-stroke-soft-200 px-4 py-12 sm:px-5 lg:px-6'>
           <div className='mb-2 flex justify-end'>
-            <Button.Root asChild variant='neutral' mode='lighter' size='small'>
-              <Link href='/shop?sort=newest'>{t('viewAll')}</Link>
-            </Button.Root>
+            <Link
+              href='/shop?sort=newest'
+              className={btnClass({ variant: 'neutral', mode: 'lighter', size: 'small' })}
+            >
+              {t('viewAll')}
+            </Link>
           </div>
           <ShopProductGridsWithQuickView
             quickViewEnabled
@@ -224,9 +269,12 @@ export async function MarketplaceHome() {
               </p>
               <h2 className='mt-1 text-title-h5 text-text-strong-950'>{t('homeRisingStoresTitle')}</h2>
             </div>
-            <Button.Root asChild variant='neutral' mode='lighter' size='small'>
-              <Link href='/stores'>{t('viewAll')}</Link>
-            </Button.Root>
+            <Link
+              href='/stores'
+              className={btnClass({ variant: 'neutral', mode: 'lighter', size: 'small' })}
+            >
+              {t('viewAll')}
+            </Link>
           </div>
           <div className='grid gap-4 sm:grid-cols-2 lg:grid-cols-4'>
             {data.risingStores.slice(0, 8).map((entry) => (
@@ -244,9 +292,12 @@ export async function MarketplaceHome() {
       {onPromotion.length ? (
         <section className='mx-auto w-full max-w-screen-2xl border-t border-stroke-soft-200 px-4 py-12 sm:px-5 lg:px-6'>
           <div className='mb-2 flex justify-end'>
-            <Button.Root asChild variant='neutral' mode='lighter' size='small'>
-              <Link href='/shop'>{t('viewAll')}</Link>
-            </Button.Root>
+            <Link
+              href='/shop'
+              className={btnClass({ variant: 'neutral', mode: 'lighter', size: 'small' })}
+            >
+              {t('viewAll')}
+            </Link>
           </div>
           <ShopProductGridsWithQuickView
             quickViewEnabled
@@ -266,12 +317,15 @@ export async function MarketplaceHome() {
             <p className='mt-1 text-paragraph-sm text-text-sub-600'>{t('homeCtaSubtitle')}</p>
           </div>
           <div className='flex flex-wrap gap-3'>
-            <Button.Root asChild variant='primary'>
-              <Link href='/shop'>{t('browseAllProducts')}</Link>
-            </Button.Root>
-            <Button.Root asChild variant='neutral' mode='stroke'>
-              <Link href={merchantSignupHref() as '/signup'}>{t('becomeSeller')}</Link>
-            </Button.Root>
+            <Link href='/shop' className={btnClass({ variant: 'primary' })}>
+              {t('browseAllProducts')}
+            </Link>
+            <Link
+              href={merchantSignupHref() as '/signup'}
+              className={btnClass({ variant: 'neutral', mode: 'stroke' })}
+            >
+              {t('becomeSeller')}
+            </Link>
           </div>
         </div>
       </section>

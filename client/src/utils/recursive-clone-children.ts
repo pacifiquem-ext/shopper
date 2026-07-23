@@ -7,7 +7,7 @@ export function recursiveCloneChildren(
   uniqueId: string,
   asChild?: boolean,
 ): React.ReactNode {
-  return React.Children.map(children, (child, index) => {
+  const mapped = React.Children.map(children, (child, index) => {
     if (!React.isValidElement(child)) {
       return child
     }
@@ -42,4 +42,12 @@ export function recursiveCloneChildren(
       } as never,
     )
   })
+
+  // Children.map always returns an array; callers that need a single element
+  // (e.g. Radix Slot via asChild) must not receive a one-item array.
+  if (asChild && Array.isArray(mapped) && mapped.length === 1) {
+    return mapped[0]
+  }
+
+  return mapped
 }

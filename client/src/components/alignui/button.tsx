@@ -204,13 +204,17 @@ const ButtonRoot = React.forwardRef<HTMLButtonElement, ButtonRootProps>(
     const Component = asChild ? Slot : 'button'
     const { root } = buttonVariants({ variant, mode, size })
     const sharedProps: ButtonSharedProps = { variant, mode, size }
-    const extendedChildren = recursiveCloneChildren(
-      children,
-      sharedProps,
-      [BUTTON_ICON_NAME],
-      uniqueId,
-      asChild,
-    )
+    // Slot (asChild) requires exactly one React element child — not an array.
+    // recursiveCloneChildren uses Children.map which always returns an array.
+    const content = asChild
+      ? children
+      : recursiveCloneChildren(
+          children,
+          sharedProps,
+          [BUTTON_ICON_NAME],
+          uniqueId,
+          asChild,
+        )
 
     return (
       <Component
@@ -218,7 +222,7 @@ const ButtonRoot = React.forwardRef<HTMLButtonElement, ButtonRootProps>(
         className={root({ class: className })}
         {...rest}
       >
-        {extendedChildren}
+        {content}
       </Component>
     )
   },

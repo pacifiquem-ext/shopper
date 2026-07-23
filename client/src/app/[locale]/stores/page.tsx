@@ -4,7 +4,7 @@ import { RiStore2Line } from '@remixicon/react'
 
 import { Link } from '@/i18n/navigation'
 import { fetchStores, storePublicSlug } from '@/services/catalog.service'
-import * as Button from '@/components/alignui/button'
+import { cn } from '@/lib/utils'
 import { Card } from '@/components/alignui/card'
 import { SiteFooter } from '@/components/shop/site-footer'
 import { CartIconButton } from '@/components/shop/cart-icon-button'
@@ -45,9 +45,7 @@ export default async function StoresDirectoryPage({
           </pre>
         ) : null}
         <div className='mt-6 flex justify-center'>
-          <Button.Root asChild variant='neutral' mode='stroke'>
-            <Link href='/'>{t('homeLink')}</Link>
-          </Button.Root>
+          <Link href='/' className='inline-flex h-10 items-center justify-center rounded-10 bg-bg-white-0 px-3.5 text-label-sm text-text-sub-600 shadow-regular-xs ring-1 ring-inset ring-stroke-soft-200'>{t('homeLink')}</Link>
         </div>
       </div>
     )
@@ -78,9 +76,7 @@ export default async function StoresDirectoryPage({
                 {t('storesDirectoryDescription')}
               </p>
             </div>
-            <Button.Root asChild variant='primary' mode='filled' className='rounded-full'>
-              <Link href='/shop'>{t('browseAllProducts')}</Link>
-            </Button.Root>
+            <Link href='/shop' className='inline-flex h-10 items-center justify-center rounded-full bg-primary-base px-3.5 text-label-sm text-static-white shadow-regular-xs hover:bg-primary-darker'>{t('browseAllProducts')}</Link>
           </div>
         </div>
       </header>
@@ -90,9 +86,7 @@ export default async function StoresDirectoryPage({
           <div className='flex flex-col items-center justify-center gap-3 rounded-20 border border-stroke-soft-200 bg-bg-white-0 px-6 py-16 text-center shadow-regular-xs'>
             <RiStore2Line className='size-10 text-text-soft-400' aria-hidden />
             <p className='text-label-md text-text-strong-950'>{t('storesDirectoryEmpty')}</p>
-            <Button.Root asChild variant='neutral' mode='stroke' className='rounded-full'>
-              <Link href='/'>{t('homeLink')}</Link>
-            </Button.Root>
+            <Link href='/' className='inline-flex h-10 items-center justify-center rounded-full bg-bg-white-0 px-3.5 text-label-sm text-text-sub-600 shadow-regular-xs ring-1 ring-inset ring-stroke-soft-200'>{t('homeLink')}</Link>
           </div>
         ) : (
           <ul className='grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'>

@@ -163,138 +163,179 @@ export class CatalogService {
     }
 
     async getHome() {
-        const [topRated, newArrivals, risingStores, onPromotion] =
-            await Promise.all([
-                this.getTopRatedProducts(),
-                this.getNewArrivals(),
-                this.getRisingStores(),
-                this.getOnPromotionProducts(),
-            ]);
+        // Keep homepage to two DB round-trips so Neon cold-start cannot time out clients.
+        try {
+            await this.prisma.$queryRaw`SELECT 1`;
+        } catch {
+            // continue; queries below still use the pool
+        }
 
-        return { topRated, newArrivals, risingStores, onPromotion };
-    }
+        let products: ProductWithCatalog[] = [];
+        let stores: Array<{
+            id: string;
+            displayName: string;
+            logoUrl: string | null;
+            slug: string;
+            brandColors: Prisma.JsonValue;
+            description: string | null;
+            currency: string;
+            contactEmail: string | null;
+            contactPhone: string | null;
+            contactAddress: string | null;
+            ratingAvg: Prisma.Decimal;
+            ratingCount: number;
+            approvedAt: Date | null;
+            createdAt: Date;
+            aboutUs: string | null;
+        }> = [];
 
-    private async getTopRatedProducts(): Promise<PublicCatalogProduct[]> {
-        const rated = await withDbRetry(
-            this.prisma,
-            () =>
+        const leanStoreSelect = {
+            id: true,
+            displayName: true,
+            logoUrl: true,
+            slug: true,
+            brandColors: true,
+            description: true,
+            currency: true,
+            contactEmail: true,
+            contactPhone: true,
+            contactAddress: true,
+            ratingAvg: true,
+            ratingCount: true,
+            approvedAt: true,
+            createdAt: true,
+            aboutUs: true,
+        } as const;
+
+        try {
+            // Parallel after pool is warm; lean selects only.
+            const [productRows, storeRows] = await Promise.all([
                 this.prisma.product.findMany({
                     where: {
                         status: ProductStatus.ACTIVE,
-                        ratingCount: { gte: 1 },
-                        store: this.marketplaceStoreWhere(),
+                        store: { status: StoreStatus.APPROVED },
                     },
-                    orderBy: [
-                        { ratingAvg: 'desc' },
-                        { ratingCount: 'desc' },
-                    ],
+                    orderBy: { createdAt: 'desc' },
                     take: HOME_PRODUCT_LIMIT,
-                    include: catalogProductInclude,
+                    include: {
+                        store: { select: leanStoreSelect },
+                        variants: {
+                            select: {
+                                id: true,
+                                sku: true,
+                                title: true,
+                                colorName: true,
+                                colorHex: true,
+                                size: true,
+                                price: true,
+                                compareAt: true,
+                                attributes: true,
+                                images: true,
+                                inventory: {
+                                    select: { available: true, status: true },
+                                },
+                            },
+                            take: 3,
+                        },
+                        productCategory: {
+                            select: {
+                                id: true,
+                                slug: true,
+                                nameEn: true,
+                                nameRw: true,
+                            },
+                        },
+                    },
                 }),
-            { label: 'catalog.getTopRated' },
+                this.prisma.store.findMany({
+                    where: { status: StoreStatus.APPROVED },
+                    orderBy: [{ createdAt: 'desc' }],
+                    take: HOME_STORE_LIMIT,
+                    select: leanStoreSelect,
+                }),
+            ]);
+            products = productRows;
+            stores = storeRows;
+        } catch {
+            products = [];
+            stores = [];
+        }
+
+        const serialized = products.map((p) => this.serializeProduct(p));
+        const topRated = [...serialized].sort(
+            (a, b) =>
+                (b.ratingAvg ?? 0) - (a.ratingAvg ?? 0) ||
+                (b.ratingCount ?? 0) - (a.ratingCount ?? 0),
         );
+        const onPromotion = serialized.filter(
+            (p) =>
+                p.compareAtFrom != null &&
+                p.priceFrom != null &&
+                p.compareAtFrom > p.priceFrom,
+        );
+
+        const risingStores = stores.map((store) => ({
+            store: this.serializeStoreProfile(store),
+            productCount: 0,
+            sampleProducts: [] as PublicCatalogProduct[],
+        }));
+
+        return {
+            topRated,
+            newArrivals: serialized,
+            risingStores,
+            onPromotion:
+                onPromotion.length > 0 ? onPromotion : serialized.slice(0, 4),
+        };
+    }
+
+    private async getTopRatedProducts(): Promise<PublicCatalogProduct[]> {
+        // Fast path only: avoid multi-round-trip groupBy fallbacks on Neon.
+        const rated = await this.prisma.product.findMany({
+            where: {
+                status: ProductStatus.ACTIVE,
+                ratingCount: { gte: 1 },
+                store: this.marketplaceStoreWhere(),
+            },
+            orderBy: [{ ratingAvg: 'desc' }, { ratingCount: 'desc' }],
+            take: HOME_PRODUCT_LIMIT,
+            include: catalogProductInclude,
+        });
 
         if (rated.length > 0) {
             return rated.map((p) => this.serializeProduct(p));
         }
 
-        const since = new Date();
-        since.setDate(since.getDate() - 30);
-
-        const popular = await withDbRetry(
-            this.prisma,
-            () =>
-                this.prisma.orderLineItem.groupBy({
-                    by: ['productVariantId'],
-                    where: {
-                        createdAt: { gte: since },
-                        order: {
-                            store: this.marketplaceStoreWhere(),
-                        },
-                        productVariant: {
-                            product: { status: ProductStatus.ACTIVE },
-                        },
-                    },
-                    _sum: { quantity: true },
-                    orderBy: { _sum: { quantity: 'desc' } },
-                    take: HOME_PRODUCT_LIMIT * 3,
-                }),
-            { label: 'catalog.getTopRated.fallback' },
-        );
-
-        if (popular.length === 0) {
-            return this.getNewArrivals();
-        }
-
-        const variants = await this.prisma.productVariant.findMany({
-            where: { id: { in: popular.map((r) => r.productVariantId) } },
-            select: { id: true, productId: true },
-        });
-        const productIds: string[] = [];
-        const seen = new Set<string>();
-        for (const row of popular) {
-            const v = variants.find((x) => x.id === row.productVariantId);
-            if (v && !seen.has(v.productId)) {
-                seen.add(v.productId);
-                productIds.push(v.productId);
-            }
-            if (productIds.length >= HOME_PRODUCT_LIMIT) break;
-        }
-
-        const products = await this.prisma.product.findMany({
-            where: {
-                id: { in: productIds },
-                status: ProductStatus.ACTIVE,
-                store: this.marketplaceStoreWhere(),
-            },
-            include: catalogProductInclude,
-        });
-
-        const byId = new Map(products.map((p) => [p.id, p]));
-        return productIds
-            .map((id) => byId.get(id))
-            .filter((p): p is ProductWithCatalog => p != null)
-            .map((p) => this.serializeProduct(p));
+        // No reviews yet → show newest actives so the section is never empty.
+        return this.getNewArrivals();
     }
 
     private async getNewArrivals(): Promise<PublicCatalogProduct[]> {
-        const products = await withDbRetry(
-            this.prisma,
-            () =>
-                this.prisma.product.findMany({
-                    where: {
-                        status: ProductStatus.ACTIVE,
-                        store: this.marketplaceStoreWhere(),
-                    },
-                    orderBy: { createdAt: 'desc' },
-                    take: HOME_PRODUCT_LIMIT,
-                    include: catalogProductInclude,
-                }),
-            { label: 'catalog.getNewArrivals' },
-        );
+        const products = await this.prisma.product.findMany({
+            where: {
+                status: ProductStatus.ACTIVE,
+                store: this.marketplaceStoreWhere(),
+            },
+            orderBy: { createdAt: 'desc' },
+            take: HOME_PRODUCT_LIMIT,
+            include: catalogProductInclude,
+        });
         return products.map((p) => this.serializeProduct(p));
     }
 
     private async getRisingStores() {
-        const stores = await withDbRetry(
-            this.prisma,
-            () =>
-                this.prisma.store.findMany({
-                    where: {
-                        status: StoreStatus.APPROVED,
-                    },
-                    orderBy: [
-                        { approvedAt: 'desc' },
-                        { createdAt: 'desc' },
-                    ],
-                    take: HOME_STORE_LIMIT,
-                    select: catalogStoreSelect,
-                }),
-            { label: 'catalog.getRisingStores' },
-        );
+        const stores = await this.prisma.store.findMany({
+            where: {
+                status: StoreStatus.APPROVED,
+            },
+            orderBy: [{ approvedAt: 'desc' }, { createdAt: 'desc' }],
+            take: HOME_STORE_LIMIT,
+            select: catalogStoreSelect,
+        });
 
         if (stores.length === 0) return [];
 
+        // Lightweight counts only — skip sample product fan-out on homepage.
         const storeIds = stores.map((s) => s.id);
         const counts = await this.prisma.product.groupBy({
             by: ['storeId'],
@@ -308,91 +349,29 @@ export class CatalogService {
             counts.map((c) => [c.storeId, c._count._all]),
         );
 
-        const sampleProducts = await this.prisma.product.findMany({
-            where: {
-                storeId: { in: storeIds },
-                status: ProductStatus.ACTIVE,
-            },
-            orderBy: { createdAt: 'desc' },
-            take: storeIds.length * 3,
-            include: catalogProductInclude,
-        });
-
-        const samplesByStore = new Map<string, PublicCatalogProduct[]>();
-        for (const p of sampleProducts) {
-            const list = samplesByStore.get(p.storeId) ?? [];
-            if (list.length < 3) {
-                list.push(this.serializeProduct(p));
-                samplesByStore.set(p.storeId, list);
-            }
-        }
-
         return stores.map((store) => ({
             store: this.serializeStoreProfile(store),
             productCount: countByStore.get(store.id) ?? 0,
-            sampleProducts: samplesByStore.get(store.id) ?? [],
+            sampleProducts: [] as PublicCatalogProduct[],
         }));
     }
 
     private async getOnPromotionProducts(): Promise<PublicCatalogProduct[]> {
-        const now = new Date();
-        const activePromos = await this.prisma.promotion.findMany({
+        // Prefer compareAt discounts first (cheap index-friendly filter).
+        let products = await this.prisma.product.findMany({
             where: {
-                status: PromotionStatus.ACTIVE,
-                startsAt: { lte: now },
-                OR: [{ endsAt: null }, { endsAt: { gte: now } }],
+                status: ProductStatus.ACTIVE,
+                store: this.marketplaceStoreWhere(),
+                variants: {
+                    some: {
+                        compareAt: { not: null },
+                    },
+                },
             },
-            include: {
-                targets: true,
-            },
-            take: 50,
+            take: HOME_PRODUCT_LIMIT,
+            orderBy: { updatedAt: 'desc' },
+            include: catalogProductInclude,
         });
-
-        const productIds = new Set<string>();
-        const categoryIds = new Set<string>();
-        let wholePlatformOrStore = false;
-
-        for (const promo of activePromos) {
-            if (promo.targets.length === 0) {
-                wholePlatformOrStore = true;
-                break;
-            }
-            for (const t of promo.targets) {
-                if (t.productId) productIds.add(t.productId);
-                if (t.categoryId) categoryIds.add(t.categoryId);
-            }
-        }
-
-        let products: ProductWithCatalog[] = [];
-
-        if (wholePlatformOrStore) {
-            products = await this.prisma.product.findMany({
-                where: {
-                    status: ProductStatus.ACTIVE,
-                    store: this.marketplaceStoreWhere(),
-                },
-                orderBy: { updatedAt: 'desc' },
-                take: HOME_PRODUCT_LIMIT,
-                include: catalogProductInclude,
-            });
-        } else if (productIds.size > 0 || categoryIds.size > 0) {
-            products = await this.prisma.product.findMany({
-                where: {
-                    status: ProductStatus.ACTIVE,
-                    store: this.marketplaceStoreWhere(),
-                    OR: [
-                        ...(productIds.size
-                            ? [{ id: { in: [...productIds] } }]
-                            : []),
-                        ...(categoryIds.size
-                            ? [{ categoryId: { in: [...categoryIds] } }]
-                            : []),
-                    ],
-                },
-                take: HOME_PRODUCT_LIMIT,
-                include: catalogProductInclude,
-            });
-        }
 
         if (products.length === 0) {
             products = await this.prisma.product.findMany({

@@ -173,24 +173,56 @@ export async function fetchCatalogHome(
   const root = resolveCatalogApiRoot()
   const url = `${root}/catalog/home`
 
+  const controller = new AbortController()
+  const timeoutMs = 12_000
+  const timer = setTimeout(() => controller.abort(), timeoutMs)
+
   let res: Response
   try {
     res = await fetch(url, {
       cache: options.cache ?? 'no-store',
       headers: { Accept: 'application/json' },
+      signal: controller.signal,
     })
   } catch (err) {
+    clearTimeout(timer)
+    // Do NOT fall back to /catalog/groups (loads thousands of rows and can hang Neon).
     const msg = err instanceof Error ? err.message : 'Network error'
-    return buildHomeFallbackFromGroups(options.cache, `${url} — ${msg}`)
+    return {
+      data: {
+        topRated: [],
+        newArrivals: [],
+        risingStores: [],
+        onPromotion: [],
+      },
+      devHint: `${url} — ${msg}`,
+    }
   }
+  clearTimeout(timer)
 
   if (res.status === 404) {
-    return buildHomeFallbackFromGroups(options.cache, `${url} — HTTP 404 (using groups fallback)`)
+    return {
+      data: {
+        topRated: [],
+        newArrivals: [],
+        risingStores: [],
+        onPromotion: [],
+      },
+      devHint: `${url} — HTTP 404`,
+    }
   }
 
   const parsed = await parseEnvelope<CatalogHomePayload>(url, res)
   if (!parsed.data) {
-    return buildHomeFallbackFromGroups(options.cache, parsed.devHint)
+    return {
+      data: {
+        topRated: [],
+        newArrivals: [],
+        risingStores: [],
+        onPromotion: [],
+      },
+      devHint: parsed.devHint,
+    }
   }
 
   return {
