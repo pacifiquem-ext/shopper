@@ -635,19 +635,16 @@ async function seedDevMerchant() {
         return;
     }
 
-    const existing = await prisma.user.findUnique({
-        where: { phoneNumber },
-    });
-
-    if (existing) {
-        console.log(`Dev merchant already exists (${phoneNumber})`);
-        return;
-    }
-
     const passwordHash = await bcrypt.hash(password, 10);
 
-    await prisma.user.create({
-        data: {
+    const user = await prisma.user.upsert({
+        where: { phoneNumber },
+        update: {
+            passwordHash,
+            status: 'ACTIVE',
+            role: 'STORE_OWNER',
+        },
+        create: {
             fullName: 'Dev Merchant',
             phoneNumber,
             passwordHash,
@@ -656,7 +653,44 @@ async function seedDevMerchant() {
         },
     });
 
-    console.log(`Dev merchant seeded — phone: ${phoneNumber}`);
+    const existingStore = await prisma.store.findFirst({
+        where: { userId: user.id },
+    });
+
+    if (!existingStore) {
+        const store = await prisma.store.create({
+            data: {
+                userId: user.id,
+                slug: 'demo-kigali',
+                status: 'APPROVED',
+                approvedAt: new Date(),
+                registeredName: 'Demo Kigali Retail Ltd',
+                displayName: 'Demo Kigali Market',
+                description: 'Seeded demo store for local marketplace development.',
+                currency: 'RWF',
+                contactEmail: 'demo@onlineshop.rw',
+                contactPhone: phoneNumber,
+                contactAddress: 'Kigali, Rwanda',
+            },
+        });
+        await prisma.user.update({
+            where: { id: user.id },
+            data: { storeId: store.id },
+        });
+        console.log(
+            `Dev merchant + APPROVED store seeded — phone: ${phoneNumber}, store: ${store.slug}`,
+        );
+    } else if (existingStore.status !== 'APPROVED') {
+        await prisma.store.update({
+            where: { id: existingStore.id },
+            data: { status: 'APPROVED', approvedAt: new Date() },
+        });
+        console.log(
+            `Dev merchant store approved — phone: ${phoneNumber}, store: ${existingStore.slug}`,
+        );
+    } else {
+        console.log(`Dev merchant already exists (${phoneNumber})`);
+    }
 }
 
 
