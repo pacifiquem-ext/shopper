@@ -1516,6 +1516,27 @@
     "categoriesTitle": "Categories",
     "categoriesSubtitle": "Catalog categories and attributes.",
     "tableUnavailable": "Could not load this table. The API endpoint may not be ready yet.",
-    "emptyTable": "No rows yet."
+    "emptyTable": "No rows yet.",
+    "reviewsEmptyHint": "No pending reviews to moderate.",
+    "reviewApproved": "Review approved",
+    "reviewRejected": "Review rejected",
+    "colProduct": "Product",
+    "colRating": "Rating",
+    "colComment": "Comment",
+    "colStatus": "Status",
+    "colActions": "Actions",
+    "createPlatformPromo": "Create platform promo",
+    "promoCode": "Code",
+    "promoName": "Name",
+    "promoType": "Type",
+    "promoValue": "Value",
+    "typePercent": "Percent",
+    "typeFixed": "Fixed (RWF)",
+    "createPromo": "Create promo",
+    "saving": "Saving…",
+    "promoValidation": "Enter code, name, and a positive value.",
+    "promoCreated": "Platform promo created",
+    "promoDeleted": "Promo deleted",
+    "delete": "Delete"
   }
 }

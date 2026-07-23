@@ -1,7 +1,2 @@
-import { cn } from '@/lib/utils'
-
-function Skeleton({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
-  return <div className={cn('bg-muted animate-pulse rounded-md', className)} {...props} />
-}
-
-export { Skeleton }
+/** AlignUI-token implementation — re-exported for gradual import migration. */
+export * from '@/components/alignui/skeleton'

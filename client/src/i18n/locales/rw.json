@@ -1516,6 +1516,27 @@
     "categoriesTitle": "Ibyiciro",
     "categoriesSubtitle": "Ibyiciro n’ibiranga.",
     "tableUnavailable": "Ntibishoboye gupakira iyi mbonerahamwe. API ishobora kuba itarateguwe.",
-    "emptyTable": "Nta mirongo ihari."
+    "emptyTable": "Nta mirongo ihari.",
+    "reviewsEmptyHint": "Nta bisubizo bitegereje isuzuma.",
+    "reviewApproved": "Igisubizo cyemejwe",
+    "reviewRejected": "Igisubizo cyanze",
+    "colProduct": "Igicuruzwa",
+    "colRating": "Amanota",
+    "colComment": "Igitekerezo",
+    "colStatus": "Imiterere",
+    "colActions": "Ibikorwa",
+    "createPlatformPromo": "Kora promo y’urubuga",
+    "promoCode": "Kode",
+    "promoName": "Izina",
+    "promoType": "Ubwoko",
+    "promoValue": "Agaciro",
+    "typePercent": "Ijanisha",
+    "typeFixed": "Amafaranga (RWF)",
+    "createPromo": "Kora promo",
+    "saving": "Birimo kubikwa…",
+    "promoValidation": "Andika kode, izina, n’agaciro keza.",
+    "promoCreated": "Promo y’urubuga yaremwe",
+    "promoDeleted": "Promo yasibwe",
+    "delete": "Siba"
   }
 }

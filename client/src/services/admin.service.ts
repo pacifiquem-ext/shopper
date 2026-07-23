@@ -33,9 +33,13 @@ export type AdminStoreListApi = OffsetPage<AdminStoreApi>
 export interface AdminPromoApi {
   id: string
   code: string
-  discountType: 'PERCENT' | 'FIXED'
-  discountValue: number
-  active: boolean
+  name?: string
+  type?: 'PERCENT' | 'FIXED'
+  value?: number
+  discountType?: 'PERCENT' | 'FIXED'
+  discountValue?: number
+  status?: string
+  active?: boolean
   storeId?: string | null
   storeName?: string | null
   startsAt?: string | null
@@ -46,11 +50,15 @@ export interface AdminPromoApi {
 export interface AdminReviewApi {
   id: string
   rating: number
+  title?: string | null
+  body?: string | null
   comment?: string | null
   productName?: string
   storeName?: string
   status: string
   createdAt: string
+  product?: { name?: string }
+  store?: { displayName?: string }
 }
 
 export interface AdminCategoryApi {
@@ -105,11 +113,36 @@ export const adminService = {
     return (await api.get('/admin/promotions')) as ApiResponse<AdminPromoApi[]>
   },
 
-  async getReviews(filters: { status?: string } = {}): Promise<ApiResponse<AdminReviewApi[]>> {
+  async createPromotion(dto: {
+    code: string
+    name: string
+    type: 'PERCENT' | 'FIXED'
+    value: number
+    startsAt: string
+    endsAt?: string
+  }): Promise<ApiResponse<AdminPromoApi>> {
+    return (await api.post('/admin/promotions', dto)) as ApiResponse<AdminPromoApi>
+  },
+
+  async deletePromotion(id: string): Promise<ApiResponse<unknown>> {
+    return (await api.delete(`/admin/promotions/${id}`)) as ApiResponse<unknown>
+  },
+
+  async getReviews(filters: { status?: string } = {}): Promise<ApiResponse<AdminReviewApi[] | { data: AdminReviewApi[] }>> {
     const params = new URLSearchParams()
     if (filters.status) params.set('status', filters.status)
     const qs = params.toString()
-    return (await api.get(`/admin/reviews${qs ? `?${qs}` : ''}`)) as ApiResponse<AdminReviewApi[]>
+    return (await api.get(`/admin/reviews${qs ? `?${qs}` : ''}`)) as ApiResponse<
+      AdminReviewApi[] | { data: AdminReviewApi[] }
+    >
+  },
+
+  async approveReview(id: string): Promise<ApiResponse<unknown>> {
+    return (await api.post(`/admin/reviews/${id}/approve`)) as ApiResponse<unknown>
+  },
+
+  async rejectReview(id: string): Promise<ApiResponse<unknown>> {
+    return (await api.post(`/admin/reviews/${id}/reject`)) as ApiResponse<unknown>
   },
 
   async getCategories(): Promise<ApiResponse<AdminCategoryApi[]>> {
