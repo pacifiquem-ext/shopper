@@ -1,12 +1,12 @@
 'use client'
 
 import { AuthCard } from '@/components/auth/auth-card'
-import { Button } from '@/components/ui/button'
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
-import { Input } from '@/components/ui/input'
+import { AuthField, AuthInput } from '@/components/auth/auth-field'
+import * as Button from '@/components/alignui/button'
+import { Form, FormField } from '@/components/ui/form'
 import { SignupInput, signupSchema } from '@/validations/auth'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Lock, Mail, Phone, User as UserIcon } from 'lucide-react'
+import { RiLockLine, RiMailLine, RiPhoneLine, RiUserLine } from '@remixicon/react'
 import { useForm } from 'react-hook-form'
 import { useAuthStore } from '@/store/auth.store'
 import { useRouter } from '@/i18n/navigation'
@@ -52,109 +52,79 @@ export default function SignupPage() {
             event.preventDefault()
             void form.handleSubmit(onSubmit)(event)
           }}
-          className="w-full space-y-5"
+          className="w-full space-y-4"
         >
           <FormField
             control={form.control}
             name="fullName"
-            render={({ field }) => (
-              <FormItem className="relative space-y-0">
-                <FormLabel className="sr-only">{t('fields.fullName')}</FormLabel>
-                <div className="focus-within:border-primary-base flex items-center border-b border-stroke-soft-200 py-2 transition-colors">
-                  <UserIcon className="mr-3 h-5 w-5 text-gray-400" aria-hidden />
-                  <FormControl>
-                    <Input
-                      autoComplete="name"
-                      placeholder={t('fields.fullName')}
-                      className="rounded-none border-0 bg-transparent px-0 shadow-none focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-base/40 focus-visible:ring-offset-0"
-                      {...field}
-                    />
-                  </FormControl>
-                </div>
-                <FormMessage className="absolute pt-1 text-xs" />
-              </FormItem>
+            render={({ field, fieldState }) => (
+              <AuthField label={t('fields.fullName')} icon={RiUserLine} hasError={!!fieldState.error}>
+                <AuthInput autoComplete="name" placeholder={t('fields.fullName')} {...field} />
+              </AuthField>
             )}
           />
 
           <FormField
             control={form.control}
             name="phoneNumber"
-            render={({ field }) => (
-              <FormItem className="relative space-y-0 pt-3">
-                <FormLabel className="sr-only">{t('fields.phone')}</FormLabel>
-                <div className="focus-within:border-primary-base flex items-center border-b border-stroke-soft-200 py-2 transition-colors">
-                  <Phone className="mr-3 h-5 w-5 text-gray-400" aria-hidden />
-                  <FormControl>
-                    <Input
-                      type="tel"
-                      autoComplete="tel"
-                      placeholder={t('fields.phone')}
-                      className="rounded-none border-0 bg-transparent px-0 shadow-none focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-base/40 focus-visible:ring-offset-0"
-                      {...field}
-                    />
-                  </FormControl>
-                </div>
-                <p className="pt-1 text-xs text-gray-500">{t('fields.phoneHint')}</p>
-                <FormMessage className="absolute pt-1 text-xs" />
-              </FormItem>
+            render={({ field, fieldState }) => (
+              <AuthField
+                label={t('fields.phone')}
+                icon={RiPhoneLine}
+                hasError={!!fieldState.error}
+                hint={t('fields.phoneHint')}
+              >
+                <AuthInput type="tel" autoComplete="tel" placeholder={t('fields.phone')} {...field} />
+              </AuthField>
             )}
           />
 
           <FormField
             control={form.control}
             name="email"
-            render={({ field }) => (
-              <FormItem className="relative space-y-0 pt-3">
-                <FormLabel className="sr-only">{t('fields.emailOptional')}</FormLabel>
-                <div className="focus-within:border-primary-base flex items-center border-b border-stroke-soft-200 py-2 transition-colors">
-                  <Mail className="mr-3 h-5 w-5 text-gray-400" aria-hidden />
-                  <FormControl>
-                    <Input
-                      type="email"
-                      inputMode="email"
-                      autoComplete="email"
-                      placeholder={t('fields.emailOptional')}
-                      className="rounded-none border-0 bg-transparent px-0 shadow-none focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-base/40 focus-visible:ring-offset-0"
-                      {...field}
-                    />
-                  </FormControl>
-                </div>
-                <FormMessage className="absolute pt-1 text-xs" />
-              </FormItem>
+            render={({ field, fieldState }) => (
+              <AuthField
+                label={t('fields.emailOptional')}
+                icon={RiMailLine}
+                hasError={!!fieldState.error}
+              >
+                <AuthInput
+                  type="email"
+                  inputMode="email"
+                  autoComplete="email"
+                  placeholder={t('fields.emailOptional')}
+                  {...field}
+                />
+              </AuthField>
             )}
           />
 
           <FormField
             control={form.control}
             name="password"
-            render={({ field }) => (
-              <FormItem className="relative space-y-0 pt-3">
-                <FormLabel className="sr-only">{t('fields.password')}</FormLabel>
-                <div className="focus-within:border-primary-base flex items-center border-b border-stroke-soft-200 py-2 transition-colors">
-                  <Lock className="mr-3 h-5 w-5 text-gray-400" aria-hidden />
-                  <FormControl>
-                    <Input
-                      type="password"
-                      autoComplete="new-password"
-                      placeholder={t('fields.password')}
-                      className="rounded-none border-0 bg-transparent px-0 shadow-none focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-base/40 focus-visible:ring-offset-0"
-                      {...field}
-                    />
-                  </FormControl>
-                </div>
-                <FormMessage className="absolute pt-1 text-xs" />
-              </FormItem>
+            render={({ field, fieldState }) => (
+              <AuthField label={t('fields.password')} icon={RiLockLine} hasError={!!fieldState.error}>
+                <AuthInput
+                  type="password"
+                  autoComplete="new-password"
+                  placeholder={t('fields.password')}
+                  {...field}
+                />
+              </AuthField>
             )}
           />
 
-          <div className="flex items-center justify-end pt-6">
-            <Button
+          <div className="flex justify-end pt-3">
+            <Button.Root
               type="submit"
               disabled={isLoading}
-              className="rounded-full bg-primary-base px-8 py-2 font-bold text-static-white shadow-regular-xs transition-transform hover:bg-primary-darker active:scale-95 disabled:opacity-50"
+              variant="primary"
+              mode="filled"
+              size="medium"
+              className="min-w-[8.5rem]"
             >
               {isLoading ? t('signup.submitting') : t('signup.submit')}
-            </Button>
+            </Button.Root>
           </div>
         </form>
       </Form>

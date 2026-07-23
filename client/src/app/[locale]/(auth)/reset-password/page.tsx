@@ -1,13 +1,13 @@
 'use client'
 
 import { AuthCard } from '@/components/auth/auth-card'
-import { Button } from '@/components/ui/button'
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
-import { Input } from '@/components/ui/input'
+import { AuthField, AuthInput } from '@/components/auth/auth-field'
+import * as Button from '@/components/alignui/button'
+import { Form, FormField } from '@/components/ui/form'
 import { Link } from '@/i18n/navigation'
 import { ResetPasswordInput, resetPasswordSchema } from '@/validations/auth'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { KeyRound, Lock, Phone } from 'lucide-react'
+import { RiKey2Line, RiLockLine, RiPhoneLine } from '@remixicon/react'
 import { useForm } from 'react-hook-form'
 import { useAuthStore } from '@/store/auth.store'
 import { useRouter } from '@/i18n/navigation'
@@ -34,11 +34,7 @@ export default function ResetPasswordPage() {
   }
 
   return (
-    <AuthCard activeTab="reset-password">
-      <div className="mb-6 text-center">
-        <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">{t('reset.hint')}</p>
-      </div>
-
+    <AuthCard activeTab="reset-password" description={t('reset.hint')}>
       <Form {...form}>
         <form
           method="post"
@@ -47,90 +43,62 @@ export default function ResetPasswordPage() {
             event.preventDefault()
             void form.handleSubmit(onSubmit)(event)
           }}
-          className="w-full space-y-5"
+          className="w-full space-y-4"
         >
           <FormField
             control={form.control}
             name="phoneNumber"
-            render={({ field }) => (
-              <FormItem className="relative space-y-0">
-                <FormLabel className="sr-only">{t('fields.phone')}</FormLabel>
-                <div className="focus-within:border-primary-base flex items-center border-b border-stroke-soft-200 py-2 transition-colors">
-                  <Phone className="mr-3 h-5 w-5 text-gray-400" aria-hidden />
-                  <FormControl>
-                    <Input
-                      type="tel"
-                      autoComplete="tel"
-                      placeholder={t('fields.phone')}
-                      className="rounded-none border-0 bg-transparent px-0 shadow-none focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-base/40 focus-visible:ring-offset-0"
-                      {...field}
-                    />
-                  </FormControl>
-                </div>
-                <FormMessage className="absolute pt-1 text-xs" />
-              </FormItem>
+            render={({ field, fieldState }) => (
+              <AuthField label={t('fields.phone')} icon={RiPhoneLine} hasError={!!fieldState.error}>
+                <AuthInput type="tel" autoComplete="tel" placeholder={t('fields.phone')} {...field} />
+              </AuthField>
             )}
           />
 
           <FormField
             control={form.control}
             name="otpCode"
-            render={({ field }) => (
-              <FormItem className="relative space-y-0 pt-3">
-                <FormLabel className="sr-only">{t('fields.otpShort')}</FormLabel>
-                <div className="focus-within:border-primary-base flex items-center border-b border-stroke-soft-200 py-2 transition-colors">
-                  <KeyRound className="mr-3 h-5 w-5 text-gray-400" aria-hidden />
-                  <FormControl>
-                    <Input
-                      inputMode="numeric"
-                      autoComplete="one-time-code"
-                      placeholder={t('fields.otpShort')}
-                      className="rounded-none border-0 bg-transparent px-0 font-mono tracking-widest shadow-none focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-base/40 focus-visible:ring-offset-0"
-                      maxLength={6}
-                      {...field}
-                    />
-                  </FormControl>
-                </div>
-                <FormMessage className="absolute pt-1 text-xs" />
-              </FormItem>
+            render={({ field, fieldState }) => (
+              <AuthField label={t('fields.otpShort')} icon={RiKey2Line} hasError={!!fieldState.error}>
+                <AuthInput
+                  inputMode="numeric"
+                  autoComplete="one-time-code"
+                  placeholder={t('fields.otp')}
+                  {...field}
+                />
+              </AuthField>
             )}
           />
 
           <FormField
             control={form.control}
             name="newPassword"
-            render={({ field }) => (
-              <FormItem className="relative space-y-0 pt-3">
-                <FormLabel className="sr-only">{t('fields.newPassword')}</FormLabel>
-                <div className="focus-within:border-primary-base flex items-center border-b border-stroke-soft-200 py-2 transition-colors">
-                  <Lock className="mr-3 h-5 w-5 text-gray-400" aria-hidden />
-                  <FormControl>
-                    <Input
-                      type="password"
-                      autoComplete="new-password"
-                      placeholder={t('fields.newPassword')}
-                      className="rounded-none border-0 bg-transparent px-0 shadow-none focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-base/40 focus-visible:ring-offset-0"
-                      {...field}
-                    />
-                  </FormControl>
-                </div>
-                <FormMessage className="absolute pt-1 text-xs" />
-              </FormItem>
+            render={({ field, fieldState }) => (
+              <AuthField label={t('fields.newPassword')} icon={RiLockLine} hasError={!!fieldState.error}>
+                <AuthInput
+                  type="password"
+                  autoComplete="new-password"
+                  placeholder={t('fields.newPassword')}
+                  {...field}
+                />
+              </AuthField>
             )}
           />
 
-          <div className="flex flex-col items-center space-y-4 pt-6">
-            <Button
+          <div className="flex flex-col gap-3 pt-2">
+            <Button.Root
               type="submit"
               disabled={isLoading}
-              className="w-full rounded-full bg-primary-base py-6 font-bold text-static-white shadow-regular-xs transition-transform hover:bg-primary-darker active:scale-95 disabled:opacity-50"
+              variant="primary"
+              mode="filled"
+              size="medium"
+              className="w-full"
             >
               {isLoading ? t('reset.submitting') : t('reset.submit')}
-            </Button>
-
+            </Button.Root>
             <Link
               href="/login"
-              className="text-primary-darker hover:text-primary-darker text-sm font-semibold transition-colors hover:underline"
+              className="text-center text-label-sm text-primary-base transition hover:text-primary-darker hover:underline"
             >
               {t('reset.backToLogin')}
             </Link>

@@ -1,4 +1,4 @@
-import { Package, ShoppingBag, Truck } from 'lucide-react'
+import { RiBox3Line, RiShoppingBag3Line, RiTruckLine } from '@remixicon/react'
 
 import { Link } from '@/i18n/navigation'
 import { cn } from '@/lib/utils'
@@ -67,47 +67,45 @@ function ProductCardMedia({
 }) {
   return (
     <>
-      <div className='relative aspect-[4/5] w-full overflow-hidden bg-[#ebebeb]'>
+      <div className="relative aspect-[4/5] w-full overflow-hidden bg-bg-soft-200">
         {img ? (
+          // eslint-disable-next-line @next/next/no-img-element
           <img
             src={img}
             alt={product.name}
-            loading='lazy'
-            className='size-full object-cover transition-transform duration-500 group-hover/card:scale-[1.04]'
+            loading="lazy"
+            className="size-full object-cover transition-transform duration-500 group-hover/card:scale-[1.04]"
           />
         ) : (
-          <div className='flex size-full items-center justify-center text-[#5c5c5c]'>
-            <Package className='size-12' aria-hidden strokeWidth={1.25} />
+          <div className="flex size-full items-center justify-center text-text-soft-400">
+            <RiBox3Line className="size-12" aria-hidden />
           </div>
         )}
 
-        <div className='pointer-events-none absolute left-3 top-3 flex items-center gap-2'>
+        <div className="pointer-events-none absolute left-3 top-3 flex items-center gap-2">
           {off != null && labels.discountBadge ? (
             <span
-              className='inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-semibold tracking-tight text-white shadow-regular-xs'
+              className="inline-flex items-center rounded-full px-2.5 py-1 text-label-xs font-semibold tracking-tight text-static-white shadow-regular-xs"
               style={{ backgroundColor: accentColor }}
             >
               {labels.discountBadge}
             </span>
           ) : showNew ? (
-            <span className='inline-flex items-center gap-1.5 rounded-full border border-stroke-soft-200 bg-bg-white-0/95 px-2.5 py-1 text-[11px] font-semibold tracking-tight text-text-strong-950 shadow-regular-xs'>
-              <span aria-hidden className='size-1.5 rounded-full' style={{ backgroundColor: accentColor }} />
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-stroke-soft-200 bg-bg-white-0/95 px-2.5 py-1 text-label-xs font-semibold tracking-tight text-text-strong-950 shadow-regular-xs">
+              <span aria-hidden className="size-1.5 rounded-full" style={{ backgroundColor: accentColor }} />
               {labels.newBadge}
             </span>
           ) : null}
         </div>
       </div>
 
-      <div className='flex items-center justify-between gap-2 border-t border-stroke-soft-200 bg-bg-weak-50 px-3 py-2'>
-        <div className='min-w-0 flex-1'>
-          <p className='truncate text-[10px] font-medium uppercase tracking-[0.12em] text-text-sub-600'>
-            {labels.storeLabel}
-          </p>
-          <p className='truncate text-xs font-semibold text-text-strong-950'>{product.store.displayName}</p>
-        </div>
+      <div className="flex items-center justify-between gap-2 border-t border-stroke-soft-200 bg-bg-weak-50 px-3 py-2">
+        <p className="min-w-0 flex-1 truncate text-label-xs font-medium text-text-sub-600">
+          {labels.storeLabel}
+        </p>
         {product.deliveryEnabled ? (
-          <span className='inline-flex shrink-0 items-center gap-1 rounded-full border border-stroke-soft-200 bg-bg-white-0 px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.08em] text-text-strong-950'>
-            <Truck className='size-3' style={{ color: accentColor }} aria-hidden strokeWidth={2.5} />
+          <span className="inline-flex shrink-0 items-center gap-1 rounded-full border border-stroke-soft-200 bg-bg-white-0 px-2 py-1 text-label-xs font-semibold uppercase tracking-[0.08em] text-text-strong-950">
+            <RiTruckLine className="size-3" style={{ color: accentColor }} aria-hidden />
             {labels.deliveryAvailable}
           </span>
         ) : null}
@@ -249,7 +247,7 @@ export function ProductCard({
                 }}
                 className='inline-flex h-10 shrink-0 items-center gap-1.5 self-end rounded-full bg-primary-base px-3 text-[11px] font-semibold text-static-white shadow-regular-xs transition-colors hover:bg-primary-darker active:scale-[0.98] sm:h-11 sm:px-4 sm:text-xs'
               >
-                <ShoppingBag className='size-4 shrink-0' aria-hidden strokeWidth={2} />
+                <RiShoppingBag3Line className="size-4 shrink-0" aria-hidden />
                 <span>{labels.addToCartAria}</span>
               </button>
             ) : (
@@ -260,7 +258,7 @@ export function ProductCard({
                 title={labels.addToCartAria}
                 className='inline-flex h-10 shrink-0 items-center gap-1.5 self-end rounded-full bg-primary-base px-3 text-[11px] font-semibold text-static-white shadow-regular-xs transition-colors hover:bg-primary-darker active:scale-[0.98] sm:h-11 sm:px-4 sm:text-xs'
               >
-                <ShoppingBag className='size-4 shrink-0' aria-hidden strokeWidth={2} />
+                <RiShoppingBag3Line className="size-4 shrink-0" aria-hidden />
                 <span>{labels.addToCartAria}</span>
               </Link>
             )

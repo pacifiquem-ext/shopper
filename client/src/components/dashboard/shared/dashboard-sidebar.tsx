@@ -140,7 +140,7 @@ export function DashboardNavContent({
             collapsed && 'justify-center px-2',
           )}
         >
-          <div className="flex size-10 shrink-0 items-center justify-center rounded-10 bg-primary-alpha-10 text-primary-base">
+          <div className="flex size-10 shrink-0 items-center justify-center rounded-10 bg-primary-base text-static-white shadow-regular-xs">
             <RiStore2Line className="size-5" aria-hidden />
           </div>
           {showLabels && (
@@ -175,16 +175,19 @@ export function DashboardNavContent({
         aria-label={t('sidebar.navAria')}
       >
         {mainNavItems.map((item) => {
-          const isActive = pathname === item.href
+          const isActive =
+            item.href === '/dashboard'
+              ? pathname === '/dashboard'
+              : pathname === item.href || pathname.startsWith(`${item.href}/`)
           return (
             <Link
               key={item.href}
               href={item.href}
               onClick={handleNavClick}
               className={cn(
-                'group flex items-center gap-2.5 rounded-10 px-2.5 py-2 text-label-sm transition duration-200',
+                'group relative flex items-center gap-2.5 rounded-10 px-2.5 py-2 text-label-sm transition duration-200',
                 isActive
-                  ? 'bg-primary-alpha-10 text-primary-base'
+                  ? 'bg-primary-alpha-10 font-medium text-primary-base shadow-regular-xs'
                   : 'text-text-sub-600 hover:bg-bg-weak-50 hover:text-text-strong-950',
                 collapsed && 'justify-center px-0',
               )}
@@ -257,8 +260,13 @@ export function DashboardNavContent({
 
       <div className="mt-auto border-t border-stroke-soft-200 p-3">
         {showLabels && user && (
-          <div className="mb-2 truncate px-1 text-paragraph-xs text-text-sub-600">
-            {user.fullName || user.phoneNumber}
+          <div className="mb-2 rounded-10 bg-bg-weak-50 px-2.5 py-2">
+            <div className="truncate text-label-xs text-text-strong-950">
+              {user.fullName || user.phoneNumber}
+            </div>
+            <div className="truncate text-paragraph-xs text-text-soft-400">
+              {t('sidebar.role')}
+            </div>
           </div>
         )}
         <Button.Root

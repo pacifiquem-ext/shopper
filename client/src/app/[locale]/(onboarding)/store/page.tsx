@@ -4,9 +4,8 @@ import { useMemo, useState, useEffect } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { useRouter } from '@/i18n/navigation'
 import { useTranslations } from 'next-intl'
-import { Store, ChevronLeft, ChevronRight, Check, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
-import { Button } from '@/components/ui/button'
+import * as Button from '@/components/alignui/button'
 import {
   Dialog,
   DialogContent,
@@ -14,6 +13,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
+import { RiLoader4Line, RiStore2Line } from '@remixicon/react'
 import { useStoreOnboardingStore } from '@/store/store-onboarding.store'
 import { useAuthStore } from '@/store/auth.store'
 
@@ -168,8 +168,11 @@ export default function StoreOnboardingPage() {
 
   if (!isAuthReady || isLoadingDraft) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-white">
-        <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
+      <div className="flex min-h-screen items-center justify-center bg-bg-weak-50">
+        <div className="flex flex-col items-center gap-3">
+          <RiLoader4Line className="size-8 animate-spin text-primary-base" aria-hidden />
+          <p className="text-paragraph-sm text-text-sub-600">{t('loading')}</p>
+        </div>
       </div>
     )
   }
@@ -177,71 +180,104 @@ export default function StoreOnboardingPage() {
   return (
     <WizardContext.Provider value={{ showErrors, errors: validation.errors || {} }}>
       <Dialog open={showResumeModal} onOpenChange={() => {}}>
-        <DialogContent className="max-w-md border-0 p-8 shadow-2xl sm:rounded-2xl">
-          <DialogHeader className="space-y-4">
-            <DialogTitle className="text-center text-2xl font-bold text-gray-900">
+        <DialogContent className="max-w-md rounded-20 border border-stroke-soft-200 bg-bg-white-0 p-8 shadow-regular-md">
+          <DialogHeader className="space-y-3">
+            <DialogTitle className="text-center text-title-h6 text-text-strong-950">
               {t('resumeModal.title')}
             </DialogTitle>
-            <DialogDescription className="text-center text-base text-gray-600">
+            <DialogDescription className="text-center text-paragraph-sm text-text-sub-600">
               {t('resumeModal.description')}
             </DialogDescription>
           </DialogHeader>
-          <div className="mt-8 flex flex-col gap-3">
-            <Button
+          <div className="mt-6 flex flex-col gap-3">
+            <Button.Root
+              type="button"
+              variant="primary"
+              mode="filled"
+              size="medium"
+              className="w-full"
               onClick={() => {
                 const step = resumeDraft()
                 navigateToStep(step)
               }}
-              className="bg-primary-darker hover:bg-primary-darker w-full rounded-full py-6 text-base font-bold shadow-regular-xs transition-transform active:scale-95"
             >
               {t('resumeModal.resumeButton')}
-            </Button>
-            <Button
-              variant="outline"
+            </Button.Root>
+            <Button.Root
+              type="button"
+              variant="neutral"
+              mode="stroke"
+              size="medium"
+              className="w-full"
               onClick={discardDraft}
-              className="w-full rounded-full border-stroke-soft-200 py-6 text-base font-bold text-gray-700 transition-colors hover:bg-gray-50"
             >
               {t('resumeModal.discardButton')}
-            </Button>
+            </Button.Root>
           </div>
         </DialogContent>
       </Dialog>
 
-      <div className="flex min-h-screen flex-col overflow-x-hidden bg-white">
-        {/* HEADER */}
-        <header className="flex w-full items-center justify-between px-6 py-5 md:px-10 md:py-8">
-          <div className="flex items-center gap-2">
-            {/* Logo or brand icon */}
-            <div className="text-primary-base flex items-center gap-2 text-xl font-bold tracking-tight">
-              <Store className="h-8 w-8" />
+      <div className="flex min-h-screen flex-col overflow-x-hidden bg-bg-weak-50">
+        <header className="sticky top-0 z-40 border-b border-stroke-soft-200/80 bg-bg-white-0/90 backdrop-blur-md">
+          <div className="mx-auto flex w-full max-w-5xl items-center justify-between px-4 py-4 sm:px-6">
+            <div className="flex items-center gap-2.5">
+              <span className="grid size-9 place-items-center rounded-10 bg-primary-base text-static-white">
+                <RiStore2Line className="size-4" aria-hidden />
+              </span>
+              <div className="leading-tight">
+                <p className="text-label-sm text-text-strong-950">{t('header.brand')}</p>
+                <p className="text-paragraph-xs text-text-sub-600">{t('header.setup')}</p>
+              </div>
             </div>
-          </div>
 
-          <div className="flex items-center gap-4">
-            <Button
-              type="button"
-              variant="outline"
-              className="rounded-full px-5 text-sm font-medium"
-            >
-              {t('header.help', { defaultValue: 'Questions?' })}
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              className="rounded-full px-5 text-sm font-medium"
-              onClick={handleSaveAndExit}
-              disabled={isSavingDraft || isSubmitting}
-            >
-              {isSavingDraft && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {t('header.saveExit', { defaultValue: 'Save & exit' })}
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button.Root
+                type="button"
+                variant="neutral"
+                mode="stroke"
+                size="small"
+                onClick={handleSaveAndExit}
+                disabled={isSavingDraft || isSubmitting}
+              >
+                {isSavingDraft ? (
+                  <Button.Icon as={RiLoader4Line} className="animate-spin" />
+                ) : null}
+                {t('header.saveExit')}
+              </Button.Root>
+            </div>
           </div>
         </header>
 
-        {/* MAIN CONTENT Area */}
-        <main className="mx-auto flex w-full max-w-[850px] flex-1 flex-col items-center justify-center px-6 pt-8 pb-32">
-          <div className="animate-in fade-in slide-in-from-bottom-4 w-full max-w-[650px] duration-500">
-            {/* Step titles are handled inside the step components to allow unique layouts */}
+        <main className="mx-auto flex w-full max-w-[720px] flex-1 flex-col px-4 pt-10 pb-36 sm:px-6">
+          <div className="mb-8">
+            <div className="mb-2 flex items-center justify-between gap-3">
+              <p className="text-label-xs uppercase tracking-[0.12em] text-primary-base">
+                {t('stepLabel', {
+                  step: stepIndex + 1,
+                  total: orderedSteps.length,
+                })}
+              </p>
+              <p className="text-paragraph-xs text-text-soft-400">
+                {Math.round(((stepIndex + 1) / orderedSteps.length) * 100)}%
+              </p>
+            </div>
+            <div className="flex w-full items-center gap-1.5" aria-hidden>
+              {orderedSteps.map((_, idx) => {
+                const isDone = idx <= stepIndex
+                return (
+                  <div
+                    key={idx}
+                    className={cn(
+                      'h-1.5 w-full rounded-full transition-colors duration-300',
+                      isDone ? 'bg-primary-base' : 'bg-stroke-soft-200',
+                    )}
+                  />
+                )
+              })}
+            </div>
+          </div>
+
+          <div className="w-full rounded-20 border border-stroke-soft-200 bg-bg-white-0 p-6 shadow-regular-xs sm:p-8">
             {(() => {
               switch (stepKey) {
                 case 'businessType':
@@ -269,62 +305,54 @@ export default function StoreOnboardingPage() {
           </div>
         </main>
 
-        {/* FOOTER & PROGRESS */}
-        <footer className="fixed inset-x-0 bottom-0 z-50 bg-white">
-          <div className="flex w-full items-center gap-2 px-6 pt-1 pb-4">
-            {orderedSteps.map((_, idx) => {
-              const isDone = idx <= stepIndex
-              return (
-                <div
-                  key={idx}
-                  className={cn(
-                    'h-1.5 w-full rounded-full transition-colors duration-300',
-                    isDone ? 'bg-black' : 'bg-gray-200'
-                  )}
-                />
-              )
-            })}
-          </div>
-
-          <div className="flex items-center justify-between px-6 py-4 md:px-10 md:pb-6">
+        <footer className="fixed inset-x-0 bottom-0 z-50 border-t border-stroke-soft-200 bg-bg-white-0/95 backdrop-blur-md">
+          <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 py-4 sm:px-6">
             <div>
               {!isFirstStep && !isSubmitting ? (
-                <button
+                <Button.Root
                   type="button"
+                  variant="neutral"
+                  mode="ghost"
+                  size="medium"
                   onClick={handleBack}
-                  className="text-base font-semibold text-gray-900 underline transition-colors hover:text-gray-600 focus:outline-none"
                 >
-                  {t('actions.back', { defaultValue: 'Back' })}
-                </button>
+                  {t('actions.back')}
+                </Button.Root>
               ) : (
                 <div className="w-10" />
               )}
             </div>
 
             {isLastStep ? (
-              <Button
+              <Button.Root
                 type="button"
-                className="rounded-lg bg-black px-10 py-6 text-base font-semibold text-white transition-transform hover:bg-gray-800 disabled:opacity-50"
+                variant="primary"
+                mode="filled"
+                size="medium"
                 onClick={handleSubmit}
                 disabled={isSubmitting}
+                className="min-w-[8rem]"
               >
                 {isSubmitting ? (
                   <>
-                    <span className="mr-2 animate-pulse text-xl">...</span>
-                    {t('actions.submitting', { defaultValue: 'Submitting' })}
+                    <Button.Icon as={RiLoader4Line} className="animate-spin" />
+                    {t('actions.submitting')}
                   </>
                 ) : (
-                  <>{t('actions.finish', { defaultValue: 'Finish' })}</>
+                  t('actions.finish')
                 )}
-              </Button>
+              </Button.Root>
             ) : (
-              <Button
+              <Button.Root
                 type="button"
-                className="rounded-lg bg-black px-10 py-6 text-base font-semibold text-white transition-transform hover:bg-gray-800 disabled:opacity-50"
+                variant="primary"
+                mode="filled"
+                size="medium"
                 onClick={handleNext}
+                className="min-w-[8rem]"
               >
-                {t('actions.next', { defaultValue: 'Next' })}
-              </Button>
+                {t('actions.next')}
+              </Button.Root>
             )}
           </div>
         </footer>

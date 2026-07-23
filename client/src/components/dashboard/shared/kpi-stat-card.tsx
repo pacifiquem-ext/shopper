@@ -24,13 +24,18 @@ export function KpiStatCard({
   const showSparkline = Boolean(sparklineTitle && sparklinePoints && sparklinePoints.length > 0)
 
   return (
-    <div className={cn('rounded-20 border border-stroke-soft-200 bg-bg-white-0 p-4 shadow-regular-xs', className)}>
-      <div className="text-xs font-semibold text-text-soft-400">{title}</div>
-      <div className={cn('mt-2 flex items-end gap-3', showSparkline ? 'justify-between' : 'justify-start')}>
+    <div
+      className={cn(
+        'rounded-20 border border-stroke-soft-200 bg-bg-white-0 p-5 shadow-regular-xs transition duration-200 hover:shadow-regular-sm',
+        className,
+      )}
+    >
+      <div className="text-label-xs uppercase tracking-[0.08em] text-text-soft-400">{title}</div>
+      <div className={cn('mt-3 flex items-end gap-3', showSparkline ? 'justify-between' : 'justify-start')}>
         {isLoading ? (
           <TurningZeroLoader size="sm" />
         ) : (
-          <div className="text-2xl font-semibold text-text-strong-950">{value}</div>
+          <div className="text-title-h5 text-text-strong-950">{value}</div>
         )}
         {showSparkline && sparklineTitle && sparklinePoints && !isLoading && (
           <Sparkline
@@ -43,7 +48,7 @@ export function KpiStatCard({
         )}
       </div>
       {!isLoading && trendLabel ? (
-        <div className="mt-2 text-xs text-text-soft-400">{trendLabel}</div>
+        <div className="mt-2 text-paragraph-xs text-text-sub-600">{trendLabel}</div>
       ) : null}
     </div>
   )

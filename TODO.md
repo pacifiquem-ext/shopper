@@ -12,13 +12,14 @@ Rough readiness (maintain when large slices land):
 | ---- | -- | ----- |
 | Foundation (schema, auth, store ownership, health, monorepo) | ~85% | JWT + StoreGuard; Host storefront tenancy being removed (ADR 001) |
 | Merchant path (onboarding → products → inventory → orders → delivery → settings) | ~78% | Payment proof flow incomplete; category attrs pending |
-| Marketplace (single site, ranking, stores browse) | ~40% | Teardown multi-storefront + ranking + redesign in flight |
-| Payment proof (upload + merchant approve) | ~25% | `paymentProofUrl` field exists; full flow + image rules pending |
-| Promos + reviews + ranking algorithms | ~10% | Not domain-modeled yet |
-| Platform admin console | ~20% | Approve/reject only; expand under `/admin` |
-| AlignUI design system | ~58% → **target 100%** | Kit incomplete; full migration required |
+| Marketplace (single site, ranking, stores browse) | ~72% | Home/stores live; product cards AlignUI-partial; checkout/proof still gaps |
+| Payment proof (upload + merchant approve) | ~55% | Upload + merchant review wired; full E2E polish pending |
+| Promos + reviews + ranking algorithms | ~55% | Domain + APIs + UI present; ranking simplified for latency |
+| Platform admin console | ~45% | `/admin` expanded; attrs CRUD polish pending |
+| AlignUI design system | ~78% → **target 100%** | Auth/home/onboarding chrome strong; residual `ui/*` on dashboard body + steps |
 | Billing / Basic–Pro | **removed** | Off-website; delete subscription UI/gates |
-| Release hardening (SMS, email, storage, e2e, server rw i18n) | ~35% | Storage needed for images/proofs |
+| Release hardening (SMS, email, storage, e2e, server rw i18n) | ~42% | Local storage works; S3 credentials + full e2e pending |
+| UI shells (home / auth / onboarding / dashboard) | ~86% | Premium redesign session 2026-07-23; steps + dashboard body still hybrid |
 
 ---
 
@@ -40,7 +41,8 @@ _(empty — initiative largely landed 2026-07-23; polish items under Next up)_
 - [x] **Phase G** — Merchant/admin promos APIs + dashboard/admin UI — 2026-07-23
 - [x] **Phase G2** — Payment proof upload + merchant review; subscription page redirected — 2026-07-23
 - [x] **Phase H** — Platform admin under `/admin` — 2026-07-23
-- [ ] **Phase I polish** — AlignUI 100% migration of residual `ui/*` call sites; Playwright design research doc; promo apply at checkout cart; real file storage upload; auth shell full restyle; UI Expert live browser pass
+- [x] **Phase I UI shells** — Marketplace home sticky nav/hero/sections; auth AlignUI fields + split AuthCard; onboarding chrome (progress/footer); dashboard shell + home token polish; footer green-only; product card Remix/tokens — 2026-07-23
+- [ ] **Phase I polish** — AlignUI 100% residual `ui/*` (onboarding steps, dashboard page body, product grids edges); Playwright design research doc; promo apply at checkout cart; S3 credentials; full UI Expert re-pass
 - [ ] Seed demo data for reviews/promos after migrate (`pnpm prisma db seed`)
 
 ### §0 — Agent / repo hygiene
@@ -129,6 +131,14 @@ _(empty — initiative largely landed 2026-07-23; polish items under Next up)_
 ---
 
 ## Done
+
+### 2026-07-23 — UI redesign shells (~50% → ~86% on target surfaces)
+
+- [x] Marketplace home — sticky nav (mobile-friendly links), hero mesh, section headers, store cards hover, green-only footer, product card Remix + token pass
+- [x] Auth — split AuthCard brand panel, AlignUI Input/Label/Button via `auth-field`, login/signup/verify/forgot/reset restyled
+- [x] Onboarding chrome — sticky header, primary progress, card step body, AlignUI footer actions + resume modal (step field bodies still hybrid)
+- [x] Dashboard shell — sidebar active rail/nested paths, header polish, KPI cards; home overview token cleanup (page body still lucide/`ui/*` in places)
+- [x] Reviewer agents — UI Expert + Integration/Progress (integration PASS; formal gate partial with Playwright screenshots under `e2e-audit/screens/ui-redesign-2026-07-23/`)
 
 ### 2026-07-12 — Full audit remediation (verified API + Playwright)
 

@@ -1,12 +1,12 @@
 'use client'
 
 import { AuthCard } from '@/components/auth/auth-card'
-import { Button } from '@/components/ui/button'
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
-import { Input } from '@/components/ui/input'
+import { AuthField, AuthInput } from '@/components/auth/auth-field'
+import * as Button from '@/components/alignui/button'
+import { Form, FormField } from '@/components/ui/form'
 import { VerifyPhoneSchemaType, verifyPhoneSchema } from '@/validations/auth'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { KeyRound, Phone } from 'lucide-react'
+import { RiKey2Line, RiPhoneLine } from '@remixicon/react'
 import { useForm } from 'react-hook-form'
 import { useAuthStore } from '@/store/auth.store'
 import { useRouter } from '@/i18n/navigation'
@@ -52,16 +52,15 @@ export default function VerifyPhonePage() {
   }
 
   return (
-    <AuthCard activeTab="signup">
-      <div className="mb-6 text-center">
-        <h2 className="text-xl font-bold text-gray-800">{t('verify.title')}</h2>
-        <p className="mt-2 text-sm text-gray-500">
-          {detectedPhone
-            ? t('verify.hintWithPhone', { phone: detectedPhone })
-            : t('verify.hint')}
-        </p>
-      </div>
-
+    <AuthCard
+      activeTab="signup"
+      title={t('verify.title')}
+      description={
+        detectedPhone
+          ? t('verify.hintWithPhone', { phone: detectedPhone })
+          : t('verify.hint')
+      }
+    >
       <Form {...form}>
         <form
           method="post"
@@ -70,64 +69,50 @@ export default function VerifyPhonePage() {
             event.preventDefault()
             void form.handleSubmit(onSubmit)(event)
           }}
-          className="w-full space-y-5"
+          className="w-full space-y-4"
         >
           <FormField
             control={form.control}
             name="phoneNumber"
-            render={({ field }) => (
-              <FormItem className="relative space-y-0 pt-3">
-                <FormLabel className="sr-only">{t('fields.phone')}</FormLabel>
-                <div className="focus-within:border-primary-base flex items-center border-b border-stroke-soft-200 py-2 transition-colors">
-                  <Phone className="mr-3 h-5 w-5 text-gray-400" aria-hidden />
-                  <FormControl>
-                    <Input
-                      type="tel"
-                      autoComplete="tel"
-                      placeholder={t('fields.phone')}
-                      className="rounded-none border-0 bg-transparent px-0 shadow-none focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-base/40 focus-visible:ring-offset-0"
-                      disabled={!!detectedPhone}
-                      {...field}
-                    />
-                  </FormControl>
-                </div>
-                <FormMessage className="absolute pt-1 text-xs" />
-              </FormItem>
+            render={({ field, fieldState }) => (
+              <AuthField label={t('fields.phone')} icon={RiPhoneLine} hasError={!!fieldState.error}>
+                <AuthInput
+                  type="tel"
+                  autoComplete="tel"
+                  placeholder={t('fields.phone')}
+                  disabled={!!detectedPhone}
+                  {...field}
+                />
+              </AuthField>
             )}
           />
 
           <FormField
             control={form.control}
             name="otpCode"
-            render={({ field }) => (
-              <FormItem className="relative space-y-0 pt-3">
-                <FormLabel className="sr-only">{t('fields.otp')}</FormLabel>
-                <div className="focus-within:border-primary-base flex items-center border-b border-stroke-soft-200 py-2 transition-colors">
-                  <KeyRound className="mr-3 h-5 w-5 text-gray-400" aria-hidden />
-                  <FormControl>
-                    <Input
-                      inputMode="numeric"
-                      autoComplete="one-time-code"
-                      placeholder={t('fields.otp')}
-                      maxLength={6}
-                      className="rounded-none border-0 bg-transparent px-0 tracking-widest shadow-none focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-base/40 focus-visible:ring-offset-0"
-                      {...field}
-                    />
-                  </FormControl>
-                </div>
-                <FormMessage className="absolute pt-1 text-xs" />
-              </FormItem>
+            render={({ field, fieldState }) => (
+              <AuthField label={t('fields.otpShort')} icon={RiKey2Line} hasError={!!fieldState.error}>
+                <AuthInput
+                  inputMode="numeric"
+                  autoComplete="one-time-code"
+                  placeholder={t('fields.otp')}
+                  {...field}
+                />
+              </AuthField>
             )}
           />
 
-          <div className="flex items-center justify-end pt-6">
-            <Button
+          <div className="flex justify-end pt-3">
+            <Button.Root
               type="submit"
               disabled={isLoading}
-              className="rounded-full bg-primary-base px-8 py-2 font-bold text-static-white shadow-regular-xs transition-transform hover:bg-primary-darker active:scale-95 disabled:opacity-50"
+              variant="primary"
+              mode="filled"
+              size="medium"
+              className="min-w-[8.5rem]"
             >
               {isLoading ? t('verify.submitting') : t('verify.submit')}
-            </Button>
+            </Button.Root>
           </div>
         </form>
       </Form>

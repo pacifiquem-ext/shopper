@@ -1,6 +1,6 @@
 'use client'
 
-import { Sparkles } from 'lucide-react'
+import { RiSparklingLine } from '@remixicon/react'
 import { useCallback, useMemo, useState } from 'react'
 
 import {
@@ -10,6 +10,7 @@ import {
   hasTopStoresSectionItems,
 } from '@/lib/catalog-grid'
 import type { CatalogProductPublic } from '@/services/catalog.service'
+import { cn } from '@/lib/utils'
 
 import { ProductCard, type ProductCardLabels } from './product-card'
 import { ProductQuickViewSheet } from './product-quick-view-sheet'
@@ -21,6 +22,8 @@ interface NewArrivalsSection {
   title: string
   eyebrow: string
   items: ShopProductCell[]
+  /** When true, parent owns the section heading (e.g. marketplace home). */
+  hideHeader?: boolean
 }
 
 interface TopStoresSectionConfig {
@@ -88,19 +91,30 @@ export function ShopProductGridsWithQuickView({
   return (
     <>
       {newArrivals && hasCatalogSectionItems(newArrivals.items.length) ? (
-        <section id='new-arrivals' className='py-8 sm:py-12'>
-          <div className='mb-4 flex items-end justify-between gap-3 sm:mb-5 sm:gap-4'>
-            <div className='min-w-0'>
-              <span className='mb-2 inline-flex max-w-full items-center gap-1.5 rounded-full border border-stroke-soft-200 bg-bg-white-0 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.08em] text-text-strong-950 shadow-regular-xs sm:text-[11px]'>
-                <Sparkles className='size-3.5 shrink-0' style={{ color: accentColor }} aria-hidden />
-                <span className='truncate'>{newArrivals.eyebrow}</span>
-              </span>
-              <h2 className='text-xl font-bold tracking-tight text-[#171717] sm:text-2xl'>{newArrivals.title}</h2>
+        <section
+          id="new-arrivals"
+          className={cn(newArrivals.hideHeader ? 'py-0' : 'py-8 sm:py-12')}
+        >
+          {!newArrivals.hideHeader ? (
+            <div className="mb-4 flex items-end justify-between gap-3 sm:mb-5 sm:gap-4">
+              <div className="min-w-0">
+                <span className="mb-2 inline-flex max-w-full items-center gap-1.5 rounded-full border border-stroke-soft-200 bg-bg-white-0 px-2.5 py-1 text-label-xs uppercase tracking-[0.08em] text-text-strong-950 shadow-regular-xs">
+                  <RiSparklingLine
+                    className="size-3.5 shrink-0"
+                    style={{ color: accentColor }}
+                    aria-hidden
+                  />
+                  <span className="truncate">{newArrivals.eyebrow}</span>
+                </span>
+                <h2 className="text-title-h5 text-text-strong-950 sm:text-title-h4">
+                  {newArrivals.title}
+                </h2>
+              </div>
             </div>
-          </div>
+          ) : null}
           <ul className={catalogSectionGridClassForCount(newArrivals.items.length)}>
             {newArrivals.items.map(({ product, labels }, index) => (
-              <li key={product.id} className='os-fade-up' style={{ animationDelay: `${index * 45}ms` }}>
+              <li key={product.id} className="os-fade-up" style={{ animationDelay: `${index * 45}ms` }}>
                 {renderCard({ product, labels })}
               </li>
             ))}

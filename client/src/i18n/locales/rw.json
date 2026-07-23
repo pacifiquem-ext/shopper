@@ -270,7 +270,9 @@
       "help": "Ufite ikibazo?",
       "helpAria": "Ubufasha",
       "saveExit": "Bika usohoke",
-      "reset": "Subiza ku ntangiriro"
+      "reset": "Subiza ku ntangiriro",
+      "brand": "OnlineShop.rw",
+      "setup": "Gushiraho iduka"
     },
     "wizardTitle": "Gushyiraho ububiko bwawe",
     "stepLabel": "Intambwe {step} kuri {total}",
@@ -474,6 +476,10 @@
       "rule2": "Ntiryatangira cyangwa kurangira n’akanyo",
       "rule3": "Hagati y’inyuguti 2 na 63",
       "rule4": "Rikoreshwa gusa kuri /stores/{slug} mu isoko"
+    },
+    "loading": "Gutunganya setup yawe…",
+    "progress": {
+      "label": "Intambwe {current} kuri {total}"
     }
   },
   "dashboard": {

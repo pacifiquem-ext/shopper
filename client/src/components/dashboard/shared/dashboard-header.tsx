@@ -37,8 +37,8 @@ export function DashboardHeader() {
   const searchPlaceholder = t('header.searchPlaceholder')
 
   return (
-    <header className="sticky top-0 z-20 flex h-14 shrink-0 items-center justify-between gap-4 border-b border-stroke-soft-200 bg-bg-white-0/90 px-4 backdrop-blur-md sm:px-6 lg:px-8">
-      <div className="flex min-w-0 items-center gap-2">
+    <header className="sticky top-0 z-20 flex h-14 shrink-0 items-center justify-between gap-4 border-b border-stroke-soft-200/80 bg-bg-white-0/90 px-4 backdrop-blur-md sm:px-6 lg:px-8">
+      <div className="flex min-w-0 items-center gap-3">
         <Sheet open={mobileNavOpen} onOpenChange={setMobileNavOpen}>
           <Button.Root
             variant="neutral"
@@ -71,6 +71,9 @@ export function DashboardHeader() {
           </SheetContent>
         </Sheet>
         <div className="min-w-0">
+          <p className="text-paragraph-xs uppercase tracking-[0.08em] text-text-soft-400">
+            {t('sidebar.brand')}
+          </p>
           <p className="truncate text-label-md text-text-strong-950">{title}</p>
         </div>
       </div>

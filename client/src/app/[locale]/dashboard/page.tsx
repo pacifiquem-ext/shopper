@@ -111,9 +111,9 @@ export default function DashboardPage() {
 
   const quickLinks = useMemo(() => [
     { label: th('createProduct'), href: '/dashboard/products?action=create', icon: Plus, color: 'bg-primary-alpha-10 text-primary-base' },
-    { label: th('viewOrders'), href: '/dashboard/orders', icon: Layers, color: 'bg-sky-50 text-sky-900' },
-    { label: th('manageInventory'), href: '/dashboard/inventory', icon: Boxes, color: 'bg-emerald-50 text-emerald-900' },
-    { label: th('storeSettings'), href: '/dashboard/store-settings', icon: Edit, color: 'bg-violet-50 text-violet-900' },
+    { label: th('viewOrders'), href: '/dashboard/orders', icon: Layers, color: 'bg-information-alpha-10 text-information-base' },
+    { label: th('manageInventory'), href: '/dashboard/inventory', icon: Boxes, color: 'bg-primary-alpha-10 text-primary-darker' },
+    { label: th('storeSettings'), href: '/dashboard/store-settings', icon: Edit, color: 'bg-bg-weak-50 text-text-sub-600' },
   ], [th])
 
   const dash = (v: string | number | undefined) => (isLoading ? '—' : String(v ?? 0))
@@ -123,35 +123,37 @@ export default function DashboardPage() {
     <div className="flex w-full flex-col gap-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <div className="flex items-center gap-2 text-text-strong-950">
-            <div className="bg-primary-alpha-10 text-primary-base flex h-9 w-9 items-center justify-center rounded-xl">
-              <Box className="h-4 w-4" />
+          <div className="flex items-center gap-3 text-text-strong-950">
+            <div className="flex size-10 items-center justify-center rounded-10 bg-primary-base text-static-white shadow-regular-xs">
+              <Box className="size-4" aria-hidden />
             </div>
-            <h1 className="text-xl font-semibold">{t('nav.dashboard')}</h1>
+            <div>
+              <h1 className="text-title-h6 text-text-strong-950">{t('nav.dashboard')}</h1>
+              <p className="text-paragraph-sm text-text-sub-600">{th('welcome')}</p>
+            </div>
           </div>
-          <p className="mt-1 text-sm text-text-soft-400">{th('welcome')}</p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
           <DashboardFilters period={selectedPeriod} />
           <ExportButton
             fetchBlob={() => analyticsService.getReport(selectedPeriod)}
             filename={`report-${selectedPeriod}.csv`}
             label={t('header.generateReport')}
-            className="h-10 rounded-xl border-stroke-soft-200 bg-bg-white-0 px-4 text-sm font-medium text-text-sub-600 shadow-regular-xs hover:bg-bg-weak-50 hover:text-text-strong-950"
+            className="h-10 rounded-10 border-stroke-soft-200 bg-bg-white-0 px-4 text-label-sm text-text-sub-600 shadow-regular-xs hover:bg-bg-weak-50 hover:text-text-strong-950"
             variant="outline"
           />
         </div>
       </div>
 
       {loadError && !isLoading ? (
-        <div className="flex flex-col items-start gap-3 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-sm font-medium text-rose-800">{t('errors.loadFailed')}</p>
+        <div className="flex flex-col items-start gap-3 rounded-20 border border-error-base/20 bg-error-alpha-10 px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-paragraph-sm font-medium text-error-base">{t('errors.loadFailed')}</p>
           <Button
             type="button"
             variant="outline"
             onClick={() => setReloadKey((k) => k + 1)}
-            className="h-9 rounded-lg border-rose-200 bg-white text-rose-800 hover:bg-rose-50"
+            className="h-9 rounded-10 border-error-base/30 bg-bg-white-0 text-error-base hover:bg-error-alpha-10"
           >
             {t('errors.retry')}
           </Button>
@@ -197,12 +199,12 @@ export default function DashboardPage() {
               <Link
                 key={link.href}
                 href={link.href}
-                className="group flex flex-col items-center gap-3 rounded-xl border border-stroke-soft-200 bg-white p-4 transition-all hover:border-primary-base/20 hover:bg-primary-alpha-10"
+                className="group flex flex-col items-center gap-3 rounded-10 border border-stroke-soft-200 bg-bg-white-0 p-4 transition duration-200 hover:border-primary-base/25 hover:bg-primary-alpha-10 hover:shadow-regular-xs"
               >
-                <div className={cn('flex h-12 w-12 items-center justify-center rounded-xl transition-transform group-hover:scale-110', link.color)}>
-                  <link.icon className="h-5 w-5" />
+                <div className={cn('flex size-12 items-center justify-center rounded-10 transition-transform group-hover:scale-105', link.color)}>
+                  <link.icon className="size-5" aria-hidden />
                 </div>
-                <span className="text-center text-sm font-medium text-text-strong-950">{link.label}</span>
+                <span className="text-center text-label-sm text-text-strong-950">{link.label}</span>
               </Link>
             ))}
           </div>
@@ -228,54 +230,54 @@ export default function DashboardPage() {
             </Link>
           </CardHeader>
           <CardContent className="space-y-3">
-            <div className="flex items-center justify-between rounded-xl bg-gradient-to-br from-gray-50 to-gray-100/50 p-4 transition-all hover:shadow-sm">
+            <div className="flex items-center justify-between rounded-10 bg-bg-weak-50 p-4 ring-1 ring-inset ring-stroke-soft-200">
               <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-white shadow-sm">
-                  <Clock className="h-5 w-5 text-text-sub-600" />
+                <div className="flex size-10 items-center justify-center rounded-10 bg-bg-white-0 shadow-regular-xs">
+                  <Clock className="size-5 text-text-sub-600" aria-hidden />
                 </div>
                 <div>
-                  <div className="text-xs font-medium text-text-soft-400">{th('pending')}</div>
-                  <div className="text-2xl font-bold text-text-strong-950">{dash(dashboardMetrics?.pendingOrders)}</div>
+                  <div className="text-label-xs text-text-soft-400">{th('pending')}</div>
+                  <div className="text-title-h6 text-text-strong-950">{dash(dashboardMetrics?.pendingOrders)}</div>
                 </div>
               </div>
               <div className="text-right">
-                <div className="text-xs font-medium text-gray-400">{th('awaitingAction')}</div>
+                <div className="text-paragraph-xs text-text-soft-400">{th('awaitingAction')}</div>
               </div>
             </div>
 
-            <div className="flex items-center justify-between rounded-xl bg-gradient-to-br from-blue-50/50 to-sky-50/30 p-4 transition-all hover:shadow-sm">
+            <div className="flex items-center justify-between rounded-10 bg-information-alpha-10 p-4 ring-1 ring-inset ring-stroke-soft-200">
               <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-white shadow-sm">
-                  <RotateCcw className="h-5 w-5 text-sky-700" />
+                <div className="flex size-10 items-center justify-center rounded-10 bg-bg-white-0 shadow-regular-xs">
+                  <RotateCcw className="size-5 text-information-base" aria-hidden />
                 </div>
                 <div>
-                  <div className="text-xs font-medium text-text-soft-400">{th('totalOrders')}</div>
-                  <div className="text-2xl font-bold text-text-strong-950">{dash(dashboardMetrics?.totalOrders)}</div>
+                  <div className="text-label-xs text-text-soft-400">{th('totalOrders')}</div>
+                  <div className="text-title-h6 text-text-strong-950">{dash(dashboardMetrics?.totalOrders)}</div>
                 </div>
               </div>
               <div className="text-right">
-                <div className="text-xs font-medium text-sky-600">{th('allOrders')}</div>
+                <div className="text-paragraph-xs text-information-base">{th('allOrders')}</div>
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-3">
-              <div className="rounded-xl bg-gradient-to-br from-emerald-50/30 to-green-50/20 p-4 transition-all hover:shadow-sm">
+              <div className="rounded-10 bg-primary-alpha-10/60 p-4 ring-1 ring-inset ring-stroke-soft-200">
                 <div className="flex items-center gap-2">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white shadow-sm">
-                    <CheckCircle2 className="h-4 w-4 text-[--color-emerald-600]" />
+                  <div className="flex size-8 items-center justify-center rounded-lg bg-bg-white-0 shadow-regular-xs">
+                    <CheckCircle2 className="size-4 text-primary-base" aria-hidden />
                   </div>
-                  <div className="text-xs font-medium text-text-soft-400">{th('completed')}</div>
+                  <div className="text-label-xs text-text-soft-400">{th('completed')}</div>
                 </div>
-                <div className="mt-2 text-xl font-bold text-text-strong-950">{dash(dashboardMetrics?.completedOrders)}</div>
+                <div className="mt-2 text-title-h6 text-text-strong-950">{dash(dashboardMetrics?.completedOrders)}</div>
               </div>
-              <div className="rounded-xl bg-gradient-to-br from-amber-50/30 to-yellow-50/20 p-4 transition-all hover:shadow-sm">
+              <div className="rounded-10 bg-warning-alpha-10 p-4 ring-1 ring-inset ring-stroke-soft-200">
                 <div className="flex items-center gap-2">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white shadow-sm">
-                    <AlertTriangle className="h-4 w-4 text-amber-500" />
+                  <div className="flex size-8 items-center justify-center rounded-lg bg-bg-white-0 shadow-regular-xs">
+                    <AlertTriangle className="size-4 text-warning-base" aria-hidden />
                   </div>
-                  <div className="text-xs font-medium text-text-soft-400">{th('lowStock')}</div>
+                  <div className="text-label-xs text-text-soft-400">{th('lowStock')}</div>
                 </div>
-                <div className="mt-2 text-xl font-bold text-text-strong-950">{dash(inventorySummary?.lowStock)}</div>
+                <div className="mt-2 text-title-h6 text-text-strong-950">{dash(inventorySummary?.lowStock)}</div>
               </div>
             </div>
           </CardContent>
@@ -298,50 +300,50 @@ export default function DashboardPage() {
             </Link>
           </CardHeader>
           <CardContent className="space-y-3">
-            <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-emerald-50/40 via-green-50/20 to-teal-50/30 p-5 transition-all hover:shadow-sm">
+            <div className="relative overflow-hidden rounded-10 bg-primary-alpha-10/50 p-5 ring-1 ring-inset ring-stroke-soft-200">
               <div className="absolute right-4 top-4 opacity-10">
-                <Banknote className="h-16 w-16 text-[--color-emerald-600]" />
+                <Banknote className="size-16 text-primary-base" aria-hidden />
               </div>
               <div className="relative">
                 <div className="flex items-center gap-2">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-white shadow-sm">
-                    <Banknote className="h-4 w-4 text-[--color-emerald-600]" />
+                  <div className="flex size-9 items-center justify-center rounded-10 bg-bg-white-0 shadow-regular-xs">
+                    <Banknote className="size-4 text-primary-base" aria-hidden />
                   </div>
-                  <div className="text-xs font-medium text-text-soft-400">{th('totalStockValue')}</div>
+                  <div className="text-label-xs text-text-soft-400">{th('totalStockValue')}</div>
                 </div>
-                <div className="mt-3 text-3xl font-bold text-text-strong-950">
+                <div className="mt-3 text-title-h5 text-text-strong-950">
                   {moneyOrDash(inventorySummary?.totalStockValue)}
                 </div>
-                <div className="mt-1 text-xs text-text-soft-400">{th('acrossAllProducts')}</div>
+                <div className="mt-1 text-paragraph-xs text-text-sub-600">{th('acrossAllProducts')}</div>
               </div>
             </div>
 
             <div className="grid grid-cols-3 gap-3">
-              <div className="group rounded-xl bg-gradient-to-br from-gray-50 to-slate-50/50 p-4 transition-all hover:shadow-sm">
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white shadow-sm transition-transform group-hover:scale-110">
-                  <Box className="h-4 w-4 text-text-sub-600" />
+              <div className="rounded-10 bg-bg-weak-50 p-4 ring-1 ring-inset ring-stroke-soft-200">
+                <div className="flex size-8 items-center justify-center rounded-lg bg-bg-white-0 shadow-regular-xs">
+                  <Box className="size-4 text-text-sub-600" aria-hidden />
                 </div>
-                <div className="mt-3 text-xs font-medium text-text-soft-400">{th('inStock')}</div>
-                <div className="mt-1 text-xl font-bold text-text-strong-950">{dash(inventorySummary?.totalStockQuantity)}</div>
-                <div className="mt-0.5 text-xs text-gray-400">{th('units')}</div>
+                <div className="mt-3 text-label-xs text-text-soft-400">{th('inStock')}</div>
+                <div className="mt-1 text-title-h6 text-text-strong-950">{dash(inventorySummary?.totalStockQuantity)}</div>
+                <div className="mt-0.5 text-paragraph-xs text-text-soft-400">{th('units')}</div>
               </div>
 
-              <div className="group rounded-xl bg-gradient-to-br from-slate-50 to-gray-100/50 p-4 transition-all hover:shadow-sm">
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white shadow-sm transition-transform group-hover:scale-110">
-                  <AlertTriangle className="h-4 w-4 text-text-sub-600" />
+              <div className="rounded-10 bg-warning-alpha-10 p-4 ring-1 ring-inset ring-stroke-soft-200">
+                <div className="flex size-8 items-center justify-center rounded-lg bg-bg-white-0 shadow-regular-xs">
+                  <AlertTriangle className="size-4 text-warning-base" aria-hidden />
                 </div>
-                <div className="mt-3 text-xs font-medium text-text-soft-400">{th('lowStock')}</div>
-                <div className="mt-1 text-xl font-bold text-text-strong-950">{dash(inventorySummary?.lowStock)}</div>
-                <div className="mt-0.5 text-xs text-gray-400">{th('items')}</div>
+                <div className="mt-3 text-label-xs text-text-soft-400">{th('lowStock')}</div>
+                <div className="mt-1 text-title-h6 text-text-strong-950">{dash(inventorySummary?.lowStock)}</div>
+                <div className="mt-0.5 text-paragraph-xs text-text-soft-400">{th('items')}</div>
               </div>
 
-              <div className="group rounded-xl bg-gradient-to-br from-red-50/30 to-rose-50/20 p-4 transition-all hover:shadow-sm">
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white shadow-sm transition-transform group-hover:scale-110">
-                  <XCircle className="h-4 w-4 text-red-500" />
+              <div className="rounded-10 bg-error-alpha-10 p-4 ring-1 ring-inset ring-stroke-soft-200">
+                <div className="flex size-8 items-center justify-center rounded-lg bg-bg-white-0 shadow-regular-xs">
+                  <XCircle className="size-4 text-error-base" aria-hidden />
                 </div>
-                <div className="mt-3 text-xs font-medium text-text-soft-400">{th('outOfStock')}</div>
-                <div className="mt-1 text-xl font-bold text-text-strong-950">{dash(inventorySummary?.outOfStock)}</div>
-                <div className="mt-0.5 text-xs text-gray-400">{th('items')}</div>
+                <div className="mt-3 text-label-xs text-text-soft-400">{th('outOfStock')}</div>
+                <div className="mt-1 text-title-h6 text-text-strong-950">{dash(inventorySummary?.outOfStock)}</div>
+                <div className="mt-0.5 text-paragraph-xs text-text-soft-400">{th('items')}</div>
               </div>
             </div>
           </CardContent>
@@ -366,7 +368,7 @@ export default function DashboardPage() {
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <div className="group rounded-xl bg-gradient-to-br from-gray-50 to-slate-50/50 p-5 transition-all hover:shadow-sm">
+            <div className="group rounded-xl bg-gradient-to-br from-bg-weak-50 to-bg-white-0 p-5 transition-all hover:shadow-sm">
               <div className="flex items-center gap-3">
                 <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-white shadow-sm transition-transform group-hover:scale-110">
                   <ShoppingBag className="h-5 w-5 text-text-sub-600" />
@@ -376,13 +378,13 @@ export default function DashboardPage() {
                   <div className="text-2xl font-bold text-text-strong-950">{dash(dashboardMetrics?.totalOrders)}</div>
                 </div>
               </div>
-              <div className="mt-2 text-xs text-gray-400">{th('totalOrdersPlaced')}</div>
+              <div className="mt-2 text-xs text-text-soft-400">{th('totalOrdersPlaced')}</div>
             </div>
 
-            <div className="group rounded-xl bg-gradient-to-br from-blue-50/40 to-sky-50/30 p-5 transition-all hover:shadow-sm">
+            <div className="group rounded-xl bg-gradient-to-br from-information-alpha-10 to-bg-weak-50 p-5 transition-all hover:shadow-sm">
               <div className="flex items-center gap-3">
                 <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-white shadow-sm transition-transform group-hover:scale-110">
-                  <ArrowUpRight className="h-5 w-5 text-sky-700" />
+                  <ArrowUpRight className="h-5 w-5 text-information-base" />
                 </div>
                 <div>
                   <div className="text-xs font-medium text-text-soft-400">{t('cards.revenue')}</div>
@@ -391,10 +393,10 @@ export default function DashboardPage() {
                   </div>
                 </div>
               </div>
-              <div className="mt-2 text-xs text-gray-400">{th('grossIncome')}</div>
+              <div className="mt-2 text-xs text-text-soft-400">{th('grossIncome')}</div>
             </div>
 
-            <div className="group rounded-xl bg-gradient-to-br from-slate-50 to-gray-100/50 p-5 transition-all hover:shadow-sm">
+            <div className="group rounded-xl bg-gradient-to-br from-bg-weak-50 to-bg-white-0 p-5 transition-all hover:shadow-sm">
               <div className="flex items-center gap-3">
                 <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-white shadow-sm transition-transform group-hover:scale-110">
                   <ArrowDownRight className="h-5 w-5 text-text-sub-600" />
@@ -404,20 +406,20 @@ export default function DashboardPage() {
                   <div className="text-2xl font-bold text-text-strong-950">{dash(dashboardMetrics?.completedOrders)}</div>
                 </div>
               </div>
-              <div className="mt-2 text-xs text-gray-400">{th('fulfilledOrders')}</div>
+              <div className="mt-2 text-xs text-text-soft-400">{th('fulfilledOrders')}</div>
             </div>
 
-            <div className="group rounded-xl bg-gradient-to-br from-emerald-50/40 via-green-50/20 to-teal-50/30 p-5 transition-all hover:shadow-sm">
+            <div className="group rounded-xl bg-gradient-to-br from-primary-alpha-10 to-bg-weak-50 p-5 transition-all hover:shadow-sm">
               <div className="flex items-center gap-3">
                 <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-white shadow-sm transition-transform group-hover:scale-110">
-                  <Users className="h-5 w-5 text-[--color-emerald-600]" />
+                  <Users className="h-5 w-5 text-primary-base" />
                 </div>
                 <div>
                   <div className="text-xs font-medium text-text-soft-400">{th('totalCustomers')}</div>
                   <div className="text-2xl font-bold text-text-strong-950">{dash(dashboardMetrics?.totalCustomers)}</div>
                 </div>
               </div>
-              <div className="mt-2 text-xs text-gray-400">{th('totalCustomersHint')}</div>
+              <div className="mt-2 text-xs text-text-soft-400">{th('totalCustomersHint')}</div>
             </div>
           </div>
         </CardContent>
@@ -446,7 +448,7 @@ export default function DashboardPage() {
           {isLoading ? (
             <LoaderPanel minHeightClassName="min-h-[140px]" size="md" />
           ) : topProducts.length === 0 ? (
-            <div className="py-8 text-center text-sm text-gray-400">{th('noSalesData')}</div>
+            <div className="py-8 text-center text-sm text-text-soft-400">{th('noSalesData')}</div>
           ) : (
             <div className="space-y-3">
               {topProducts.map((product, idx) => (
@@ -494,7 +496,7 @@ export default function DashboardPage() {
             />
             <MetricTile
               icon={<CheckCircle2 className="h-4 w-4" />}
-              iconClassName="bg-emerald-50 text-[--color-emerald-600]"
+              iconClassName="bg-primary-alpha-10 text-primary-base"
               label={th('completedOrders')}
               value={dash(dashboardMetrics?.completedOrders)}
             />
@@ -535,13 +537,13 @@ export default function DashboardPage() {
           <CardContent className="grid grid-cols-2 gap-4 pt-4">
             <MetricTile
               icon={<Users className="h-4 w-4" />}
-              iconClassName="bg-emerald-50 text-[--color-emerald-600]"
+              iconClassName="bg-primary-alpha-10 text-primary-base"
               label={t('cards.totalCustomers')}
               value={dash(dashboardMetrics?.totalCustomers)}
             />
             <MetricTile
               icon={<ShoppingBag className="h-4 w-4" />}
-              iconClassName="bg-sky-50 text-sky-600"
+              iconClassName="bg-information-alpha-10 text-information-base"
               label={th('totalOrders')}
               value={dash(dashboardMetrics?.totalOrders)}
             />
@@ -594,7 +596,7 @@ export default function DashboardPage() {
           {isLoading ? (
             <LoaderPanel minHeightClassName="min-h-[160px]" size="md" />
           ) : recentActivity.length === 0 ? (
-            <div className="py-8 text-center text-sm text-gray-400">{th('noRecentActivity')}</div>
+            <div className="py-8 text-center text-sm text-text-soft-400">{th('noRecentActivity')}</div>
           ) : (
             <div className="space-y-2">
               {recentActivity.map((item) => (
@@ -608,7 +610,7 @@ export default function DashboardPage() {
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center justify-between gap-2">
                       <span className="text-sm font-semibold text-text-strong-950">{item.title}</span>
-                      <span className="shrink-0 text-xs text-gray-400">
+                      <span className="shrink-0 text-xs text-text-soft-400">
                         {new Date(item.createdAt).toLocaleDateString('en-RW', {
                           day: '2-digit',
                           month: 'short',

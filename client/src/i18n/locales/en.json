@@ -270,7 +270,9 @@
       "help": "Questions?",
       "helpAria": "Help",
       "saveExit": "Save & exit",
-      "reset": "Reset"
+      "reset": "Reset",
+      "brand": "OnlineShop.rw",
+      "setup": "Store setup"
     },
     "wizardTitle": "Store Setup Wizard",
     "stepLabel": "Step {step} of {total}",
@@ -474,6 +476,10 @@
       "rule2": "Cannot start or end with a hyphen",
       "rule3": "Must be between 2 and 63 characters",
       "rule4": "Used only for /stores/{slug} marketplace profiles"
+    },
+    "loading": "Loading your setup…",
+    "progress": {
+      "label": "Step {current} of {total}"
     }
   },
   "dashboard": {
