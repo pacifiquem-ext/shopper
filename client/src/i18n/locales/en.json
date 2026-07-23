@@ -877,7 +877,9 @@
           "empty": "No images added yet.",
           "zoom": "Zoom",
           "defaultAlt": "Product",
-          "imageInvalid": "Image not accepted: {reason}"
+          "imageInvalid": "Image not accepted: {reason}",
+          "uploadSuccess": "Images uploaded",
+          "uploadFailed": "Image upload failed"
         },
         "variants": {
           "colors": "Colors",

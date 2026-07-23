@@ -32,6 +32,7 @@ import { TurningZeroLoader } from '@/components/ui/turning-zero-loader'
 import { toast } from 'sonner'
 import { validateImageUrl, DEFAULT_PRODUCT_IMAGE_LIMITS } from '@/lib/image-validation'
 import { getPublicApiBaseUrl } from '@/lib/api-base-url'
+import { mediaService } from '@/services/media.service'
 
 
 type ProductStatus = 'ACTIVE' | 'DRAFT' | 'ARCHIVED'
@@ -531,12 +532,31 @@ export function ProductFormModal({
                               accept="image/*"
                               multiple
                               className="hidden"
-                              onChange={(e) => {
+                              onChange={async (e) => {
                                 const files = Array.from(e.target.files ?? [])
-                                const urls: string[] = []
-                                for (const f of files) urls.push(URL.createObjectURL(f))
-                                addImages(urls)
                                 e.target.value = ''
+                                if (files.length === 0) return
+                                setImageValidating(true)
+                                try {
+                                  const urls: string[] = []
+                                  for (const file of files) {
+                                    const uploaded = await mediaService.uploadAuthenticated(
+                                      file,
+                                      'product',
+                                    )
+                                    urls.push(uploaded.url)
+                                  }
+                                  addImages(urls)
+                                  toast.success(t('products.create.media.uploadSuccess'))
+                                } catch (err) {
+                                  toast.error(
+                                    err instanceof Error
+                                      ? err.message
+                                      : t('products.create.media.uploadFailed'),
+                                  )
+                                } finally {
+                                  setImageValidating(false)
+                                }
                               }}
                             />
                             <Button

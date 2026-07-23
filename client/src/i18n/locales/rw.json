@@ -877,7 +877,9 @@
           "empty": "Nta foto zirimo.",
           "zoom": "Zoom",
           "defaultAlt": "Igicuruzwa",
-          "imageInvalid": "Ishusho ntiyemewe: {reason}"
+          "imageInvalid": "Ishusho ntiyemewe: {reason}",
+          "uploadSuccess": "Amashusho yoherejwe",
+          "uploadFailed": "Kohereza ishusho byanze"
         },
         "variants": {
           "colors": "Amabara",
