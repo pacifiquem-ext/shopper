@@ -470,7 +470,6 @@ export type PlaceGuestOrderPayload = {
     quantity: number
   }>
   promoCode?: string
-  /** Offline pay default: MOBILE_MONEY so payment proof flow works */
   paymentMethod?: 'MOBILE_MONEY' | 'BANK_TRANSFER' | 'CASH_ON_DELIVERY' | 'CARD'
 }
 

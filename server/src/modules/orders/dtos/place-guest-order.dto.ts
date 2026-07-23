@@ -54,4 +54,9 @@ export class PlaceGuestOrderDto {
     @IsOptional()
     @IsEnum(PaymentMethod)
     paymentMethod?: string;
+
+    @ApiPropertyOptional({ example: 'WELCOME10' })
+    @IsOptional()
+    @IsString()
+    promoCode?: string;
 }

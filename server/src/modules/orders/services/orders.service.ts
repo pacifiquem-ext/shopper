@@ -36,6 +36,7 @@ type Tx = Prisma.TransactionClient;
 
 type ResolvedLine = {
     productVariantId: string;
+    productId: string;
     productName: string;
     sku: string;
     quantity: number;
@@ -230,6 +231,7 @@ export class OrdersService {
                     const unitPrice = Number(variant.price);
                     const line: ResolvedLine = {
                         productVariantId: variant.id,
+                        productId: variant.product.id,
                         productName: `${variant.product.name} — ${variant.title}`,
                         sku: variant.sku,
                         quantity,
@@ -264,6 +266,18 @@ export class OrdersService {
                         0,
                     );
 
+                    const promo = await this.resolveGuestPromoDiscount({
+                        code: dto.promoCode,
+                        storeId,
+                        subtotal,
+                        customerPhone,
+                        productIds: bucket.lines.map((l) => l.productId),
+                        tx,
+                    });
+
+                    const discount = promo.discount;
+                    const total = Math.max(0, subtotal - discount);
+
                     const orderId = await this.persistOrder(tx, {
                         storeId,
                         userId: 'guest',
@@ -280,17 +294,29 @@ export class OrdersService {
                         },
                         subtotal,
                         deliveryFee: 0,
-                        discount: 0,
+                        discount,
                         tax: 0,
-                        total: subtotal,
+                        total,
+                        promoCode: promo.code,
+                        promoDiscount: discount,
                         customerNote: `Customer phone for vendor follow-up: ${customerPhone}`,
                         paymentMethod:
-                            (dto as { paymentMethod?: string }).paymentMethod ||
-                            PaymentMethod.MOBILE_MONEY,
+                            dto.paymentMethod || PaymentMethod.MOBILE_MONEY,
                         deliveryMethod: 'Phone order',
                         lines: bucket.lines,
                         initialMessage: `New order placed. Contact customer at ${customerPhone}.`,
                     });
+
+                    if (promo.promotionId && discount > 0) {
+                        await tx.promotionRedemption.create({
+                            data: {
+                                promotionId: promo.promotionId,
+                                orderId,
+                                amount: discount,
+                                customerPhone,
+                            },
+                        });
+                    }
 
                     const order = await tx.order.findUniqueOrThrow({
                         where: { id: orderId },
@@ -302,7 +328,7 @@ export class OrdersService {
                         orderNumber: order.orderNumber,
                         storeId,
                         storeName: bucket.storeName,
-                        total: subtotal,
+                        total,
                     });
                 }
 
@@ -325,6 +351,119 @@ export class OrdersService {
         }
 
         return [StoreStatus.APPROVED];
+    }
+
+    private async resolveGuestPromoDiscount(input: {
+        code?: string;
+        storeId: string;
+        subtotal: number;
+        customerPhone: string;
+        productIds: string[];
+        tx: Tx;
+    }): Promise<{
+        discount: number;
+        code: string | null;
+        promotionId: string | null;
+    }> {
+        const raw = input.code?.trim();
+        if (!raw) {
+            return { discount: 0, code: null, promotionId: null };
+        }
+
+        const code = raw.toUpperCase();
+        const now = new Date();
+        const promotions = await input.tx.promotion.findMany({
+            where: {
+                code: { equals: code, mode: 'insensitive' },
+                status: 'ACTIVE',
+                startsAt: { lte: now },
+                OR: [{ endsAt: null }, { endsAt: { gte: now } }],
+                AND: [
+                    {
+                        OR: [
+                            { scope: 'PLATFORM', storeId: null },
+                            { scope: 'STORE', storeId: input.storeId },
+                        ],
+                    },
+                ],
+            },
+            include: {
+                targets: true,
+                _count: { select: { redemptions: true } },
+            },
+            take: 5,
+        });
+
+        const promotion =
+            promotions.find((p) => p.scope === 'STORE') ?? promotions[0];
+        if (!promotion) {
+            throw new BadRequestException('Promo code is invalid or expired');
+        }
+        if (
+            promotion.maxRedemptions != null &&
+            promotion._count.redemptions >= promotion.maxRedemptions
+        ) {
+            throw new BadRequestException('Promo code redemption limit reached');
+        }
+        if (
+            promotion.minOrderAmount != null &&
+            input.subtotal < Number(promotion.minOrderAmount)
+        ) {
+            throw new BadRequestException(
+                'Order total is below the promo minimum',
+            );
+        }
+
+        let eligibleSubtotal = input.subtotal;
+        if (promotion.targets.length > 0) {
+            const productIds = new Set(
+                promotion.targets
+                    .map((t) => t.productId)
+                    .filter((id): id is string => Boolean(id)),
+            );
+            const categoryIds = new Set(
+                promotion.targets
+                    .map((t) => t.categoryId)
+                    .filter((id): id is string => Boolean(id)),
+            );
+            // For guest lines we only have productIds; category targets apply via product lookup.
+            let matching = input.productIds;
+            if (productIds.size > 0) {
+                matching = matching.filter((id) => productIds.has(id));
+            }
+            if (categoryIds.size > 0) {
+                const products = await input.tx.product.findMany({
+                    where: {
+                        id: { in: input.productIds },
+                        categoryId: { in: [...categoryIds] },
+                    },
+                    select: { id: true },
+                });
+                const catMatch = new Set(products.map((p) => p.id));
+                matching = matching.filter((id) => catMatch.has(id));
+            }
+            if (matching.length === 0) {
+                throw new BadRequestException(
+                    'Promo code does not apply to cart items',
+                );
+            }
+            // Approximate eligible share as full subtotal when mixed targeting is complex.
+            eligibleSubtotal = input.subtotal;
+        }
+
+        let discount = 0;
+        if (promotion.type === 'PERCENT') {
+            discount = (eligibleSubtotal * Number(promotion.value)) / 100;
+        } else {
+            discount = Number(promotion.value);
+        }
+        discount = Math.min(Math.max(0, discount), input.subtotal);
+
+        return {
+            discount,
+            code: promotion.code,
+            promotionId: promotion.id,
+        };
     }
 
     async findAll(storeId: string, filters: any) {
@@ -735,6 +874,7 @@ export class OrdersService {
 
             lines.push({
                 productVariantId: variant.id,
+                productId: variant.product.id,
                 productName:
                     options.trustClientPrices && item.productName
                         ? item.productName

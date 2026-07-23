@@ -34,6 +34,7 @@ const phoneRegex = /^\+[1-9]\d{1,14}$/
 
 type PlaceOrderPhoneInput = {
   customerPhone: string
+  promoCode?: string
 }
 
 type PlaceOrderDialogProps = {
@@ -62,13 +63,14 @@ export function PlaceOrderDialog({
           .string()
           .min(1, t('placeOrderPhoneRequired'))
           .regex(phoneRegex, t('placeOrderPhoneInvalid')),
+        promoCode: z.string().optional(),
       }),
     [t],
   )
 
   const form = useForm<PlaceOrderPhoneInput>({
     resolver: zodResolver(schema),
-    defaultValues: { customerPhone: '' },
+    defaultValues: { customerPhone: '', promoCode: '' },
   })
 
   const handleOpenChange = (next: boolean) => {
@@ -88,6 +90,7 @@ export function PlaceOrderDialog({
       const result = await placeGuestOrder({
         customerPhone: values.customerPhone.trim(),
         paymentMethod: 'MOBILE_MONEY',
+        promoCode: values.promoCode?.trim() || undefined,
         items: items.map((item) => ({
           productVariantId: item.variantId,
           quantity: item.quantity,
@@ -160,6 +163,28 @@ export function PlaceOrderDialog({
                     </FormControl>
                   </div>
                   <FormDescription>{t('placeOrderPhoneHint')}</FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name='promoCode'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{t('placeOrderPromoLabel')}</FormLabel>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      type='text'
+                      autoComplete='off'
+                      placeholder={t('placeOrderPromoPlaceholder')}
+                      className='uppercase'
+                      disabled={submitting}
+                    />
+                  </FormControl>
+                  <FormDescription>{t('placeOrderPromoHint')}</FormDescription>
                   <FormMessage />
                 </FormItem>
               )}

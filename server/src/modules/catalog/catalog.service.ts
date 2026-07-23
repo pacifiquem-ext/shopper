@@ -170,24 +170,10 @@ export class CatalogService {
             // continue; queries below still use the pool
         }
 
-        let products: ProductWithCatalog[] = [];
-        let stores: Array<{
-            id: string;
-            displayName: string;
-            logoUrl: string | null;
-            slug: string;
-            brandColors: Prisma.JsonValue;
-            description: string | null;
-            currency: string;
-            contactEmail: string | null;
-            contactPhone: string | null;
-            contactAddress: string | null;
-            ratingAvg: Prisma.Decimal;
-            ratingCount: number;
-            approvedAt: Date | null;
-            createdAt: Date;
-            aboutUs: string | null;
-        }> = [];
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        let products: any[] = [];
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        let stores: any[] = [];
 
         const leanStoreSelect = {
             id: true,
