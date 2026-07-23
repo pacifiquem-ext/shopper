@@ -3,12 +3,35 @@
 import { useEffect, useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { Card } from '@/components/alignui/card'
+import { EmptyState } from '@/components/alignui/empty'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/alignui/table'
 import { TurningZeroLoader } from '@/components/ui/turning-zero-loader'
 import { adminService } from '@/services/admin.service'
 
+type CategoryRow = {
+  id: string
+  slug?: string
+  nameEn?: string
+  nameRw?: string
+  name?: string
+  sortOrder?: number
+  isActive?: boolean
+  _count?: { attributeDefs?: number; products?: number }
+  attributeDefs?: unknown[]
+  productCount?: number
+  attributeKeys?: string[]
+}
+
 export default function AdminCategoriesPage() {
   const t = useTranslations('admin')
-  const [rows, setRows] = useState<Array<Record<string, unknown>>>([])
+  const [rows, setRows] = useState<CategoryRow[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
 
@@ -19,7 +42,7 @@ export default function AdminCategoriesPage() {
       try {
         const res = await adminService.getCategories()
         const data = (res as { data?: unknown })?.data ?? res
-        if (!cancelled) setRows(Array.isArray(data) ? (data as Array<Record<string, unknown>>) : [])
+        if (!cancelled) setRows(Array.isArray(data) ? (data as CategoryRow[]) : [])
       } catch {
         if (!cancelled) setError(true)
       } finally {
@@ -46,36 +69,37 @@ export default function AdminCategoriesPage() {
           <p className="text-paragraph-sm text-text-sub-600">{t('tableUnavailable')}</p>
         </Card>
       ) : rows.length === 0 ? (
-        <p className="text-center text-text-sub-600">{t('emptyTable')}</p>
+        <EmptyState title={t('emptyTable')} />
       ) : (
-        <div className="overflow-x-auto rounded-2xl border border-stroke-soft-200 bg-bg-white-0">
-          <table className="min-w-full text-left text-sm">
-            <thead className="border-b border-stroke-soft-200 bg-bg-weak-50 text-text-sub-600">
-              <tr>
-                {Object.keys(rows[0] ?? {})
-                  .slice(0, 6)
-                  .map((key) => (
-                    <th key={key} className="px-4 py-3 font-medium">
-                      {key}
-                    </th>
-                  ))}
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((row, i) => (
-                <tr key={String(row.id ?? i)} className="border-b border-stroke-soft-200 last:border-0">
-                  {Object.keys(rows[0] ?? {})
-                    .slice(0, 6)
-                    .map((key) => (
-                      <td key={key} className="px-4 py-3 text-text-strong-950">
-                        {String(row[key] ?? '—')}
-                      </td>
-                    ))}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>{t('catSlug')}</TableHead>
+              <TableHead>{t('catNameEn')}</TableHead>
+              <TableHead>{t('catNameRw')}</TableHead>
+              <TableHead>{t('catAttributes')}</TableHead>
+              <TableHead>{t('catStatus')}</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {rows.map((row) => (
+              <TableRow key={row.id}>
+                <TableCell className="font-semibold">{row.slug ?? '—'}</TableCell>
+                <TableCell>{row.nameEn ?? row.name ?? '—'}</TableCell>
+                <TableCell>{row.nameRw ?? '—'}</TableCell>
+                <TableCell>
+                  {row._count?.attributeDefs ??
+                    row.attributeDefs?.length ??
+                    row.attributeKeys?.length ??
+                    0}
+                </TableCell>
+                <TableCell>
+                  {row.isActive === false ? t('inactive') : t('active')}
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
       )}
     </div>
   )

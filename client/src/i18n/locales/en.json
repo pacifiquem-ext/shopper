@@ -108,7 +108,28 @@
     "homeOnPromotionEyebrow": "On promotion",
     "homeOnPromotionTitle": "Deals you will love",
     "homeCtaTitle": "Explore the full marketplace",
-    "homeCtaSubtitle": "Filter by category, sort by price, or visit a store profile."
+    "homeCtaSubtitle": "Filter by category, sort by price, or visit a store profile.",
+    "reviews": {
+      "title": "Customer reviews",
+      "subtitle": "What buyers say about this product.",
+      "loading": "Loading reviews…",
+      "empty": "No reviews yet",
+      "emptyHint": "Be the first to share your experience after delivery.",
+      "writeTitle": "Write a review",
+      "loginRequired": "Please log in to leave a review.",
+      "loginPrompt": "Sign in to leave a review.",
+      "loginLink": "Log in",
+      "ratingLabel": "Rating",
+      "titleLabel": "Title",
+      "titlePlaceholder": "Great quality",
+      "bodyLabel": "Review",
+      "bodyPlaceholder": "Share details about fit, quality, delivery…",
+      "submit": "Submit review",
+      "submitting": "Submitting…",
+      "submitted": "Review submitted for moderation",
+      "submitFailed": "Could not submit review",
+      "ratingStars": "{rating} / 5"
+    }
   },
   "storeTemplates": {
     "pickerTitle": "Choose your storefront",
@@ -1544,6 +1565,13 @@
     "promoValidation": "Enter code, name, and a positive value.",
     "promoCreated": "Platform promo created",
     "promoDeleted": "Promo deleted",
-    "delete": "Delete"
+    "delete": "Delete",
+    "catSlug": "Slug",
+    "catNameEn": "Name (EN)",
+    "catNameRw": "Name (RW)",
+    "catAttributes": "Attributes",
+    "catStatus": "Status",
+    "active": "Active",
+    "inactive": "Inactive"
   }
 }

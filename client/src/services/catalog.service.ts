@@ -630,3 +630,41 @@ export async function fetchCatalogProductById(
   const envelope = body as ApiResponse<CatalogProductPublic> & { data?: CatalogProductPublic }
   return { data: envelope.data ?? null }
 }
+
+
+export type ProductReviewPublic = {
+  id: string
+  rating: number
+  title?: string | null
+  body?: string | null
+  createdAt: string
+  status?: string
+}
+
+export async function fetchProductReviews(
+  productId: string,
+): Promise<ProductReviewPublic[]> {
+  const root = resolveCatalogApiRoot()
+  const url = `${root}/catalog/products/${encodeURIComponent(productId)}/reviews`
+  try {
+    const res = await fetch(url, { cache: 'no-store', headers: { Accept: 'application/json' } })
+    if (!res.ok) return []
+    const body = (await res.json()) as { data?: { data?: ProductReviewPublic[] } | ProductReviewPublic[] }
+    const payload = body.data
+    if (Array.isArray(payload)) return payload
+    if (payload && Array.isArray((payload as { data?: ProductReviewPublic[] }).data)) {
+      return (payload as { data: ProductReviewPublic[] }).data
+    }
+    return []
+  } catch {
+    return []
+  }
+}
+
+export async function submitProductReview(
+  productId: string,
+  dto: { rating: number; title?: string; body?: string },
+): Promise<void> {
+  const { api } = await import('@/lib/axios')
+  await api.post(`/catalog/products/${productId}/reviews`, dto)
+}

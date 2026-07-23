@@ -14,6 +14,7 @@ import type { CatalogProductPublic } from '@/services/catalog.service'
 import { storePublicSlug } from '@/services/catalog.service'
 
 import { QuickAddButton } from './quick-add-button'
+import { ProductReviews } from './product-reviews'
 
 type ProductDetailsBodyProps = {
   product: CatalogProductPublic
@@ -348,6 +349,8 @@ export function ProductDetailsBody({ product, preview = false }: ProductDetailsB
           </div>
         ) : null}
       </div>
+
+      {!preview ? <ProductReviews productId={product.id} /> : null}
     </div>
   )
 }
@@ -373,5 +376,6 @@ export function ProductDetailsTopBar({
         </span>
       </div>
     </div>
+
   )
 }

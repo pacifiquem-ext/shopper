@@ -108,7 +108,28 @@
     "homeOnPromotionEyebrow": "Ku giciro cyihariye",
     "homeOnPromotionTitle": "Amafaranga y’igiciro cyihariye",
     "homeCtaTitle": "Reba isoko ryose",
-    "homeCtaSubtitle": "Shungura ukurikije icyiciro, igiciro, cyangwa sura iduka."
+    "homeCtaSubtitle": "Shungura ukurikije icyiciro, igiciro, cyangwa sura iduka.",
+    "reviews": {
+      "title": "Ibisubizo by’abakiriya",
+      "subtitle": "Icyo abaguzi bavuga kuri iki gicuruzwa.",
+      "loading": "Turimo gupakira ibisubizo…",
+      "empty": "Nta bisubizo bihari",
+      "emptyHint": "Ba uwa mbere utanga igitekerezo nyuma yo kwakira ibicuruzwa.",
+      "writeTitle": "Andika igisubizo",
+      "loginRequired": "Injira kugira ngo wandike igisubizo.",
+      "loginPrompt": "Injira kugira ngo wandike igisubizo.",
+      "loginLink": "Injira",
+      "ratingLabel": "Amanota",
+      "titleLabel": "Umutwe",
+      "titlePlaceholder": "Ubwiza bwiza",
+      "bodyLabel": "Igisubizo",
+      "bodyPlaceholder": "Vuga ku bwiza, delivery…",
+      "submit": "Ohereza igisubizo",
+      "submitting": "Birimo koherezwa…",
+      "submitted": "Igisubizo cyoherejwe gisuze",
+      "submitFailed": "Ntibishoboye kohereza igisubizo",
+      "ratingStars": "{rating} / 5"
+    }
   },
   "storeTemplates": {
     "pickerTitle": "Hitamo imiterere y’iduka",
@@ -1544,6 +1565,13 @@
     "promoValidation": "Andika kode, izina, n’agaciro keza.",
     "promoCreated": "Promo y’urubuga yaremwe",
     "promoDeleted": "Promo yasibwe",
-    "delete": "Siba"
+    "delete": "Siba",
+    "catSlug": "Slug",
+    "catNameEn": "Izina (EN)",
+    "catNameRw": "Izina (RW)",
+    "catAttributes": "Ibiranga",
+    "catStatus": "Imiterere",
+    "active": "Ikora",
+    "inactive": "Ntikora"
   }
 }
