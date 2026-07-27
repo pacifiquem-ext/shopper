@@ -10,7 +10,7 @@ trigger: always_on
 - Zero prop-drilling; Zustand for cross-component state
 - All user-facing text must be translatable
 - No inline logic that belongs in services or stores
-- **Design system:** AlignUI v1.2 tokens + components — see `design-system/MASTER.md` and `client/src/components/alignui/`. Prefer AlignUI semantic colors (`bg-bg-weak-50`, `text-text-strong-950`, `primary-base`, `stroke-soft-200`) over ad-hoc hex or leftover terracotta/sage classes.
+- **Design system:** AlignUI v1.2 tokens + components — see `client/src/components/alignui/`. Prefer AlignUI semantic colors (`bg-bg-weak-50`, `text-text-strong-950`, `primary-base`, `stroke-soft-200`) over ad-hoc hex or leftover terracotta/sage classes.
 
 ## Directory Structure
 

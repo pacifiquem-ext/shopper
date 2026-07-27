@@ -473,13 +473,13 @@ export default function StoreSettingsPage() {
                             Subdomain
                           </Label>
                           <div className="flex items-center gap-2">
+                            <span className="shrink-0 text-sm text-text-soft-400">/stores/</span>
                             <Input
                               id="subdomain"
                               value={businessInfo.subdomain}
                               readOnly
                               className="rounded-lg border-stroke-soft-200 bg-bg-weak-50 text-text-soft-400"
                             />
-                            <span className="text-sm text-text-soft-400">.onlineshop.rw</span>
                           </div>
                         </div>
 

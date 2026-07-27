@@ -8,7 +8,6 @@ coverage/
 
 # environment
 .env
-!.env.docker
 config.yaml
 config.yml
 yarn-error.log

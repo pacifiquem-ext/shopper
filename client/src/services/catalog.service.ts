@@ -1,5 +1,5 @@
 import { getInternalApiBaseUrl, getPublicApiBaseUrl } from '@/lib/api-base-url'
-import type { ApiResponse } from '@onlineshop/shared'
+import type { ApiResponse } from '@shopper/shared'
 import type { BrandColors } from '@/lib/store-templates'
 
 function isServer(): boolean {

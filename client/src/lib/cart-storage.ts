@@ -11,8 +11,8 @@ export type CartItem = {
   quantity: number
 }
 
-export const CART_KEY = 'onlineshop.cart.v1'
-export const CART_EVENT = 'onlineshop:cart-updated'
+export const CART_KEY = 'shopper.cart.v1'
+export const CART_EVENT = 'shopper:cart-updated'
 
 export function readCart(): CartItem[] {
   if (typeof window === 'undefined') return []

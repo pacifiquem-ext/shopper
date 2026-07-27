@@ -16,19 +16,19 @@
     }
   },
   "hero": {
-    "title": "OnlineShop.rw",
+    "title": "Shopper",
     "tagline": "One place to discover products from trusted local stores.",
     "openShop": "Browse products"
   },
   "marketplace": {
     "title": "Shop",
-    "brandTitle": "OnlineShop",
-    "brandSuffix": ".rw",
+    "brandTitle": "Shopper",
+    "brandSuffix": "",
     "subtitle": "Products from every approved store, grouped by category.",
     "compactStats": "{products} products · {categories} categories",
     "compactMetaDescription": "Search, filter, and browse products from approved stores.",
     "compactFullShopLink": "Classic shop page",
-    "heroEyebrow": "OnlineShop.rw marketplace",
+    "heroEyebrow": "Shopper marketplace",
     "heroTitle": "Discover Rwanda's most desirable local finds.",
     "heroSubtitle": "Browse real products from approved stores, compare variants, check stock, and build a cart from one polished storefront.",
     "heroCta": "Start shopping",
@@ -53,7 +53,7 @@
     "topStoresVisitLabel": "Visit store",
     "storesDirectoryEyebrow": "Shops",
     "storesDirectoryTitle": "Browse stores",
-    "storesDirectoryDescription": "Discover approved shops on OnlineShop.rw. Open a store to see only that shop’s products — same marketplace, no separate website.",
+    "storesDirectoryDescription": "Discover approved shops on Shopper. Open a store to see only that shop’s products — same marketplace, no separate website.",
     "storesDirectoryEmpty": "No stores are listed yet.",
     "browseAllProducts": "Browse all products",
     "allProductsTitle": "All products",
@@ -80,8 +80,8 @@
     "deliveryAvailable": "Delivery",
     "storeLabel": "{name}",
     "storeEyebrow": "Store storefront",
-    "storeMetaTitle": "{store} on OnlineShop.rw",
-    "storeMetaDescription": "Browse products from {store} on OnlineShop.rw.",
+    "storeMetaTitle": "{store} on Shopper",
+    "storeMetaDescription": "Browse products from {store} on Shopper.",
     "storeHeroSubtitle": "You are browsing {store}'s storefront. Every product below is sold and shipped by this store.",
     "storeEmpty": "{store} has not added any products yet.",
     "storeNotFoundEyebrow": "Store not found",
@@ -161,8 +161,8 @@
       "promo1": "Free delivery on orders over 50,000 RWF",
       "promo2": "Secure checkout · pay on delivery available",
       "tickerAria": "Store highlights",
-      "footerTagline": "Shop with {store} on OnlineShop.rw.",
-      "poweredBy": "Powered by OnlineShop.rw",
+      "footerTagline": "Shop with {store} on Shopper.",
+      "poweredBy": "Powered by Shopper",
       "marketplaceLabel": "Explore marketplace",
       "contactLabel": "Contact"
     },
@@ -180,19 +180,19 @@
       "productsTitle": "Shop all products",
       "categoriesLabel": "Categories",
       "footerTagline": "Quality products from a trusted local store.",
-      "poweredBy": "Powered by OnlineShop.rw",
+      "poweredBy": "Powered by Shopper",
       "marketplaceLabel": "Explore marketplace"
     },
     "classicMarket": {
-      "eyebrow": "Shop on OnlineShop.rw",
+      "eyebrow": "Shop on Shopper",
       "defaultTagline": "Quality products from local sellers — delivered across Rwanda.",
       "ctaShop": "Shop now",
       "ctaBrowse": "Browse catalog",
       "searchAria": "Search products",
       "addToCart": "Add to cart",
       "productsTitle": "All products",
-      "footerTagline": "Shop with {store} on OnlineShop.rw.",
-      "poweredBy": "Powered by OnlineShop.rw",
+      "footerTagline": "Shop with {store} on Shopper.",
+      "poweredBy": "Powered by Shopper",
       "marketplaceLabel": "Explore marketplace"
     }
   },
@@ -271,7 +271,7 @@
       "helpAria": "Help",
       "saveExit": "Save & exit",
       "reset": "Reset",
-      "brand": "OnlineShop.rw",
+      "brand": "Shopper",
       "setup": "Store setup"
     },
     "wizardTitle": "Store Setup Wizard",
@@ -296,13 +296,13 @@
       },
       "selected": "Selected",
       "note": "This only affects the setup flow. You can change some settings later.",
-      "retailOnly": "OnlineShop.rw is built for retail stores. You’re set up as a retail merchant — products, inventory, delivery, and orders."
+      "retailOnly": "Shopper is built for retail stores. You’re set up as a retail merchant — products, inventory, delivery, and orders."
     },
     "storeBasics": {
       "title": "Tell customers who you are",
       "subtitle": "Add a registered name and a display name. Then write a short description.",
       "registeredNameLabel": "Registered business name",
-      "registeredNamePlaceholder": "e.g. OnlineShop Rwanda Ltd",
+      "registeredNamePlaceholder": "e.g. Shopper Ltd",
       "displayNameLabel": "Store name (public)",
       "displayNamePlaceholder": "e.g. Kigali Fashion",
       "descriptionLabel": "Description",
@@ -464,7 +464,7 @@
     },
     "slug": {
       "title": "Choose your store slug",
-      "subtitle": "Buyers find you at /stores/your-slug on OnlineShop.rw — not a separate website.",
+      "subtitle": "Buyers find you at /stores/your-slug on Shopper — not a separate website.",
       "label": "Store slug",
       "placeholder": "my-store",
       "checking": "Checking availability…",
@@ -502,7 +502,7 @@
     },
     "profile": {
       "title": "Your profile",
-      "subtitle": "Account details for your OnlineShop.rw login.",
+      "subtitle": "Account details for your Shopper login.",
       "fallbackName": "User",
       "notProvided": "Not provided",
       "fields": {
@@ -524,7 +524,7 @@
       }
     },
     "sidebar": {
-      "brand": "OnlineShop.rw",
+      "brand": "Shopper",
       "subtitle": "Inventory",
       "role": "Store owner",
       "defaultUserName": "User",
@@ -1361,7 +1361,7 @@
     }
   },
   "footer": {
-    "brandName": "OnlineShop.rw",
+    "brandName": "Shopper",
     "brandTagline": "Marketplace",
     "about": "A single storefront to discover real products from approved stores, compare variants, and build a cart with confidence.",
     "becomeSeller": "Become a seller",
@@ -1374,19 +1374,19 @@
     },
     "companyTitle": "Company",
     "company": {
-      "about": "About OnlineShop.rw",
-      "sell": "Sell on OnlineShop.rw",
+      "about": "About Shopper",
+      "sell": "Sell on Shopper",
       "help": "Help center",
       "contact": "Contact",
       "aboutHref": "/",
       "sellHref": "/store",
       "helpHref": "/",
-      "contactHref": "mailto:support@onlineshop.rw"
+      "contactHref": "mailto:support@shopper.app"
     },
     "getInTouchTitle": "Get in touch",
     "contact": {
       "emailLabel": "Email",
-      "email": "support@onlineshop.rw",
+      "email": "support@shopper.app",
       "phoneLabel": "Phone",
       "phone": "+250 780 000 000",
       "phoneTel": "+250780000000",
@@ -1411,10 +1411,10 @@
     },
     "store": {
       "brandTagline": "Storefront",
-      "about": "You are shopping products sold by {store} on OnlineShop.rw.",
+      "about": "You are shopping products sold by {store} on Shopper.",
       "exploreMarketplace": "Explore full marketplace",
       "browseAllStores": "Browse all stores",
-      "platformBlurb": "This shop is hosted on OnlineShop.rw. For account, payment, or order help, contact marketplace support.",
+      "platformBlurb": "This shop is hosted on Shopper. For account, payment, or order help, contact marketplace support.",
       "quickLinksTitle": "This store",
       "quickLinks": {
         "storefront": "All products here",
@@ -1423,9 +1423,9 @@
         "newArrivals": "New arrivals here"
       },
       "platformTitle": "Marketplace",
-      "copyright": "© {year} {store} · OnlineShop.rw"
+      "copyright": "© {year} {store} · Shopper"
     },
-    "copyright": "© {year} OnlineShop.rw. All rights reserved."
+    "copyright": "© {year} Shopper. All rights reserved."
   },
   "auth": {
     "tabs": {
@@ -1435,7 +1435,7 @@
       "reset": "Reset password"
     },
     "brand": {
-      "title": "OnlineShop.rw",
+      "title": "Shopper",
       "subtitle": "Launch a premium storefront, manage orders, and grow with tools built for Rwanda.",
       "bullets": {
         "products": "Products & inventory in one place",

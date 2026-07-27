@@ -73,7 +73,7 @@ export class ResponseInterceptor implements NestInterceptor {
                     });
                 }
 
-                // Shape must stay in sync with ApiSuccessResponse in @onlineshop/shared
+                // Shape must stay in sync with ApiSuccessResponse in @shopper/shared
                 return {
                     statusCode,
                     message,

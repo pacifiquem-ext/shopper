@@ -1,4 +1,4 @@
-import type { ApiResponse } from '@onlineshop/shared'
+import type { ApiResponse } from '@shopper/shared'
 import { api } from '@/lib/axios'
 import type {
   LoginInput,
@@ -7,7 +7,7 @@ import type {
   ResetPasswordInput,
 } from '@/validations/auth'
 
-export type { ApiResponse } from '@onlineshop/shared'
+export type { ApiResponse } from '@shopper/shared'
 
 export interface AuthTokenResponse {
   accessToken: string

@@ -1,4 +1,4 @@
-import type { ApiResponse, OffsetPage } from '@onlineshop/shared'
+import type { ApiResponse, OffsetPage } from '@shopper/shared'
 import { api } from '@/lib/axios'
 
 export interface ProductVariantApi {

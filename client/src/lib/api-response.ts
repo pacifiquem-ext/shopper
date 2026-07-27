@@ -1,5 +1,5 @@
 /**
- * Response helpers — canonical implementation lives in @onlineshop/shared
+ * Response helpers — canonical implementation lives in @shopper/shared
  * so server envelopes and client unwrapping stay aligned.
  */
 export {
@@ -12,4 +12,4 @@ export {
   type ApiErrorResponse,
   type OffsetPage,
   type ApiOffsetPageResponse,
-} from '@onlineshop/shared'
+} from '@shopper/shared'

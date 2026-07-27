@@ -14,8 +14,8 @@ type WishlistItem = {
   storeName: string
 }
 
-const WISHLIST_KEY = 'onlineshop.wishlist.v1'
-const WISHLIST_EVENT = 'onlineshop:wishlist-updated'
+const WISHLIST_KEY = 'shopper.wishlist.v1'
+const WISHLIST_EVENT = 'shopper:wishlist-updated'
 
 function readWishlist(): WishlistItem[] {
   if (typeof window === 'undefined') return []

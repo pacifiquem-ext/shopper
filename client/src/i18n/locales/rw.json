@@ -22,13 +22,13 @@
   },
   "marketplace": {
     "title": "Ububiko",
-    "brandTitle": "OnlineShop",
-    "brandSuffix": ".rw",
+    "brandTitle": "Shopper",
+    "brandSuffix": "",
     "subtitle": "Ibicuruzwa byose mu maduka yemejwe, byateguriwe ku mitwe.",
     "compactStats": "Ibicuruzwa {products} · Ibyiciro {categories}",
     "compactMetaDescription": "Shakisha, tondeka, maze urebe ibicuruzwa biturutse mu maduka yemejwe.",
     "compactFullShopLink": "Urubuga rwa shop ruzuye",
-    "heroEyebrow": "Isoko rya OnlineShop.rw",
+    "heroEyebrow": "Isoko rya Shopper",
     "heroTitle": "Shakisha ibicuruzwa byiza byo mu Rwanda.",
     "heroSubtitle": "Reba ibicuruzwa nyabyo biturutse mu maduka yemejwe, gereranya ubwoko, reba sitoke, maze wubake igikapu kimwe cyiza.",
     "heroCta": "Tangira guhaha",
@@ -53,7 +53,7 @@
     "topStoresVisitLabel": "Sura iduka",
     "storesDirectoryEyebrow": "Amaduka",
     "storesDirectoryTitle": "Shakisha amaduka",
-    "storesDirectoryDescription": "Menya amaduka yemewe kuri OnlineShop.rw. Fungura iduka urebe gusa ibicuruzwa byaryo — isoko rimwe, nta website yihariye.",
+    "storesDirectoryDescription": "Menya amaduka yemewe kuri Shopper. Fungura iduka urebe gusa ibicuruzwa byaryo — isoko rimwe, nta website yihariye.",
     "storesDirectoryEmpty": "Nta maduka agaragara ubu.",
     "browseAllProducts": "Reba ibicuruzwa byose",
     "allProductsTitle": "Ibicuruzwa byose",
@@ -80,8 +80,8 @@
     "deliveryAvailable": "Kohereza",
     "storeLabel": "{name}",
     "storeEyebrow": "Iduka rya nyabyo",
-    "storeMetaTitle": "{store} kuri OnlineShop.rw",
-    "storeMetaDescription": "Reba ibicuruzwa byo mu iduka rya {store} kuri OnlineShop.rw.",
+    "storeMetaTitle": "{store} kuri Shopper",
+    "storeMetaDescription": "Reba ibicuruzwa byo mu iduka rya {store} kuri Shopper.",
     "storeHeroSubtitle": "Uri kureba iduka rya {store}. Buri gicuruzwa kiri hano gicuruzwa kandi cyoherezwa n'iri duka.",
     "storeEmpty": "{store} ntirarashyiramo ibicuruzwa.",
     "storeNotFoundEyebrow": "Iduka ntiriboneka",
@@ -161,8 +161,8 @@
       "promo1": "Kohereza ku buntu ku ma commande arenga 50,000 RWF",
       "promo2": "Kwishyura byizewe · wishyura igihe wakiriye",
       "tickerAria": "Amakuru y'iduka",
-      "footerTagline": "Gura kuri {store} kuri OnlineShop.rw.",
-      "poweredBy": "Byakozwe na OnlineShop.rw",
+      "footerTagline": "Gura kuri {store} kuri Shopper.",
+      "poweredBy": "Byakozwe na Shopper",
       "marketplaceLabel": "Sura isoko rusange",
       "contactLabel": "Twandikire"
     },
@@ -180,19 +180,19 @@
       "productsTitle": "Gura ibicuruzwa byose",
       "categoriesLabel": "Ibyiciro",
       "footerTagline": "Ibicuruzwa byiza biva mu iduka ryizewe.",
-      "poweredBy": "Byakozwe na OnlineShop.rw",
+      "poweredBy": "Byakozwe na Shopper",
       "marketplaceLabel": "Sura isoko"
     },
     "classicMarket": {
-      "eyebrow": "Gura kuri OnlineShop.rw",
+      "eyebrow": "Gura kuri Shopper",
       "defaultTagline": "Ibicuruzwa byiza by’abacuruzi bo mu Rwanda — bitangwa mu gihugu hose.",
       "ctaShop": "Gura nonaha",
       "ctaBrowse": "Reba urutonde",
       "searchAria": "Shakira ibicuruzwa",
       "addToCart": "Shyira mu gikapu",
       "productsTitle": "Ibicuruzwa byose",
-      "footerTagline": "Gura na {store} kuri OnlineShop.rw.",
-      "poweredBy": "Byakozwe na OnlineShop.rw",
+      "footerTagline": "Gura na {store} kuri Shopper.",
+      "poweredBy": "Byakozwe na Shopper",
       "marketplaceLabel": "Sura isoko"
     }
   },
@@ -271,7 +271,7 @@
       "helpAria": "Ubufasha",
       "saveExit": "Bika usohoke",
       "reset": "Subiza ku ntangiriro",
-      "brand": "OnlineShop.rw",
+      "brand": "Shopper",
       "setup": "Gushiraho iduka"
     },
     "wizardTitle": "Gushyiraho ububiko bwawe",
@@ -296,13 +296,13 @@
       },
       "selected": "Wahisemo",
       "note": "Ibi bigena uburyo bwo gutangira. Hari bimwe ushobora guhindura nyuma.",
-      "retailOnly": "OnlineShop.rw yubatswe ku maduka y’ibicuruzwa. Ushyizweho nka umucuruzi w’ibicuruzwa — ibicuruzwa, ububiko, gutanga, n’amabwiriza."
+      "retailOnly": "Shopper yubatswe ku maduka y’ibicuruzwa. Ushyizweho nka umucuruzi w’ibicuruzwa — ibicuruzwa, ububiko, gutanga, n’amabwiriza."
     },
     "storeBasics": {
       "title": "Bwira abakiriya uwo uri",
       "subtitle": "Andika izina ryemewe n'irizagaragara. Hanyuma andika ibisobanuro bigufi.",
       "registeredNameLabel": "Izina ry'ubucuruzi ryemewe",
-      "registeredNamePlaceholder": "Urugero: OnlineShop Rwanda Ltd",
+      "registeredNamePlaceholder": "Urugero: Shopper Ltd",
       "displayNameLabel": "Izina ry'ububiko (riboneka ku rubuga)",
       "displayNamePlaceholder": "Urugero: Kigali Fashion",
       "descriptionLabel": "Ibisobanuro",
@@ -464,7 +464,7 @@
     },
     "slug": {
       "title": "Hitamo izina rito ry’iduka",
-      "subtitle": "Abaguzi bakubona kuri /stores/izina-ryawe kuri OnlineShop.rw — si urubuga rwisanzwe.",
+      "subtitle": "Abaguzi bakubona kuri /stores/izina-ryawe kuri Shopper — si urubuga rwisanzwe.",
       "label": "Izina rito ry’iduka",
       "placeholder": "iduka-ryanje",
       "checking": "Turareba niba rihari…",
@@ -502,7 +502,7 @@
     },
     "profile": {
       "title": "Umwirondoro wawe",
-      "subtitle": "Amakuru y'konti yawe ya OnlineShop.rw.",
+      "subtitle": "Amakuru y'konti yawe ya Shopper.",
       "fallbackName": "Umukoresha",
       "notProvided": "Ntabwo yatanzwe",
       "fields": {
@@ -524,7 +524,7 @@
       }
     },
     "sidebar": {
-      "brand": "OnlineShop.rw",
+      "brand": "Shopper",
       "subtitle": "Inventory",
       "role": "Nyir'iduka",
       "defaultUserName": "Ukoresha",
@@ -1361,7 +1361,7 @@
     }
   },
   "footer": {
-    "brandName": "OnlineShop.rw",
+    "brandName": "Shopper",
     "brandTagline": "Isoko",
     "about": "Ahantu hamwe ho kurebera ibicuruzwa nyabyo biturutse mu maduka yemejwe, kugereranya variants, no kubaka igikapu wizeye.",
     "becomeSeller": "Kuba umucuruzi",
@@ -1374,19 +1374,19 @@
     },
     "companyTitle": "Company",
     "company": {
-      "about": "Ibyerekeye OnlineShop.rw",
-      "sell": "Gurisha kuri OnlineShop.rw",
+      "about": "Ibyerekeye Shopper",
+      "sell": "Gurisha kuri Shopper",
       "help": "Ubufasha",
       "contact": "Twandikire",
       "aboutHref": "/",
       "sellHref": "/store",
       "helpHref": "/",
-      "contactHref": "mailto:support@onlineshop.rw"
+      "contactHref": "mailto:support@shopper.app"
     },
     "getInTouchTitle": "Twandikire",
     "contact": {
       "emailLabel": "Email",
-      "email": "support@onlineshop.rw",
+      "email": "support@shopper.app",
       "phoneLabel": "Telefoni",
       "phone": "+250 780 000 000",
       "phoneTel": "+250780000000",
@@ -1411,10 +1411,10 @@
     },
     "store": {
       "brandTagline": "Iduka rya nyabyo",
-      "about": "Uri guhaha ibicuruzwa {store} agurisha kuri OnlineShop.rw.",
+      "about": "Uri guhaha ibicuruzwa {store} agurisha kuri Shopper.",
       "exploreMarketplace": "Shakisha isoko ryose",
       "browseAllStores": "Subira ku maduka yose",
-      "platformBlurb": "Iri duka riri kuri OnlineShop.rw. Kugirango ubone ubufasha ku konti, kwishyura, cyangwa teka, vugana n'itsinda rishyigikira isoko.",
+      "platformBlurb": "Iri duka riri kuri Shopper. Kugirango ubone ubufasha ku konti, kwishyura, cyangwa teka, vugana n'itsinda rishyigikira isoko.",
       "quickLinksTitle": "Iri duka",
       "quickLinks": {
         "storefront": "Ibicuruzwa byose hano",
@@ -1423,9 +1423,9 @@
         "newArrivals": "Ibishya hano"
       },
       "platformTitle": "Isoko",
-      "copyright": "© {year} {store} · OnlineShop.rw"
+      "copyright": "© {year} {store} · Shopper"
     },
-    "copyright": "© {year} OnlineShop.rw. Uburenganzira bwose burubahirizwa."
+    "copyright": "© {year} Shopper. Uburenganzira bwose burubahirizwa."
   },
   "auth": {
     "tabs": {
@@ -1435,7 +1435,7 @@
       "reset": "Ongera ushyire ijambo ry'ibanga"
     },
     "brand": {
-      "title": "OnlineShop.rw",
+      "title": "Shopper",
       "subtitle": "Fungura iduka riza, gucunga ibicuruzwa n'amabwiriza, kandi ukure ubucuruzi bwawe mu Rwanda.",
       "bullets": {
         "products": "Ibicuruzwa n'ububiko hamwe",

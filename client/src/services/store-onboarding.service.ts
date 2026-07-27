@@ -1,5 +1,5 @@
 import { api } from '@/lib/axios'
-import type { ApiResponse } from '@onlineshop/shared'
+import type { ApiResponse } from '@shopper/shared'
 import { getPublicApiBaseUrl } from '@/lib/api-base-url'
 
 export interface UpdateDraftDto {

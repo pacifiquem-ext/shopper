@@ -19,7 +19,7 @@ export function isProductId(value: string): boolean {
  * Returns `null` for:
  * - missing/empty host
  * - raw IPv4/IPv6 hosts (`127.0.0.1`, `[::1]`)
- * - apex hosts (`onlineshop.rw`, `localhost:3000`)
+ * - apex hosts (`shopper`, `localhost:3000`)
  * - reserved first parts (`www`, `localhost`)
  *
  * Mirrors the logic in `server/src/common/tenant/tenant.middleware.ts` so the
@@ -43,7 +43,7 @@ export function extractSubdomain(host: string | null | undefined): string | null
   const candidate = normalizeStoreSubdomain(parts[0])
   if (!candidate) return null
 
-  // Multi-segment apex (e.g. `kigalifashion.onlineshop.rw`)
+  // Multi-segment apex (e.g. `kigalifashion.shopper`)
   if (parts.length > 2) {
     return candidate
   }

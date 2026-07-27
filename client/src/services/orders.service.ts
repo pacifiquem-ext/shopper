@@ -1,5 +1,5 @@
 import { api } from '@/lib/axios'
-import type { ApiResponse, OffsetPage } from '@onlineshop/shared'
+import type { ApiResponse, OffsetPage } from '@shopper/shared'
 
 export interface OrderLineItemApi {
   id: string

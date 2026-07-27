@@ -1,4 +1,4 @@
-/** AlignUI-aligned HTML email shell for OnlineShop.rw transactional mail. */
+/** AlignUI-aligned HTML email shell for Shopper transactional mail. */
 
 export type EmailLayoutOptions = {
   title: string
@@ -57,10 +57,10 @@ export function renderEmailLayout(opts: EmailLayoutOptions): string {
               <table role="presentation" cellpadding="0" cellspacing="0">
                 <tr>
                   <td style="width:36px;height:36px;border-radius:10px;background:${BRAND.primary};text-align:center;vertical-align:middle;color:${BRAND.white};font-family:Inter,Segoe UI,Helvetica,Arial,sans-serif;font-size:14px;font-weight:700;">
-                    OS
+                    S
                   </td>
                   <td style="padding-left:12px;font-family:Inter,Segoe UI,Helvetica,Arial,sans-serif;font-size:15px;font-weight:600;color:${BRAND.white};">
-                    OnlineShop.rw
+                    Shopper
                   </td>
                 </tr>
               </table>
@@ -80,7 +80,7 @@ export function renderEmailLayout(opts: EmailLayoutOptions): string {
           </tr>
           <tr>
             <td style="padding:16px 28px 22px;border-top:1px solid ${BRAND.border};font-family:Inter,Segoe UI,Helvetica,Arial,sans-serif;font-size:11px;line-height:1.5;color:${BRAND.muted};">
-              © OnlineShop.rw · Building Africa’s marketplace from Rwanda.
+              © Shopper · Building Africa’s marketplace from Rwanda.
             </td>
           </tr>
         </table>

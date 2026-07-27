@@ -27,4 +27,4 @@ export {
     type PromotionStatusType,
     type AttributeFieldTypeType,
     type AttributeAppliesToType,
-} from '@onlineshop/shared';
+} from '@shopper/shared';

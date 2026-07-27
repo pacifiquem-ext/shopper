@@ -6,9 +6,9 @@ export function welcomeEmailHtml(input: {
 }): string {
   return renderEmailLayout({
     title: `Welcome, ${input.fullName}`,
-    preheader: 'Your OnlineShop.rw account is ready.',
+    preheader: 'Your Shopper account is ready.',
     bodyHtml: `
-      <p style="margin:0 0 12px;">Thanks for joining OnlineShop.rw. You can set up your retail storefront, add products, and start receiving orders.</p>
+      <p style="margin:0 0 12px;">Thanks for joining Shopper. You can set up your retail storefront, add products, and start receiving orders.</p>
       <p style="margin:0;">Use the button below to open your merchant dashboard.</p>
     `,
     cta: { label: 'Open dashboard', url: input.dashboardUrl },
@@ -26,7 +26,7 @@ export function passwordResetEmailHtml(input: {
     : ''
   return renderEmailLayout({
     title: 'Reset your password',
-    preheader: 'Use this code or link to reset your OnlineShop.rw password.',
+    preheader: 'Use this code or link to reset your Shopper password.',
     bodyHtml: `
       <p style="margin:0 0 12px;">Hi ${input.fullName || 'there'}, we received a request to reset your password.</p>
       ${otpBlock}
@@ -75,7 +75,7 @@ export function storeApprovedEmailHtml(input: {
 }): string {
   return renderEmailLayout({
     title: `${input.storeName} is live`,
-    preheader: 'Your store has been approved on OnlineShop.rw.',
+    preheader: 'Your store has been approved on Shopper.',
     bodyHtml: `
       <p style="margin:0 0 12px;">Hi ${input.ownerName}, great news — <strong style="color:#171717;">${input.storeName}</strong> has been approved.</p>
       <p style="margin:0;">Share your storefront link and start selling. You can still change your template anytime from Store settings → Branding.</p>

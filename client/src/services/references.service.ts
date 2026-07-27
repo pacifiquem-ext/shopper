@@ -1,5 +1,5 @@
 import { api } from '@/lib/axios'
-import type { ApiResponse } from '@onlineshop/shared'
+import type { ApiResponse } from '@shopper/shared'
 
 export interface IndustrySector {
   id: string

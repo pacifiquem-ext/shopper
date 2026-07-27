@@ -2,29 +2,29 @@ import type { Metadata } from 'next'
 
 export const rootMetadata: Metadata = {
   title: {
-    default: 'OnlineShop.rw',
-    template: '%s | OnlineShop.rw',
+    default: 'Shopper',
+    template: '%s | Shopper',
   },
   description:
-    'Discover products from trusted local stores in Rwanda. Launch your storefront, manage orders, and grow on OnlineShop.rw.',
-  keywords: ['OnlineShop.rw', 'Rwanda', 'ecommerce', 'marketplace', 'local stores'],
-  authors: [{ name: 'OnlineShop.rw' }],
-  creator: 'OnlineShop.rw',
+    'Discover products from trusted local stores in Rwanda. Launch your storefront, manage orders, and grow on Shopper.',
+  keywords: ['Shopper', 'Rwanda', 'ecommerce', 'marketplace', 'local stores'],
+  authors: [{ name: 'Shopper' }],
+  creator: 'Shopper',
   openGraph: {
     type: 'website',
     locale: 'en_US',
-    url: 'https://onlineshop.rw',
-    title: 'OnlineShop.rw',
+    url: 'https://github.com/pacifiquem-ext/shopper',
+    title: 'Shopper',
     description:
       'Discover products from trusted local stores in Rwanda. Launch your storefront, manage orders, and grow.',
-    siteName: 'OnlineShop.rw',
+    siteName: 'Shopper',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'OnlineShop.rw',
+    title: 'Shopper',
     description:
       'Discover products from trusted local stores in Rwanda. Launch your storefront, manage orders, and grow.',
-    creator: '@onlineshoprw',
+    creator: '@shopper',
   },
   robots: {
     index: true,

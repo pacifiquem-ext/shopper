@@ -1,8 +1,8 @@
-# OnlineShop.rw
+# Shopper
 
 > Building Africa's Biggest Marketplace Starting From Rwanda.
 
-OnlineShop.rw is a **single marketplace** where buyers browse products and stores, and merchants operate their shops from a **dashboard** — not from separate subdomain websites.
+Shopper is a **single marketplace** where buyers browse products and stores, and merchants operate their shops from a **dashboard** — not from separate subdomain websites.
 
 ## 1. Product Vision
 
@@ -16,8 +16,7 @@ OnlineShop.rw is a **single marketplace** where buyers browse products and store
 
 Commercial packaging and any off-platform billing are **handled outside this website** — there is **no in-app Basic/Pro subscription ladder**.
 
-Architecture decision: [`docs/adr/001-single-marketplace.md`](./docs/adr/001-single-marketplace.md).  
-Domain language: [`CONTEXT.md`](./CONTEXT.md).
+Architecture decision: [`docs/adr/001-single-marketplace.md`](./docs/adr/001-single-marketplace.md).
 
 ---
 
@@ -117,7 +116,7 @@ There is no automated card/MoMo capture processor in product scope.
 
 ## 10. Design
 
-- **AlignUI v1.2** is mandatory for all product UI (`design-system/MASTER.md`).
+- **AlignUI v1.2** is mandatory for all product UI (`client/src/components/alignui/`).
 - Target: **100% AlignUI** on redesigned surfaces.
 - Image uploads enforce quality rules (MIME, file size, dimensions).
 
@@ -125,21 +124,53 @@ There is no automated card/MoMo capture processor in product scope.
 
 ## Developer setup (monorepo)
 
+Shopper runs locally with Node.js, PostgreSQL, and Redis. No Docker is required.
+
+### Prerequisites
+
+- Node.js 20+ and [pnpm](https://pnpm.io) 9+
+- PostgreSQL 16+ listening on `localhost:5432`
+- Redis 7+ listening on `localhost:6379`
+
+macOS (Homebrew):
+
+```bash
+brew install node@20 pnpm postgresql@16 redis
+brew services start postgresql@16
+brew services start redis
+createdb shopper
+```
+
+Linux (Debian/Ubuntu):
+
+```bash
+sudo apt install postgresql redis-server
+sudo systemctl enable --now postgresql redis-server
+sudo -u postgres createdb shopper
+```
+
+### Run the app
+
 ```bash
 # from repo root
 pnpm install
-cp server/.env.example server/.env   # or use your local secrets
+cp server/.env.example server/.env
 cp client/.env.example client/.env.local
-pnpm dev   # builds @onlineshop/shared, then runs shared watch + Nest + Next together
+# edit server/.env if your Postgres user/password/database differ
+pnpm --filter @shopper/server prisma:migrate-prod
+pnpm dev   # builds @shopper/shared, then runs shared watch + Nest + Next together
 ```
+
+- App: http://localhost:3000
+- API: http://localhost:3001
 
 Packages:
 
 | Package | Path | Role |
 | ------- | ---- | ---- |
-| `@onlineshop/shared` | `packages/shared` | API envelope, statuses, shared constants |
-| `@onlineshop/server` | `server` | NestJS API |
-| `@onlineshop/client` | `client` | Next.js app |
+| `@shopper/shared` | `packages/shared` | API envelope, statuses, shared constants |
+| `@shopper/server` | `server` | NestJS API |
+| `@shopper/client` | `client` | Next.js app |
 
 API success responses always look like:
 

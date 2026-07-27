@@ -5,21 +5,21 @@ import type {
     ItemsPage,
     OffsetPage,
     PaginationMetadata,
-} from '@onlineshop/shared';
+} from '@shopper/shared';
 
-/** @deprecated Prefer PaginationMetadata from @onlineshop/shared */
+/** @deprecated Prefer PaginationMetadata from @shopper/shared */
 export type IPaginationMetadata = PaginationMetadata;
 
-/** @deprecated Prefer ApiSuccessResponse from @onlineshop/shared */
+/** @deprecated Prefer ApiSuccessResponse from @shopper/shared */
 export type IApiSuccessResponse<T> = ApiSuccessResponse<T>;
 
-/** @deprecated Prefer ItemsPage from @onlineshop/shared */
+/** @deprecated Prefer ItemsPage from @shopper/shared */
 export type IApiPaginatedData<T> = ItemsPage<T>;
 
 /** @deprecated Prefer ApiSuccessResponse<ItemsPage<T>> */
 export interface IApiPaginatedResponse<T> extends ApiSuccessResponse<ItemsPage<T>> {}
 
-/** @deprecated Prefer ApiErrorResponse from @onlineshop/shared */
+/** @deprecated Prefer ApiErrorResponse from @shopper/shared */
 export type IApiErrorResponse = ApiErrorResponse;
 
 export interface IGenericResponse {

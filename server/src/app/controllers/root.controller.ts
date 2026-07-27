@@ -10,7 +10,7 @@ export class RootController {
     @PublicRoute()
     public getRoot() {
         return {
-            service: 'onlineshop_server',
+            service: 'shopper_server',
             message:
                 'REST API only. Open the Next.js app (pnpm dev in client/) in the browser for pages such as /en/dashboard.',
             health: '/health',

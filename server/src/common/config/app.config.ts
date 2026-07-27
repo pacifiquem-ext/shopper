@@ -100,7 +100,7 @@ export default registerAs('app', (): Record<string, any> => {
 
     return {
         env,
-        name: process.env.APP_NAME ?? 'OnlineShop.rw',
+        name: process.env.APP_NAME ?? 'Shopper',
 
         versioning: {
             enable: process.env.HTTP_VERSIONING_ENABLE === 'true',

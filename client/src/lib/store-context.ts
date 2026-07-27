@@ -1,6 +1,6 @@
 /** Cookie + localStorage key for the last storefront the shopper browsed. */
 export const STORE_CONTEXT_COOKIE = 'os_store'
-export const STORE_CONTEXT_KEY = 'onlineshop.store-context'
+export const STORE_CONTEXT_KEY = 'shopper.store-context'
 
 const COOKIE_MAX_AGE_SEC = 60 * 60 * 24 * 30
 

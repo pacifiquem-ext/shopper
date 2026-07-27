@@ -4,7 +4,7 @@ trigger: always_on
 
 # i18n Translation Rules
 
-The OnlineShop.rw platform STRICTLY enforces internationalization (i18n) across both the frontend (`client`) and backend (`server`) applications. It is **MANDATORY** that every user-facing text, error message, and validation message be translated into both English (`en`) and Kinyarwanda (`rw`).
+The Shopper platform STRICTLY enforces internationalization (i18n) across both the frontend (`client`) and backend (`server`) applications. It is **MANDATORY** that every user-facing text, error message, and validation message be translated into both English (`en`) and Kinyarwanda (`rw`).
 
 ## 1. Client (Frontend) Translation Rules
 

@@ -1,7 +1,7 @@
 {
-  "name": "@onlineshop/server",
+  "name": "@shopper/server",
   "version": "1.0.0",
-  "description": "Production-ready NestJS boilerplate with JWT auth, PostgreSQL/Prisma, AWS S3/SES, Bull/Redis queues, Docker/K8s support, and MCP integration for AI capabilities",
+  "description": "Shopper API — NestJS, JWT auth, PostgreSQL/Prisma, Redis/Bull queues",
   "author": "pacifiquem",
   "license": "MIT",
   "private": true,
@@ -42,7 +42,7 @@
     "@nestjs/swagger": "^11.2.6",
     "@nestjs/terminus": "^11.1.1",
     "@nestjs/throttler": "^6.5.0",
-    "@onlineshop/shared": "workspace:*",
+    "@shopper/shared": "workspace:*",
     "@prisma/client": "6.19.0",
     "@sentry/node": "^10.39.0",
     "@sentry/tracing": "^7.120.4",

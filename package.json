@@ -1,8 +1,8 @@
 {
-  "name": "onlineshop",
+  "name": "shopper",
   "version": "1.0.0",
   "private": true,
-  "description": "OnlineShop.rw monorepo — client, server, shared",
+  "description": "Shopper monorepo — client, server, shared",
   "packageManager": "pnpm@10.12.1",
   "engines": {
     "node": ">=20.0.0",
@@ -10,14 +10,14 @@
   },
   "scripts": {
     "preinstall": "npx only-allow pnpm",
-    "build:shared": "pnpm --filter @onlineshop/shared build",
-    "dev": "pnpm build:shared && pnpm run --parallel --filter @onlineshop/shared --filter @onlineshop/server --filter @onlineshop/client dev",
-    "dev:client": "pnpm --filter @onlineshop/client dev",
-    "dev:server": "pnpm --filter @onlineshop/server dev",
-    "dev:shared": "pnpm --filter @onlineshop/shared dev",
-    "build": "pnpm build:shared && pnpm --filter @onlineshop/server build && pnpm --filter @onlineshop/client build",
-    "typecheck": "pnpm --filter @onlineshop/shared typecheck && pnpm --filter @onlineshop/client type-check",
-    "lint": "pnpm --filter @onlineshop/client lint && pnpm --filter @onlineshop/server lint",
-    "test": "pnpm --filter @onlineshop/client test --run && pnpm --filter @onlineshop/server test"
+    "build:shared": "pnpm --filter @shopper/shared build",
+    "dev": "pnpm build:shared && pnpm run --parallel --filter @shopper/shared --filter @shopper/server --filter @shopper/client dev",
+    "dev:client": "pnpm --filter @shopper/client dev",
+    "dev:server": "pnpm --filter @shopper/server dev",
+    "dev:shared": "pnpm --filter @shopper/shared dev",
+    "build": "pnpm build:shared && pnpm --filter @shopper/server build && pnpm --filter @shopper/client build",
+    "typecheck": "pnpm --filter @shopper/shared typecheck && pnpm --filter @shopper/client type-check",
+    "lint": "pnpm --filter @shopper/client lint && pnpm --filter @shopper/server lint",
+    "test": "pnpm --filter @shopper/client test --run && pnpm --filter @shopper/server test"
   }
 }

@@ -668,7 +668,7 @@ async function seedDevMerchant() {
                 displayName: 'Demo Kigali Market',
                 description: 'Seeded demo store for local marketplace development.',
                 currency: 'RWF',
-                contactEmail: 'demo@onlineshop.rw',
+                contactEmail: 'demo@shopper.app',
                 contactPhone: phoneNumber,
                 contactAddress: 'Kigali, Rwanda',
             },

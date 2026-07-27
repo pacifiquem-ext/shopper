@@ -24,7 +24,7 @@ export function StepBusinessType() {
         <p className="mt-2 text-paragraph-sm text-text-sub-600">
           {t('businessType.retailOnly', {
             defaultValue:
-              'OnlineShop.rw is built for retail stores. You are set up as a retail merchant — products, inventory, delivery, and orders.',
+              'Shopper is built for retail stores. You are set up as a retail merchant — products, inventory, delivery, and orders.',
           })}
         </p>
       </div>

@@ -6,7 +6,7 @@ const withNextIntl = createNextIntlPlugin()
 const withBundleAnalyzer = bundleAnalyzer({ enabled: process.env.ANALYZE === 'true' })
 
 const nextConfig: NextConfig = {
-  transpilePackages: ['@onlineshop/shared'],
+  transpilePackages: ['@shopper/shared'],
 
   webpack(config) {
     config.module.rules.push({
