@@ -10,6 +10,12 @@ coverage
 *.tsbuildinfo
 .turbo
 packages/shared/dist
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+server/prisma/dev.db
+server/prisma/schema.sqlite.prisma
 
 .playwright-mcp/
 

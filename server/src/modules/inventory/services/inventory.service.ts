@@ -7,6 +7,7 @@ import {
     StockStatus as PrismaStockStatus,
     InventoryEventType as PrismaInventoryEventType,
 } from '@prisma/client';
+import { containsInsensitive } from '../../../common/helper/prisma-string-filter';
 
 const EXPORT_MAX_ROWS = 5000;
 
@@ -44,8 +45,8 @@ export class InventoryService {
 
             if (search) {
                 where.productVariant.product.OR = [
-                    { name: { contains: search, mode: 'insensitive' } },
-                    { vendor: { contains: search, mode: 'insensitive' } },
+                    { name: containsInsensitive(search) },
+                    { vendor: containsInsensitive(search) },
                 ];
             }
         }

@@ -14,6 +14,10 @@ export class DatabaseService extends PrismaClient implements OnModuleInit, OnMod
         for (let attempt = 1; attempt <= attempts; attempt++) {
             try {
                 await this.$connect();
+                const provider = process.env.DATABASE_URL?.startsWith('file:')
+                    ? 'sqlite'
+                    : 'postgresql';
+                this.logger.log(`Database connected (${provider})`);
                 return;
             } catch (error) {
                 const message =

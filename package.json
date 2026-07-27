@@ -18,6 +18,8 @@
     "build": "pnpm build:shared && pnpm --filter @shopper/server build && pnpm --filter @shopper/client build",
     "typecheck": "pnpm --filter @shopper/shared typecheck && pnpm --filter @shopper/client type-check",
     "lint": "pnpm --filter @shopper/client lint && pnpm --filter @shopper/server lint",
-    "test": "pnpm --filter @shopper/client test --run && pnpm --filter @shopper/server test"
+    "test": "pnpm --filter @shopper/client test --run && pnpm --filter @shopper/server test",
+    "setup": "bash ./setup.sh",
+    "start": "bash ./start.sh"
   }
 }

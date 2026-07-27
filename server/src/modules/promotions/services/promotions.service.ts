@@ -9,6 +9,7 @@ import {
     PromotionType,
 } from '@prisma/client';
 import { DatabaseService } from '../../../common/database/services/database.service';
+import { equalsInsensitive } from '../../../common/helper/prisma-string-filter';
 import { CreatePromotionDto, UpdatePromotionDto } from '../dtos/promotion.dto';
 
 @Injectable()
@@ -87,7 +88,7 @@ export class PromotionsService {
         const code = dto.code.trim().toUpperCase();
         const existing = await this.prisma.promotion.findFirst({
             where: {
-                code: { equals: code, mode: 'insensitive' },
+                code: equalsInsensitive(code),
                 storeId: storeId,
             },
         });

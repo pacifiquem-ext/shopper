@@ -124,42 +124,33 @@ There is no automated card/MoMo capture processor in product scope.
 
 ## Developer setup (monorepo)
 
-Shopper runs locally with Node.js, PostgreSQL, and Redis. No Docker is required.
-
-### Prerequisites
-
-- Node.js 20+ and [pnpm](https://pnpm.io) 9+
-- PostgreSQL 16+ listening on `localhost:5432`
-- Redis 7+ listening on `localhost:6379`
-
-macOS (Homebrew):
+Only **Node.js 20+** is required. Postgres and Redis are used when they are already running; otherwise setup falls back to SQLite and an in-process cache.
 
 ```bash
-brew install node@20 pnpm postgresql@16 redis
-brew services start postgresql@16
-brew services start redis
-createdb shopper
+./setup.sh    # install, write env files, pick Postgres or SQLite, migrate, seed
+./start.sh    # run API (:3001) and app (:3000)
 ```
 
-Linux (Debian/Ubuntu):
+`./start.sh` runs `./setup.sh` first when `node_modules` or env files are missing.
+
+### What setup chooses
+
+| Service | Production (`APP_ENV` / `NODE_ENV=production`) | Local (`DATABASE_PROVIDER=auto`) |
+| ------- | ---------------------------------------------- | -------------------------------- |
+| Database | PostgreSQL (`DATABASE_URL`) — required | PostgreSQL if `localhost:5432` accepts a connection, otherwise SQLite at `server/prisma/dev.db` |
+| Cache | `lru-cache` in-process unless `CACHE_DRIVER=redis` | Same default. Set `CACHE_DRIVER=redis` or `auto` to use Redis when it is running |
+
+Force an engine in `server/.env`:
 
 ```bash
-sudo apt install postgresql redis-server
-sudo systemctl enable --now postgresql redis-server
-sudo -u postgres createdb shopper
+DATABASE_PROVIDER=postgresql   # or sqlite
+CACHE_DRIVER=memory            # default lru-cache; redis or auto also work
 ```
 
-### Run the app
+Env files (created by setup if missing):
 
-```bash
-# from repo root
-pnpm install
-cp server/.env.example server/.env
-cp client/.env.example client/.env.local
-# edit server/.env if your Postgres user/password/database differ
-pnpm --filter @shopper/server prisma:migrate-prod
-pnpm dev   # builds @shopper/shared, then runs shared watch + Nest + Next together
-```
+- `server/.env` ← `server/.env.example`
+- `client/.env.local` ← `client/.env.example`
 
 - App: http://localhost:3000
 - API: http://localhost:3001

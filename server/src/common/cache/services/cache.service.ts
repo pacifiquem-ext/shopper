@@ -1,24 +1,33 @@
-import { Inject, Injectable, Logger, OnModuleDestroy } from '@nestjs/common';
+import { Inject, Injectable, Logger, Optional, OnModuleDestroy } from '@nestjs/common';
 import Redis from 'ioredis';
 
+import { LruMemoryStore } from '../lru-memory-store';
 import { REDIS_CLIENT } from '../constants/cache.constant';
 
 @Injectable()
 export class CacheService implements OnModuleDestroy {
     private readonly logger = new Logger(CacheService.name);
+    private readonly memory: LruMemoryStore;
 
-    constructor(@Inject(REDIS_CLIENT) private readonly redis: Redis) {}
-
-    async onModuleDestroy(): Promise<void> {
-        await this.redis.quit();
+    constructor(@Optional() @Inject(REDIS_CLIENT) private readonly redis: Redis | null) {
+        const maxItems = Number(process.env.CACHE_MAX_ITEMS || 10_000);
+        this.memory = new LruMemoryStore(Number.isFinite(maxItems) ? maxItems : 10_000);
+        if (!this.redis) {
+            this.logger.log('Cache: lru-cache in-process store');
+        }
     }
 
-    /**
-     * Retrieve a value by key. Returns null when the key does not exist.
-     * JSON-serialised values are automatically deserialised.
-     */
+    async onModuleDestroy(): Promise<void> {
+        if (this.redis) {
+            await this.redis.quit();
+        }
+        this.memory.flush();
+    }
+
     async get<T = string>(key: string): Promise<T | null> {
-        const value = await this.redis.get(key);
+        const value = this.redis
+            ? await this.redis.get(key)
+            : this.memory.get(key);
         if (value === null) return null;
         try {
             return JSON.parse(value) as T;
@@ -27,58 +36,57 @@ export class CacheService implements OnModuleDestroy {
         }
     }
 
-    /**
-     * Store a value. Objects/arrays are JSON-serialised automatically.
-     * @param ttlSeconds Optional TTL in seconds. Omit to persist indefinitely.
-     */
     async set(key: string, value: unknown, ttlSeconds?: number): Promise<void> {
         const serialised =
             typeof value === 'string' ? value : JSON.stringify(value);
-        if (ttlSeconds !== undefined && ttlSeconds > 0) {
-            await this.redis.set(key, serialised, 'EX', ttlSeconds);
-        } else {
-            await this.redis.set(key, serialised);
+        if (this.redis) {
+            if (ttlSeconds !== undefined && ttlSeconds > 0) {
+                await this.redis.set(key, serialised, 'EX', ttlSeconds);
+            } else {
+                await this.redis.set(key, serialised);
+            }
+            return;
         }
+        this.memory.set(key, serialised, ttlSeconds);
     }
 
-    /**
-     * Delete one or more keys.
-     */
     async del(...keys: string[]): Promise<void> {
         if (keys.length === 0) return;
-        await this.redis.del(...keys);
+        if (this.redis) {
+            await this.redis.del(...keys);
+            return;
+        }
+        this.memory.del(...keys);
     }
 
-    /**
-     * Check whether a key exists.
-     */
     async exists(key: string): Promise<boolean> {
-        const count = await this.redis.exists(key);
-        return count > 0;
+        if (this.redis) {
+            return (await this.redis.exists(key)) > 0;
+        }
+        return this.memory.exists(key);
     }
 
-    /**
-     * Return all keys matching a glob-style pattern (e.g. "user:*").
-     * Avoid in production on large datasets – use SCAN-based helpers instead.
-     */
     async keys(pattern: string): Promise<string[]> {
-        return this.redis.keys(pattern);
+        if (this.redis) {
+            return this.redis.keys(pattern);
+        }
+        return this.memory.keys(pattern);
     }
 
-    /**
-     * Set a hash field value.
-     */
     async hset(key: string, field: string, value: unknown): Promise<void> {
         const serialised =
             typeof value === 'string' ? value : JSON.stringify(value);
-        await this.redis.hset(key, field, serialised);
+        if (this.redis) {
+            await this.redis.hset(key, field, serialised);
+            return;
+        }
+        this.memory.hset(key, field, serialised);
     }
 
-    /**
-     * Get a single hash field value. Returns null when the field does not exist.
-     */
     async hget<T = string>(key: string, field: string): Promise<T | null> {
-        const value = await this.redis.hget(key, field);
+        const value = this.redis
+            ? await this.redis.hget(key, field)
+            : this.memory.hget(key, field);
         if (value === null) return null;
         try {
             return JSON.parse(value) as T;
@@ -87,69 +95,60 @@ export class CacheService implements OnModuleDestroy {
         }
     }
 
-    /**
-     * Get all fields and values of a hash. Returns null when the key does not exist.
-     */
     async hgetall<T = Record<string, string>>(key: string): Promise<T | null> {
-        const value = await this.redis.hgetall(key);
-        if (!value || Object.keys(value).length === 0) return null;
-        return value as unknown as T;
+        if (this.redis) {
+            const value = await this.redis.hgetall(key);
+            if (!value || Object.keys(value).length === 0) return null;
+            return value as unknown as T;
+        }
+        return this.memory.hgetall(key) as T | null;
     }
 
-    /**
-     * Delete one or more hash fields.
-     */
     async hdel(key: string, ...fields: string[]): Promise<void> {
         if (fields.length === 0) return;
-        await this.redis.hdel(key, ...fields);
+        if (this.redis) {
+            await this.redis.hdel(key, ...fields);
+            return;
+        }
+        this.memory.hdel(key, ...fields);
     }
 
-    /**
-     * Atomically increment a counter. Creates the key at 0 before incrementing.
-     */
     async incr(key: string): Promise<number> {
-        return this.redis.incr(key);
+        if (this.redis) return this.redis.incr(key);
+        return this.memory.incr(key);
     }
 
-    /**
-     * Atomically decrement a counter.
-     */
     async decr(key: string): Promise<number> {
-        return this.redis.decr(key);
+        if (this.redis) return this.redis.decr(key);
+        return this.memory.decr(key);
     }
 
-    /**
-     * Update the TTL on an existing key.
-     */
     async expire(key: string, ttlSeconds: number): Promise<void> {
-        await this.redis.expire(key, ttlSeconds);
+        if (this.redis) {
+            await this.redis.expire(key, ttlSeconds);
+            return;
+        }
+        this.memory.expire(key, ttlSeconds);
     }
 
-    /**
-     * Return the remaining TTL in seconds. -1 = no expiry, -2 = key not found.
-     */
     async ttl(key: string): Promise<number> {
-        return this.redis.ttl(key);
+        if (this.redis) return this.redis.ttl(key);
+        return this.memory.ttl(key);
     }
 
-    /**
-     * Delete all keys in the current database. Use with caution.
-     */
     async flush(): Promise<void> {
-        await this.redis.flushdb();
+        if (this.redis) {
+            await this.redis.flushdb();
+            return;
+        }
+        this.memory.flush();
     }
 
-    /**
-     * Returns true when the Redis connection is ready.
-     */
     isHealthy(): boolean {
-        return this.redis.status === 'ready';
+        return this.redis ? this.redis.status === 'ready' : true;
     }
 
-    /**
-     * Expose the raw IORedis client for advanced operations.
-     */
-    getClient(): Redis {
+    getClient(): Redis | null {
         return this.redis;
     }
 }

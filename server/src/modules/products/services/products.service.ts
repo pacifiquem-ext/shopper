@@ -10,6 +10,7 @@ import {
     ProductStatus as PrismaProductStatus,
     StockStatus as PrismaStockStatus,
 } from '@prisma/client';
+import { containsInsensitive } from '../../../common/helper/prisma-string-filter';
 
 const EXPORT_MAX_ROWS = 5000;
 
@@ -116,9 +117,9 @@ export class ProductsService {
 
         if (search) {
             where.OR = [
-                { name: { contains: search, mode: 'insensitive' } },
-                { description: { contains: search, mode: 'insensitive' } },
-                { vendor: { contains: search, mode: 'insensitive' } },
+                { name: containsInsensitive(search) },
+                { description: containsInsensitive(search) },
+                { vendor: containsInsensitive(search) },
             ];
         }
 

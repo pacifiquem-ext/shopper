@@ -9,6 +9,7 @@ import {
     PrismaDelegate,
 } from '../interfaces/pagination.interface';
 import { IHelperPaginationService } from '../interfaces/pagination.service.interface';
+import { containsInsensitive } from '../prisma-string-filter';
 
 /**
  * Simple pagination service for Prisma queries
@@ -99,10 +100,7 @@ export class HelperPaginationService implements IHelperPaginationService {
 
         return {
             OR: fields.map(field => ({
-                [field]: {
-                    contains: searchQuery,
-                    mode: 'insensitive',
-                },
+                [field]: containsInsensitive(searchQuery),
             })),
         };
     }

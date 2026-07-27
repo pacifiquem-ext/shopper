@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { PinoLogger } from 'nestjs-pino';
 
 import { ApiPaginatedDataDto } from 'src/common/response/dtos/response.paginated.dto';
+import { containsInsensitive } from '../prisma-string-filter';
 
 /**
  * Simple query builder service for common listing API patterns
@@ -90,10 +91,7 @@ class QueryBuilder<T> {
 
         this.whereConditions.push({
             OR: fields.map(field => ({
-                [field]: {
-                    contains: searchQuery,
-                    mode: 'insensitive',
-                },
+                [field]: containsInsensitive(searchQuery),
             })),
         });
 

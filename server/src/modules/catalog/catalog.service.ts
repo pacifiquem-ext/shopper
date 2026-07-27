@@ -17,6 +17,11 @@ import type { Prisma } from '@prisma/client';
 import { APP_ENVIRONMENT } from '../../app/enums/app.enum';
 import { DatabaseService } from '../../common/database/services/database.service';
 import { withDbRetry } from '../../common/database/utils/with-db-retry';
+import { asStringArray } from '../../common/helper/as-string-array';
+import {
+    containsInsensitive,
+    equalsInsensitive,
+} from '../../common/helper/prisma-string-filter';
 import { CreateReviewDto } from './dtos/create-review.dto';
 import { PromoValidateDto } from './dtos/promo-validate.dto';
 
@@ -402,10 +407,10 @@ export class CatalogService {
         const q = search?.trim();
         if (q) {
             where.OR = [
-                { name: { contains: q, mode: 'insensitive' } },
-                { description: { contains: q, mode: 'insensitive' } },
-                { vendor: { contains: q, mode: 'insensitive' } },
-                { category: { contains: q, mode: 'insensitive' } },
+                { name: containsInsensitive(q) },
+                { description: containsInsensitive(q) },
+                { vendor: containsInsensitive(q) },
+                { category: containsInsensitive(q) },
             ];
         }
 
@@ -544,9 +549,9 @@ export class CatalogService {
         const q = search?.trim();
         if (q) {
             where.OR = [
-                { displayName: { contains: q, mode: 'insensitive' } },
-                { description: { contains: q, mode: 'insensitive' } },
-                { slug: { contains: q, mode: 'insensitive' } },
+                { displayName: containsInsensitive(q) },
+                { description: containsInsensitive(q) },
+                { slug: containsInsensitive(q) },
             ];
         }
 
@@ -871,7 +876,7 @@ export class CatalogService {
 
         const promotions = await this.prisma.promotion.findMany({
             where: {
-                code: { equals: code, mode: 'insensitive' },
+                code: equalsInsensitive(code),
                 status: PromotionStatus.ACTIVE,
                 startsAt: { lte: now },
                 OR: [{ endsAt: null }, { endsAt: { gte: now } }],
@@ -1026,13 +1031,8 @@ export class CatalogService {
                     where: {
                         status: { in: this.marketplaceStoreStatuses() },
                         OR: [
-                            { slug: { equals: trimmed, mode: 'insensitive' } },
-                            {
-                                slug: {
-                                    equals: normalizedIdentifier,
-                                    mode: 'insensitive',
-                                },
-                            },
+                            { slug: equalsInsensitive(trimmed) },
+                            { slug: equalsInsensitive(normalizedIdentifier) },
                         ],
                     },
                     select: { id: true },
@@ -1113,7 +1113,7 @@ export class CatalogService {
             price: Number(v.price),
             compareAt: v.compareAt ? Number(v.compareAt) : null,
             attributes: (v.attributes as Record<string, unknown>) ?? {},
-            images: v.images ?? [],
+            images: asStringArray(v.images),
             inventory: v.inventory
                 ? {
                       available: v.inventory.available,
@@ -1146,8 +1146,8 @@ export class CatalogService {
                       nameRw: p.productCategory.nameRw,
                   }
                 : null,
-            tags: p.tags,
-            images: p.images,
+            tags: asStringArray(p.tags),
+            images: asStringArray(p.images),
             primaryImage: p.primaryImage,
             attributes: (p.attributes as Record<string, unknown>) ?? {},
             ratingAvg: Number(p.ratingAvg),
