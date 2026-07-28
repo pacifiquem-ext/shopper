@@ -47,7 +47,7 @@ export function StepContact() {
               value={draft.contactEmail || ''}
               onChange={(e) => setContactEmail(e.target.value)}
               className="rounded-none border-0 bg-transparent px-0 pb-1 text-lg shadow-none focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-base/40 focus-visible:ring-offset-0"
-              placeholder="e.g. hello@mystore.rw"
+              placeholder="e.g. hello@onlineshop.rw"
             />
           </div>
         </div>

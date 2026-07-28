@@ -73,7 +73,7 @@ export class CreateOrderDto {
     @IsString()
     customerPhone: string;
 
-    @ApiPropertyOptional({ example: 'jean@example.com' })
+    @ApiPropertyOptional({ example: 'jean@onlineshop.rw' })
     @IsOptional()
     @IsEmail()
     customerEmail?: string;

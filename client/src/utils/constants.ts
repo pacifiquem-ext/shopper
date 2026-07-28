@@ -6,7 +6,7 @@ export const APP_CONFIG = {
   version: '1.0.0',
   author: 'Your Name',
   url: process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
-  email: 'hello@example.com',
+  email: 'hello@onlineshop.rw',
 } as const
 
 export const ROUTES = {

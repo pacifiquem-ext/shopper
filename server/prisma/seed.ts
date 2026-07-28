@@ -499,7 +499,7 @@ async function seedDashboardData(categoryIds: Record<string, string> = {}) {
                 orderNumber,
                 customerName: `Customer ${i + 1}`,
                 customerPhone: `078${String(i).padStart(7, '0')}`,
-                customerEmail: `customer${i + 1}@example.com`,
+                customerEmail: `customer${i + 1}@onlineshop.rw`,
                 shippingAddress: JSON.stringify({
                     street: `KG ${i + 1} Ave`,
                     city: 'Kigali',
@@ -669,7 +669,7 @@ async function seedDevMerchant() {
                 displayName: 'Demo Kigali Market',
                 description: 'Seeded demo store for local marketplace development.',
                 currency: 'RWF',
-                contactEmail: 'demo@shopper.app',
+                contactEmail: 'demo@onlineshop.rw',
                 contactPhone: phoneNumber,
                 contactAddress: 'Kigali, Rwanda',
             },

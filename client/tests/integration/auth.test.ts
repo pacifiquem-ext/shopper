@@ -14,7 +14,7 @@ describe("Authentication Integration Tests", () => {
   describe("User Registration", () => {
     it("should create a new user account", async () => {
       const userData = {
-        email: "test@example.com",
+        email: "test@onlineshop.rw",
         password: "SecurePass123!",
         firstName: "John",
         lastName: "Doe",
@@ -32,7 +32,7 @@ describe("Authentication Integration Tests", () => {
 
     it("should not allow duplicate email addresses", async () => {
       const userData = {
-        email: "duplicate@example.com",
+        email: "duplicate@onlineshop.rw",
         password: "SecurePass123!",
         firstName: "John",
         lastName: "Doe",
@@ -47,7 +47,7 @@ describe("Authentication Integration Tests", () => {
 
     it("should validate password requirements", async () => {
       const userData = {
-        email: "test@example.com",
+        email: "test@onlineshop.rw",
         password: "weak",
         firstName: "John",
         lastName: "Doe",
@@ -63,7 +63,7 @@ describe("Authentication Integration Tests", () => {
   describe("User Authentication", () => {
     beforeEach(async () => {
       await signUp({
-        email: "auth@example.com",
+        email: "auth@onlineshop.rw",
         password: "SecurePass123!",
         firstName: "Auth",
         lastName: "User",
@@ -72,7 +72,7 @@ describe("Authentication Integration Tests", () => {
 
     it("should authenticate user with correct credentials", async () => {
       const result = await signIn({
-        email: "auth@example.com",
+        email: "auth@onlineshop.rw",
         password: "SecurePass123!",
       })
 
@@ -84,7 +84,7 @@ describe("Authentication Integration Tests", () => {
 
     it("should reject invalid credentials", async () => {
       const result = await signIn({
-        email: "auth@example.com",
+        email: "auth@onlineshop.rw",
         password: "WrongPassword",
       })
 
@@ -94,7 +94,7 @@ describe("Authentication Integration Tests", () => {
 
     it("should reject non-existent user", async () => {
       const result = await signIn({
-        email: "nonexistent@example.com",
+        email: "nonexistent@onlineshop.rw",
         password: "SecurePass123!",
       })
 
@@ -106,7 +106,7 @@ describe("Authentication Integration Tests", () => {
   describe("Email Verification", () => {
     it("should verify email with valid token", async () => {
       const signUpResult = await signUp({
-        email: "verify@example.com",
+        email: "verify@onlineshop.rw",
         password: "SecurePass123!",
         firstName: "Verify",
         lastName: "User",

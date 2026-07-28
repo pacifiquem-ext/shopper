@@ -20,7 +20,7 @@ export class AuthTokenResponseDto {
             id: 'uuid',
             fullName: 'John Doe',
             phoneNumber: '+250788123456',
-            email: 'john@example.com',
+            email: 'john@onlineshop.rw',
             role: UserRole.CUSTOMER,
             status: UserStatus.ACTIVE,
         },

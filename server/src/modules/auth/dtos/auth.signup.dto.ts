@@ -35,7 +35,7 @@ export class SignupDto {
 
     @ApiPropertyOptional({
         description: 'Optional email address',
-        example: 'john@example.com',
+        example: 'john@onlineshop.rw',
     })
     @ValidateIf((_, value) => value != null && String(value).trim() !== '')
     @IsEmail()

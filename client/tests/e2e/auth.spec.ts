@@ -13,7 +13,7 @@ test.describe("Authentication Flow", () => {
     // Fill out sign up form
     await page.fill('[name="firstName"]', "John")
     await page.fill('[name="lastName"]', "Doe")
-    await page.fill('[name="email"]', "john.doe@example.com")
+    await page.fill('[name="email"]', "john.doe@onlineshop.rw")
     await page.fill('[name="password"]', "SecurePass123!")
     await page.fill('[name="confirmPassword"]', "SecurePass123!")
     await page.check('[name="terms"]')
@@ -31,7 +31,7 @@ test.describe("Authentication Flow", () => {
     await page.click("text=Sign in")
 
     // Fill out sign in form
-    await page.fill('[name="email"]', "existing@example.com")
+    await page.fill('[name="email"]', "existing@onlineshop.rw")
     await page.fill('[name="password"]', "SecurePass123!")
 
     // Submit form
@@ -63,7 +63,7 @@ test.describe("Authentication Flow", () => {
     await page.click("text=Forgot Password")
 
     // Fill out forgot password form
-    await page.fill('[name="email"]', "reset@example.com")
+    await page.fill('[name="email"]', "reset@onlineshop.rw")
     await page.click('button[type="submit"]')
 
     // Should show success message
@@ -73,7 +73,7 @@ test.describe("Authentication Flow", () => {
   test("should allow user to sign out", async ({ page }) => {
     // Sign in first
     await page.goto("/sign-in")
-    await page.fill('[name="email"]', "existing@example.com")
+    await page.fill('[name="email"]', "existing@onlineshop.rw")
     await page.fill('[name="password"]', "SecurePass123!")
     await page.click('button[type="submit"]')
 

@@ -118,7 +118,7 @@ export function StepLegal() {
                 onChange={(e) => setOwnerEmail(e.target.value)}
                 aria-invalid={ownerEmailField.hasError || undefined}
                 className="rounded-none border-0 bg-transparent px-0 pb-1 text-lg shadow-none focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-base/40 focus-visible:ring-offset-0"
-                placeholder="owner@domain.com"
+                placeholder="owner@onlineshop.rw"
               />
             </div>
             {ownerEmailField.hasError && (

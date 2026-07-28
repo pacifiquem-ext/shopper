@@ -49,7 +49,7 @@ export class UpdateStoreSettingsDto {
     @IsString()
     aboutUs?: string;
 
-    @ApiPropertyOptional({ example: 'contact@kigalifashion.rw' })
+    @ApiPropertyOptional({ example: 'contact@onlineshop.rw' })
     @IsOptional()
     @IsEmail()
     contactEmail?: string;
@@ -85,7 +85,7 @@ export class UpdateStoreSettingsDto {
     @IsString()
     ownerFullName?: string;
 
-    @ApiPropertyOptional({ example: 'owner@kigalifashion.rw' })
+    @ApiPropertyOptional({ example: 'owner@onlineshop.rw' })
     @IsOptional()
     @IsEmail()
     ownerEmail?: string;

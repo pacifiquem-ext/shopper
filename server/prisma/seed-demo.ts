@@ -462,7 +462,7 @@ export async function seedDemoMarketplace(
     const admin = await upsertUser(prisma, passwordHash, {
         phoneNumber: '+233200000001',
         fullName: 'Amina Boateng',
-        email: 'admin@shopper.app',
+        email: 'admin@onlineshop.rw',
         role: 'PLATFORM_ADMIN',
         status: 'ACTIVE',
         createdAt: daysAgo(120),
@@ -471,7 +471,7 @@ export async function seedDemoMarketplace(
     const harvestOwner = await upsertUser(prisma, passwordHash, {
         phoneNumber: '+233200000010',
         fullName: 'Kwame Mensah',
-        email: 'kwame@harvest-market.test',
+        email: 'kwame@onlineshop.rw',
         role: 'STORE_OWNER',
         status: 'ACTIVE',
         createdAt: daysAgo(90),
@@ -479,7 +479,7 @@ export async function seedDemoMarketplace(
     const northlineOwner = await upsertUser(prisma, passwordHash, {
         phoneNumber: '+233200000011',
         fullName: 'Fatou Ndiaye',
-        email: 'fatou@northline.test',
+        email: 'fatou@onlineshop.rw',
         role: 'STORE_OWNER',
         status: 'ACTIVE',
         createdAt: daysAgo(80),
@@ -487,7 +487,7 @@ export async function seedDemoMarketplace(
     const atelierOwner = await upsertUser(prisma, passwordHash, {
         phoneNumber: '+233200000012',
         fullName: 'Imani Okello',
-        email: 'imani@atelier-threads.test',
+        email: 'imani@onlineshop.rw',
         role: 'STORE_OWNER',
         status: 'ACTIVE',
         createdAt: daysAgo(70),
@@ -495,7 +495,7 @@ export async function seedDemoMarketplace(
     const pendingOwner = await upsertUser(prisma, passwordHash, {
         phoneNumber: '+233200000013',
         fullName: 'Samuel Adeyemi',
-        email: 'samuel@pending-goods.test',
+        email: 'samuel@onlineshop.rw',
         role: 'STORE_OWNER',
         status: 'ACTIVE',
         createdAt: daysAgo(12),
@@ -503,7 +503,7 @@ export async function seedDemoMarketplace(
     const reviewOwner = await upsertUser(prisma, passwordHash, {
         phoneNumber: '+233200000014',
         fullName: 'Chidinma Eze',
-        email: 'chidinma@review-house.test',
+        email: 'chidinma@onlineshop.rw',
         role: 'STORE_OWNER',
         status: 'ACTIVE',
         createdAt: daysAgo(9),
@@ -511,7 +511,7 @@ export async function seedDemoMarketplace(
     const rejectedOwner = await upsertUser(prisma, passwordHash, {
         phoneNumber: '+233200000015',
         fullName: 'Joseph Kamau',
-        email: 'joseph@closed-corner.test',
+        email: 'joseph@onlineshop.rw',
         role: 'STORE_OWNER',
         status: 'ACTIVE',
         createdAt: daysAgo(20),
@@ -519,7 +519,7 @@ export async function seedDemoMarketplace(
     const suspendedOwner = await upsertUser(prisma, passwordHash, {
         phoneNumber: '+233200000016',
         fullName: 'Aisha Bello',
-        email: 'aisha@paused-mart.test',
+        email: 'aisha@onlineshop.rw',
         role: 'STORE_OWNER',
         status: 'SUSPENDED',
         createdAt: daysAgo(40),
@@ -528,7 +528,7 @@ export async function seedDemoMarketplace(
     const customerAma = await upsertUser(prisma, passwordHash, {
         phoneNumber: '+233200000101',
         fullName: 'Ama Diallo',
-        email: 'ama.diallo@example.com',
+        email: 'ama.diallo@onlineshop.rw',
         role: 'CUSTOMER',
         status: 'ACTIVE',
         createdAt: daysAgo(60),
@@ -536,7 +536,7 @@ export async function seedDemoMarketplace(
     const customerYusuf = await upsertUser(prisma, passwordHash, {
         phoneNumber: '+233200000102',
         fullName: 'Yusuf Ibrahim',
-        email: 'yusuf.ibrahim@example.com',
+        email: 'yusuf.ibrahim@onlineshop.rw',
         role: 'CUSTOMER',
         status: 'ACTIVE',
         createdAt: daysAgo(45),
@@ -544,7 +544,7 @@ export async function seedDemoMarketplace(
     const customerLina = await upsertUser(prisma, passwordHash, {
         phoneNumber: '+233200000103',
         fullName: 'Lina Mwangi',
-        email: 'lina.mwangi@example.com',
+        email: 'lina.mwangi@onlineshop.rw',
         role: 'CUSTOMER',
         status: 'ACTIVE',
         createdAt: daysAgo(30),
@@ -552,7 +552,7 @@ export async function seedDemoMarketplace(
     await upsertUser(prisma, passwordHash, {
         phoneNumber: '+233200000104',
         fullName: 'Peter Okonkwo',
-        email: 'peter.okonkwo@example.com',
+        email: 'peter.okonkwo@onlineshop.rw',
         role: 'CUSTOMER',
         status: 'PENDING_VERIFICATION',
         createdAt: daysAgo(2),
@@ -560,7 +560,7 @@ export async function seedDemoMarketplace(
     await upsertUser(prisma, passwordHash, {
         phoneNumber: '+233200000105',
         fullName: 'Mariam Sow',
-        email: 'mariam.sow@example.com',
+        email: 'mariam.sow@onlineshop.rw',
         role: 'CUSTOMER',
         status: 'SUSPENDED',
         createdAt: daysAgo(25),
@@ -573,7 +573,7 @@ export async function seedDemoMarketplace(
         registeredName: 'Harvest Market Ltd',
         displayName: 'Harvest Market',
         description: 'Fresh groceries and pantry staples from local growers.',
-        contactEmail: 'hello@harvest-market.test',
+        contactEmail: 'harvest@onlineshop.rw',
         contactPhone: harvestOwner.phoneNumber,
         contactAddress: 'Osu Market Road, Accra',
         ratingAvg: 4.6,
@@ -589,7 +589,7 @@ export async function seedDemoMarketplace(
         registeredName: 'Northline Electronics Ltd',
         displayName: 'Northline Electronics',
         description: 'Phones, audio, and everyday gadgets with local warranty.',
-        contactEmail: 'hello@northline.test',
+        contactEmail: 'northline@onlineshop.rw',
         contactPhone: northlineOwner.phoneNumber,
         contactAddress: 'Ring Road East, Accra',
         ratingAvg: 4.4,
@@ -605,7 +605,7 @@ export async function seedDemoMarketplace(
         registeredName: 'Atelier Threads Ltd',
         displayName: 'Atelier Threads',
         description: 'Everyday clothing and accessories made for warm weather.',
-        contactEmail: 'hello@atelier-threads.test',
+        contactEmail: 'atelier@onlineshop.rw',
         contactPhone: atelierOwner.phoneNumber,
         contactAddress: 'Oxford Street, Accra',
         ratingAvg: 4.8,
@@ -621,7 +621,7 @@ export async function seedDemoMarketplace(
         registeredName: 'Pending Goods Ltd',
         displayName: 'Pending Goods',
         description: 'New shop waiting for review.',
-        contactEmail: 'hello@pending-goods.test',
+        contactEmail: 'pending@onlineshop.rw',
         contactPhone: pendingOwner.phoneNumber,
         contactAddress: 'Tema Community 1',
         ratingAvg: 0,
@@ -636,7 +636,7 @@ export async function seedDemoMarketplace(
         registeredName: 'Review House Ltd',
         displayName: 'Review House',
         description: 'Documents are with the platform team.',
-        contactEmail: 'hello@review-house.test',
+        contactEmail: 'review@onlineshop.rw',
         contactPhone: reviewOwner.phoneNumber,
         contactAddress: 'Kumasi Central',
         ratingAvg: 0,
@@ -651,7 +651,7 @@ export async function seedDemoMarketplace(
         registeredName: 'Closed Corner Ltd',
         displayName: 'Closed Corner',
         description: 'Application did not pass review.',
-        contactEmail: 'hello@closed-corner.test',
+        contactEmail: 'closed@onlineshop.rw',
         contactPhone: rejectedOwner.phoneNumber,
         contactAddress: 'Takoradi Harbour',
         ratingAvg: 0,
@@ -667,7 +667,7 @@ export async function seedDemoMarketplace(
         registeredName: 'Paused Mart Ltd',
         displayName: 'Paused Mart',
         description: 'Temporarily paused by the platform.',
-        contactEmail: 'hello@paused-mart.test',
+        contactEmail: 'paused@onlineshop.rw',
         contactPhone: suspendedOwner.phoneNumber,
         contactAddress: 'Cape Coast',
         ratingAvg: 3.2,
@@ -1083,7 +1083,7 @@ export async function seedDemoMarketplace(
 
     console.log('Demo marketplace ready.')
     console.log(`  Password for all seeded users: ${DEMO_PASSWORD}`)
-    console.log('  Admin     admin@shopper.app / +233200000001')
+    console.log('  Admin     admin@onlineshop.rw / +233200000001')
     console.log('  Merchant  /stores/harvest-market  /stores/northline-electronics  /stores/atelier-threads')
-    console.log('  Customer  ama.diallo@example.com / +233200000101')
+    console.log('  Customer  ama.diallo@onlineshop.rw / +233200000101')
 }
