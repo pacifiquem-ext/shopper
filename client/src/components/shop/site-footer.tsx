@@ -12,18 +12,12 @@ import { cn } from '@/lib/utils'
 
 export type SiteFooterStoreContext = {
   displayName: string
-  subdomain: string
-  slug?: string
+  slug: string
   logoUrl: string | null
   description?: string | null
   contactEmail?: string | null
   contactPhone?: string | null
   brandColors?: BrandColors | null
-  /** True when the site is opened on the store’s subdomain host. */
-  isSubdomainHost: boolean
-  /** Absolute URL to marketplace /shop on the apex host (only when `isSubdomainHost`). */
-  marketplaceShopAbsoluteHref: string | null
-  /** e.g. `store=myshop` — used on the marketplace host with `?store=` so links stay in-store. */
   listingSearch?: string
 }
 
@@ -68,7 +62,7 @@ export function SiteFooter({ className, store }: SiteFooterProps) {
       .filter(Boolean)
       .slice(0, 2)
       .map((w) => w[0]?.toUpperCase() ?? '')
-      .join('') || store.subdomain.slice(0, 2).toUpperCase()
+      .join('') || store.slug.slice(0, 2).toUpperCase()
 
     return (
       <footer
@@ -116,45 +110,17 @@ export function SiteFooter({ className, store }: SiteFooterProps) {
                 </div>
               </div>
               <p className='max-w-sm text-sm leading-6 text-white/75'>{aboutText}</p>
-              {store.isSubdomainHost ? (
-                store.marketplaceShopAbsoluteHref ? (
-                  <Button
-                    asChild
-                    type='button'
-                    className={ctaButtonClass}
-                    style={ctaButtonStyle}
-                  >
-                    <a href={store.marketplaceShopAbsoluteHref} className='inline-flex items-center gap-2'>
-                      {ts('exploreMarketplace')}
-                      <ArrowRight className='size-4' aria-hidden />
-                    </a>
-                  </Button>
-                ) : (
-                  <Button
-                    asChild
-                    type='button'
-                    className={ctaButtonClass}
-                    style={ctaButtonStyle}
-                  >
-                    <Link href='/shop' className='inline-flex items-center gap-2'>
-                      {ts('exploreMarketplace')}
-                      <ArrowRight className='size-4' aria-hidden />
-                    </Link>
-                  </Button>
-                )
-              ) : (
-                <Button
-                  asChild
-                  type='button'
-                  className={ctaButtonClass}
-                  style={ctaButtonStyle}
-                >
-                  <Link href='/shop' className='inline-flex items-center gap-2'>
-                    {ts('browseAllStores')}
-                    <ArrowRight className='size-4' aria-hidden />
-                  </Link>
-                </Button>
-              )}
+              <Button
+                asChild
+                type='button'
+                className={ctaButtonClass}
+                style={ctaButtonStyle}
+              >
+                <Link href='/shop' className='inline-flex items-center gap-2'>
+                  {ts('browseAllStores')}
+                  <ArrowRight className='size-4' aria-hidden />
+                </Link>
+              </Button>
               <p className='text-xs leading-relaxed text-white/60'>{ts('platformBlurb')}</p>
               <div className='flex items-center gap-3'>
                 <a

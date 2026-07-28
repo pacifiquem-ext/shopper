@@ -4,8 +4,7 @@ import type { ApiResponse, OffsetPage } from '@shopper/shared'
 export interface AdminStoreApi {
   id: string
   displayName: string
-  subdomain: string
-  slug?: string
+  slug: string
   status: string
   createdAt: string
   contactEmail?: string | null

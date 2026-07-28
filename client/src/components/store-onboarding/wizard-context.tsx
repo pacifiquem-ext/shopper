@@ -9,7 +9,7 @@ export type WizardStepKey =
   | 'legal'
   | 'businessAddress'
   | 'storeBasics'
-  | 'subdomain'
+  | 'slug'
   | 'brand'
   | 'delivery'
   | 'contact'
@@ -20,7 +20,7 @@ export const orderedSteps: WizardStepKey[] = [
   'legal',
   'businessAddress',
   'storeBasics',
-  'subdomain',
+  'slug',
   'brand',
   'delivery',
   'contact',
@@ -32,7 +32,7 @@ export const urlSteps = [
   'legal',
   'business-address',
   'store-basics',
-  'subdomain',
+  'slug',
   'brand',
   'delivery',
   'contact',

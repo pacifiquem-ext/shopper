@@ -16,8 +16,7 @@ export interface DeliveryZoneDto {
 }
 
 export interface SubmitStoreDto {
-  slug?: string
-  subdomain?: string
+  slug: string
   registeredName: string
   displayName: string
   description?: string
@@ -64,7 +63,6 @@ export const storeOnboardingService = {
     const base = getPublicApiBaseUrl().replace(/\/+$/, '')
     const candidates = [
       `${base}/onboarding/check-slug?slug=${encodeURIComponent(slug)}`,
-      `${base}/onboarding/check-subdomain?subdomain=${encodeURIComponent(slug)}`,
     ]
 
     let lastError: Error | null = null
@@ -87,12 +85,5 @@ export const storeOnboardingService = {
     }
 
     throw lastError ?? new Error('Slug check failed')
-  },
-
-  /** @deprecated Prefer checkSlug */
-  async checkSubdomain(
-    subdomain: string,
-  ): Promise<ApiResponse<{ available: boolean; message: string }>> {
-    return this.checkSlug(subdomain)
   },
 }

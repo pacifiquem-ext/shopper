@@ -309,18 +309,6 @@
       "descriptionPlaceholder": "Ugura/gurisha iki? Ni iki gitandukanye?",
       "descriptionCount": "{count}/500"
     },
-    "subdomain": {
-      "title": "Hitamo aderesi y'ububiko",
-      "subtitle": "Subdomain niyo izaba link y'ububiko bwawe. Iyigire ngufi kandi yoroshye kwibuka.",
-      "label": "Subdomain",
-      "placeholder": "Urugero: mystore",
-      "preview": "Igaragaza: {domain}",
-      "rulesTitle": "Amategeko ya subdomain",
-      "rulesBody": "Koresha inyuguti nto, imibare, n'udutambike (-). Itangire kandi irangire ku nyuguti cyangwa umubare.",
-      "rule1": "Inyuguti, imibare, n'udukurongo gusa",
-      "rule2": "Ntishobora gutangira cyangwa kurangira n'agakurongo",
-      "rule3": "Igomba kuba hagati y'inyuguti 2 na 63"
-    },
     "brand": {
       "title": "Tandukanya ikirango cyawe",
       "subtitle": "Shyiraho logo uhitemo amabara. Wabihindura nyuma.",
@@ -372,7 +360,7 @@
       },
       "registeredName": "Izina ryemewe",
       "displayName": "Izina rizagaragara",
-      "subdomain": "Subdomain",
+      "slug": "Store slug",
       "delivery": "Delivery",
       "unnamedZone": "Akarere katanditse",
       "deliveryMeta": "{fee} RWF • {eta} min",
@@ -444,8 +432,8 @@
       "missingCategory": "Hitamo icyiciro cy'ubucuruzi kugira ngo ukomeze.",
       "missingRegisteredName": "Andika izina ryemewe ry'ubucuruzi.",
       "missingDisplayName": "Andika izina ry'ububiko rizagaragara.",
-      "missingSubdomain": "Hitamo subdomain kugira ngo ukomeze.",
-      "invalidSubdomain": "Subdomain wanditse siyo.",
+      "missingSlug": "Hitamo izina ry'iduka kugirango ukomeze.",
+      "invalidSlug": "Izina rito ry'iduka ntiryemewe.",
       "missingBrandColors": "Hitamo amabara y'ikirango cyawe.",
       "missingDeliveryZoneName": "Andika amazina y'uturere twa delivery.",
       "missingDeliveryFee": "Andika ikiguzi cya delivery kuri buri karere.",
@@ -464,7 +452,7 @@
     },
     "slug": {
       "title": "Hitamo izina rito ry’iduka",
-      "subtitle": "Abaguzi bakubona kuri /stores/izina-ryawe kuri Shopper — si urubuga rwisanzwe.",
+      "subtitle": "Abaguzi bakubona kuri /stores/izina-ryawe.",
       "label": "Izina rito ry’iduka",
       "placeholder": "iduka-ryanje",
       "checking": "Turareba niba rihari…",
@@ -539,6 +527,7 @@
       "retry": "Ongera ugerageze"
     },
     "storeSettings": {
+      "slugLabel": "Izina rito ry'iduka",
       "loadError": "Ntitwashoboye gupakira imiterere y'iduka. Kubika ntibishoboka kugeza bipakiye neza.",
       "branding": {
         "storeLogo": "Logo y'iduka",

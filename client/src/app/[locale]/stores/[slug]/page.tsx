@@ -12,10 +12,6 @@ export async function generateMetadata({
   return shopGenerateMetadata({ params: Promise.resolve({ locale }) })
 }
 
-/**
- * Store profile inside the marketplace (products of one seller).
- * Not a multi-tenant subdomain website.
- */
 export default async function StoreProfilePage({
   params,
   searchParams,

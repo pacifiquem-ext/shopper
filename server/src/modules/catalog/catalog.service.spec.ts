@@ -110,7 +110,6 @@ describe('CatalogService', () => {
 
         expect(home.topRated).toHaveLength(1);
         expect(home.topRated[0].store.slug).toBe('demo-store');
-        expect(home.topRated[0].store.subdomain).toBe('demo-store');
         expect(home.topRated[0].priceFrom).toBe(1000);
         expect(home.newArrivals).toHaveLength(1);
         expect(home.risingStores).toHaveLength(1);

@@ -33,21 +33,6 @@ export class CatalogQueryDto {
             'storeSlug must be 2-63 chars (letters, digits, hyphens) and not start/end with a hyphen.',
     })
     storeSlug?: string;
-
-    /** @deprecated Use storeSlug */
-    @ApiPropertyOptional({
-        description: 'Deprecated alias for storeSlug',
-        deprecated: true,
-        example: 'kigalifashion',
-    })
-    @IsOptional()
-    @IsString()
-    @MaxLength(63)
-    @Matches(/^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$/i, {
-        message:
-            'subdomain must be 2-63 chars (letters, digits, hyphens) and not start/end with a hyphen.',
-    })
-    subdomain?: string;
 }
 
 export class CatalogPaginationDto {

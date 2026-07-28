@@ -11,16 +11,16 @@ import { useEffect, useState } from 'react'
 
 type AvailabilityState = 'idle' | 'checking' | 'available' | 'taken' | 'error'
 
-export function StepSubdomain() {
+export function StepSlug() {
   const t = useTranslations('storeOnboarding')
-  const { draft, setSubdomain } = useStoreOnboardingStore()
+  const { draft, setSlug } = useStoreOnboardingStore()
 
-  const subdomainField = useWizardField('subdomain')
+  const slugField = useWizardField('slug')
 
   const [availability, setAvailability] = useState<AvailabilityState>('idle')
 
   useEffect(() => {
-    const slug = draft.subdomain || ''
+    const slug = draft.slug || ''
 
     if (slug.length < 2 || !/^[a-z0-9][a-z0-9-]*[a-z0-9]$/.test(slug)) {
       setAvailability('idle')
@@ -39,7 +39,7 @@ export function StepSubdomain() {
     }, 400)
 
     return () => clearTimeout(timer)
-  }, [draft.subdomain])
+  }, [draft.slug])
 
   return (
     <div className="space-y-8">
@@ -53,7 +53,7 @@ export function StepSubdomain() {
           <div
             className={cn(
               'flex items-center border-b py-2 transition-colors',
-              subdomainField.hasError
+              slugField.hasError
                 ? 'border-error-base focus-within:border-error-base'
                 : availability === 'taken'
                   ? 'border-error-base focus-within:border-error-base'
@@ -68,9 +68,9 @@ export function StepSubdomain() {
             <input
               id="onboarding-slug"
               type="text"
-              value={draft.subdomain || ''}
-              onChange={(e) => setSubdomain(e.target.value.toLowerCase())}
-              aria-invalid={subdomainField.hasError || availability === 'taken' || undefined}
+              value={draft.slug || ''}
+              onChange={(e) => setSlug(e.target.value.toLowerCase())}
+              aria-invalid={slugField.hasError || availability === 'taken' || undefined}
               className="flex-1 bg-transparent pb-1 text-lg font-medium outline-none focus-visible:ring-2 focus-visible:ring-primary-base/40"
               placeholder={t('slug.placeholder')}
               autoCapitalize="none"
@@ -79,13 +79,13 @@ export function StepSubdomain() {
             />
           </div>
 
-          {subdomainField.hasError && (
+          {slugField.hasError && (
             <div className="absolute bg-bg-white-0 pt-1 text-xs font-medium text-error-base" role="alert">
-              {subdomainField.errorMessage}
+              {slugField.errorMessage}
             </div>
           )}
 
-          {!subdomainField.hasError && availability !== 'idle' && (
+          {!slugField.hasError && availability !== 'idle' && (
             <div
               className={cn('pt-1 text-xs font-medium', {
                 'text-text-soft-400': availability === 'checking',

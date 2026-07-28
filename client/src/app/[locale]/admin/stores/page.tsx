@@ -132,7 +132,7 @@ export default function AdminStoresPage() {
                   <div>
                     <p className="font-semibold text-text-strong-950">{store.displayName}</p>
                     <p className="text-xs text-text-sub-600">
-                      {store.slug ?? store.subdomain}
+                      {store.slug}
                     </p>
                   </div>
                   <div className="flex flex-wrap items-center gap-2">

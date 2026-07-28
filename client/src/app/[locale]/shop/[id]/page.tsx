@@ -1,4 +1,3 @@
-import { headers } from 'next/headers'
 import { notFound, redirect } from 'next/navigation'
 import type { Metadata } from 'next'
 import { getTranslations } from 'next-intl/server'
@@ -8,7 +7,7 @@ import { fetchCatalogProductById, storePublicSlug } from '@/services/catalog.ser
 import { Button } from '@/components/ui/button'
 import { ProductDetailsBody, ProductDetailsTopBar } from '@/components/shop/product-details-body'
 import { SiteFooter } from '@/components/shop/site-footer'
-import { extractSubdomain, isProductId, normalizeStoreSubdomain } from '@/lib/host'
+import { isProductId, normalizeStoreSlug } from '@/lib/store-slug'
 
 export async function generateMetadata({
   params,
@@ -17,9 +16,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale, id } = await params
   const t = await getTranslations({ locale, namespace: 'product' })
-  const headersList = await headers()
-  const subdomain = extractSubdomain(headersList.get('host'))
-  const storeSlug = !subdomain && !isProductId(id) ? normalizeStoreSubdomain(id) : null
+  const storeSlug = !isProductId(id) ? normalizeStoreSlug(id) : null
   if (storeSlug) {
     const marketplace = await getTranslations({ locale, namespace: 'marketplace' })
     return {
@@ -28,7 +25,7 @@ export async function generateMetadata({
     }
   }
 
-  const { data } = await fetchCatalogProductById(id, { storeSlug: subdomain })
+  const { data } = await fetchCatalogProductById(id)
   if (!data) return { title: t('title') }
   return {
     title: `${data.name} — ${t('title')}`,
@@ -43,14 +40,12 @@ export default async function ProductDetailsPage({
 }) {
   const { locale, id } = await params
   const t = await getTranslations('product')
-  const headersList = await headers()
-  const subdomain = extractSubdomain(headersList.get('host'))
-  const storeSlug = !subdomain && !isProductId(id) ? normalizeStoreSubdomain(id) : null
+  const storeSlug = !isProductId(id) ? normalizeStoreSlug(id) : null
   if (storeSlug) {
     redirect(`/${locale}/stores/${encodeURIComponent(storeSlug)}` as never)
   }
 
-  const { data, devHint } = await fetchCatalogProductById(id, { storeSlug: subdomain })
+  const { data, devHint } = await fetchCatalogProductById(id)
 
   if (!data) {
     if (process.env.NODE_ENV === 'development' && devHint) {

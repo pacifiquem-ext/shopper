@@ -25,8 +25,7 @@ export interface StoreKycApi {
 
 export interface StoreSettingsApi {
   id: string
-  subdomain: string
-  slug?: string
+  slug: string
   registeredName: string
   displayName: string
   description: string | null

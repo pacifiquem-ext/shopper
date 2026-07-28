@@ -13,7 +13,7 @@ import { SiteFooter } from '@/components/shop/site-footer'
 import type { ProductCardLabels } from '@/components/shop/product-card'
 import { ShopProductGridsWithQuickView } from '@/components/shop/shop-product-grids-with-quick-view'
 import { buildCatalogQueryString, catalogFiltersActive } from '@/lib/catalog-query'
-import { normalizeStoreSubdomain } from '@/lib/host'
+import { normalizeStoreSlug } from '@/lib/store-slug'
 import { discountPercent, formatRwf } from '@/lib/product-display'
 import { merchantSignupHref } from '@/lib/auth-return-url'
 import { cn } from '@/lib/utils'
@@ -103,10 +103,10 @@ export async function ShopPage({
   const { locale } = await params
   const { q, category, sort, store } = await searchParams
   const t = await getTranslations('marketplace')
-  const subdomain = normalizeStoreSubdomain(store)
+  const storeSlug = normalizeStoreSlug(store)
   const { data, devHint } = await fetchCatalogGroups({
     search: q,
-    subdomain,
+    storeSlug,
     cache: 'no-store',
   })
 
@@ -141,8 +141,7 @@ export async function ShopPage({
     : filterAndSortProducts({ products, category }).slice(0, 4)
   const catalogStore = data.store ?? null
 
-  // Invalid / unknown store slug — do not fake a storefront from the query param alone.
-  if (subdomain && !catalogStore) {
+  if (storeSlug && !catalogStore) {
     return (
       <div className='mx-auto flex min-h-[50vh] max-w-lg flex-col items-center justify-center gap-4 px-4 py-20 text-center'>
         <p className='text-label-sm uppercase tracking-wide text-text-soft-400'>
@@ -150,7 +149,7 @@ export async function ShopPage({
         </p>
         <h1 className='text-title-h5 text-text-strong-950'>{t('storeNotFoundTitle')}</h1>
         <p className='text-paragraph-sm text-text-sub-600'>
-          {t('storeNotFoundBody', { store: subdomain })}
+          {t('storeNotFoundBody', { store: storeSlug })}
         </p>
         <Button asChild variant='outline' className='mt-2 rounded-full'>
           <Link href='/'>{t('homeLink')}</Link>
@@ -159,9 +158,9 @@ export async function ShopPage({
     )
   }
 
-  const storeContext = subdomain && catalogStore
+  const storeContext = storeSlug && catalogStore
     ? {
-        subdomain: catalogStore.subdomain || subdomain,
+        slug: catalogStore.slug || storeSlug,
         displayName: catalogStore.displayName,
       }
     : null
@@ -169,7 +168,7 @@ export async function ShopPage({
   const toCells = (list: CatalogProductPublic[]) =>
     list.map((p) => ({ product: p, labels: buildProductCardLabels(t, p) }))
 
-  const persistStore = store?.trim() ? normalizeStoreSubdomain(store) ?? store.trim() : undefined
+  const persistStore = store?.trim() ? normalizeStoreSlug(store) ?? store.trim() : undefined
   const catalogFilters = { q, category, sort, store: persistStore }
 
   const buildShopHref = (

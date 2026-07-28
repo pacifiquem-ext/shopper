@@ -26,7 +26,7 @@ export interface StoreOnboardingDraft {
   registeredName: string
   displayName: string
   description: string
-  subdomain: string
+  slug: string
   brandPrimaryColor: string
   brandSecondaryColor: string
   contactEmail: string
@@ -72,7 +72,7 @@ interface StoreOnboardingState {
   setRegisteredName: (value: string) => void
   setDisplayName: (value: string) => void
   setDescription: (value: string) => void
-  setSubdomain: (value: string) => void
+  setSlug: (value: string) => void
   setBrandPrimaryColor: (value: string) => void
   setBrandSecondaryColor: (value: string) => void
   setContactEmail: (value: string) => void
@@ -109,7 +109,7 @@ const initialDraft: StoreOnboardingDraft = {
   registeredName: '',
   displayName: '',
   description: '',
-  subdomain: '',
+  slug: '',
   brandPrimaryColor: '#1daf61',
   brandSecondaryColor: '#171717',
   contactEmail: '',
@@ -166,8 +166,13 @@ export const useStoreOnboardingStore = create<StoreOnboardingState>()((set, get)
     const savedDraft = get().savedDraft
     let stepToResume = 0
     if (savedDraft) {
+      const incoming = savedDraft.draftData as StoreOnboardingDraft & { slug?: string }
       set((state) => ({
-        draft: { ...state.draft, ...savedDraft.draftData },
+        draft: {
+          ...state.draft,
+          ...incoming,
+          slug: incoming.slug || '',
+        },
         showResumeModal: false,
         savedDraft: null,
       }))
@@ -206,8 +211,7 @@ export const useStoreOnboardingStore = create<StoreOnboardingState>()((set, get)
       const draft = get().draft
 
       const payload: SubmitStoreDto = {
-        slug: draft.subdomain,
-        subdomain: draft.subdomain,
+        slug: draft.slug,
         registeredName: draft.registeredName,
         displayName: draft.displayName,
         description: draft.description,
@@ -269,7 +273,7 @@ export const useStoreOnboardingStore = create<StoreOnboardingState>()((set, get)
     set((state) => ({ draft: { ...state.draft, registeredName } })),
   setDisplayName: (displayName) => set((state) => ({ draft: { ...state.draft, displayName } })),
   setDescription: (description) => set((state) => ({ draft: { ...state.draft, description } })),
-  setSubdomain: (subdomain) => set((state) => ({ draft: { ...state.draft, subdomain } })),
+  setSlug: (slug) => set((state) => ({ draft: { ...state.draft, slug } })),
   setBrandPrimaryColor: (brandPrimaryColor) =>
     set((state) => ({ draft: { ...state.draft, brandPrimaryColor } })),
   setBrandSecondaryColor: (brandSecondaryColor) =>

@@ -212,7 +212,7 @@ model BusinessCategory {
 model Store {
   id     String      @id @default(uuid())
   userId String
-  slug   String      @unique @map("subdomain")
+  slug   String      @unique
   status StoreStatus @default(SUBMITTED)
 
   registeredName String

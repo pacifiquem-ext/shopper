@@ -1,5 +1,4 @@
--- Single marketplace: ratings, categories, reviews, promotions, payment proof review fields.
--- Keep stores.subdomain column; Prisma maps Store.slug → subdomain.
+-- Ratings, categories, reviews, promotions, and payment proof review fields.
 
 -- CreateEnum
 CREATE TYPE "AttributeFieldType" AS ENUM ('STRING', 'NUMBER', 'BOOLEAN', 'SELECT', 'MULTISELECT');

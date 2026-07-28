@@ -1,13 +1,11 @@
-/** Cookie + localStorage key for the last storefront the shopper browsed. */
 export const STORE_CONTEXT_COOKIE = 'os_store'
 export const STORE_CONTEXT_KEY = 'shopper.store-context'
 
 const COOKIE_MAX_AGE_SEC = 60 * 60 * 24 * 30
 
-/** Persist store subdomain in the browser (cart + cart icon links). */
-export function persistStoreContext(subdomain: string): void {
+export function persistStoreContext(slug: string): void {
   if (typeof window === 'undefined') return
-  const normalized = subdomain.trim().toLowerCase()
+  const normalized = slug.trim().toLowerCase()
   if (!normalized) return
 
   try {

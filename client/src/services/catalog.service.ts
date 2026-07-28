@@ -31,10 +31,7 @@ export interface CatalogStoreSummary {
   id: string
   displayName: string
   logoUrl: string | null
-  /** Preferred public store path segment */
-  slug?: string
-  /** Legacy field — use `slug ?? subdomain` */
-  subdomain: string
+  slug: string
   brandColors: BrandColors | null
   description: string | null
   currency: string
@@ -44,8 +41,8 @@ export interface CatalogStoreSummary {
   reviewCount?: number | null
 }
 
-export function storePublicSlug(store: Pick<CatalogStoreSummary, 'slug' | 'subdomain'>): string {
-  return store.slug ?? store.subdomain
+export function storePublicSlug(store: Pick<CatalogStoreSummary, 'slug'>): string {
+  return store.slug
 }
 
 export interface CatalogVariantSummary {
@@ -115,8 +112,6 @@ export type CatalogFetchResult = {
 
 export interface CatalogQueryOptions {
   search?: string
-  /** @deprecated Prefer storeSlug */
-  subdomain?: string | null
   storeSlug?: string | null
   cache?: RequestCache
 }
@@ -388,11 +383,9 @@ export async function fetchCatalogGroups(
   if (options.search?.trim()) {
     url.searchParams.set('search', options.search.trim())
   }
-  const slug = options.storeSlug?.trim() || options.subdomain?.trim()
+  const slug = options.storeSlug?.trim()
   if (slug) {
     url.searchParams.set('storeSlug', slug)
-    // Back-compat for older API
-    url.searchParams.set('subdomain', slug)
   }
 
   let res: Response
@@ -599,10 +592,9 @@ export async function fetchCatalogProductById(
 ): Promise<CatalogProductFetchResult> {
   const root = resolveCatalogApiRoot()
   const url = new URL(`${root}/catalog/products/${id}`)
-  const slug = options.storeSlug?.trim() || options.subdomain?.trim()
+  const slug = options.storeSlug?.trim()
   if (slug) {
     url.searchParams.set('storeSlug', slug)
-    url.searchParams.set('subdomain', slug)
   }
 
   let res: Response

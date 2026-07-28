@@ -51,8 +51,7 @@ export class CatalogController {
     })
     @ApiResponse({ status: 200, description: 'Catalog groups' })
     async getGroups(@Query() query: CatalogQueryDto) {
-        const slug = query.storeSlug || query.subdomain;
-        return this.catalogService.getCatalogGrouped(query.search, slug);
+        return this.catalogService.getCatalogGrouped(query.search, query.storeSlug);
     }
 
     @PublicRoute()
@@ -104,8 +103,7 @@ export class CatalogController {
         @Param('id') id: string,
         @Query() query: CatalogQueryDto,
     ) {
-        const slug = query.storeSlug || query.subdomain;
-        return this.catalogService.getProductById(id, slug);
+        return this.catalogService.getProductById(id, query.storeSlug);
     }
 
     @PublicRoute()

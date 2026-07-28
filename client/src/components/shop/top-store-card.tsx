@@ -19,8 +19,7 @@ export function TopStoreCard({
   className,
 }: TopStoreCardProps) {
   const { store, productCountLabel } = entry
-  // Marketplace store profile (same site chrome — not a subdomain tenant website).
-  const href = `/stores/${encodeURIComponent(store.subdomain)}`
+  const href = `/stores/${encodeURIComponent(store.slug)}`
 
   return (
     <article

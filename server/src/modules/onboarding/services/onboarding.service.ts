@@ -113,13 +113,8 @@ export class OnboardingService {
         return { available: true, message: 'Slug is available' };
     }
 
-    /** @deprecated Prefer checkSlugAvailability */
-    async checkSubdomainAvailability(subdomain: string) {
-        return this.checkSlugAvailability(subdomain);
-    }
-
     async submitStore(userId: string, dto: SubmitStoreDto) {
-        const resolvedSlug = (dto.slug || dto.subdomain || '').trim().toLowerCase();
+        const resolvedSlug = (dto.slug || '').trim().toLowerCase();
         if (!resolvedSlug) {
             throw new BadRequestException('Slug is required');
         }

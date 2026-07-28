@@ -92,18 +92,18 @@ export function validateStep(
       const ok = Object.keys(errors).length === 0
       return { ok, errors, messageKey: ok ? undefined : 'errors.missingRegisteredName' }
     }
-    case 'subdomain': {
-      const subdomain = (draft.subdomain || '').trim()
-      if (!subdomain) {
-        errors.subdomain = 'errors.missingSubdomain'
+    case 'slug': {
+      const slug = (draft.slug || '').trim()
+      if (!slug) {
+        errors.slug = 'errors.missingSlug'
       } else {
         const regex = /^[a-z0-9][a-z0-9-]{1,61}[a-z0-9]$/
-        if (!regex.test(subdomain)) {
-          errors.subdomain = 'errors.invalidSubdomain'
+        if (!regex.test(slug)) {
+          errors.slug = 'errors.invalidSlug'
         }
       }
       const ok = Object.keys(errors).length === 0
-      return { ok, errors, messageKey: ok ? undefined : 'errors.missingSubdomain' }
+      return { ok, errors, messageKey: ok ? undefined : 'errors.missingSlug' }
     }
     case 'brand': {
       if (!(draft.brandPrimaryColor || '').trim() || !(draft.brandSecondaryColor || '').trim()) {

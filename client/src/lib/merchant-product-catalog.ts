@@ -17,7 +17,6 @@ export function merchantProductToCatalog(
     displayName: store.displayName,
     logoUrl: store.logoUrl,
     slug: store.slug,
-    subdomain: store.subdomain,
     brandColors: store.brandColors,
     description: store.description,
     currency: 'RWF',

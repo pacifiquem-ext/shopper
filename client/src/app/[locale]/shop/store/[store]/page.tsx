@@ -1,7 +1,6 @@
 import { redirect } from '@/i18n/navigation'
 
-/** Legacy storefront path → marketplace store profile. */
-export default async function LegacyStoreStorefrontRedirect({
+export default async function StorePathRedirect({
   params,
 }: {
   params: Promise<{ locale: string; store: string }>

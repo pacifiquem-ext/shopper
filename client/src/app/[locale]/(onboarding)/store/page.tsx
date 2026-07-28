@@ -29,7 +29,7 @@ import { StepIndustry } from '@/components/store-onboarding/step-industry'
 import { StepLegal } from '@/components/store-onboarding/step-legal'
 import { StepBusinessAddress } from '@/components/store-onboarding/step-business-address'
 import { StepStoreBasics } from '@/components/store-onboarding/step-store-basics'
-import { StepSubdomain } from '@/components/store-onboarding/step-subdomain'
+import { StepSlug } from '@/components/store-onboarding/step-slug'
 import { StepBrand } from '@/components/store-onboarding/step-brand'
 import { StepDelivery } from '@/components/store-onboarding/step-delivery'
 import { StepContact } from '@/components/store-onboarding/step-contact'
@@ -290,8 +290,8 @@ export default function StoreOnboardingPage() {
                   return <StepBusinessAddress />
                 case 'storeBasics':
                   return <StepStoreBasics />
-                case 'subdomain':
-                  return <StepSubdomain />
+                case 'slug':
+                  return <StepSlug />
                 case 'brand':
                   return <StepBrand />
                 case 'delivery':

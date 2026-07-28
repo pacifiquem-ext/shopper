@@ -1,7 +1,4 @@
-/**
- * Legacy brand-color helpers kept for store settings brand colors.
- * Storefront templates have been removed (ADR 001 — single marketplace).
- */
+/** Brand-color helpers for store settings. */
 
 export type BrandColors = {
   primary?: string

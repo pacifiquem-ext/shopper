@@ -81,8 +81,6 @@ export type PublicCatalogStoreProfile = {
     displayName: string;
     logoUrl: string | null;
     slug: string;
-    /** @deprecated Alias of slug for client back-compat */
-    subdomain: string;
     storeTemplate: 'DEFAULT';
     brandColors: { primary?: string; secondary?: string } | null;
     description: string | null;
@@ -161,10 +159,6 @@ export class CatalogService {
             status: { in: this.marketplaceStoreStatuses() },
             ...(storeId ? { id: storeId } : {}),
         };
-    }
-
-    private resolveStoreSlugParam(storeSlug?: string, subdomain?: string) {
-        return storeSlug?.trim() || subdomain?.trim() || undefined;
     }
 
     async getHome() {
@@ -1088,7 +1082,6 @@ export class CatalogService {
             displayName: store.displayName,
             logoUrl: store.logoUrl,
             slug: store.slug,
-            subdomain: store.slug,
             storeTemplate: 'DEFAULT',
             brandColors: brandColors ?? null,
             description: store.description,

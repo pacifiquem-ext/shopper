@@ -76,7 +76,7 @@ export default function StoreSettingsPage() {
     registeredName: '',
     displayName: '',
     description: '',
-    subdomain: '',
+    slug: '',
     industrySector: '',
     businessCategory: '',
     country: '',
@@ -148,7 +148,7 @@ export default function StoreSettingsPage() {
             registeredName: s.registeredName ?? '',
             displayName: s.displayName ?? '',
             description: s.description ?? '',
-            subdomain: s.subdomain ?? '',
+            slug: s.slug ?? '',
             industrySector: s.kyc?.industrySector?.name ?? '',
             businessCategory: s.kyc?.businessCategory?.name ?? '',
             country: s.kyc?.country ?? '',
@@ -468,15 +468,15 @@ export default function StoreSettingsPage() {
 
                       <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                         <div className="space-y-2">
-                          <Label htmlFor="subdomain" className="text-sm font-semibold text-text-sub-600">
+                          <Label htmlFor="store-slug" className="text-sm font-semibold text-text-sub-600">
                             <Globe className="mr-1 inline h-4 w-4" />
-                            Subdomain
+                            {t('storeSettings.slugLabel')}
                           </Label>
                           <div className="flex items-center gap-2">
                             <span className="shrink-0 text-sm text-text-soft-400">/stores/</span>
                             <Input
-                              id="subdomain"
-                              value={businessInfo.subdomain}
+                              id="store-slug"
+                              value={businessInfo.slug}
                               readOnly
                               className="rounded-lg border-stroke-soft-200 bg-bg-weak-50 text-text-soft-400"
                             />

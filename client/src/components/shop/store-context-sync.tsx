@@ -5,14 +5,13 @@ import { useEffect } from 'react'
 import { persistStoreContext } from '@/lib/store-context'
 
 type StoreContextSyncProps = {
-  subdomain: string
+  slug: string
 }
 
-/** Remembers which store storefront the user is browsing (for themed cart, etc.). */
-export function StoreContextSync({ subdomain }: StoreContextSyncProps) {
+export function StoreContextSync({ slug }: StoreContextSyncProps) {
   useEffect(() => {
-    persistStoreContext(subdomain)
-  }, [subdomain])
+    persistStoreContext(slug)
+  }, [slug])
 
   return null
 }

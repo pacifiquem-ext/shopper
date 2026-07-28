@@ -66,36 +66,6 @@ export class OnboardingController {
         return this.onboardingService.checkSlugAvailability(slug);
     }
 
-    /** @deprecated Prefer check-slug */
-    @PublicRoute()
-    @Get('check-subdomain')
-    @ApiOperation({
-        summary: 'Deprecated alias for check-slug',
-        deprecated: true,
-    })
-    @ApiQuery({
-        name: 'subdomain',
-        required: false,
-        type: String,
-    })
-    @ApiQuery({
-        name: 'slug',
-        required: false,
-        type: String,
-    })
-    @ApiResponse({
-        status: 200,
-        description: 'Availability status returned correctly',
-    })
-    async checkSubdomainAvailability(
-        @Query('subdomain') subdomain?: string,
-        @Query('slug') slug?: string,
-    ) {
-        return this.onboardingService.checkSlugAvailability(
-            slug || subdomain || '',
-        );
-    }
-
     @Put('submit')
     @ApiOperation({ summary: 'Submit full store profile for KYC Admin review' })
     @ApiResponse({ status: 201, description: 'Store successfully submitted' })

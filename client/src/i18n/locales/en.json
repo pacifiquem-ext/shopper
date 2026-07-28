@@ -309,18 +309,6 @@
       "descriptionPlaceholder": "What do you sell? What makes you different?",
       "descriptionCount": "{count}/500"
     },
-    "subdomain": {
-      "title": "Choose your store address",
-      "subtitle": "Your subdomain becomes your public link. Keep it short and easy to remember.",
-      "label": "Subdomain",
-      "placeholder": "e.g. mystore",
-      "preview": "Preview: {domain}",
-      "rulesTitle": "Link requirements",
-      "rulesBody": "Use lowercase letters, numbers, and hyphens. It must start and end with a letter or number.",
-      "rule1": "Letters, numbers, and hyphens only",
-      "rule2": "Cannot start or end with a hyphen",
-      "rule3": "Must be between 2 and 63 characters"
-    },
     "brand": {
       "title": "Make your brand stand out",
       "subtitle": "Upload a logo and pick colors. You can adjust later.",
@@ -372,7 +360,7 @@
       },
       "registeredName": "Registered name",
       "displayName": "Display name",
-      "subdomain": "Subdomain",
+      "slug": "Store slug",
       "delivery": "Delivery",
       "unnamedZone": "Unnamed zone",
       "deliveryMeta": "{fee} RWF • {eta} min",
@@ -455,8 +443,8 @@
       "missingCategory": "Select a business category to continue.",
       "missingRegisteredName": "Add your registered business name to continue.",
       "missingDisplayName": "Add your public store name to continue.",
-      "missingSubdomain": "Choose a subdomain to continue.",
-      "invalidSubdomain": "That subdomain format isn’t valid.",
+      "missingSlug": "Choose a store slug to continue.",
+      "invalidSlug": "That store slug format isn’t valid.",
       "missingBrandColors": "Pick your brand colors to continue.",
       "missingDeliveryZoneName": "Add a name for each delivery zone to continue.",
       "missingDeliveryFee": "Add a delivery fee for each zone to continue.",
@@ -464,7 +452,7 @@
     },
     "slug": {
       "title": "Choose your store slug",
-      "subtitle": "Buyers find you at /stores/your-slug on Shopper — not a separate website.",
+      "subtitle": "Buyers find you at /stores/your-slug.",
       "label": "Store slug",
       "placeholder": "my-store",
       "checking": "Checking availability…",
@@ -475,7 +463,7 @@
       "rule1": "Letters, numbers, and hyphens only",
       "rule2": "Cannot start or end with a hyphen",
       "rule3": "Must be between 2 and 63 characters",
-      "rule4": "Used only for /stores/{slug} marketplace profiles"
+      "rule4": "Used in your public store path /stores/{slug}"
     },
     "loading": "Loading your setup…",
     "progress": {
@@ -539,6 +527,7 @@
       "retry": "Retry"
     },
     "storeSettings": {
+      "slugLabel": "Store slug",
       "loadError": "We could not load store settings. Save is disabled until reload succeeds.",
       "branding": {
         "storeLogo": "Store Logo",

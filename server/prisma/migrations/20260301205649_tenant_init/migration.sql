@@ -29,7 +29,7 @@ CREATE TABLE "business_categories" (
 CREATE TABLE "stores" (
     "id" TEXT NOT NULL,
     "userId" TEXT NOT NULL,
-    "subdomain" TEXT NOT NULL,
+    "slug" TEXT NOT NULL,
     "status" "StoreStatus" NOT NULL DEFAULT 'SUBMITTED',
     "registeredName" TEXT NOT NULL,
     "displayName" TEXT NOT NULL,
@@ -106,13 +106,13 @@ CREATE UNIQUE INDEX "business_categories_code_key" ON "business_categories"("cod
 CREATE INDEX "business_categories_industrySectorId_idx" ON "business_categories"("industrySectorId");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "stores_subdomain_key" ON "stores"("subdomain");
+CREATE UNIQUE INDEX "stores_slug_key" ON "stores"("slug");
 
 -- CreateIndex
 CREATE INDEX "stores_userId_idx" ON "stores"("userId");
 
 -- CreateIndex
-CREATE INDEX "stores_subdomain_idx" ON "stores"("subdomain");
+CREATE INDEX "stores_slug_idx" ON "stores"("slug");
 
 -- CreateIndex
 CREATE INDEX "stores_status_idx" ON "stores"("status");

@@ -30,7 +30,7 @@ function isStoreOnboardingPage(): boolean {
 function isSilentOnboardingRequest(url?: string): boolean {
   if (!url) return false
   return (
-    url.includes('/onboarding/check-subdomain') || url.includes('/onboarding/draft')
+    url.includes('/onboarding/check-slug') || url.includes('/onboarding/draft')
   )
 }
 
@@ -51,7 +51,7 @@ const PUBLIC_API_PREFIXES = [
   '/auth/forgot-password',
   '/auth/reset-password',
   '/catalog/',
-  '/onboarding/check-subdomain',
+  '/onboarding/check-slug',
 ]
 
 function isPublicApiRequest(url?: string): boolean {

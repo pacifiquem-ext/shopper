@@ -66,16 +66,6 @@ export class SubmitStoreDto {
     })
     slug: string;
 
-    /** @deprecated Use slug. Accepted for one-release client back-compat. */
-    @ApiProperty({
-        description: 'Deprecated alias for slug',
-        required: false,
-        deprecated: true,
-    })
-    @IsString()
-    @IsOptional()
-    subdomain?: string;
-
     @ApiProperty({ description: 'Legal registered business name' })
     @IsString()
     @IsNotEmpty()
