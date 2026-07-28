@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import * as bcrypt from 'bcryptjs';
+import { seedDemoMarketplace } from './seed-demo';
 
 const prisma = new PrismaClient();
 
@@ -861,10 +862,9 @@ async function main() {
             }
         }
 
-        await seedDevMerchant();
         const categoryIds = await seedMarketplaceTaxonomy();
-        await seedDashboardData(categoryIds);
-        await seedMarketplaceExtras(categoryIds);
+        await seedDemoMarketplace(prisma, categoryIds);
+        await seedDevMerchant();
 
         console.log('Seeding finished.');
     } catch (error) {
