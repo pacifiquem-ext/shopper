@@ -78,6 +78,7 @@
     "@radix-ui/react-tooltip": "latest",
     "@react-email/components": "latest",
     "@remixicon/react": "^4.9.0",
+    "@shopper/shared": "workspace:*",
     "@svgr/webpack": "^8.1.0",
     "@t3-oss/env-nextjs": "latest",
     "@types/debug": "latest",
@@ -93,6 +94,7 @@
     "dotenv": "^17.2.1",
     "embla-carousel-react": "latest",
     "eslint-plugin-import": "^2.32.0",
+    "flexsearch": "^0.8.212",
     "gel": "latest",
     "input-otp": "latest",
     "kysely": "latest",
@@ -113,8 +115,7 @@
     "tailwindcss-animate": "^1.0.7",
     "vaul": "latest",
     "zod": "^3.25.76",
-    "zustand": "^5.0.11",
-    "@shopper/shared": "workspace:*"
+    "zustand": "^5.0.11"
   },
   "devDependencies": {
     "@chromatic-com/storybook": "^4.0.1",
