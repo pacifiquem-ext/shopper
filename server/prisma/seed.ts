@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import * as bcrypt from 'bcryptjs';
+import { productImages, storeLogoUrl } from './seed-catalog';
 import { seedDemoMarketplace } from './seed-demo';
 
 const prisma = new PrismaClient();
@@ -250,6 +251,47 @@ async function seedMarketplaceTaxonomy() {
                 { key: 'condition', labelEn: 'Condition', labelRw: 'Imiterere', type: 'SELECT' as const, appliesTo: 'PRODUCT' as const, options: ['New', 'Used'] },
             ],
         },
+        {
+            slug: 'home',
+            nameEn: 'Home',
+            nameRw: 'Ibikoresho byo mu rugo',
+            sortOrder: 5,
+            attributes: [
+                { key: 'material', labelEn: 'Material', labelRw: 'Ibikoresho', type: 'STRING' as const, appliesTo: 'PRODUCT' as const },
+                { key: 'room', labelEn: 'Room', labelRw: 'Icyumba', type: 'SELECT' as const, appliesTo: 'PRODUCT' as const, options: ['Living room', 'Dining', 'Bedroom', 'Outdoor'] },
+                { key: 'color', labelEn: 'Color', labelRw: 'Ibara', type: 'STRING' as const, appliesTo: 'VARIANT' as const },
+            ],
+        },
+        {
+            slug: 'beauty',
+            nameEn: 'Beauty',
+            nameRw: 'Ubwiza',
+            sortOrder: 6,
+            attributes: [
+                { key: 'skin_type', labelEn: 'Skin type', labelRw: "Ubwoko bw'uruhu", type: 'SELECT' as const, appliesTo: 'PRODUCT' as const, options: ['Dry', 'Oily', 'Combination', 'All'] },
+                { key: 'volume', labelEn: 'Volume', labelRw: 'Ingano', type: 'STRING' as const, appliesTo: 'VARIANT' as const },
+            ],
+        },
+        {
+            slug: 'sports',
+            nameEn: 'Sports',
+            nameRw: 'Siporo',
+            sortOrder: 7,
+            attributes: [
+                { key: 'sport', labelEn: 'Sport', labelRw: 'Siporo', type: 'STRING' as const, appliesTo: 'PRODUCT' as const },
+                { key: 'size', labelEn: 'Size', labelRw: 'Ingano', type: 'STRING' as const, appliesTo: 'VARIANT' as const },
+            ],
+        },
+        {
+            slug: 'health',
+            nameEn: 'Health',
+            nameRw: 'Ubuzima',
+            sortOrder: 8,
+            attributes: [
+                { key: 'form', labelEn: 'Form', labelRw: 'Imiterere', type: 'SELECT' as const, appliesTo: 'PRODUCT' as const, options: ['Tablet', 'Syrup', 'Device', 'Kit'] },
+                { key: 'count', labelEn: 'Count', labelRw: 'Umubare', type: 'NUMBER' as const, appliesTo: 'VARIANT' as const },
+            ],
+        },
     ];
 
     const bySlug: Record<string, string> = {};
@@ -319,8 +361,8 @@ async function seedDashboardData(categoryIds: Record<string, string> = {}) {
             categorySlug: 'fashion',
             attributes: { material: 'Cotton' },
             tags: ['fashion', 'casual', 'cotton'],
-            images: ['/products/tshirt-1.jpg', '/products/tshirt-2.jpg'],
-            primaryImage: '/products/tshirt-1.jpg',
+            images: productImages('Premium Cotton T-Shirt'),
+            primaryImage: productImages('Premium Cotton T-Shirt')[0],
             variants: [
                 { color: 'Black', hex: '#000000', size: 'S', price: 15000, cost: 8000, stock: 50 },
                 { color: 'Black', hex: '#000000', size: 'M', price: 15000, cost: 8000, stock: 75 },
@@ -338,8 +380,8 @@ async function seedDashboardData(categoryIds: Record<string, string> = {}) {
             categorySlug: 'electronics',
             attributes: { brand: 'AudioMax', warranty_months: 12 },
             tags: ['audio', 'wireless', 'bluetooth'],
-            images: ['/products/headphones-1.jpg'],
-            primaryImage: '/products/headphones-1.jpg',
+            images: productImages('Wireless Bluetooth Headphones'),
+            primaryImage: productImages('Wireless Bluetooth Headphones')[0],
             variants: [
                 { color: 'Black', hex: '#000000', size: null, price: 45000, cost: 25000, stock: 30 },
                 { color: 'Silver', hex: '#C0C0C0', size: null, price: 45000, cost: 25000, stock: 25 },
@@ -353,8 +395,8 @@ async function seedDashboardData(categoryIds: Record<string, string> = {}) {
             categorySlug: 'groceries',
             attributes: { organic: true },
             tags: ['coffee', 'organic', 'premium'],
-            images: ['/products/coffee-1.jpg'],
-            primaryImage: '/products/coffee-1.jpg',
+            images: productImages('Organic Coffee Beans'),
+            primaryImage: productImages('Organic Coffee Beans')[0],
             variants: [
                 { color: null, hex: null, size: '250g', price: 8000, cost: 4000, stock: 100 },
                 { color: null, hex: null, size: '500g', price: 15000, cost: 7500, stock: 75 },
@@ -369,8 +411,8 @@ async function seedDashboardData(categoryIds: Record<string, string> = {}) {
             categorySlug: 'fashion',
             attributes: { material: 'Leather' },
             tags: ['leather', 'wallet', 'accessories'],
-            images: ['/products/wallet-1.jpg', '/products/wallet-2.jpg'],
-            primaryImage: '/products/wallet-1.jpg',
+            images: productImages('Leather Wallet'),
+            primaryImage: productImages('Leather Wallet')[0],
             variants: [
                 { color: 'Brown', hex: '#8B4513', size: null, price: 25000, cost: 12000, stock: 5 },
                 { color: 'Black', hex: '#000000', size: null, price: 25000, cost: 12000, stock: 8 },
@@ -384,8 +426,8 @@ async function seedDashboardData(categoryIds: Record<string, string> = {}) {
             categorySlug: 'general',
             attributes: { condition: 'New' },
             tags: ['yoga', 'fitness', 'exercise'],
-            images: ['/products/yoga-mat-1.jpg'],
-            primaryImage: '/products/yoga-mat-1.jpg',
+            images: productImages('Yoga Mat Pro'),
+            primaryImage: productImages('Yoga Mat Pro')[0],
             variants: [
                 { color: 'Purple', hex: '#800080', size: null, price: 18000, cost: 9000, stock: 0 },
                 { color: 'Blue', hex: '#0000FF', size: null, price: 18000, cost: 9000, stock: 20 },
@@ -669,9 +711,15 @@ async function seedDevMerchant() {
                 displayName: 'Demo Kigali Market',
                 description: 'Seeded demo store for local marketplace development.',
                 currency: 'RWF',
+                logoUrl: storeLogoUrl('demo-kigali'),
+                brandColors: { primary: '#1daf61', secondary: '#14532d', template: 'DEFAULT' },
+                aboutUs: 'A local development store used when SEED_DEV_MERCHANT_PHONE is set.',
                 contactEmail: 'demo@onlineshop.rw',
                 contactPhone: phoneNumber,
                 contactAddress: 'Kigali, Rwanda',
+                returnPolicy: 'Unused items can be returned within 7 days with the receipt.',
+                privacyPolicy: 'Order details are used only to fulfill and support purchases.',
+                termsAndConditions: 'Standard marketplace terms apply to every order.',
             },
         });
         await prisma.user.update({
@@ -684,12 +732,20 @@ async function seedDevMerchant() {
     } else if (existingStore.status !== 'APPROVED') {
         await prisma.store.update({
             where: { id: existingStore.id },
-            data: { status: 'APPROVED', approvedAt: new Date() },
+            data: {
+                status: 'APPROVED',
+                approvedAt: new Date(),
+                logoUrl: storeLogoUrl('demo-kigali'),
+            },
         });
         console.log(
             `Dev merchant store approved — phone: ${phoneNumber}, store: ${existingStore.slug}`,
         );
     } else {
+        await prisma.store.update({
+            where: { id: existingStore.id },
+            data: { logoUrl: storeLogoUrl(existingStore.slug) },
+        });
         console.log(`Dev merchant already exists (${phoneNumber})`);
     }
 }
