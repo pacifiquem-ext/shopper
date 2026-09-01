@@ -88,6 +88,14 @@ describe('CatalogService', () => {
             promotionRedemption: {
                 count: jest.fn().mockResolvedValue(0),
             },
+            shopperProfile: {
+                findUnique: jest.fn().mockResolvedValue(null),
+                create: jest.fn(),
+                update: jest.fn(),
+            },
+            shopperEvent: {
+                createMany: jest.fn().mockResolvedValue({ count: 0 }),
+            },
             $connect: jest.fn().mockResolvedValue(undefined),
             $disconnect: jest.fn().mockResolvedValue(undefined),
             $queryRaw: jest.fn().mockResolvedValue([{ '?column?': 1 }]),
@@ -97,9 +105,24 @@ describe('CatalogService', () => {
         const config = {
             get: jest.fn().mockReturnValue('local'),
         };
+        const shopperProfiles = {
+            loadAffinity: jest.fn().mockResolvedValue({
+                visitorId: null,
+                affinity: {
+                    searches: [],
+                    categories: {},
+                    stores: {},
+                    products: {},
+                    tags: {},
+                    priceBand: { low: 0, mid: 0, high: 0 },
+                },
+                context: {},
+            }),
+            ingest: jest.fn(),
+        };
 
         return {
-            service: new CatalogService(prisma as any, config as any),
+            service: new CatalogService(prisma as any, config as any, shopperProfiles as any),
             prisma,
         };
     }

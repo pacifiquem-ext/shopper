@@ -37,6 +37,7 @@
     "statCategories": "Categories",
     "statStock": "Available",
     "sortLabel": "Sort",
+    "sortForYou": "Picked for you",
     "sortNewest": "Newest first",
     "sortTrending": "Trending",
     "sortPriceLow": "Price: low to high",
@@ -99,6 +100,8 @@
       "openFullPage": "Open full page",
       "photoThumbAria": "Show photo {index}"
     },
+    "homePickedForYouEyebrow": "For you",
+    "homePickedForYouTitle": "Picked from what you browse",
     "homeTopRatedEyebrow": "Top rated",
     "homeTopRatedTitle": "Highest rated products",
     "homeNewArrivalsEyebrow": "Just in",

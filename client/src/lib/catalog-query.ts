@@ -21,7 +21,7 @@ export function buildCatalogQueryString(
   if (merged.store?.trim()) params.set('store', merged.store.trim())
   if (merged.q?.trim()) params.set('q', merged.q.trim())
   if (merged.category?.trim()) params.set('category', merged.category.trim())
-  if (merged.sort?.trim() && merged.sort !== 'newest') params.set('sort', merged.sort.trim())
+  if (merged.sort?.trim() && merged.sort !== 'for-you') params.set('sort', merged.sort.trim())
 
   return params.toString()
 }

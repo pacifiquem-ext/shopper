@@ -37,6 +37,7 @@
     "statCategories": "Ibyiciro",
     "statStock": "Bihari",
     "sortLabel": "Tondeka",
+    "sortForYou": "Byatoranijwe kuri wowe",
     "sortNewest": "Ibishya mbere",
     "sortTrending": "Ibikunzwe",
     "sortPriceLow": "Igiciro: gito kujya hejuru",
@@ -99,6 +100,8 @@
       "openFullPage": "Fungura urupapuro rwuzuye",
       "photoThumbAria": "Erekana ifoto {index}"
     },
+    "homePickedForYouEyebrow": "Kuri wowe",
+    "homePickedForYouTitle": "Byatoranijwe ukurikije ibyo ushaka",
     "homeTopRatedEyebrow": "Byagenze neza",
     "homeTopRatedTitle": "Ibicuruzwa byagenze neza",
     "homeNewArrivalsEyebrow": "Bishya",

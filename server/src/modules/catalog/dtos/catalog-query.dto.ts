@@ -12,13 +12,22 @@ import {
 
 export class CatalogQueryDto {
     @ApiPropertyOptional({
-        description: 'Search product name, description, or vendor',
+        description: 'Search product name, description, tags, or vendor',
         example: 'coffee',
     })
     @IsOptional()
     @IsString()
     @MaxLength(200)
     search?: string;
+
+    @ApiPropertyOptional({
+        description: 'Catalog ranking. Default is first-party for-you ranking.',
+        example: 'for-you',
+    })
+    @IsOptional()
+    @IsString()
+    @MaxLength(32)
+    sort?: string;
 
     @ApiPropertyOptional({
         description:

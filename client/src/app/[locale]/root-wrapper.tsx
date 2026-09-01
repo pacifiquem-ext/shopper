@@ -4,6 +4,7 @@
 
 import { NextIntlClientProvider } from 'next-intl'
 import React from 'react'
+import { ShopperSignals } from '../../components/shop/shopper-signals'
 import { ThemeProvider } from '../../components/theme-provider'
 
 export const RootWrapper = ({
@@ -23,6 +24,7 @@ export const RootWrapper = ({
     <>
       <ThemeProvider attribute="class" defaultTheme="light" disableTransitionOnChange>
         <NextIntlClientProvider locale={locale} messages={messages} timeZone={timeZone}>
+          <ShopperSignals />
           {children}
         </NextIntlClientProvider>
       </ThemeProvider>

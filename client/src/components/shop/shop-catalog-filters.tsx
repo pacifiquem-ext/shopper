@@ -10,12 +10,14 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { usePathname } from '@/i18n/navigation'
 import { buildCatalogQueryString, type CatalogFilterParams } from '@/lib/catalog-query'
+import { emitShopperSignal } from '@/lib/shopper-profile'
 import { cn } from '@/lib/utils'
 
 export type ShopCatalogFiltersLabels = {
   searchLabel: string
   searchPlaceholder: string
   sortLabel: string
+  sortForYou: string
   sortNewest: string
   sortTrending: string
   sortPriceLow: string
@@ -105,6 +107,7 @@ export function ShopCatalogFilters({
     const form = event.currentTarget
     const q = (form.elements.namedItem('q') as HTMLInputElement).value
     const sort = (form.elements.namedItem('sort') as HTMLSelectElement).value
+    if (q.trim()) emitShopperSignal({ type: 'SEARCH', query: q.trim() })
     navigate({ q: q.trim() || null, sort: sort || null })
   }
 
@@ -154,9 +157,10 @@ export function ShopCatalogFilters({
               id='catalog-sort'
               name='sort'
               aria-label={labels.sortLabel}
-              defaultValue={filters.sort ?? 'newest'}
+              defaultValue={filters.sort ?? 'for-you'}
               className='h-11 w-full min-w-0 rounded-2xl border border-stroke-soft-200 bg-bg-weak-50 px-4 text-sm text-text-strong-950 sm:h-12'
             >
+              <option value='for-you'>{labels.sortForYou}</option>
               <option value='newest'>{labels.sortNewest}</option>
               <option value='trending'>{labels.sortTrending}</option>
               <option value='price-asc'>{labels.sortPriceLow}</option>
@@ -198,7 +202,10 @@ export function ShopCatalogFilters({
               variant={isActive ? 'default' : 'outline'}
               disabled={isPending}
               aria-pressed={isActive}
-              onClick={() => navigate({ category: item.name })}
+              onClick={() => {
+            emitShopperSignal({ type: 'VIEW_CATEGORY', category: item.name })
+            navigate({ category: item.name })
+          }}
               className={cn(
                 'shrink-0 rounded-full shadow-none',
                 isActive

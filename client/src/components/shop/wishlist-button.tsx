@@ -4,6 +4,7 @@ import { Heart } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
+import { emitShopperSignal } from '@/lib/shopper-profile'
 import { cn } from '@/lib/utils'
 
 type WishlistItem = {
@@ -80,6 +81,13 @@ export function WishlistButton({
 
     writeWishlist(next)
     setActive(!exists)
+    if (!exists) {
+      emitShopperSignal({
+        type: 'WISHLIST',
+        productId: item.productId,
+        price: item.price ?? undefined,
+      })
+    }
 
     if (!exists) {
       setPulse(true)
