@@ -22,8 +22,11 @@ import {
     containsInsensitive,
     equalsInsensitive,
 } from '../../common/helper/prisma-string-filter';
+import { rankCatalog } from './discovery/catalog-discovery';
+import type { ShopperContext } from './discovery/shopper-affinity';
 import { CreateReviewDto } from './dtos/create-review.dto';
 import { PromoValidateDto } from './dtos/promo-validate.dto';
+import { ShopperProfileService } from './services/shopper-profile.service';
 
 const CATALOG_GROUPED_MAX_PRODUCTS = 2000;
 const HOME_PRODUCT_LIMIT = 12;
@@ -144,6 +147,7 @@ export class CatalogService {
     constructor(
         private readonly prisma: DatabaseService,
         private readonly config: ConfigService,
+        private readonly shopperProfiles: ShopperProfileService,
     ) {}
 
     private marketplaceStoreStatuses(): StoreStatus[] {
@@ -161,7 +165,9 @@ export class CatalogService {
         };
     }
 
-    async getHome() {
+    async getHome(visitorId?: string | null, context: ShopperContext = {}) {
+        const profile = await this.shopperProfiles.loadAffinity(visitorId)
+        const mergedContext = { ...context, ...profile.context }
         // Keep homepage to two DB round-trips so Neon cold-start cannot time out clients.
         try {
             await this.prisma.$queryRaw`SELECT 1`;
@@ -201,7 +207,7 @@ export class CatalogService {
                         store: { status: StoreStatus.APPROVED },
                     },
                     orderBy: { createdAt: 'desc' },
-                    take: HOME_PRODUCT_LIMIT,
+                    take: HOME_PRODUCT_LIMIT * 6,
                     include: {
                         store: { select: leanStoreSelect },
                         variants: {
@@ -247,12 +253,25 @@ export class CatalogService {
         }
 
         const serialized = products.map((p) => this.serializeProduct(p));
-        const topRated = [...serialized].sort(
-            (a, b) =>
-                (b.ratingAvg ?? 0) - (a.ratingAvg ?? 0) ||
-                (b.ratingCount ?? 0) - (a.ratingCount ?? 0),
-        );
-        const onPromotion = serialized.filter(
+        const ranked = {
+            forYou: rankCatalog({
+                products: serialized,
+                affinity: profile.affinity,
+                context: mergedContext,
+                sort: 'for-you',
+            }),
+            trending: rankCatalog({
+                products: serialized,
+                affinity: profile.affinity,
+                context: mergedContext,
+                sort: 'trending',
+            }),
+            newest: rankCatalog({
+                products: serialized,
+                sort: 'newest',
+            }),
+        };
+        const onPromotion = ranked.forYou.filter(
             (p) =>
                 p.compareAtFrom != null &&
                 p.priceFrom != null &&
@@ -266,11 +285,15 @@ export class CatalogService {
         }));
 
         return {
-            topRated,
-            newArrivals: serialized,
+            topRated: ranked.trending.slice(0, HOME_PRODUCT_LIMIT),
+            newArrivals: ranked.newest.slice(0, HOME_PRODUCT_LIMIT),
+            pickedForYou: ranked.forYou.slice(0, HOME_PRODUCT_LIMIT),
+            personalized: Boolean(visitorId),
             risingStores,
             onPromotion:
-                onPromotion.length > 0 ? onPromotion : serialized.slice(0, 4),
+                onPromotion.length > 0
+                    ? onPromotion.slice(0, HOME_PRODUCT_LIMIT)
+                    : ranked.forYou.slice(0, 4),
         };
     }
 
@@ -387,26 +410,27 @@ export class CatalogService {
         return products.map((p) => this.serializeProduct(p));
     }
 
-    async getCatalogGrouped(search?: string, storeSlug?: string) {
+    async getCatalogGrouped(
+        search?: string,
+        storeSlug?: string,
+        options: {
+            visitorId?: string | null
+            sort?: string | null
+            context?: ShopperContext
+        } = {},
+    ) {
         const storeId = await this.resolveApprovedStoreId(storeSlug);
         if (storeSlug && !storeId) {
             return { groups: [] };
         }
 
+        const profile = await this.shopperProfiles.loadAffinity(options.visitorId)
+        const context = { ...options.context, ...profile.context }
+
         const where: Prisma.ProductWhereInput = {
             status: ProductStatus.ACTIVE,
             store: this.marketplaceStoreWhere(storeId),
         };
-
-        const q = search?.trim();
-        if (q) {
-            where.OR = [
-                { name: containsInsensitive(q) },
-                { description: containsInsensitive(q) },
-                { vendor: containsInsensitive(q) },
-                { category: containsInsensitive(q) },
-            ];
-        }
 
         const products = await withDbRetry(
             this.prisma,
@@ -420,9 +444,16 @@ export class CatalogService {
             { label: 'catalog.getCatalogGrouped' },
         );
 
+        const ranked = rankCatalog({
+            products: products.map((p) => this.serializeProduct(p)),
+            query: search,
+            affinity: profile.affinity,
+            context,
+            sort: options.sort,
+        })
+
         const groupsMap = new Map<string, PublicCatalogProduct[]>();
-        for (const p of products) {
-            const serialized = this.serializeProduct(p);
+        for (const serialized of ranked) {
             const categoryLabel = serialized.category?.trim() || 'Other';
             const existing = groupsMap.get(categoryLabel) ?? [];
             existing.push(serialized);
@@ -469,7 +500,7 @@ export class CatalogService {
                   ReturnType<CatalogService['listMarketplaceStoresWithProducts']>
               >
             | undefined;
-        if (!storeSlug && !q) {
+        if (!storeSlug && !search?.trim()) {
             try {
                 stores = await this.listMarketplaceStoresWithProducts();
             } catch {
@@ -584,7 +615,12 @@ export class CatalogService {
         };
     }
 
-    async getStoreBySlug(slug: string, page = 1, limit = 20) {
+    async getStoreBySlug(
+        slug: string,
+        page = 1,
+        limit = 20,
+        options: { visitorId?: string | null; context?: ShopperContext } = {},
+    ) {
         const storeId = await this.resolveApprovedStoreId(slug);
         if (!storeId) {
             throw new NotFoundException('Store not found');
@@ -611,20 +647,27 @@ export class CatalogService {
             status: ProductStatus.ACTIVE,
         };
 
-        const [products, total] = await Promise.all([
+        const [productRows, total] = await Promise.all([
             this.prisma.product.findMany({
                 where,
                 orderBy: { createdAt: 'desc' },
-                skip,
-                take: safeLimit,
                 include: catalogProductInclude,
             }),
             this.prisma.product.count({ where }),
         ]);
 
+        const profile = await this.shopperProfiles.loadAffinity(options.visitorId)
+        const ranked = rankCatalog({
+            products: productRows.map((p) => this.serializeProduct(p)),
+            affinity: profile.affinity,
+            context: { ...options.context, ...profile.context },
+            sort: 'for-you',
+        })
+        const products = ranked.slice(skip, skip + safeLimit)
+
         return {
             store: this.serializeStoreProfile(store),
-            products: products.map((p) => this.serializeProduct(p)),
+            products,
             total,
             page: safePage,
             limit: safeLimit,

@@ -748,6 +748,44 @@ model DailyMetricsSnapshot {
   @@map("daily_metrics_snapshots")
 }
 
+model ShopperProfile {
+  id         String   @id @default(uuid())
+  visitorId  String   @unique
+  userId     String?
+  country    String?
+  region     String?
+  city       String?
+  deviceType String?
+  affinity   Json     @default("{}")
+  lastSeenAt DateTime @default(now())
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  events ShopperEvent[]
+
+  @@index([userId])
+  @@index([lastSeenAt])
+  @@map("shopper_profiles")
+}
+
+model ShopperEvent {
+  id        String   @id @default(uuid())
+  profileId String
+  type      String
+  query     String?
+  productId String?
+  storeId   String?
+  category  String?
+  weight    Int      @default(1)
+  createdAt DateTime @default(now())
+
+  profile ShopperProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@index([profileId, createdAt])
+  @@index([type, createdAt])
+  @@map("shopper_events")
+}
+
 model ProductPerformanceSnapshot {
   id               String   @id @default(uuid())
   storeId          String

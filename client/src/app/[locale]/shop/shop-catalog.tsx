@@ -51,6 +51,8 @@ function filterAndSortProducts({
     ? products.filter((product) => product.category.toLowerCase() === category.toLowerCase())
     : products
 
+  if (!sort || sort === 'for-you') return filtered
+
   return [...filtered].sort((a, b) => {
     if (sort === 'price-asc') return (a.priceFrom ?? 0) - (b.priceFrom ?? 0)
     if (sort === 'price-desc') return (b.priceFrom ?? 0) - (a.priceFrom ?? 0)
@@ -107,6 +109,7 @@ export async function ShopPage({
   const { data, devHint } = await fetchCatalogGroups({
     search: q,
     storeSlug,
+    sort,
     cache: 'no-store',
   })
 
@@ -185,6 +188,7 @@ export async function ShopPage({
     searchLabel: t('searchLabel'),
     searchPlaceholder: t('searchPlaceholder'),
     sortLabel: t('sortLabel'),
+    sortForYou: t('sortForYou'),
     sortNewest: t('sortNewest'),
     sortTrending: t('sortTrending'),
     sortPriceLow: t('sortPriceLow'),

@@ -1,4 +1,5 @@
 import { getInternalApiBaseUrl, getPublicApiBaseUrl } from '@/lib/api-base-url'
+import { catalogAuthHeaders } from '@/lib/shopper-profile'
 import type { ApiResponse } from '@shopper/shared'
 import type { BrandColors } from '@/lib/store-templates'
 
@@ -113,6 +114,7 @@ export type CatalogFetchResult = {
 export interface CatalogQueryOptions {
   search?: string
   storeSlug?: string | null
+  sort?: string | null
   cache?: RequestCache
 }
 
@@ -129,6 +131,8 @@ export interface CatalogHomeSectionStore {
 export interface CatalogHomePayload {
   topRated: CatalogProductPublic[]
   newArrivals: CatalogProductPublic[]
+  pickedForYou?: CatalogProductPublic[]
+  personalized?: boolean
   risingStores: CatalogStoreWithProductCount[]
   onPromotion: CatalogProductPublic[]
 }
@@ -176,7 +180,7 @@ export async function fetchCatalogHome(
   try {
     res = await fetch(url, {
       cache: options.cache ?? 'no-store',
-      headers: { Accept: 'application/json' },
+      headers: await catalogAuthHeaders(),
       signal: controller.signal,
     })
   } catch (err) {
@@ -224,6 +228,8 @@ export async function fetchCatalogHome(
     data: {
       topRated: parsed.data.topRated ?? [],
       newArrivals: parsed.data.newArrivals ?? [],
+      pickedForYou: parsed.data.pickedForYou ?? parsed.data.topRated ?? [],
+      personalized: parsed.data.personalized ?? false,
       risingStores: parsed.data.risingStores ?? [],
       onPromotion: parsed.data.onPromotion ?? [],
     },
@@ -261,6 +267,8 @@ async function buildHomeFallbackFromGroups(
     data: {
       topRated: byRating.slice(0, 8),
       newArrivals: byNewest.slice(0, 8),
+      pickedForYou: byRating.slice(0, 8),
+      personalized: false,
       risingStores,
       onPromotion: onPromo.slice(0, 8),
     },
@@ -281,7 +289,7 @@ export async function fetchStores(
   try {
     res = await fetch(url.toString(), {
       cache: options.cache ?? 'no-store',
-      headers: { Accept: 'application/json' },
+      headers: await catalogAuthHeaders(),
     })
   } catch (err) {
     const msg = err instanceof Error ? err.message : 'Network error'
@@ -340,7 +348,7 @@ export async function fetchStoreBySlug(
   try {
     res = await fetch(url, {
       cache: options.cache ?? 'no-store',
-      headers: { Accept: 'application/json' },
+      headers: await catalogAuthHeaders(),
     })
   } catch (err) {
     const msg = err instanceof Error ? err.message : 'Network error'
@@ -383,6 +391,9 @@ export async function fetchCatalogGroups(
   if (options.search?.trim()) {
     url.searchParams.set('search', options.search.trim())
   }
+  if (options.sort?.trim()) {
+    url.searchParams.set('sort', options.sort.trim())
+  }
   const slug = options.storeSlug?.trim()
   if (slug) {
     url.searchParams.set('storeSlug', slug)
@@ -393,7 +404,7 @@ export async function fetchCatalogGroups(
     res = await fetch(url.toString(), {
       cache: options.cache ?? 'no-store',
       next: { revalidate: 0 },
-      headers: { Accept: 'application/json' },
+      headers: await catalogAuthHeaders(),
     })
   } catch (err) {
     const msg = err instanceof Error ? err.message : 'Network error'
@@ -601,7 +612,7 @@ export async function fetchCatalogProductById(
   try {
     res = await fetch(url.toString(), {
       cache: options.cache ?? 'no-store',
-      headers: { Accept: 'application/json' },
+      headers: await catalogAuthHeaders(),
     })
   } catch (err) {
     const msg = err instanceof Error ? err.message : 'Network error'
@@ -639,7 +650,7 @@ export async function fetchProductReviews(
   const root = resolveCatalogApiRoot()
   const url = `${root}/catalog/products/${encodeURIComponent(productId)}/reviews`
   try {
-    const res = await fetch(url, { cache: 'no-store', headers: { Accept: 'application/json' } })
+    const res = await fetch(url, { cache: 'no-store', headers: await catalogAuthHeaders() })
     if (!res.ok) return []
     const body = (await res.json()) as { data?: { data?: ProductReviewPublic[] } | ProductReviewPublic[] }
     const payload = body.data

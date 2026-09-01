@@ -192,6 +192,7 @@ export async function MarketplaceHome() {
     )
   }
 
+  const pickedForYou = toCardItems(t, data.pickedForYou ?? [])
   const topRated = toCardItems(t, data.topRated)
   const newArrivals = toCardItems(t, data.newArrivals)
   const onPromotion = toCardItems(t, data.onPromotion)
@@ -319,6 +320,26 @@ export async function MarketplaceHome() {
           </div>
         </div>
       </section>
+
+      {pickedForYou.length ? (
+        <section className="mx-auto w-full max-w-screen-2xl px-4 py-12 sm:px-5 lg:px-6">
+          <SectionHeader
+            eyebrow={t('homePickedForYouEyebrow')}
+            title={t('homePickedForYouTitle')}
+            href="/shop?sort=for-you"
+            viewAllLabel={t('viewAll')}
+          />
+          <ShopProductGridsWithQuickView
+            quickViewEnabled
+            newArrivals={{
+              eyebrow: t('homePickedForYouEyebrow'),
+              title: t('homePickedForYouTitle'),
+              items: pickedForYou,
+              hideHeader: true,
+            }}
+          />
+        </section>
+      ) : null}
 
       {topRated.length ? (
         <section className="mx-auto w-full max-w-screen-2xl px-4 py-12 sm:px-5 lg:px-6">

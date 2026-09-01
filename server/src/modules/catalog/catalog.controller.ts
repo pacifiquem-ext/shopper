@@ -7,8 +7,11 @@ import {
     Param,
     Post,
     Query,
+    Req,
+    Res,
     UseGuards,
 } from '@nestjs/common';
+import type { Request, Response } from 'express';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 
 import { PublicRoute } from '../../common/request/decorators/request.public.decorator';
@@ -24,6 +27,11 @@ import {
 } from './dtos/catalog-query.dto';
 import { CreateReviewDto } from './dtos/create-review.dto';
 import { PromoValidateDto } from './dtos/promo-validate.dto';
+import { IngestShopperSignalsDto } from './dtos/shopper-signal.dto';
+import {
+    SHOPPER_VISITOR_COOKIE,
+    ShopperProfileService,
+} from './services/shopper-profile.service';
 
 @ApiTags('Catalog')
 @Controller({ path: 'catalog', version: '1' })
@@ -31,15 +39,35 @@ export class CatalogController {
     constructor(
         private readonly catalogService: CatalogService,
         private readonly ordersService: OrdersService,
+        private readonly shopperProfiles: ShopperProfileService,
     ) {}
+
+    private visitor(req: Request, explicit?: string) {
+        return this.shopperProfiles.visitorIdFromRequest(req, explicit)
+    }
+
+    private rememberVisitor(res: Response, visitorId: string | null) {
+        if (!visitorId) return
+        res.cookie(SHOPPER_VISITOR_COOKIE, visitorId, {
+            httpOnly: false,
+            sameSite: 'lax',
+            maxAge: 1000 * 60 * 60 * 24 * 180,
+            path: '/',
+        })
+    }
 
     @PublicRoute()
     @Get('home')
-    @Header('Cache-Control', 'public, max-age=60')
+    @Header('Cache-Control', 'private, no-store')
     @ApiOperation({ summary: 'Marketplace home sections' })
     @ApiResponse({ status: 200, description: 'Home catalog sections' })
-    async getHome() {
-        return this.catalogService.getHome();
+    async getHome(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
+        const visitorId = this.visitor(req)
+        this.rememberVisitor(res, visitorId)
+        return this.catalogService.getHome(
+            visitorId,
+            this.shopperProfiles.contextFromRequest(req),
+        );
     }
 
     @PublicRoute()
@@ -50,8 +78,39 @@ export class CatalogController {
             'List all active products from approved stores, grouped by category',
     })
     @ApiResponse({ status: 200, description: 'Catalog groups' })
-    async getGroups(@Query() query: CatalogQueryDto) {
-        return this.catalogService.getCatalogGrouped(query.search, query.storeSlug);
+    async getGroups(
+        @Query() query: CatalogQueryDto,
+        @Req() req: Request,
+        @Res({ passthrough: true }) res: Response,
+    ) {
+        const visitorId = this.visitor(req)
+        this.rememberVisitor(res, visitorId)
+        return this.catalogService.getCatalogGrouped(query.search, query.storeSlug, {
+            visitorId,
+            sort: query.sort,
+            context: this.shopperProfiles.contextFromRequest(req),
+        });
+    }
+
+    @PublicRoute()
+    @Post('signals')
+    @ApiOperation({ summary: 'Ingest first-party shopper signals' })
+    async ingestSignals(
+        @Body() dto: IngestShopperSignalsDto,
+        @Req() req: Request,
+        @Res({ passthrough: true }) res: Response,
+    ) {
+        const visitorId = this.visitor(req, dto.visitorId)
+        if (!visitorId) {
+            return { accepted: 0 }
+        }
+        this.rememberVisitor(res, visitorId)
+        const affinity = await this.shopperProfiles.ingest(
+            visitorId,
+            dto.events,
+            this.shopperProfiles.contextFromRequest(req),
+        )
+        return { accepted: dto.events.length, visitorId, personalized: true, affinity }
     }
 
     @PublicRoute()
@@ -84,11 +143,16 @@ export class CatalogController {
     async getStore(
         @Param('slug') slug: string,
         @Query() query: CatalogPaginationDto,
+        @Req() req: Request,
     ) {
         return this.catalogService.getStoreBySlug(
             slug,
             query.page ?? 1,
             query.limit ?? 20,
+            {
+                visitorId: this.visitor(req),
+                context: this.shopperProfiles.contextFromRequest(req),
+            },
         );
     }
 
